@@ -1,0 +1,155 @@
+Table tenants {
+  id uuid [pk, default: `gen_random_uuid()`]
+  name varchar(255) [not null]
+  brand_voice_guidelines text
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  deleted_at timestamptz
+}
+
+Table customers {
+  id uuid [pk, default: `gen_random_uuid()`]
+  tenant_id uuid [not null, ref: > tenants.id]
+  full_name varchar(255) [not null]
+  email varchar(255) [not null]
+  phone varchar(50)
+  external_id varchar(255)
+  preferred_language varchar(10) [note: 'en | ar | fr | es']
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  deleted_at timestamptz
+
+  indexes {
+    (tenant_id, email) [unique]
+  }
+}
+
+Table agents {
+  id uuid [pk, default: `gen_random_uuid()`]
+  tenant_id uuid [not null, ref: > tenants.id]
+  full_name varchar(255) [not null]
+  email varchar(255) [unique, not null]
+  role varchar(50) [not null, note: 'agent | supervisor']
+  is_active boolean [default: true]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table tickets {
+  id uuid [pk, default: `gen_random_uuid()`]
+  tenant_id uuid [not null, ref: > tenants.id]
+  customer_id uuid [not null, ref: > customers.id]
+  assigned_agent_id uuid [ref: > agents.id]
+  channel varchar(50) [not null, note: 'chat | email | whatsapp']
+  tier varchar(10) [not null, note: 'tier_1 | tier_2 | human']
+  handled_by_agent varchar(50) [note: 'router | tier_1 | tier_2 | human']
+  status varchar(50) [not null, note: 'open | in_progress | escalated | resolved | closed']
+  issue_type varchar(100)
+  subject varchar(500)
+  language varchar(10) [note: 'en | ar | fr | es']
+  resolution_summary text
+  sla_deadline timestamptz
+  resolved_at timestamptz
+  closed_at timestamptz
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  deleted_at timestamptz
+
+  indexes {
+    tenant_id
+    customer_id
+    status
+    (tenant_id, created_at)
+  }
+}
+
+Table ticket_messages {
+  id uuid [pk, default: `gen_random_uuid()`]
+  ticket_id uuid [not null, ref: > tickets.id]
+  sender_type varchar(20) [not null, note: 'customer | ai | agent']
+  sender_id uuid
+  content text [not null]
+  language varchar(10) [note: 'en | ar | fr | es']
+  created_at timestamptz [default: `now()`]
+
+  indexes {
+    ticket_id
+  }
+}
+
+Table ticket_escalations {
+  id uuid [pk, default: `gen_random_uuid()`]
+  ticket_id uuid [not null, ref: > tickets.id]
+  from_tier varchar(10) [not null, note: 'tier_1 | tier_2']
+  to_tier varchar(10) [not null, note: 'tier_2 | human']
+  escalation_reason text [not null]
+  context_snapshot jsonb [not null]
+  assigned_agent_id uuid [ref: > agents.id]
+  escalated_at timestamptz [default: `now()`]
+
+  indexes {
+    ticket_id
+    assigned_agent_id
+  }
+}
+
+Table identity_verifications {
+  id uuid [pk, default: `gen_random_uuid()`]
+  ticket_id uuid [not null, ref: > tickets.id]
+  customer_id uuid [not null, ref: > customers.id]
+  attempt_number int [not null, default: 1]
+  status varchar(20) [not null, note: 'passed | failed | locked']
+  verified_at timestamptz
+  created_at timestamptz [default: `now()`]
+
+  indexes {
+    ticket_id
+    customer_id
+  }
+}
+
+Table tier_actions {
+  id uuid [pk, default: `gen_random_uuid()`]
+  ticket_id uuid [not null, ref: > tickets.id]
+  tier varchar(10) [not null, note: 'tier_1 | tier_2']
+  action_type varchar(100) [not null, note: 'e.g. password_reset | payment_gateway_check']
+  status varchar(20) [not null, note: 'initiated | completed | failed']
+  action_payload jsonb
+  result_payload jsonb
+  initiated_at timestamptz [default: `now()`]
+  completed_at timestamptz
+
+  indexes {
+    ticket_id
+    status
+    (ticket_id, tier)
+  }
+}
+
+Table sla_logs {
+  id uuid [pk, default: `gen_random_uuid()`]
+  ticket_id uuid [not null, ref: > tickets.id]
+  tier varchar(10) [not null, note: 'tier_1 | tier_2 | human']
+  sla_target_seconds int [not null]
+  actual_seconds int
+  is_breached boolean [default: false]
+  logged_at timestamptz [default: `now()`]
+
+  indexes {
+    ticket_id
+    (is_breached, tier)
+  }
+}
+
+Table csat_scores {
+  id uuid [pk, default: `gen_random_uuid()`]
+  ticket_id uuid [not null, ref: > tickets.id, unique]
+  customer_id uuid [not null, ref: > customers.id]
+  score int [not null, note: '1 to 5']
+  comment text
+  submitted_at timestamptz [default: `now()`]
+
+  indexes {
+    customer_id
+  }
+}
