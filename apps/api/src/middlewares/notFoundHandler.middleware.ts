@@ -1,5 +1,5 @@
 import type {Request, Response, NextFunction, RequestHandler} from "express"
-import AppError from "../utils/AppError"
+import AppError from "../utils/appError.js"
 
 const notFoundHandler = (err: AppError, req: Request, res: Response, next: NextFunction) => {
     const statusCode = 404

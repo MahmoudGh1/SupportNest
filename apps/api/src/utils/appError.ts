@@ -1,5 +1,6 @@
 class AppError extends Error {
-    constructor(message, statusCode = 500){
+    public statusCode
+    constructor(message: string, statusCode = 500){
         super(message)
         this.statusCode = statusCode
         Error.captureStackTrace(this, this.constructor)
@@ -7,7 +8,7 @@ class AppError extends Error {
 }
 
 class notFoundError extends AppError {
-    constructor(message){
+    constructor(message: string){
         super(message, 404)
     }
 }
