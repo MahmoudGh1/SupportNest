@@ -1,0 +1,327 @@
+Here is the full REST API design for the MVP.
+
+---
+
+# SupportNest — REST API Design (MVP)
+
+## General Conventions
+
+- Base URL: `https://api.supportnest.io/v1`
+- All requests and responses are `application/json`
+- All protected routes require a `Authorization: Bearer <clerk_token>` header
+- Clerk token is verified in middleware on every request before anything else runs
+- Role is extracted from the verified Clerk token and checked in middleware per route
+- Roles: `agent` and `supervisor`
+- All list endpoints support `?page=1&limit=20` pagination by default
+- Timestamps are returned in ISO 8601 format
+- Errors follow a consistent shape:
+```json
+{
+  "error": {
+    "code": "TICKET_NOT_FOUND",
+    "message": "The requested ticket does not exist."
+  }
+}
+```
+
+---
+
+## Auth Middleware Flow
+
+Every request goes through this chain before hitting any controller:
+
+```
+Request
+  → Verify Clerk JWT
+  → Extract user id + role from token
+  → Attach to request context
+  → Check role against route permission
+  → Proceed or return 403
+```
+
+---
+
+## 1. Tenants
+
+| Method | Endpoint | Description | Role Required |
+|---|---|---|---|
+| GET | `/tenants/:id` | Get tenant details | supervisor |
+| PATCH | `/tenants/:id` | Update brand voice or tenant settings | supervisor |
+
+**GET /tenants/:id — Response**
+```json
+{
+  "id": "uuid",
+  "name": "ShopWave",
+  "brand_voice_guidelines": "Friendly, playful, never robotic.",
+  "created_at": "2026-01-01T00:00:00Z"
+}
+```
+
+---
+
+## 2. Customers
+
+| Method | Endpoint | Description | Role Required |
+|---|---|---|---|
+| GET | `/customers` | List all customers for the tenant | supervisor |
+| GET | `/customers/:id` | Get a single customer's details | agent, supervisor |
+| POST | `/customers` | Create a new customer record | agent, supervisor |
+| PATCH | `/customers/:id` | Update customer details | agent, supervisor |
+
+**POST /customers — Request Body**
+```json
+{
+  "full_name": "Sara Ahmed",
+  "email": "sara@example.com",
+  "phone": "+201012345678",
+  "preferred_language": "ar",
+  "external_id": "shopify_cust_9921"
+}
+```
+
+---
+
+## 3. Agents
+
+| Method | Endpoint | Description | Role Required |
+|---|---|---|---|
+| GET | `/agents` | List all agents for the tenant | supervisor |
+| GET | `/agents/:id` | Get a single agent's profile | agent, supervisor |
+| POST | `/agents` | Create a new agent (onboarding) | supervisor |
+| PATCH | `/agents/:id` | Update role or active status | supervisor |
+
+**PATCH /agents/:id — Request Body**
+```json
+{
+  "role": "supervisor",
+  "is_active": true
+}
+```
+
+> Note: Agent creation in this API creates the database record. The actual Clerk account invitation is handled separately through Clerk's own API on the frontend during onboarding.
+
+---
+
+## 4. Tickets
+
+This is the most important resource in the entire API.
+
+| Method | Endpoint | Description | Role Required |
+|---|---|---|---|
+| GET | `/tickets` | List all tickets for the tenant with filters | agent, supervisor |
+| GET | `/tickets/:id` | Get full ticket details | agent, supervisor |
+| POST | `/tickets` | Create a new ticket (from any channel) | agent, supervisor |
+| PATCH | `/tickets/:id` | Update ticket status, tier, or assignment | agent, supervisor |
+| GET | `/tickets/:id/messages` | Get all messages for a ticket | agent, supervisor |
+| POST | `/tickets/:id/messages` | Add a new message to a ticket | agent, supervisor |
+| GET | `/tickets/:id/escalations` | Get escalation history for a ticket | agent, supervisor |
+| POST | `/tickets/:id/escalate` | Escalate a ticket to the next tier | agent, supervisor |
+
+**GET /tickets — Query Parameters**
+```
+?status=open
+?tier=tier_2
+?channel=email
+?assigned_agent_id=uuid
+?language=ar
+?page=1&limit=20
+```
+
+**POST /tickets — Request Body**
+```json
+{
+  "customer_id": "uuid",
+  "channel": "chat",
+  "tier": "tier_1",
+  "issue_type": "password_reset",
+  "subject": "Cannot log into my account",
+  "language": "en"
+}
+```
+
+**POST /tickets/:id/escalate — Request Body**
+```json
+{
+  "from_tier": "tier_1",
+  "to_tier": "tier_2",
+  "escalation_reason": "Identity verification passed but reset link delivery failed after 2 attempts.",
+  "context_snapshot": {
+    "messages": [],
+    "actions_taken": [],
+    "customer_summary": {}
+  }
+}
+```
+
+**PATCH /tickets/:id — Request Body**
+```json
+{
+  "status": "resolved",
+  "resolution_summary": "Password reset email sent successfully.",
+  "assigned_agent_id": "uuid"
+}
+```
+
+---
+
+## 5. Identity Verifications
+
+| Method | Endpoint | Description | Role Required |
+|---|---|---|---|
+| POST | `/tickets/:id/verifications` | Submit a verification attempt | agent, supervisor |
+| GET | `/tickets/:id/verifications` | Get verification history for a ticket | agent, supervisor |
+
+**POST /tickets/:id/verifications — Request Body**
+```json
+{
+  "customer_id": "uuid",
+  "attempt_number": 1
+}
+```
+
+**Response**
+```json
+{
+  "status": "passed",
+  "verified_at": "2026-06-01T10:23:00Z",
+  "attempts_remaining": null
+}
+```
+
+> The backend compares submitted data against the customer record and returns passed, failed, or locked. The actual verification logic (what data points to check) lives in the backend service layer, not in this endpoint's request body — the frontend never sends the raw comparison values directly.
+
+---
+
+## 6. Tier Actions
+
+| Method | Endpoint | Description | Role Required |
+|---|---|---|---|
+| POST | `/tickets/:id/actions` | Trigger a Tier 1 or Tier 2 action | agent, supervisor |
+| GET | `/tickets/:id/actions` | Get all actions taken on a ticket | agent, supervisor |
+
+**POST /tickets/:id/actions — Request Body**
+```json
+{
+  "tier": "tier_1",
+  "action_type": "password_reset",
+  "action_payload": {
+    "customer_id": "uuid",
+    "email": "sara@example.com"
+  }
+}
+```
+
+**Response**
+```json
+{
+  "id": "uuid",
+  "status": "completed",
+  "action_type": "password_reset",
+  "result_payload": {
+    "reset_link_sent": true,
+    "delivery_timestamp": "2026-06-01T10:24:00Z"
+  },
+  "completed_at": "2026-06-01T10:24:00Z"
+}
+```
+
+---
+
+## 7. SLA Logs
+
+| Method | Endpoint | Description | Role Required |
+|---|---|---|---|
+| GET | `/tickets/:id/sla` | Get SLA log for a specific ticket | agent, supervisor |
+| GET | `/sla-logs` | Get SLA logs across all tickets with filters | supervisor |
+
+**GET /sla-logs — Query Parameters**
+```
+?is_breached=true
+?tier=tier_1
+?from=2026-06-01&to=2026-06-30
+```
+
+---
+
+## 8. CSAT Scores
+
+| Method | Endpoint | Description | Role Required |
+|---|---|---|---|
+| POST | `/tickets/:id/csat` | Submit a CSAT score after ticket resolution | public (no auth) |
+| GET | `/tickets/:id/csat` | Get CSAT score for a ticket | agent, supervisor |
+| GET | `/csat-scores` | Get all CSAT scores with filters | supervisor |
+
+> CSAT submission is public because the customer receives a link via email or chat after their ticket closes — they are not logged into the agent dashboard. The link contains a signed token tied to the ticket ID to prevent abuse.
+
+**POST /tickets/:id/csat — Request Body**
+```json
+{
+  "score": 5,
+  "comment": "Issue was resolved immediately, very impressed."
+}
+```
+
+**GET /csat-scores — Query Parameters**
+```
+?score=1
+?from=2026-06-01&to=2026-06-30
+?customer_id=uuid
+```
+
+---
+
+## 9. Reporting (Supervisor Dashboard)
+
+These endpoints power the supervisor dashboard. All are supervisor-only.
+
+| Method | Endpoint | Description | Role Required |
+|---|---|---|---|
+| GET | `/reports/ticket-volume` | Ticket count grouped by status, tier, or channel | supervisor |
+| GET | `/reports/resolution-rates` | AI vs human resolution breakdown | supervisor |
+| GET | `/reports/sla-compliance` | SLA breach rate per tier | supervisor |
+| GET | `/reports/csat-summary` | Average CSAT score over a time range | supervisor |
+| GET | `/reports/agent-workload` | Ticket count per agent | supervisor |
+
+**GET /reports/ticket-volume — Query Parameters**
+```
+?group_by=tier
+?from=2026-06-01&to=2026-06-30
+```
+
+**Response**
+```json
+{
+  "from": "2026-06-01",
+  "to": "2026-06-30",
+  "data": [
+    { "tier": "tier_1", "count": 1240 },
+    { "tier": "tier_2", "count": 380 },
+    { "tier": "human", "count": 95 }
+  ]
+}
+```
+
+---
+
+## Supabase & Clerk Integration Notes
+
+**Clerk** sits in front of every protected route. Your middleware should:
+- Call Clerk's `verifyToken()` on the Bearer token
+- Extract `userId` and the custom `role` claim you set in Clerk's session metadata
+- Reject with 401 if the token is invalid or expired
+- Reject with 403 if the role does not match the route requirement
+
+**Supabase** is your database layer. Since you are handling auth manually in middleware rather than using RLS, make sure to:
+- Always filter queries by `tenant_id` extracted from the verified Clerk token — never trust a `tenant_id` sent in the request body
+- Use Supabase's server-side client with your service role key in the backend only — never expose it to the frontend
+- Use the anon key on the frontend only for any direct Supabase calls, and keep those minimal since your REST API is the primary interface
+
+---
+
+## What This API Deliberately Leaves Out for MVP
+
+- Webhook endpoints for Shopify, Stripe, and Zendesk (integration scope deferred)
+- WebSocket endpoints for real-time ticket updates (use polling on the frontend for MVP)
+- File attachment endpoints for ticket messages
+- Notification delivery endpoints (email/WhatsApp sending handled by backend services internally, not exposed as API routes)
