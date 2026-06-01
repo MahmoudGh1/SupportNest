@@ -6,8 +6,9 @@
       "./src",
       "../../packages/shared/src"
     ],
+    "rootDir": "./src",
     "outDir": "./dist",
-    "baseUrl": ".",
+    "paths": {"*": ["./*"]},
     "ignoreDeprecations": "5.0",
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
