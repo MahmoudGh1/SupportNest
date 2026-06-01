@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(helmet());
 app.use(
 	cors({
-		origin: "https://localhost:5173",
+		origin: "https://localhost:3000",
 	}),
 );
 app.use(morgan("dev"));
