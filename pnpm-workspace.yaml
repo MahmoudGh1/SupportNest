@@ -3,10 +3,11 @@ packages:
   - "packages/*"
 
 allowBuilds:
-  '@prisma/engines': true
+  "@prisma/engines": true
   esbuild: false
+
   prisma: true
-  sharp: set this to true or false
-  unrs-resolver: set this to true or false
+  sharp: true
+  unrs-resolver: true
 
 preferWorkspacePackages: true
