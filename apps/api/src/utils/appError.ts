@@ -7,7 +7,7 @@ class AppError extends Error {
     }
 }
 
-class notFoundError extends AppError {
+export class notFoundError extends AppError {
     constructor(message: string){
         super(message, 404)
     }
