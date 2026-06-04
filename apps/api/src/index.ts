@@ -8,6 +8,7 @@ import errorHandler from "./middlewares/errorhandler.middleware.js";
 import notFoundHandler from "./middlewares/notFoundHandler.middleware.js";
 import knowledgeRoutes from "./routes/knowledge.routes.js";
 import * as authController from "./controllers/auth.controller.js";
+import "./workers/knowledgeWorker.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -36,16 +37,16 @@ app.listen(PORT, () => {
 	console.log("Server is running on port:", PORT);
 });
 
-async function main() {
-	const val = await prisma.organization.findMany();
-	console.log(val);
-}
-main()
-	.then(async () => {
-		await prisma.$disconnect();
-	})
-	.catch(async (e) => {
-		console.error(e);
-		await prisma.$disconnect();
-		process.exit(1);
-	});
+// async function main() {
+// 	const val = await prisma.organization.findMany();
+// 	console.log(val);
+// }
+// main()
+// 	.then(async () => {
+// 		await prisma.$disconnect();
+// 	})
+// 	.catch(async (e) => {
+// 		console.error(e);
+// 		await prisma.$disconnect();
+// 		process.exit(1);
+// 	});

@@ -9,6 +9,7 @@ import { knowledgeQueue } from "src/queues/knowledgeQueue.js";
 export const uploadDocument: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
 		const userId = req.user?.sub;
+		// const userId = "c14a63e5-48d5-48af-b40e-c2432732cec4";
 		const { orgId } = req.params;
 		const { title, type } = req.body;
 		const file = req.file; // Buffer from multer memoryStorage
@@ -21,6 +22,7 @@ export const uploadDocument: RequestHandler = asyncHandler(
 			`supportnest/${orgId}/knowledge`, // folder
 			`${Date.now()}-${title}`, // public_id
 		);
+		console.log(storagePath);
 
 		// 2. Save document record in Postgres via Prisma
 		const doc = await prisma.knowledgeDocument.create({
@@ -37,7 +39,7 @@ export const uploadDocument: RequestHandler = asyncHandler(
 		// 3. Queue chunking + embedding job in BullMQ
 		await knowledgeQueue.add("process-document", {
 			documentId: doc.id,
-			storagePath,
+			fileUrl: storagePath,
 			orgId,
 		});
 
