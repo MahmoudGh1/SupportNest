@@ -1,12 +1,14 @@
 import "dotenv/config";
 import express from "express";
-import prisma from "./lib/prisma.js";
+import prisma from "./config/prisma.js";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import errorHandler from "./middlewares/errorhandler.middleware.js";
 import notFoundHandler from "./middlewares/notFoundHandler.middleware.js";
-import knowledgeRoutes from "./routes/knowledge.js";
+import knowledgeRoutes from "./routes/knowledge.routes.js";
+import * as authController from "./controllers/auth.controller.js";
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -24,6 +26,7 @@ app.use(morgan("dev"));
 app.get("/health", (_, res) => res.json({ ok: true }));
 
 app.use("/api/v1", knowledgeRoutes);
+app.post("/api/v1/register", authController.RegisterController);
 
 app.use(notFoundHandler);
 

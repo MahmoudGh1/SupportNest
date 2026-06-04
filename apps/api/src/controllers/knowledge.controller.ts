@@ -1,5 +1,5 @@
-import prisma from "src/lib/prisma.js";
-import { uploadToCloudinary } from "src/lib/uploadToCloudinary.js";
+import prisma from "src/config/prisma.js";
+import { uploadToCloudinary } from "src/config/uploadToCloudinary.js";
 import AppError from "src/utils/appError.js";
 import asyncHandler from "src/utils/asyncHandler.js";
 import type { Response, RequestHandler } from "express";

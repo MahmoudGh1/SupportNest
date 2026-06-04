@@ -1,6 +1,6 @@
 import { Worker } from "bullmq";
-import { redis } from "../lib/redis.js";
-import prisma from "src/lib/prisma.js";
+import { redis } from "../config/redis.js";
+import prisma from "src/config/prisma.js";
 import bulkInsertChunks from "src/utils/bulkInsertChunks.util.js";
 
 export const knowledgeWorker = new Worker(

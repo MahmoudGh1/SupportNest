@@ -11,5 +11,6 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
   msgpackr-extract: false
+  node-base64: false
 
 preferWorkspacePackages: true
