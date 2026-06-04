@@ -10,5 +10,6 @@ allowBuilds:
   prisma: true
   sharp: true
   unrs-resolver: true
+  msgpackr-extract: false
 
 preferWorkspacePackages: true
