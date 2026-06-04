@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import bcrypt from "bcrypt";
-import prisma from "src/lib/prisma.js";
+import prisma from "src/config/prisma.js";
 import { Role } from "generated/prisma/enums.js";
 
 /**
