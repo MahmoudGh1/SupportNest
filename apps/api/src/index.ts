@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { capitalize } from "@supportnest/shared";
 import express from "express";
-import prisma from "./lib/prisma.js";
+import prisma from "./config/prisma.js";
 import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
