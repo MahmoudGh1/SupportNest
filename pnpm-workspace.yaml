@@ -10,5 +10,6 @@ allowBuilds:
   prisma: true
   sharp: true
   unrs-resolver: true
+  node-base64: set this to true or false
 
 preferWorkspacePackages: true
