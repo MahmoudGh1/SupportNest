@@ -1,4 +1,5 @@
 import type { Request } from "express";
+import { Role } from "generated/prisma/enums.js";
 
 export interface RefreshTokenInput {
 	refreshToken: string;
@@ -8,7 +9,7 @@ export interface TokenPayload {
 	sub: string;
 	email: string;
 	role: string;
-	organizationId: string;
+	organizationId: string | null;
 }
 
 export interface JwtPayload extends TokenPayload {
@@ -24,4 +25,30 @@ export interface AuthTokens {
 
 export interface AuthenticatedRequest extends Request {
 	user?: JwtPayload;
+}
+
+export interface RegisterInput {
+	businessName: string;
+	email: string;
+	password: string;
+	firstName: string;
+	lastName: string;
+	planId: string;
+}
+
+export interface LoginInput {
+	email: string;
+	password: string;
+}
+
+export interface OraganizationDataDTO {
+	id: string;
+    organizationId: string | null;
+    email: string;
+    role: Role;
+    firstName: string;
+    lastName: string;
+    isActive: boolean;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
