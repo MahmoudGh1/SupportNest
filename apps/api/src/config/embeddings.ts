@@ -1,30 +1,35 @@
 import { Embeddings } from "@langchain/core/embeddings";
-import { TaskType } from "@google/generative-ai";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
 export class GeminiEmbeddingsWithDimensions extends Embeddings {
-	private model: any;
+	private ai: GoogleGenAI;
 	private outputDimensionality: number;
-	private taskType: TaskType;
+	private taskType: string;
 
-	constructor(config: {
-		apiKey: string;
-		outputDimensionality: number;
-		taskType?: TaskType;
-	}) {
+	constructor(config: { apiKey: string; outputDimensionality: number; taskType?: string }) {
 		super({});
-		const genAI = new GoogleGenerativeAI(config.apiKey);
-		this.model = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
+		this.ai = new GoogleGenAI({ apiKey: config.apiKey });
 		this.outputDimensionality = config.outputDimensionality;
-		this.taskType = config.taskType ?? TaskType.RETRIEVAL_DOCUMENT;
+		this.taskType = config.taskType ?? "RETRIEVAL_DOCUMENT";
 	}
+
 	async embedQuery(text: string): Promise<number[]> {
-		const result = await this.model.embedContent({
-			content: { parts: [{ text }], role: "user" },
-			taskType: this.taskType,
-			outputDimensionality: this.outputDimensionality,
+		const result = await this.ai.models.embedContent({
+			model: "gemini-embedding-001",
+			contents: text,
+			config: {
+				taskType: this.taskType,
+				outputDimensionality: this.outputDimensionality,
+			},
 		});
-		return result.embedding.values;
+
+		const values = result.embeddings?.[0]?.values;
+
+		if (!values || values.length === 0) {
+			throw new Error(`Gemini embedContent returned no embedding values for text: "${text.slice(0, 50)}..."`);
+		}
+
+		return values;
 	}
 
 	async embedDocuments(documents: string[]): Promise<number[][]> {
@@ -35,5 +40,5 @@ export class GeminiEmbeddingsWithDimensions extends Embeddings {
 export const embeddings = new GeminiEmbeddingsWithDimensions({
 	apiKey: process.env.GOOGLE_API_KEY!,
 	outputDimensionality: 1536,
-	taskType: TaskType.RETRIEVAL_DOCUMENT,
+	taskType: "RETRIEVAL_DOCUMENT",
 });

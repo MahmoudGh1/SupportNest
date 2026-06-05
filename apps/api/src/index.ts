@@ -7,15 +7,12 @@ import morgan from "morgan";
 import errorHandler from "./middlewares/errorhandler.middleware.js";
 import notFoundHandler from "./middlewares/notFoundHandler.middleware.js";
 import { rateLimit } from "./utils/rateLimiter.util.js";
-import { authMiddleware } from "./middlewares/auth.middleware.js";
-import {
-  RegisterController,
-  LoginController,
-} from "./controllers/auth.controller.js";
 import knowledgeRoutes from "./routes/knowledge.routes.js";
-import * as authController from "./controllers/auth.controller.js";
 import "./workers/knowledgeWorker.js";
 import ApiKeyRouter from "./routes/apiKey.routes.js";
+import authRouter from "./routes/auth.routes.js";
+import ragRouter from "./routes/rag.routes.js";
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -35,9 +32,9 @@ app.use(rateLimit);
 
 app.get("/health", (_, res) => res.json({ ok: true }));
 
-app.post("/api/v1/register", RegisterController);
-app.post("/api/v1/login", LoginController);
 app.use("/api/v1", knowledgeRoutes);
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/rag", ragRouter);
 app.use("/api/v1/dashboard/apikey", ApiKeyRouter);
 
 app.use(notFoundHandler);
