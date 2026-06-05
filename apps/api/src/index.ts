@@ -1,16 +1,17 @@
 import "dotenv/config";
-import { capitalize } from "@supportnest/shared";
 import express from "express";
 import prisma from "./config/prisma.js";
 import cors from "cors";
 import helmet from "helmet";
-import dotenv from "dotenv";
 import morgan from "morgan";
 import errorHandler from "./middlewares/errorhandler.middleware.js";
 import notFoundHandler from "./middlewares/notFoundHandler.middleware.js";
 import { rateLimit } from "./utils/rateLimiter.util.js";
 import { authMiddleware } from "./middlewares/auth.middleware.js";
 import { RegisterController, LoginController } from "./controllers/auth.controller.js";
+import knowledgeRoutes from "./routes/knowledge.routes.js";
+import * as authController from "./controllers/auth.controller.js";
+import "./workers/knowledgeWorker.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -32,6 +33,7 @@ app.get("/health", (_, res) => res.json({ ok: true }));
 
 app.post("/api/v1/register", RegisterController);
 app.post("/api/v1/login", LoginController);
+app.use("/api/v1", knowledgeRoutes);
 
 app.use(notFoundHandler);
 
