@@ -9,30 +9,30 @@ import { registerService } from "src/services/auth.service.js";
  * @returns A JSON response with organization info and API key, or an error response.
  */
 export const RegisterController = async (req: Request, res: Response) => {
-  try {
-    const { businessName, email, password, firstName, lastName, planId } =
-      req.body;
+	try {
+		const { businessName, email, password, firstName, lastName, planId } =
+			req.body;
 
-    // 1. Basic validation
-    if (!businessName || !email || !password) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
+		// 1. Basic validation
+		if (!businessName || !email || !password) {
+			return res.status(400).json({ error: "Missing required fields" });
+		}
 
-    const result = await registerService({
-      businessName,
-      email,
-      password,
-      firstName,
-      lastName,
-      planId,
-    });
+		const result = await registerService({
+			businessName,
+			email,
+			password,
+			firstName,
+			lastName,
+			planId,
+		});
 
-    return res.status(201).json(result);
-  } catch (error: any) {
-    if (error.status) {
-      return res.status(error.status).json({ error: error.message });
-    }
-    console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
+		return res.status(201).json(result);
+	} catch (error: any) {
+		if (error.status) {
+			return res.status(error.status).json({ error: error.message });
+		}
+		console.error(error);
+		return res.status(500).json({ error: "Internal server error" });
+	}
 };
