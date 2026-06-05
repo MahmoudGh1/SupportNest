@@ -1,59 +1,60 @@
 import type { Request } from "express";
 import { Role } from "generated/prisma/enums.js";
+import { apiKey } from "src/utils/apiKey.utils.js";
 
 export interface RefreshTokenInput {
-  refreshToken: string;
+	refreshToken: string;
 }
 
 export interface TokenPayload {
-  sub: string;
-  email: string;
-  role: string;
-  organizationId: string | null;
+	sub: string;
+	email: string;
+	role: string;
+	organizationId: string | null;
 }
 
 export interface JwtPayload extends TokenPayload {
-  iat: number;
-  exp: number;
+	iat: number;
+	exp: number;
 }
 
 export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
+	accessToken: string;
+	refreshToken: string;
+	expiresIn: number;
 }
 
 export interface AuthenticatedRequest extends Request {
-  user?: JwtPayload;
-  file?: Express.Multer.File | undefined; // Add this for single file uploads (req.file)
-  files?:
-    | Express.Multer.File[]
-    | { [fieldname: string]: Express.Multer.File[] }
-    | undefined;
+	user?: JwtPayload;
+	file?: Express.Multer.File | undefined; // Add this for single file uploads (req.file)
+	files?:
+		| Express.Multer.File[]
+		| { [fieldname: string]: Express.Multer.File[] }
+		| undefined;
 }
 
 export interface RegisterInput {
-  businessName: string;
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  planId: string;
+	businessName: string;
+	email: string;
+	password: string;
+	firstName: string;
+	lastName: string;
+	planId: string;
 }
 
 export interface LoginInput {
-  email: string;
-  password: string;
+	email: string;
+	password: string;
 }
 
 export interface OraganizationDataDTO {
-  id: string;
-  organizationId: string | null;
-  email: string;
-  role: Role;
-  firstName: string;
-  lastName: string;
-  isActive: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
+	id: string;
+	organizationId: string | null;
+	email: string;
+	role: Role;
+	firstName: string;
+	lastName: string;
+	isActive: boolean;
+	createdAt?: Date;
+	updatedAt?: Date;
 }
