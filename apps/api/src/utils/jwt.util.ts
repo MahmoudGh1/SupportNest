@@ -1,7 +1,12 @@
 import jwt from "jsonwebtoken";
-import type { TokenPayload, AuthTokens, JwtPayload } from "../types/auth.types.js";
+import type {
+	TokenPayload,
+	AuthTokens,
+	JwtPayload,
+} from "../types/auth.types.js";
 import { AuthError } from "./appError.js";
 import dotenv from "dotenv";
+import type { IncomingHttpHeaders } from "http";
 
 dotenv.config();
 
@@ -12,9 +17,32 @@ export function signAccessToken(payload: TokenPayload): string {
 }
 
 export function signRefreshToken(payload: TokenPayload): string {
-	return jwt.sign({ ...payload, type: "refresh" }, String(process.env.JWT_SECRET), {
-		expiresIn: String(process.env.JWT_REFRESH_EXPIRES_IN),
-	} as jwt.SignOptions);
+	return jwt.sign(
+		{ ...payload, type: "refresh" },
+		String(process.env.JWT_SECRET),
+		{
+			expiresIn: String(process.env.JWT_REFRESH_EXPIRES_IN),
+		} as jwt.SignOptions,
+	);
+}
+
+export const extractTokenFromHeader = (headers: IncomingHttpHeaders) => {
+	const authHeader = headers.authorization;
+	if (!authHeader || !authHeader.startsWith("Bearer ")) {
+		return null;
+	}
+	return authHeader.split(" ")[1];
+};
+
+export function verifyToken(token: string, secret: string): JwtPayload {
+	try {
+		return jwt.verify(token, secret) as JwtPayload;
+	} catch (error) {
+		if (error instanceof jwt.TokenExpiredError) {
+			throw new AuthError("Token expired");
+		}
+		throw new AuthError("Invalid token");
+	}
 }
 
 export function verifyAccessToken(token: string): JwtPayload {
@@ -30,7 +58,11 @@ export function verifyAccessToken(token: string): JwtPayload {
 
 export function verifyRefreshToken(token: string): JwtPayload {
 	try {
-		const payload = jwt.verify(token, String(process.env.JWT_SECRET), {}) as JwtPayload & { type?: string };
+		const payload = jwt.verify(
+			token,
+			String(process.env.JWT_SECRET),
+			{},
+		) as JwtPayload & { type?: string };
 
 		if (payload.type !== "refresh") {
 			throw new AuthError("Invalid token type");

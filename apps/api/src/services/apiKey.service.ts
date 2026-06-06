@@ -12,24 +12,24 @@ import AppError from "src/utils/appError.js";
  * @throws When the organization cannot be found.
  */
 export const createApiKeyService = async ({
-  organizationId,
-  allowedOrigins,
+	organizationId,
+	allowedOrigins,
 }: CreateApiKeyInput) => {
-  // Check org exists and is active
-  const org = await prisma.organization.findUnique({
-    where: { id: organizationId },
-  });
+	// Check org exists and is active
+	const org = await prisma.organization.findUnique({
+		where: { id: organizationId },
+	});
 
-  if (!org) throw new AppError("Organization not found", 404);
+	if (!org) throw new AppError("Organization not found", 404);
 
-  // Generate api key — using apiKey utils
+	// Generate api key — using apiKey utils
 
-  const { apiKey: generatedApiKey, apiSecret } = await apiKey(
-    org,
-    allowedOrigins,
-  );
+	const { apiKey: generatedApiKey, rawKey } = await apiKey(
+		org,
+		allowedOrigins,
+	);
 
-  return { apiKey: generatedApiKey, apiSecret };
+	return { apiKey: generatedApiKey, rawKey };
 };
 
 /**
@@ -39,22 +39,22 @@ export const createApiKeyService = async ({
  * @returns A list of API key records without exposing secret hashes.
  */
 export const listApiKeysService = async (organizationId: string) => {
-  const keys = await prisma.apiKey.findMany({
-    where: { organizationId },
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      name: true,
-      keyPrefix: true, // e.g "sk_a3f9b2" — safe to show
-      allowedOrigins: true,
-      isActive: true,
-      lastUsedAt: true,
-      createdAt: true,
-      // keyHash is never selected — never returned
-    },
-  });
+	const keys = await prisma.apiKey.findMany({
+		where: { organizationId },
+		orderBy: { createdAt: "desc" },
+		select: {
+			id: true,
+			name: true,
+			keyPrefix: true, // e.g "sk_a3f9b2" — safe to show
+			allowedOrigins: true,
+			isActive: true,
+			lastUsedAt: true,
+			createdAt: true,
+			// keyHash is never selected — never returned
+		},
+	});
 
-  return keys;
+	return keys;
 };
 
 /**
@@ -66,21 +66,21 @@ export const listApiKeysService = async (organizationId: string) => {
  * @throws When the key is missing or already revoked.
  */
 export const revokeApiKeyService = async (
-  keyId: string,
-  organizationId: string,
+	keyId: string,
+	organizationId: string,
 ) => {
-  // Verify key belongs to this org before touching it
-  const key = await prisma.apiKey.findUnique({
-    where: { id: keyId, organizationId },
-  });
+	// Verify key belongs to this org before touching it
+	const key = await prisma.apiKey.findUnique({
+		where: { id: keyId, organizationId },
+	});
 
-  if (!key) throw new AppError("API key not found", 404);
-  if (!key.isActive) throw new AppError("Key is already revoked", 400);
+	if (!key) throw new AppError("API key not found", 404);
+	if (!key.isActive) throw new AppError("Key is already revoked", 400);
 
-  await prisma.apiKey.update({
-    where: { id: keyId },
-    data: { isActive: false },
-  });
+	await prisma.apiKey.update({
+		where: { id: keyId },
+		data: { isActive: false },
+	});
 
-  return { success: true, message: "API key revoked" };
+	return { success: true, message: "API key revoked" };
 };

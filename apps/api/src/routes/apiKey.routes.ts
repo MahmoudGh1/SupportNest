@@ -1,8 +1,8 @@
 import express, { Router } from "express";
 import {
-  apiKeyController,
-  listApiKeysContorller,
-  revokeApiKeyController,
+	apiKeyController,
+	listApiKeysController,
+	revokeApiKeyController,
 } from "src/controllers/apiKey.controller.js";
 import { authMiddleware } from "src/middlewares/auth.middleware.js";
 
@@ -22,7 +22,7 @@ router.post("/create", apiKeyController);
 /**
  * Lists all API keys for the authenticated organization.
  */
-router.get("/keys", listApiKeysContorller);
+router.get("/keys", listApiKeysController);
 
 /**
  * Revokes a specific API key belonging to the authenticated organization.

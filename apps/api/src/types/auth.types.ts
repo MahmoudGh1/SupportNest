@@ -9,6 +9,7 @@ export interface TokenPayload {
 	sub: string;
 	email: string;
 	role: string;
+	name?: string;
 	organizationId: string | null;
 }
 
@@ -26,7 +27,10 @@ export interface AuthTokens {
 export interface AuthenticatedRequest extends Request {
 	user?: JwtPayload;
 	file?: Express.Multer.File | undefined; // Add this for single file uploads (req.file)
-	files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] } | undefined;
+	files?:
+		| Express.Multer.File[]
+		| { [fieldname: string]: Express.Multer.File[] }
+		| undefined;
 }
 
 export interface RegisterInput {
