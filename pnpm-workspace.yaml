@@ -10,7 +10,7 @@ allowBuilds:
   prisma: true
   sharp: true
   unrs-resolver: true
-  node-base64: true
+  node-base64: false
   msgpackr-extract: false
 
 preferWorkspacePackages: true
