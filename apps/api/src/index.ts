@@ -12,21 +12,29 @@ import {
   LoginController,
 } from "./controllers/auth.controller.js";
 import knowledgeRoutes from "./routes/knowledge.routes.js";
+import * as authController from "./controllers/auth.controller.js";
 import "./workers/knowledgeWorker.js";
+import knowledgeRoutes from "./routes/knowledge.routes.js";
+import conversationsRoutes from "./routes/conversations.routes.js";
 import ApiKeyRouter from "./routes/apiKey.routes.js";
 import WidgetRouter from "./routes/widget.routes.js";
 import OrganizationRoutes from "./routes/organization.routes.js";
+import authRouter from "./routes/auth.routes.js";
+import ragRouter from "./routes/rag.routes.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cookieParser());
 
 app.use(helmet());
 app.use(
   cors({
     origin: "http://localhost:3000",
+    credentials: true,
   }),
 );
 app.use(morgan("dev"));
@@ -46,13 +54,14 @@ app.use("/widget.js", (req, res, next) => {
 
 app.get("/health", (_, res) => res.json({ ok: true }));
 
-app.post("/api/v1/register", RegisterController);
-app.post("/api/v1/login", LoginController);
 app.use("/api/v1", knowledgeRoutes);
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/rag", ragRouter);
 app.use("/api/v1/dashboard/apikey", ApiKeyRouter);
 app.use("/api/v1/widget", WidgetRouter);
 app.use("/organizations", OrganizationRoutes);
 
+app.use("/api/v1/widget/conversations", conversationsRoutes);
 app.use(notFoundHandler);
 
 app.use(errorHandler);
