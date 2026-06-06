@@ -21,6 +21,7 @@ import OrganizationRoutes from "./routes/organization.routes.js";
 import authRouter from "./routes/auth.routes.js";
 import ragRouter from "./routes/rag.routes.js";
 import cookieParser from "cookie-parser";
+import prisma from "./config/prisma.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
