@@ -12,5 +12,7 @@ allowBuilds:
   unrs-resolver: true
   node-base64: false
   msgpackr-extract: false
+  '@google/genai': true
+  protobufjs: true
 
 preferWorkspacePackages: true

@@ -9,7 +9,7 @@ export default function RegisterPage() {
   const { register } = useAuth()
   const router = useRouter()
 
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "" })
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "", businessName: "" })
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading]  = useState(false)
   const [error, setError]      = useState("")
@@ -74,6 +74,9 @@ export default function RegisterPage() {
 
       <Input label="Work email" type="email" value={form.email} onChange={set("email")}
         placeholder="you@company.com" icon="mail" error={fieldErrors.email} />
+
+      <Input label="Business Name" type="text" value={form.businessName} onChange={set("businessName")}
+        placeholder="your company name..." icon="mail" error={fieldErrors.businessName} />
 
       <Input label="Password" type={showPass ? "text" : "password"} value={form.password}
         onChange={set("password")} placeholder="Min. 8 characters" icon="lock" error={fieldErrors.password}
