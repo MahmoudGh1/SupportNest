@@ -1,7 +1,7 @@
 import prisma from "src/config/prisma.js";
 import { Role } from "generated/prisma/enums.js";
 import slugify from "src/utils/slug.utils.js";
-import type { LoginInput, OraganizationDataDTO, RegisterInput } from "src/types/auth.types.js";
+import type { LoginInput, OraganizationDataDTO, RegisterInput, TokenPayload, userData } from "src/types/auth.types.js";
 import AppError from "src/utils/appError.js";
 import { comparePassword, generateSecret, hashPassword } from "src/utils/password.util.js";
 
@@ -67,3 +67,28 @@ export const loginService = async ({ email, password }: LoginInput): Promise<Ora
 		throw err;
 	}
 };
+
+export const userService = async (payloadToken: TokenPayload): Promise<userData> => {
+	try {
+		const user = await prisma.user.findUnique({
+			where: { id: payloadToken.sub },
+			select: {
+				id: true,
+				email: true,
+				firstName: true,
+				lastName: true,
+				role: true,
+				organizationId: true,
+				onboarded: true,
+			},
+		});
+
+		if (!user) {
+			throw new AppError("Wrong Email or Password", 409);
+		}
+
+		return user as userData;
+	} catch (err) {
+		throw err;
+	}
+}

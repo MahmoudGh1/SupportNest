@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
-import { loginService, registerService } from "src/services/auth.service.js";
-import { signAccessToken } from "src/utils/jwt.util.js";
+import prisma from "src/config/prisma.js";
+import { loginService, registerService, userService } from "src/services/auth.service.js";
+import { signAccessToken, verifyAccessToken } from "src/utils/jwt.util.js";
 
 export const RegisterController = async (req: Request, res: Response) => {
 	try {
@@ -11,7 +12,6 @@ export const RegisterController = async (req: Request, res: Response) => {
 		}
 
 		const result = await registerService({ businessName, email, password, firstName, lastName, planId });
-		console.log(result)
 
 		return res.status(201).json(result);
 	} catch (error: any) {
@@ -33,12 +33,44 @@ export const LoginController = async (req: Request, res: Response) => {
 			return res.status(401).json({ message: "Invalid credentials" });
 		}
 
-		const {id: sub, ...remaining} = result
+		const { id: sub, ...remaining } = result;
 
-		const token = signAccessToken({sub, ...remaining})
+		const token = signAccessToken({ sub, ...remaining });
 
-		return res.status(200).json({ token, remaining });
+		res.cookie("accessToken", token, {
+			httpOnly: true,
+			secure: false,
+			sameSite: "lax",
+			maxAge: 1000 * 60 * 60 * 24 * 7,
+		});
+
+		return res.status(200).json({ result });
 	} catch (error: any) {
 		return res.status(500).json({ error: "Internal server error" });
+	}
+};
+
+export const LogoutController = (req: Request, res: Response) => {
+	res.clearCookie("accessToken");
+	return res.status(200).json({ message: "Token has been cleared successfully" });
+};
+
+export const userController = async (req: Request, res: Response) => {
+	try {
+		const token = req.cookies.accessToken;
+		if (!token) {
+			return res.status(401).json({ error: "No session" });
+		}
+
+		const payloadToken = verifyAccessToken(token);
+		const result = await userService(payloadToken);
+
+		if (!result) {
+			return res.status(401).json({ error: "User not found" });
+		}
+
+		return res.status(200).json({ result });
+	} catch {
+		return res.status(401).json({ error: "Invalid session" });
 	}
 };

@@ -12,6 +12,7 @@ import "./workers/knowledgeWorker.js";
 import ApiKeyRouter from "./routes/apiKey.routes.js";
 import authRouter from "./routes/auth.routes.js";
 import ragRouter from "./routes/rag.routes.js";
+import cookieParser from "cookie-parser"
 
 
 const app = express();
@@ -19,11 +20,13 @@ const PORT = process.env.PORT || 3001;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cookieParser())
 
 app.use(helmet());
 app.use(
   cors({
     origin: "http://localhost:3000",
+    credentials: true
   }),
 );
 app.use(morgan("dev"));

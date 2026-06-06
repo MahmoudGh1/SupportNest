@@ -11,41 +11,57 @@ interface AuthState {
   login: (email: string, password: string) => Promise<AuthUser>
   register: (data: { email: string; password: string; firstName: string; lastName: string }) => Promise<AuthUser>
   completeOnboarding: (orgData: { orgId: string; name: string }) => void
-  logout: () => void
+  logout: () => Promise<void>
 }
 
 const AuthCtx = createContext<AuthState | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser]   = useState<AuthUser | null>(null)
+  const [user, setUser] = useState<AuthUser | null>(null)
   const [token, setToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   // Rehydrate from sessionStorage on mount
   useEffect(() => {
-    const session = getSession()
-    if (session) {
-      setUser(session.user)
-      setToken(session.token)
+    const rehydrate = async () => {
+      const session = getSession()
+      if (session) {
+        setUser(session.user)
+        setLoading(false)
+        return
+      }
+
+      try {
+        const res = await fetch("http://localhost:3001/api/v1/auth/me", {
+          credentials: "include",
+        })
+        if (res.ok) {
+          const data = await res.json()
+          setUser(data.result)
+          saveSession(data.result)
+        }
+      } catch {} 
+      finally {
+        setLoading(false)
+      }
     }
-    setLoading(false)
+
+    rehydrate()
   }, [])
 
   const login = useCallback(async (email: string, password: string) => {
     const data = await api.login(email, password)
     setUser(data.user)
-    setToken(data.token)
-    saveSession(data.token, data.user)
+    saveSession(data.user)
     return data.user
   }, [])
 
   const register = useCallback(async (formData: {
     email: string; password: string; firstName: string; lastName: string
   }) => {
-    const data = await api.register(formData)
+    const data = await api.register({...formData, planId: "c76ec77c-25de-4383-9d1a-986f70ef7694"})
     setUser(data.user)
-    setToken(data.token)
-    saveSession(data.token, data.user)
+    saveSession(data.user)
     return data.user
   }, [])
 
@@ -53,12 +69,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(prev => {
       if (!prev) return prev
       const updated = { ...prev, orgId: orgData.orgId, orgName: orgData.name, onboarded: true }
-      saveSession(token!, updated)
+      saveSession(updated)
       return updated
     })
   }, [token])
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await fetch("http://localhost:3001/api/v1/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    })
     setUser(null)
     setToken(null)
     clearSession()
