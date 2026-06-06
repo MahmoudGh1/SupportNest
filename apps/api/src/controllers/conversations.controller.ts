@@ -11,6 +11,7 @@ import {
 	MessageRole,
 } from "generated/prisma/enums.js";
 import { MessageTier, type Message } from "generated/prisma/client.js";
+import { askTier0Agent } from "src/services/rag.service.js";
 
 export const startConversation: RequestHandler = asyncHandler(
 	async (req: AuthenticatedWidgetRequest, res: Response) => {
@@ -166,13 +167,13 @@ export const sendMessage: RequestHandler = asyncHandler(
 			},
 		});
 
-		const aiResponse = await fakeAIService(
-			conversation.id,
-			conversation.organizationId,
+		const aiResponse = await askTier0Agent(
 			customerMessage.content,
+			conversation.organizationId,
+			conversation.id,
 			conversationHistory,
 		);
-
+		console.log(aiResponse);
 		const aiMessage = await prisma.message.create({
 			data: {
 				conversationId: conversation.id,
