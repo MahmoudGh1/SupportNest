@@ -2,13 +2,14 @@ import prisma from "src/config/prisma.js";
 import { queryEmbeddings, model } from "../config/langChain.js";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { AgentAction, AgentTier, MessageTier } from "generated/prisma/enums.js";
+import type { Message } from "generated/prisma/client.js";
 
 interface ChunkResult {
 	content: string;
 	similarity: number;
 }
 
-export async function askTier0Agent(question: string, organizationId: string): Promise<any> {
+export async function askTier0Agent(question: string, organizationId: string, convesationId: string = "Empty", conversationHistory: Message[] = []): Promise<any> {
 	const questionVector = await queryEmbeddings.embedQuery(question);
 	const vectorLiteral = `[${questionVector.join(",")}]`;
 
