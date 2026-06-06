@@ -21,5 +21,5 @@ export interface ApiKey {
 }
 
 export interface AuthenticatedWidgetRequest extends Request {
-	apiKey: ApiKey;
+	apiKey?: ApiKey;
 }

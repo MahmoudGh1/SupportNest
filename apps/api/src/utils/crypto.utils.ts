@@ -2,7 +2,7 @@ import crypto from "crypto";
 
 function generateApiKey() {
 	const randomBytes = crypto.randomBytes(32).toString("hex");
-	return `"sk_${randomBytes}`;
+	return `sk_${randomBytes}`;
 }
 
 function hashApiKey(apiKey: string) {

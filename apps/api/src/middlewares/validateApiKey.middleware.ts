@@ -6,16 +6,16 @@ import prisma from "src/config/prisma.js";
 import apiKey from "src/utils/apiKey.utils.js";
 import type { AuthenticatedWidgetRequest } from "src/types/apiKey.types.js";
 
-export async function validateApiKey(
+export const validateApiKey = async (
 	req: AuthenticatedWidgetRequest,
 	res: Response,
 	next: NextFunction,
-) {
+): Promise<void> => {
 	const incomingApiKey = req.headers["x-api-key"] || req.headers["x-apikey"];
 	const origin = req.get("origin");
-
 	if (!incomingApiKey) {
-		return res.status(401).json({ error: "API key is missing" });
+		res.status(401).json({ error: "API key is missing" });
+		return;
 	}
 
 	const clientHash = hashApiKey(incomingApiKey as string);
@@ -28,22 +28,30 @@ export async function validateApiKey(
 		});
 
 		if (!apiKeyRecord) {
-			return res.status(403).json({ error: "Invalid API key" });
+			res.status(403).json({ error: "Invalid API key" });
+			return;
 		}
 
 		if (!apiKeyRecord.isActive) {
-			return res.status(400).json({ error: "API Key is not active, Revoked" });
+			res.status(400).json({ error: "API Key is not active, Revoked" });
+			return;
 		}
 
 		const clientBuffer = Buffer.from(clientHash, "hex");
 		const dbBuffer = Buffer.from(apiKeyRecord.keyHash, "hex");
 
 		if (!crypto.timingSafeEqual(clientBuffer, dbBuffer)) {
-			return res.status(403).json({ error: "Invalid API key" });
+			res.status(403).json({ error: "Invalid API key" });
+			return;
 		}
 
-		if (!origin || !apiKeyRecord.allowedOrigins.includes(origin)) {
-			return res.status(403).json({ error: "Invalid origin" });
+		if (
+			!origin ||
+			(!apiKeyRecord.allowedOrigins.includes(origin) &&
+				apiKeyRecord.allowedOrigins.length > 0)
+		) {
+			res.status(403).json({ error: "Invalid origin" });
+			return;
 		}
 
 		await prisma.apiKey.update({
@@ -59,6 +67,7 @@ export async function validateApiKey(
 
 		next();
 	} catch (error) {
-		return res.status(500).json({ error: "Internal server error" });
+		res.status(500).json({ error: "Internal server error" });
+		return;
 	}
-}
+};

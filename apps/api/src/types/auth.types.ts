@@ -1,6 +1,5 @@
 import type { Request } from "express";
 import { Role } from "generated/prisma/enums.js";
-import { apiKey } from "src/utils/apiKey.utils.js";
 
 export interface RefreshTokenInput {
 	refreshToken: string;
@@ -10,6 +9,7 @@ export interface TokenPayload {
 	sub: string;
 	email: string;
 	role: string;
+	name?: string;
 	organizationId: string | null;
 }
 

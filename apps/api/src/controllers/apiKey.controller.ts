@@ -47,7 +47,7 @@ export const apiKeyController: RequestHandler = async (
  * @param res - Express response object.
  * @returns A JSON array of API keys.
  */
-export const listApiKeysContorller = async (
+export const listApiKeysController = async (
 	req: AuthenticatedRequest,
 	res: Response,
 ) => {
