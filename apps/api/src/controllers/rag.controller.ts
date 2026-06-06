@@ -16,9 +16,7 @@ export async function askTier0AgentController(req: Request, res: Response): Prom
 
 	try {
 		const answer = await askTier0Agent(question.trim(), organizationId);
-		const {tokensUsed: tokens, ...remaining} = answer
-		const totalTokens = tokens["total_tokens"]
-		res.status(200).json({remaining, totalTokens});
+		res.status(200).json( answer.data );
 	} catch (err) {
 		console.error("RAG Controller Error:", err);
 		res.status(500).json({
