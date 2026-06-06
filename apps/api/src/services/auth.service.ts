@@ -5,6 +5,8 @@ import type {
 	LoginInput,
 	OraganizationDataDTO,
 	RegisterInput,
+	TokenPayload,
+	userData,
 } from "src/types/auth.types.js";
 import AppError from "src/utils/appError.js";
 import {
@@ -87,6 +89,33 @@ export const loginService = async ({
 
 		const { passwordHash: _password, ...dataDTO } = user;
 		return dataDTO;
+	} catch (err) {
+		throw err;
+	}
+};
+
+export const userService = async (
+	payloadToken: TokenPayload,
+): Promise<userData> => {
+	try {
+		const user = await prisma.user.findUnique({
+			where: { id: payloadToken.sub },
+			select: {
+				id: true,
+				email: true,
+				firstName: true,
+				lastName: true,
+				role: true,
+				organizationId: true,
+				onboarded: true,
+			},
+		});
+
+		if (!user) {
+			throw new AppError("Wrong Email or Password", 409);
+		}
+
+		return user as userData;
 	} catch (err) {
 		throw err;
 	}

@@ -58,3 +58,13 @@ export interface OraganizationDataDTO {
 	createdAt?: Date;
 	updatedAt?: Date;
 }
+
+export interface userData {
+	id: string;
+	email: string;
+	firstName: string;
+	lastName: string;
+	role: string;
+	organizationId: string;
+	onboarded: boolean;
+}
