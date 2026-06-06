@@ -30,6 +30,7 @@ export const updateWidgetConfigController = async (
     const organizationId = req.user?.organizationId;
     const { title, greetingMessage, accentColor, placeholder } = req.body;
 
+    console.log(title, greetingMessage, accentColor, placeholder);
     const result = await updateWidgetConfigService(organizationId as string, {
       title,
       greetingMessage,

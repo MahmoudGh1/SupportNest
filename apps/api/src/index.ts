@@ -14,7 +14,6 @@ import {
 import knowledgeRoutes from "./routes/knowledge.routes.js";
 import * as authController from "./controllers/auth.controller.js";
 import "./workers/knowledgeWorker.js";
-import knowledgeRoutes from "./routes/knowledge.routes.js";
 import conversationsRoutes from "./routes/conversations.routes.js";
 import ApiKeyRouter from "./routes/apiKey.routes.js";
 import WidgetRouter from "./routes/widget.routes.js";
@@ -33,24 +32,26 @@ app.use(cookieParser());
 app.use(helmet());
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "*",
     credentials: true,
   }),
 );
+
+app.use(express.static("public"));
 app.use(morgan("dev"));
 
 app.use(rateLimit);
 
 // Serve widget.js from the public folder
-app.use(express.static(path.join(__dirname, "../public")));
 // This makes widget.js available at:
 // https://api.supportnest.io/widget.js
 
-app.use("/widget.js", (req, res, next) => {
+app.get("/widget.js", (req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Content-Type", "application/javascript");
   next();
 });
+app.use(express.static(path.join(__dirname, "../public")));
 
 app.get("/health", (_, res) => res.json({ ok: true }));
 
@@ -59,7 +60,7 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/rag", ragRouter);
 app.use("/api/v1/dashboard/apikey", ApiKeyRouter);
 app.use("/api/v1/widget", WidgetRouter);
-app.use("/organizations", OrganizationRoutes);
+app.use("/api/v1/organizations", OrganizationRoutes);
 
 app.use("/api/v1/widget/conversations", conversationsRoutes);
 app.use(notFoundHandler);

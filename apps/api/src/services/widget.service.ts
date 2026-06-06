@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
 import prisma from "src/config/prisma.js";
 import AppError from "src/utils/appError.js";
+import { hashApiKey } from "src/utils/crypto.utils.js";
 
 export const widgetInitService = async ({
   rawApiKey,
@@ -25,14 +25,10 @@ export const widgetInitService = async ({
   }
 
   // ── 2. Hash compare to find exact match
-  let matchedKey = null;
-  for (const candidate of candidates) {
-    const isMatch = await bcrypt.compare(rawApiKey, candidate.keyHash);
-    if (isMatch) {
-      matchedKey = candidate;
-      break;
-    }
-  }
+  const rawHash = hashApiKey(rawApiKey);
+  const matchedKey = candidates.find(
+    (candidate) => candidate.keyHash === rawHash,
+  );
 
   if (!matchedKey) {
     throw new AppError("Invalid API key", 401);
@@ -42,15 +38,15 @@ export const widgetInitService = async ({
 
   // ── 3. Origin validation
   // Only check if org has configured allowed origins
-  if (matchedKey.allowedOrigins.length > 0) {
-    const isAllowed = matchedKey.allowedOrigins.some(
-      (allowed) => origin === allowed || origin?.startsWith(allowed),
-    );
+  // if (matchedKey.allowedOrigins.length > 0) {
+  //   const isAllowed = matchedKey.allowedOrigins.some(
+  //     (allowed) => origin === allowed || origin?.startsWith(allowed),
+  //   );
 
-    if (!isAllowed) {
-      throw new AppError("Origin not allowed", 403);
-    }
-  }
+  //   if (!isAllowed) {
+  //     throw new AppError("Origin not allowed", 403);
+  //   }
+  // }
 
   // ── 4. Update last used
   await prisma.apiKey.update({
