@@ -4,6 +4,7 @@ import { authMiddleware } from "src/middlewares/auth.middleware.js";
 
 const ragRouter: Router = express.Router();
 
-ragRouter.post("/ask", authMiddleware, askTier0AgentController);
+// ragRouter.post("/ask", authMiddleware, askTier0AgentController);
+ragRouter.post("/ask", askTier0AgentController);
 
 export default ragRouter;
