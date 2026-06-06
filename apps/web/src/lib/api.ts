@@ -3,6 +3,21 @@
 // When backend is ready: replace each function body with a real fetch() call.
 // The function signatures stay exactly the same — nothing else in the app changes.
 
+import {
+	AuthUser,
+	DashboardStats,
+	KnowledgeDocument,
+	LoginResponse,
+	OrgProfile,
+	OrgSetupData,
+	UpdatePasswordInput,
+	UpdateProfileInput,
+	UpdateWidgetConfigInput,
+	UploadFaqInput,
+	UploadPdfInput,
+	UserProfile,
+} from "@/types/types";
+
 const mockDelay = (ms = 600) => new Promise((r) => setTimeout(r, ms));
 
 const mockUsers = [
@@ -18,150 +33,6 @@ const mockUsers = [
 		onboarded: true,
 	},
 ];
-
-// ─── TYPES ────────────────────────────────────────────────────────────────────
-export interface AuthUser {
-	id: string;
-	email: string;
-	firstName: string;
-	lastName: string;
-	role: string;
-	orgId: string | null;
-	orgName?: string;
-	onboarded: boolean;
-}
-
-export interface LoginResponse {
-	user: AuthUser;
-}
-
-export interface OrgSetupData {
-	name: string;
-	industry: string;
-	size: string;
-}
-
-// ─── SETTINGS TYPES ───────────────────────────────────────────────────────────
-export interface WidgetConfig {
-	color: string; // hex — widget primary color
-	greeting: string; // first message shown to customer
-	position: "bottom-left" | "bottom-right";
-}
-
-export interface OrgProfile {
-	id: string;
-	name: string;
-	slug: string;
-	email: string;
-	widget_config: WidgetConfig;
-	plan_id: string;
-	is_active: boolean;
-	created_at: string;
-	updated_at: string;
-}
-
-export interface UserProfile {
-	id: string;
-	email: string;
-	first_name: string; // snake_case — matches schema
-	last_name: string;
-	role: "super_admin" | "org_admin" | "support_agent";
-	organization_id: string;
-	is_active: boolean;
-	created_at: string;
-}
-
-export interface UpdateProfileInput {
-	first_name: string;
-	last_name: string;
-	email: string;
-}
-
-export interface UpdatePasswordInput {
-	current_password: string;
-	new_password: string;
-}
-
-export interface UpdateWidgetConfigInput {
-	name: string;
-	email: string;
-	widget_config: WidgetConfig;
-}
-
-// ─── SETTINGS MOCK DATA ───────────────────────────────────────────────────────
-let mockOrgProfile: OrgProfile = {
-	id: "org1",
-	name: "Acme Corp",
-	slug: "acme-corp",
-	email: "support@acme.com",
-	widget_config: {
-		color: "#534AB7",
-		greeting: "Hi! How can we help you today?",
-		position: "bottom-right",
-	},
-	plan_id: "plan_starter",
-	is_active: true,
-	created_at: "2024-01-15T10:00:00Z",
-	updated_at: "2024-01-15T10:00:00Z",
-};
-
-let mockUserProfile: UserProfile = {
-	id: "u1",
-	email: "admin@acme.com",
-	first_name: "Mohamed",
-	last_name: "Rashad",
-	role: "org_admin",
-	organization_id: "org1",
-	is_active: true,
-	created_at: "2024-01-15T10:00:00Z",
-};
-
-// ─── KNOWLEDGE BASE TYPES ─────────────────────────────────────────────────────
-export type DocStatus = "processing" | "ready" | "failed";
-export type DocType = "pdf" | "faq";
-
-export interface KnowledgeDocument {
-	id: string;
-	organization_id: string;
-	title: string;
-	type: DocType;
-	storagePath: string; // camelCase — matches schema exactly
-	status: DocStatus;
-	metadata: {
-		pageCount?: number; // pdf only
-		fileSize?: number; // bytes, pdf only
-		faqCategory?: string; // faq only
-	};
-	created_by: string;
-	created_at: string;
-	updated_at: string;
-}
-
-export interface UploadPdfInput {
-	file: File;
-	title: string;
-}
-
-export interface UploadFaqInput {
-	title: string;
-	storagePath: string; // the FAQ URL
-	faqCategory?: string;
-}
-
-export interface DashboardStats {
-	totalConversations: number;
-	aiResolutionRate: number;
-	avgResponseTime: string;
-	csatScore: number;
-	recentConversations: {
-		id: number;
-		customer: string;
-		status: "active" | "escalated" | "closed";
-		tier: string;
-		time: string;
-	}[];
-	resolutionByTier: { tier1: number; tier2: number; human: number };
-}
 
 // ─── KB MOCK DATA STORE ───────────────────────────────────────────────────────
 // Mutable in-memory store — simulates the database for this session
@@ -195,7 +66,8 @@ let mockDocs: KnowledgeDocument[] = [
 		organization_id: "org1",
 		title: "Onboarding Guide v2",
 		type: "pdf",
-		storagePath: "https://storage.supabase.co/object/public/docs/onboarding-v2.pdf",
+		storagePath:
+			"https://storage.supabase.co/object/public/docs/onboarding-v2.pdf",
 		status: "failed",
 		metadata: { pageCount: 0, fileSize: 512000 },
 		created_by: "u1",
@@ -203,6 +75,34 @@ let mockDocs: KnowledgeDocument[] = [
 		updated_at: "2024-06-03T07:01:00Z",
 	},
 ];
+
+// ─── SETTINGS MOCK DATA ───────────────────────────────────────────────────────
+let mockOrgProfile: OrgProfile = {
+	id: "org1",
+	name: "Acme Corp",
+	slug: "acme-corp",
+	email: "support@acme.com",
+	widget_config: {
+		color: "#534AB7",
+		greeting: "Hi! How can we help you today?",
+		position: "bottom-right",
+	},
+	plan_id: "plan_starter",
+	is_active: true,
+	created_at: "2024-01-15T10:00:00Z",
+	updated_at: "2024-01-15T10:00:00Z",
+};
+
+let mockUserProfile: UserProfile = {
+	id: "u1",
+	email: "admin@acme.com",
+	first_name: "Mohamed",
+	last_name: "Rashad",
+	role: "org_admin",
+	organization_id: "org1",
+	is_active: true,
+	created_at: "2024-01-15T10:00:00Z",
+};
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
 export const api = {
@@ -219,7 +119,15 @@ export const api = {
 			throw new Error("Login failed");
 		}
 
-		const { id, email: orgEmail, firstName, lastName, role, organizationId, onboarded } = data.result;
+		const {
+			id,
+			email: orgEmail,
+			firstName,
+			lastName,
+			role,
+			organizationId,
+			onboarded,
+		} = data.result;
 		const user: AuthUser = {
 			id,
 			email: orgEmail,
@@ -233,7 +141,13 @@ export const api = {
 		return { user };
 	},
 
-	async register(data: { email: string, password: string, firstName: string, lastName: string, planId: string }): Promise<LoginResponse> {
+	async register(data: {
+		email: string;
+		password: string;
+		firstName: string;
+		lastName: string;
+		planId: string;
+	}): Promise<LoginResponse> {
 		const res = await fetch("http://localhost:3001/api/v1/auth/register", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -249,7 +163,9 @@ export const api = {
 		return api.login(data.email, data.password);
 	},
 
-	async setupOrg(data: OrgSetupData): Promise<{ orgId: string } & OrgSetupData> {
+	async setupOrg(
+		data: OrgSetupData,
+	): Promise<{ orgId: string } & OrgSetupData> {
 		await mockDelay(1000);
 		return { orgId: "org-" + Date.now(), ...data };
 	},
@@ -262,11 +178,41 @@ export const api = {
 			avgResponseTime: "1.4s",
 			csatScore: 4.7,
 			recentConversations: [
-				{ id: 1, customer: "Sarah K.", status: "active", tier: "Tier 1", time: "2m ago" },
-				{ id: 2, customer: "James O.", status: "escalated", tier: "Human", time: "8m ago" },
-				{ id: 3, customer: "Lena M.", status: "closed", tier: "Tier 2", time: "15m ago" },
-				{ id: 4, customer: "Tom B.", status: "active", tier: "Tier 1", time: "21m ago" },
-				{ id: 5, customer: "Aisha F.", status: "closed", tier: "Tier 1", time: "34m ago" },
+				{
+					id: 1,
+					customer: "Sarah K.",
+					status: "active",
+					tier: "Tier 1",
+					time: "2m ago",
+				},
+				{
+					id: 2,
+					customer: "James O.",
+					status: "escalated",
+					tier: "Human",
+					time: "8m ago",
+				},
+				{
+					id: 3,
+					customer: "Lena M.",
+					status: "closed",
+					tier: "Tier 2",
+					time: "15m ago",
+				},
+				{
+					id: 4,
+					customer: "Tom B.",
+					status: "active",
+					tier: "Tier 1",
+					time: "21m ago",
+				},
+				{
+					id: 5,
+					customer: "Aisha F.",
+					status: "closed",
+					tier: "Tier 1",
+					time: "34m ago",
+				},
 			],
 			resolutionByTier: { tier1: 58, tier2: 23, human: 19 },
 		};
@@ -279,14 +225,17 @@ export const api = {
 		return { documents: [...mockDocs] };
 	},
 
-	async uploadPdf(input: UploadPdfInput): Promise<{ document: KnowledgeDocument }> {
+	async uploadPdf(
+		input: UploadPdfInput,
+	): Promise<{ document: KnowledgeDocument }> {
 		await mockDelay(800);
 		const newDoc: KnowledgeDocument = {
 			id: "doc_" + Date.now(),
 			organization_id: "org1",
 			title: input.title,
 			type: "pdf",
-			storagePath: "https://storage.supabase.co/object/public/docs/" + input.file.name,
+			storagePath:
+				"https://storage.supabase.co/object/public/docs/" + input.file.name,
 			status: "processing",
 			metadata: {
 				fileSize: input.file.size,
@@ -300,13 +249,26 @@ export const api = {
 
 		// Simulate background job: flip to ready after 4s
 		setTimeout(() => {
-			mockDocs = mockDocs.map((d) => (d.id === newDoc.id ? { ...d, status: "ready", metadata: { ...d.metadata, pageCount: Math.floor(Math.random() * 20) + 1 } } : d));
+			mockDocs = mockDocs.map((d) =>
+				d.id === newDoc.id
+					? {
+							...d,
+							status: "ready",
+							metadata: {
+								...d.metadata,
+								pageCount: Math.floor(Math.random() * 20) + 1,
+							},
+						}
+					: d,
+			);
 		}, 4000);
 
 		return { document: newDoc };
 	},
 
-	async uploadFaq(input: UploadFaqInput): Promise<{ document: KnowledgeDocument }> {
+	async uploadFaq(
+		input: UploadFaqInput,
+	): Promise<{ document: KnowledgeDocument }> {
 		await mockDelay(600);
 		const newDoc: KnowledgeDocument = {
 			id: "doc_" + Date.now(),
@@ -326,7 +288,9 @@ export const api = {
 
 		// Simulate background job: flip to ready after 3s
 		setTimeout(() => {
-			mockDocs = mockDocs.map((d) => (d.id === newDoc.id ? { ...d, status: "ready" } : d));
+			mockDocs = mockDocs.map((d) =>
+				d.id === newDoc.id ? { ...d, status: "ready" } : d,
+			);
 		}, 3000);
 
 		return { document: newDoc };
@@ -348,10 +312,13 @@ export const api = {
 		return { user: { ...mockUserProfile } };
 	},
 
-	async updateUserProfile(input: UpdateProfileInput): Promise<{ user: UserProfile }> {
+	async updateUserProfile(
+		input: UpdateProfileInput,
+	): Promise<{ user: UserProfile }> {
 		await mockDelay(600);
 		if (!input.email) throw new Error("Email is required.");
-		if (!/\S+@\S+\.\S+/.test(input.email)) throw new Error("Enter a valid email.");
+		if (!/\S+@\S+\.\S+/.test(input.email))
+			throw new Error("Enter a valid email.");
 		mockUserProfile = {
 			...mockUserProfile,
 			...input,
@@ -360,11 +327,15 @@ export const api = {
 		return { user: { ...mockUserProfile } };
 	},
 
-	async updatePassword(input: UpdatePasswordInput): Promise<{ success: boolean }> {
+	async updatePassword(
+		input: UpdatePasswordInput,
+	): Promise<{ success: boolean }> {
 		await mockDelay(700);
 		// Mock: only accept "password" as current password (matches mock user)
-		if (input.current_password !== "password") throw new Error("Current password is incorrect.");
-		if (input.new_password.length < 8) throw new Error("New password must be at least 8 characters.");
+		if (input.current_password !== "password")
+			throw new Error("Current password is incorrect.");
+		if (input.new_password.length < 8)
+			throw new Error("New password must be at least 8 characters.");
 		return { success: true };
 	},
 
@@ -373,10 +344,13 @@ export const api = {
 		return { organization: { ...mockOrgProfile } };
 	},
 
-	async updateOrgProfile(input: UpdateWidgetConfigInput): Promise<{ organization: OrgProfile }> {
+	async updateOrgProfile(
+		input: UpdateWidgetConfigInput,
+	): Promise<{ organization: OrgProfile }> {
 		await mockDelay(600);
 		if (!input.name.trim()) throw new Error("Organization name is required.");
-		if (!input.email.trim()) throw new Error("Organization email is required.");
+		if (!input.email.trim())
+			throw new Error("Organization email is required.");
 		mockOrgProfile = {
 			...mockOrgProfile,
 			name: input.name,
