@@ -46,3 +46,29 @@ export const uploadDocument: RequestHandler = asyncHandler(
 		res.status(202).json({ documentId: doc.id, status: "PROCESSING" });
 	},
 );
+
+export const getKnowledgeDocuments: RequestHandler = asyncHandler(
+	async (req: AuthenticatedRequest, res: Response) => {
+		console.log(req.params.id);
+		const organization = await prisma.organization.findUnique({
+			where: {
+				id: req.params.orgId as string,
+			},
+		});
+		if (!organization) throw new AppError("organization not found", 404);
+
+		const documents = await prisma.knowledgeDocument.findMany({
+			where: {
+				organizationId: organization.id,
+			},
+		});
+
+		res.status(200).json({
+			success: true,
+			message: "documents fetched successfully",
+			data: {
+				documents,
+			},
+		});
+	},
+);

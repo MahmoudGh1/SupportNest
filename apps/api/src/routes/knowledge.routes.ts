@@ -10,4 +10,10 @@ router.post(
 	upload.single("file"),
 	knowledgeController.uploadDocument,
 );
+
+router.get(
+	"/organizations/:orgId/knowledge",
+	authMiddleware,
+	knowledgeController.getKnowledgeDocuments,
+);
 export default router;
