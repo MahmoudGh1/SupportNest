@@ -14,5 +14,6 @@ allowBuilds:
   msgpackr-extract: false
   '@google/genai': true
   protobufjs: true
+  '@prisma/client': false
 
 preferWorkspacePackages: true

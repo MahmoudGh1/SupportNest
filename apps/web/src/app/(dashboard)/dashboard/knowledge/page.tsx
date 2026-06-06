@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { api, KnowledgeDocument, DocStatus, DocType } from "@/lib/api";
+import { api } from "@/lib/api";
 import { S } from "@/components/ui";
+import { DocStatus, DocType, KnowledgeDocument } from "@/types/types";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function formatBytes(bytes?: number) {
@@ -26,19 +27,19 @@ function StatusBadge({ status }: { status: DocStatus }) {
 		DocStatus,
 		{ bg: string; color: string; label: string; icon: string }
 	> = {
-		ready: {
+		READY: {
 			bg: S.greenBg,
 			color: S.green,
 			label: "Ready",
 			icon: "circle-check",
 		},
-		processing: {
+		PROCESSING: {
 			bg: "#EEF2FF",
 			color: "#4F46E5",
 			label: "Processing",
 			icon: "loader-2",
 		},
-		failed: {
+		FAILED: {
 			bg: S.dangerBg,
 			color: S.danger,
 			label: "Failed",
@@ -46,6 +47,7 @@ function StatusBadge({ status }: { status: DocStatus }) {
 		},
 	};
 	const s = map[status];
+	console.log(s);
 	return (
 		<span
 			style={{
@@ -65,7 +67,7 @@ function StatusBadge({ status }: { status: DocStatus }) {
 				style={{
 					fontSize: 12,
 					animation:
-						status === "processing" ? "spin 1s linear infinite" : "none",
+						status === "PROCESSING" ? "spin 1s linear infinite" : "none",
 				}}
 			/>
 			{s.label}
@@ -76,8 +78,8 @@ function StatusBadge({ status }: { status: DocStatus }) {
 // ─── TYPE BADGE ───────────────────────────────────────────────────────────────
 function TypeBadge({ type }: { type: DocType }) {
 	const map: Record<DocType, { bg: string; color: string; icon: string }> = {
-		pdf: { bg: "#FEF3C7", color: "#92400E", icon: "file-type-pdf" },
-		faq: { bg: S.purpleBg, color: S.purple, icon: "link" },
+		PDF: { bg: "#FEF3C7", color: "#92400E", icon: "file-type-pdf" },
+		FAQ: { bg: S.purpleBg, color: S.purple, icon: "link" },
 	};
 	const s = map[type];
 	return (
@@ -791,8 +793,8 @@ export default function KnowledgePage() {
 
 	// ── Fetch ──────────────────────────────────────────────────────────────────
 	const fetchDocs = async () => {
-		const res = await api.getKnowledgeDocs();
-		setDocs(res.documents);
+		const documents = (await api.getKnowledgeDocs()).data.documents;
+		setDocs(documents);
 	};
 
 	useEffect(() => {
@@ -801,7 +803,7 @@ export default function KnowledgePage() {
 
 	// ── Polling: only runs while any doc is "processing" ──────────────────────
 	useEffect(() => {
-		const hasProcessing = docs.some((d) => d.status === "processing");
+		const hasProcessing = docs.some((d) => d.status === "PROCESSING");
 		if (!hasProcessing) return;
 		const timer = setInterval(fetchDocs, 3000);
 		return () => clearInterval(timer);
@@ -836,9 +838,9 @@ export default function KnowledgePage() {
 
 	// ── Stats ──────────────────────────────────────────────────────────────────
 	const total = docs.length;
-	const ready = docs.filter((d) => d.status === "ready").length;
-	const processing = docs.filter((d) => d.status === "processing").length;
-	const failed = docs.filter((d) => d.status === "failed").length;
+	const ready = docs.filter((d) => d.status === "READY").length;
+	const processing = docs.filter((d) => d.status === "PROCESSING").length;
+	const failed = docs.filter((d) => d.status === "FAILED").length;
 
 	if (pageLoading) {
 		return (
@@ -1103,7 +1105,7 @@ export default function KnowledgePage() {
 												fontSize: 12,
 											}}
 										>
-											{doc.type === "pdf" ? (
+											{doc.type === "PDF" ? (
 												<div>
 													<div>{formatBytes(doc.metadata.fileSize)}</div>
 													{doc.metadata.pageCount ? (
@@ -1123,7 +1125,7 @@ export default function KnowledgePage() {
 												whiteSpace: "nowrap",
 											}}
 										>
-											{formatDate(doc.created_at)}
+											{formatDate(doc.createdAt)}
 										</td>
 										{/* Delete */}
 										<td style={{ padding: "12px 16px", textAlign: "right" }}>

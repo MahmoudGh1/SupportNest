@@ -3,9 +3,12 @@
 // When backend is ready: replace each function body with a real fetch() call.
 // The function signatures stay exactly the same — nothing else in the app changes.
 
+import { getSession } from "@/lib/auth";
 import {
 	AuthUser,
 	DashboardStats,
+	GetKnowledgeDocsResponse,
+	getKnowledgeDocsResponse,
 	KnowledgeDocument,
 	LoginResponse,
 	OrgProfile,
@@ -36,45 +39,6 @@ const mockUsers = [
 
 // ─── KB MOCK DATA STORE ───────────────────────────────────────────────────────
 // Mutable in-memory store — simulates the database for this session
-let mockDocs: KnowledgeDocument[] = [
-	{
-		id: "doc_001",
-		organization_id: "org1",
-		title: "Q3 Product FAQ",
-		type: "pdf",
-		storagePath: "https://storage.supabase.co/object/public/docs/q3-faq.pdf",
-		status: "ready",
-		metadata: { pageCount: 12, fileSize: 204800 },
-		created_by: "u1",
-		created_at: "2024-06-01T10:00:00Z",
-		updated_at: "2024-06-01T10:02:00Z",
-	},
-	{
-		id: "doc_002",
-		organization_id: "org1",
-		title: "Refund Policy",
-		type: "faq",
-		storagePath: "https://acme.com/refund-policy",
-		status: "ready",
-		metadata: { faqCategory: "Billing" },
-		created_by: "u1",
-		created_at: "2024-06-02T09:00:00Z",
-		updated_at: "2024-06-02T09:01:00Z",
-	},
-	{
-		id: "doc_003",
-		organization_id: "org1",
-		title: "Onboarding Guide v2",
-		type: "pdf",
-		storagePath:
-			"https://storage.supabase.co/object/public/docs/onboarding-v2.pdf",
-		status: "failed",
-		metadata: { pageCount: 0, fileSize: 512000 },
-		created_by: "u1",
-		created_at: "2024-06-03T07:00:00Z",
-		updated_at: "2024-06-03T07:01:00Z",
-	},
-];
 
 // ─── SETTINGS MOCK DATA ───────────────────────────────────────────────────────
 let mockOrgProfile: OrgProfile = {
@@ -105,6 +69,9 @@ let mockUserProfile: UserProfile = {
 };
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const session = getSession();
+
 export const api = {
 	async login(email: string, password: string): Promise<LoginResponse> {
 		const res = await fetch("http://localhost:3001/api/v1/auth/login", {
@@ -220,50 +187,49 @@ export const api = {
 
 	// ─── KNOWLEDGE BASE ─────────────────────────────────────────────────────────
 
-	async getKnowledgeDocs(): Promise<{ documents: KnowledgeDocument[] }> {
-		await mockDelay(500);
-		return { documents: [...mockDocs] };
+	async getKnowledgeDocs(): Promise<GetKnowledgeDocsResponse> {
+		const user = session?.user;
+		if (!user) {
+			throw new Error("User not found");
+		}
+		const response = await fetch(
+			`${BASE_URL}/api/v1/organizations/${user.orgId}/knowledge`,
+			{
+				credentials: "include",
+			},
+		);
+		if (!response.ok) throw new Error(response.statusText);
+
+		return response.json();
 	},
 
 	async uploadPdf(
 		input: UploadPdfInput,
 	): Promise<{ document: KnowledgeDocument }> {
-		await mockDelay(800);
-		const newDoc: KnowledgeDocument = {
-			id: "doc_" + Date.now(),
-			organization_id: "org1",
-			title: input.title,
-			type: "pdf",
-			storagePath:
-				"https://storage.supabase.co/object/public/docs/" + input.file.name,
-			status: "processing",
-			metadata: {
-				fileSize: input.file.size,
-				pageCount: 0,
+		const user = session?.user;
+		if (!user) {
+			throw new Error("User not found");
+		}
+		const formData = new FormData();
+		formData.append("file", input.file);
+		formData.append("title", input.title);
+		formData.append("type", "PDF");
+
+		const response = await fetch(
+			`${BASE_URL}/api/v1/organizations/${user.orgId}/knowledge`,
+			{
+				method: "POST",
+				body: formData,
+				credentials: "include",
 			},
-			created_by: "u1",
-			created_at: new Date().toISOString(),
-			updated_at: new Date().toISOString(),
-		};
-		mockDocs = [newDoc, ...mockDocs];
+		);
 
-		// Simulate background job: flip to ready after 4s
-		setTimeout(() => {
-			mockDocs = mockDocs.map((d) =>
-				d.id === newDoc.id
-					? {
-							...d,
-							status: "ready",
-							metadata: {
-								...d.metadata,
-								pageCount: Math.floor(Math.random() * 20) + 1,
-							},
-						}
-					: d,
-			);
-		}, 4000);
+		if (!response.ok) {
+			const error = await response.json().catch(() => ({}));
+			throw new Error(error.message ?? `Upload failed: ${response.status}`);
+		}
 
-		return { document: newDoc };
+		return response.json(); // expects { document: KnowledgeDocument }
 	},
 
 	async uploadFaq(

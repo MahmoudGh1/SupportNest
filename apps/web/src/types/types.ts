@@ -68,8 +68,8 @@ export interface UpdateWidgetConfigInput {
 }
 
 // ─── KNOWLEDGE BASE TYPES ─────────────────────────────────────────────────────
-export type DocStatus = "processing" | "ready" | "failed";
-export type DocType = "pdf" | "faq";
+export type DocStatus = "PROCESSING" | "READY" | "FAILED";
+export type DocType = "PDF" | "FAQ";
 
 export interface KnowledgeDocument {
 	id: string;
@@ -83,9 +83,9 @@ export interface KnowledgeDocument {
 		fileSize?: number; // bytes, pdf only
 		faqCategory?: string; // faq only
 	};
-	created_by: string;
-	created_at: string;
-	updated_at: string;
+	createdBy: string;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface UploadPdfInput {
@@ -112,4 +112,10 @@ export interface DashboardStats {
 		time: string;
 	}[];
 	resolutionByTier: { tier1: number; tier2: number; human: number };
+}
+
+export interface GetKnowledgeDocsResponse {
+	success: Boolean;
+	message: string;
+	data: { documents: KnowledgeDocument[] };
 }

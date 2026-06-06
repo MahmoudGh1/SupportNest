@@ -6,14 +6,14 @@ const router: Router = express.Router();
 
 router.post(
 	"/organizations/:orgId/knowledge",
-	authMiddleware,
+	// authMiddleware,
 	upload.single("file"),
 	knowledgeController.uploadDocument,
 );
 
 router.get(
 	"/organizations/:orgId/knowledge",
-	authMiddleware,
+	// authMiddleware,
 	knowledgeController.getKnowledgeDocuments,
 );
 export default router;

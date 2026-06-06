@@ -8,8 +8,8 @@ import { knowledgeQueue } from "src/queues/knowledgeQueue.js";
 
 export const uploadDocument: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
-		const userId = req.user?.sub;
-		// const userId = "c14a63e5-48d5-48af-b40e-c2432732cec4";
+		// const userId = req.user?.sub;
+		const userId = "e0f59984-8a12-4b05-9950-c2ab3655d9d6";
 		const { orgId } = req.params;
 		const { title, type } = req.body;
 		const file = req.file; // Buffer from multer memoryStorage

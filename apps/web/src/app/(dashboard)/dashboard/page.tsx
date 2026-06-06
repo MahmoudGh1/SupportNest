@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api, DashboardStats } from "@/lib/api";
+import { api } from "@/lib/api";
 import { StatusBadge, S } from "@/components/ui";
+import { DashboardStats } from "@/types/types";
 
 function StatCard({
 	label,
