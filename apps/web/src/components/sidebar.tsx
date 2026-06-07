@@ -12,6 +12,8 @@ const navItems = [
   { icon: "chart-bar",        label: "Analytics",     page: "analytics"     },
   { icon: "code",             label: "API & Widget",  page: "api"           },
   { icon: "settings",         label: "Settings",      page: "settings"      },
+  { icon: "user-circle",      label: "Profile",        page: "profile"       },
+
 ]
 
 interface SidebarProps {

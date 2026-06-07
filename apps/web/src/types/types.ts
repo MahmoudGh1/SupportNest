@@ -119,3 +119,17 @@ export interface GetKnowledgeDocsResponse {
 	message: string;
 	data: { documents: KnowledgeDocument[] };
 }
+
+export interface ApiKey {
+  id: string;
+  key_prefix: string;
+  key_hash: string;
+  allowed_origins: string[];
+  is_active: boolean;
+  last_used_at: string | null;
+  created_at: string;
+}
+
+export interface CreateApiKeyInput {
+  allowedOrigins: string[];
+}

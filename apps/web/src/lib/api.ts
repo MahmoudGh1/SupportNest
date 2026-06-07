@@ -19,6 +19,8 @@ import {
 	UploadFaqInput,
 	UploadPdfInput,
 	UserProfile,
+	ApiKey,
+	CreateApiKeyInput,
 } from "@/types/types";
 
 const mockDelay = (ms = 600) => new Promise((r) => setTimeout(r, ms));
@@ -193,7 +195,7 @@ export const api = {
 			throw new Error("User not found");
 		}
 		const response = await fetch(
-			`${BASE_URL}/api/v1/organizations/${user.orgId}/knowledge`,
+			`http://localhost:3001/api/v1/organizations/${user.orgId}/knowledge`,
 			{
 				credentials: "include",
 			},
@@ -216,7 +218,7 @@ export const api = {
 		formData.append("type", "PDF");
 
 		const response = await fetch(
-			`${BASE_URL}/api/v1/organizations/${user.orgId}/knowledge`,
+			`http://localhost:3001/api/v1/organizations/${user.orgId}/knowledge`,
 			{
 				method: "POST",
 				body: formData,
@@ -326,4 +328,83 @@ export const api = {
 		};
 		return { organization: { ...mockOrgProfile } };
 	},
+	async getApiKeys(): Promise<ApiKey[]> {
+  const response = await fetch(
+    "http://localhost:3001/api/v1/dashboard/apiKey/keys",
+    {
+      credentials: "include",
+	   headers: {
+        Authorization: `Bearer ${getSession()?.token ?? ""}`,  // ← add this
+      },
+    }
+  );
+
+  let data;
+
+  try {
+    data = await response.json();
+  } catch {
+    data = await response.text();
+  }
+
+  console.log("=== API KEYS DEBUG ===");
+  console.log("Status:", response.status);
+  console.log("OK:", response.ok);
+  console.log("Response:", data);
+
+  if (!response.ok) {
+    // DON'T throw yet
+    return [];
+  }
+
+  return data;
+},
+async createApiKey(allowedOrigins: string[]): Promise<string> {
+  const response = await fetch(
+    "http://localhost:3001/api/v1/dashboard/apiKey/create",
+    {
+      method: "POST",
+     
+      headers: { "Content-Type": "application/json" 
+		,Authorization: `Bearer ${getSession()?.token ?? ""}`,
+		 credentials: "include",
+	  },
+      body: JSON.stringify({ allowedOrigins }),
+    }
+  )
+
+  const data = await response.json()
+  console.log("STATUS:", response.status)
+  console.log("BODY:", data)  // ← add this
+
+  if (!response.ok) {
+	console.log("bvhjdhhdddddddddddd")
+    throw new Error(data.error ?? "Failed to create API key")
+	
+  }
+
+
+  return data
+},
+async revokeApiKey(id: string) {
+  const response = await fetch(
+    `http://localhost:3001/api/v1/dashboard/api-keys/${id}/revoke`,
+    {
+      method: "PATCH",
+      credentials: "include",
+	   headers: {
+        Authorization: `Bearer ${getSession()?.token ?? ""}`,  
+      },
+    },
+	 
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error ?? "Failed to revoke API key");
+  }
+
+  return data;
+}
 };

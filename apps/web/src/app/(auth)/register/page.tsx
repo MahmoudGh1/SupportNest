@@ -3,16 +3,16 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/auth-context"
-import { Input, Btn, S } from "@/components/ui"
+import { Input, Btn } from "@/components/ui"
 
 export default function RegisterPage() {
   const { register } = useAuth()
   const router = useRouter()
 
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "", businessName: "" })
-  const [showPass, setShowPass] = useState(false)
-  const [loading, setLoading]  = useState(false)
-  const [error, setError]      = useState("")
+  const [showPass,    setShowPass]    = useState(false)
+  const [loading,     setLoading]     = useState(false)
+  const [error,       setError]       = useState("")
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const set = (k: keyof typeof form) => (v: string) => setForm(f => ({ ...f, [k]: v }))
@@ -53,65 +53,132 @@ export default function RegisterPage() {
     if (/[^A-Za-z0-9]/.test(p)) s++
     return s
   })()
+
   const strengthLabel = ["", "Weak", "Fair", "Good", "Strong"]
-  const strengthColor = ["", "#E24B4A", "#EF9F27", S.green, S.green]
+  const strengthColor = [
+    "",
+    "text-red-500",
+    "text-amber-500",
+    "text-success",
+    "text-success",
+  ]
+  const strengthBarColor = [
+    "",
+    "bg-red-500",
+    "bg-amber-500",
+    "bg-success",
+    "bg-success",
+  ]
 
   return (
     <>
-      <h1 style={{ margin: "0 0 6px", fontSize: 20, fontWeight: 600, color: S.dark }}>Create your workspace</h1>
-      <p style={{ margin: "0 0 28px", fontSize: 13, color: S.textMuted }}>Get started — it only takes a minute.</p>
+      {/* Heading */}
+      <h1 className="text-xl font-semibold text-dark mb-1.5 mt-0">
+        Create your workspace
+      </h1>
+      <p className="text-sm text-body mb-7 mt-0">
+        Get started — it only takes a minute.
+      </p>
 
+      {/* Error banner */}
       {error && (
-        <div style={{ background: S.dangerBg, border: "0.5px solid #F09595", borderRadius: 8, padding: "10px 14px", marginBottom: 18, fontSize: 13, color: S.danger, display: "flex", gap: 8, alignItems: "center" }}>
-          <i className="ti ti-alert-circle" style={{ fontSize: 16 }} /> {error}
+        <div className="flex items-center gap-2 bg-danger-bg border border-red-200 rounded-lg px-3.5 py-2.5 mb-4 text-sm text-danger">
+          <i className="ti ti-alert-circle text-base shrink-0" />
+          {error}
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 0 }}>
+      {/* Name row */}
+      <div className="grid grid-cols-2 gap-3">
         <Input label="First name" value={form.firstName} onChange={set("firstName")} placeholder="Mohamed" error={fieldErrors.firstName} />
         <Input label="Last name"  value={form.lastName}  onChange={set("lastName")}  placeholder="Rashad"   error={fieldErrors.lastName}  />
       </div>
 
-      <Input label="Work email" type="email" value={form.email} onChange={set("email")}
-        placeholder="you@company.com" icon="mail" error={fieldErrors.email} />
+      {/* Email */}
+      <Input
+        label="Work email"
+        type="email"
+        value={form.email}
+        onChange={set("email")}
+        placeholder="you@company.com"
+        icon="mail"
+        error={fieldErrors.email}
+      />
 
-      <Input label="Business Name" type="text" value={form.businessName} onChange={set("businessName")}
-        placeholder="your company name..." icon="mail" error={fieldErrors.businessName} />
+      {/* Business name */}
+      <Input
+        label="Business Name"
+        type="text"
+        value={form.businessName}
+        onChange={set("businessName")}
+        placeholder="Your company name..."
+        icon="building"
+        error={fieldErrors.businessName}
+      />
 
-      <Input label="Password" type={showPass ? "text" : "password"} value={form.password}
-        onChange={set("password")} placeholder="Min. 8 characters" icon="lock" error={fieldErrors.password}
+      {/* Password */}
+      <Input
+        label="Password"
+        type={showPass ? "text" : "password"}
+        value={form.password}
+        onChange={set("password")}
+        placeholder="Min. 8 characters"
+        icon="lock"
+        error={fieldErrors.password}
         rightEl={
-          <button onClick={() => setShowPass(p => !p)} style={{ background: "none", border: "none", cursor: "pointer", color: S.textMuted, padding: 0, display: "flex" }}>
-            <i className={`ti ti-eye${showPass ? "-off" : ""}`} style={{ fontSize: 17 }} />
+          <button
+            onClick={() => setShowPass(p => !p)}
+            className="flex items-center text-body hover:text-dark bg-transparent border-none cursor-pointer p-0 transition-colors"
+          >
+            <i className={`ti ti-eye${showPass ? "-off" : ""} text-[17px]`} />
           </button>
         }
       />
 
       {/* Password strength meter */}
       {form.password && (
-        <div style={{ marginTop: -8, marginBottom: 16 }}>
-          <div style={{ display: "flex", gap: 4, marginBottom: 4 }}>
+        <div className="-mt-2 mb-4">
+          <div className="flex gap-1 mb-1">
             {[1, 2, 3, 4].map(i => (
-              <div key={i} style={{ flex: 1, height: 3, borderRadius: 2, background: i <= strength ? strengthColor[strength] : S.border, transition: "background .2s" }} />
+              <div
+                key={i}
+                className={`flex-1 h-[3px] rounded-sm transition-colors duration-200 ${
+                  i <= strength ? strengthBarColor[strength] : "bg-border"
+                }`}
+              />
             ))}
           </div>
-          <span style={{ fontSize: 11, color: strengthColor[strength] }}>{strengthLabel[strength]}</span>
+          <span className={`text-[11px] font-medium ${strengthColor[strength]}`}>
+            {strengthLabel[strength]}
+          </span>
         </div>
       )}
 
-      <Btn onClick={handleSubmit} loading={loading} fullWidth>Create account →</Btn>
+      {/* Submit */}
+      <Btn onClick={handleSubmit} loading={loading} fullWidth>
+        Create account →
+      </Btn>
 
-      <p style={{ fontSize: 11, color: S.textMuted, textAlign: "center", marginTop: 12, marginBottom: 0 }}>
+      {/* Terms */}
+      <p className="text-[11px] text-body text-center mt-3 mb-0">
         By creating an account you agree to our{" "}
-        <button style={{ background: "none", border: "none", color: S.purple, fontSize: 11, cursor: "pointer", padding: 0, fontFamily: "inherit" }}>Terms</button>
+        <button className="text-[11px] text-brand hover:text-brand-dark bg-transparent border-none cursor-pointer p-0 font-[inherit] transition-colors">
+          Terms
+        </button>
         {" "}and{" "}
-        <button style={{ background: "none", border: "none", color: S.purple, fontSize: 11, cursor: "pointer", padding: 0, fontFamily: "inherit" }}>Privacy Policy</button>.
+        <button className="text-[11px] text-brand hover:text-brand-dark bg-transparent border-none cursor-pointer p-0 font-[inherit] transition-colors">
+          Privacy Policy
+        </button>.
       </p>
 
-      <div style={{ marginTop: 20, textAlign: "center" }}>
-        <p style={{ fontSize: 13, color: S.textMuted, margin: 0 }}>
+      {/* Sign in link */}
+      <div className="mt-5 text-center">
+        <p className="text-sm text-body m-0">
           Already have an account?{" "}
-          <button onClick={() => router.push("/login")} style={{ background: "none", border: "none", color: S.purple, fontSize: 13, cursor: "pointer", fontWeight: 500, padding: 0, fontFamily: "inherit" }}>
+          <button
+            onClick={() => router.push("/login")}
+            className="text-sm text-brand font-medium hover:text-brand-dark bg-transparent border-none cursor-pointer p-0 font-[inherit] transition-colors"
+          >
             Sign in →
           </button>
         </p>

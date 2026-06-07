@@ -13,6 +13,8 @@ const pageMeta: Record<string, string> = {
   "/dashboard/knowledge":    "Knowledge Base",
   "/dashboard/analytics":    "Analytics",
   "/dashboard/settings":     "Settings",
+  "/dashboard/profile": "Profile",
+  
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
