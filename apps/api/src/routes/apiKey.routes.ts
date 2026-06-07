@@ -1,9 +1,5 @@
 import express, { Router } from "express";
-import {
-	apiKeyController,
-	listApiKeysController,
-	revokeApiKeyController,
-} from "src/controllers/apiKey.controller.js";
+import { apiKeyController, listApiKeysController, revokeApiKeyController } from "src/controllers/apiKey.controller.js";
 import { authMiddleware } from "src/middlewares/auth.middleware.js";
 
 /**

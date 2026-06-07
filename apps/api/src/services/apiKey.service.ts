@@ -11,10 +11,7 @@ import AppError from "src/utils/appError.js";
  * @returns The generated API key and its secret.
  * @throws When the organization cannot be found.
  */
-export const createApiKeyService = async ({
-	organizationId,
-	allowedOrigins,
-}: CreateApiKeyInput) => {
+export const createApiKeyService = async ({ organizationId, allowedOrigins }: CreateApiKeyInput) => {
 	// Check org exists and is active
 	const org = await prisma.organization.findUnique({
 		where: { id: organizationId },
@@ -24,10 +21,7 @@ export const createApiKeyService = async ({
 
 	// Generate api key — using apiKey utils
 
-	const { apiKey: generatedApiKey, rawKey } = await apiKey(
-		org,
-		allowedOrigins,
-	);
+	const { apiKey: generatedApiKey, rawKey } = await apiKey(org, allowedOrigins);
 
 	return { apiKey: generatedApiKey, rawKey };
 };
@@ -65,10 +59,7 @@ export const listApiKeysService = async (organizationId: string) => {
  * @returns Confirmation that the key was revoked.
  * @throws When the key is missing or already revoked.
  */
-export const revokeApiKeyService = async (
-	keyId: string,
-	organizationId: string,
-) => {
+export const revokeApiKeyService = async (keyId: string, organizationId: string) => {
 	// Verify key belongs to this org before touching it
 	const key = await prisma.apiKey.findUnique({
 		where: { id: keyId, organizationId },

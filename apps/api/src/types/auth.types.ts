@@ -27,10 +27,7 @@ export interface AuthTokens {
 export interface AuthenticatedRequest extends Request {
 	user?: JwtPayload;
 	file?: Express.Multer.File | undefined; // Add this for single file uploads (req.file)
-	files?:
-		| Express.Multer.File[]
-		| { [fieldname: string]: Express.Multer.File[] }
-		| undefined;
+	files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] } | undefined;
 }
 
 export interface RegisterInput {

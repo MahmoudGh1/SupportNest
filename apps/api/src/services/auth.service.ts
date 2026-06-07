@@ -1,28 +1,14 @@
 import prisma from "src/config/prisma.js";
 import { Role } from "generated/prisma/enums.js";
 import slugify from "src/utils/slug.utils.js";
-import type {
-	LoginInput,
-	OraganizationDataDTO,
-	RegisterInput,
-	TokenPayload,
-	userData,
-} from "src/types/auth.types.js";
+import type { LoginInput, OraganizationDataDTO, RegisterInput, TokenPayload, userData } from "src/types/auth.types.js";
 import AppError from "src/utils/appError.js";
-import {
-	comparePassword,
-	generateSecret,
-	hashPassword,
-} from "src/utils/password.util.js";
+import { comparePassword, generateSecret, hashPassword } from "src/utils/password.util.js";
+import apiKey from "src/utils/apiKey.utils.js";
+import { hashApiKey } from "src/utils/crypto.utils.js";
+import * as jwt from "jsonwebtoken";
 
-export const registerService = async ({
-	businessName,
-	email,
-	password,
-	firstName,
-	lastName,
-	planId,
-}: RegisterInput) => {
+export const registerService = async ({ businessName, email, password, firstName, lastName, planId }: RegisterInput) => {
 	const passwordHash = await hashPassword(password);
 	const widgetSecret = await generateSecret(32);
 	const orgSlug = slugify(businessName);
@@ -72,10 +58,7 @@ export const registerService = async ({
 	}
 };
 
-export const loginService = async ({
-	email,
-	password,
-}: LoginInput): Promise<OraganizationDataDTO> => {
+export const loginService = async ({ email, password }: LoginInput): Promise<OraganizationDataDTO> => {
 	try {
 		const user = await prisma.user.findUnique({ where: { email } });
 		if (!user) {
@@ -94,9 +77,7 @@ export const loginService = async ({
 	}
 };
 
-export const userService = async (
-	payloadToken: TokenPayload,
-): Promise<userData> => {
+export const userService = async (payloadToken: TokenPayload): Promise<userData> => {
 	try {
 		const user = await prisma.user.findUnique({
 			where: { id: payloadToken.sub },
@@ -120,3 +101,56 @@ export const userService = async (
 		throw err;
 	}
 };
+
+export async function validateApiKey(rawKey: string, origin?: string) {
+	const incomingApiKey = rawKey;
+
+	const clientHash = hashApiKey(incomingApiKey as string);
+
+	const apiKeyRecord = await prisma.apiKey.findUnique({
+		where: {
+			keyHash: clientHash,
+		},
+		include: { organization: true },
+	});
+
+	if (!apiKeyRecord || !apiKeyRecord.isActive) {
+		return null;
+	}
+
+	if (origin && !apiKeyRecord.allowedOrigins.includes(origin)) {
+		return null;
+	}
+
+	await prisma.apiKey.update({
+		where: {
+			id: apiKeyRecord.id,
+		},
+		data: {
+			lastUsedAt: new Date(),
+		},
+	});
+
+	return apiKeyRecord;
+}
+
+export async function verifyCustomerJWT(token: string, organizationId: string) {
+	const org = await prisma.organization.findUnique({
+		where: { id: organizationId },
+		select: { widgetSecret: true },
+	});
+
+	if (!org) return null;
+
+	try {
+		const payload = jwt.verify(token, org.widgetSecret) as any;
+		return {
+			externalId: payload.sub,
+			email: payload.email,
+			name: payload.name,
+			metadata: payload,
+		};
+	} catch {
+		return null;
+	}
+}

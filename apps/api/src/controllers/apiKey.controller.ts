@@ -1,9 +1,5 @@
 import type { Response, RequestHandler } from "express";
-import {
-	createApiKeyService,
-	listApiKeysService,
-	revokeApiKeyService,
-} from "src/services/apiKey.service.js";
+import { createApiKeyService, listApiKeysService, revokeApiKeyService } from "src/services/apiKey.service.js";
 import type { AuthenticatedRequest } from "src/types/auth.types.js";
 import AppError from "src/utils/appError.js";
 
@@ -14,10 +10,7 @@ import AppError from "src/utils/appError.js";
  * @param res - Express response object.
  * @returns The generated API secret.
  */
-export const apiKeyController: RequestHandler = async (
-	req: AuthenticatedRequest,
-	res: Response,
-) => {
+export const apiKeyController: RequestHandler = async (req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { allowedOrigins = [] } = req.body;
 		const organizationId = req.user?.organizationId;
@@ -33,8 +26,7 @@ export const apiKeyController: RequestHandler = async (
 
 		return res.status(201).json(result.rawKey);
 	} catch (error: any) {
-		if (error.status)
-			return res.status(error.status).json({ error: error.message });
+		if (error.status) return res.status(error.status).json({ error: error.message });
 		console.error(error);
 		return res.status(500).json({ error: "Internal server error" });
 	}
@@ -47,10 +39,7 @@ export const apiKeyController: RequestHandler = async (
  * @param res - Express response object.
  * @returns A JSON array of API keys.
  */
-export const listApiKeysController = async (
-	req: AuthenticatedRequest,
-	res: Response,
-) => {
+export const listApiKeysController = async (req: AuthenticatedRequest, res: Response) => {
 	try {
 		const organizationId = req.user?.organizationId;
 
@@ -60,8 +49,7 @@ export const listApiKeysController = async (
 		const keys = await listApiKeysService(organizationId);
 		return res.status(200).json(keys);
 	} catch (error: any) {
-		if (error.status)
-			return res.status(error.status).json({ error: error.message });
+		if (error.status) return res.status(error.status).json({ error: error.message });
 		console.error(error);
 		return res.status(500).json({ error: "Internal server error" });
 	}
@@ -74,10 +62,7 @@ export const listApiKeysController = async (
  * @param res - Express response object.
  * @returns A JSON confirmation message.
  */
-export const revokeApiKeyController = async (
-	req: AuthenticatedRequest,
-	res: Response,
-) => {
+export const revokeApiKeyController = async (req: AuthenticatedRequest, res: Response) => {
 	try {
 		const { id } = req.params;
 		const organizationId = req.user?.organizationId;
@@ -91,8 +76,7 @@ export const revokeApiKeyController = async (
 		const result = await revokeApiKeyService(id as string, organizationId);
 		return res.status(200).json(result);
 	} catch (error: any) {
-		if (error.status)
-			return res.status(error.status).json({ error: error.message });
+		if (error.status) return res.status(error.status).json({ error: error.message });
 		console.error(error);
 		return res.status(500).json({ error: "Internal server error" });
 	}
