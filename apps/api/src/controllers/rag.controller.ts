@@ -1,7 +1,10 @@
 import type { Request, Response } from "express";
 import { askTier0Agent } from "../services/rag.service.js";
 
-export async function askTier0AgentController(req: Request, res: Response): Promise<void> {
+export async function askTier0AgentController(
+	req: Request,
+	res: Response,
+): Promise<void> {
 	const { question, organizationId } = req.body;
 
 	if (!question || typeof question !== "string" || question.trim() === "") {
@@ -16,9 +19,9 @@ export async function askTier0AgentController(req: Request, res: Response): Prom
 
 	try {
 		const answer = await askTier0Agent(question.trim(), organizationId);
-		const {tokensUsed: tokens, ...remaining} = answer
-		const totalTokens = tokens["total_tokens"]
-		res.status(200).json({remaining, totalTokens});
+		const { tokensUsed: tokens, ...remaining } = answer;
+		const totalTokens = tokens["total_tokens"];
+		res.status(200).json({ remaining, totalTokens });
 	} catch (err) {
 		console.error("RAG Controller Error:", err);
 		res.status(500).json({

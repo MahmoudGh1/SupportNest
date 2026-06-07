@@ -16,8 +16,8 @@ interface ChunkResult {
 export async function askTier0Agent(
 	question: string,
 	organizationId: string,
-	convesationId: string,
-	conversationHistory: Message[],
+	convesationId: string = "Empty",
+	conversationHistory: Message[] = [],
 ): Promise<any> {
 	const questionVector = await queryEmbeddings.embedQuery(question);
 	const vectorLiteral = `[${questionVector.join(",")}]`;

@@ -14,6 +14,9 @@ import {
 	generateSecret,
 	hashPassword,
 } from "src/utils/password.util.js";
+import apiKey from "src/utils/apiKey.utils.js";
+import { hashApiKey } from "src/utils/crypto.utils.js";
+import { jwt } from "jsonwebtoken";
 
 export const registerService = async ({
 	businessName,
@@ -120,3 +123,59 @@ export const userService = async (
 		throw err;
 	}
 };
+
+export async function validateApiKey(rawKey: string, origin?: string) {
+	const incomingApiKey = rawKey;
+
+	const clientHash = hashApiKey(incomingApiKey as string);
+
+	const apiKeyRecord = await prisma.apiKey.findUnique({
+		where: {
+			keyHash: clientHash,
+		},
+		include: { organization: true },
+	});
+
+	if (!apiKeyRecord || !apiKeyRecord.isActive) {
+		return null;
+	}
+
+	if (origin && !apiKeyRecord.allowedOrigins.includes(origin)) {
+		return null;
+	}
+
+	await prisma.apiKey.update({
+		where: {
+			id: apiKeyRecord.id,
+		},
+		data: {
+			lastUsedAt: new Date(),
+		},
+	});
+
+	return apiKeyRecord;
+}
+
+export async function verifyCustomerJWT(
+	token: string,
+	organizationId: string,
+) {
+	const org = await prisma.organization.findUnique({
+		where: { id: organizationId },
+		select: { widgetSecret: true },
+	});
+
+	if (!org) return null;
+
+	try {
+		const payload = jwt.verify(token, org.widgetSecret) as any;
+		return {
+			externalId: payload.sub,
+			email: payload.email,
+			name: payload.name,
+			metadata: payload,
+		};
+	} catch {
+		return null;
+	}
+}
