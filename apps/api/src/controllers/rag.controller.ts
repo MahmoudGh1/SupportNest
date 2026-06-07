@@ -1,7 +1,10 @@
 import type { Request, Response } from "express";
 import { askTier0Agent } from "../services/rag.service.js";
 
-export async function askTier0AgentController(req: Request, res: Response): Promise<void> {
+export async function askTier0AgentController(
+	req: Request,
+	res: Response,
+): Promise<void> {
 	const { question, organizationId } = req.body;
 
 	if (!question || typeof question !== "string" || question.trim() === "") {
