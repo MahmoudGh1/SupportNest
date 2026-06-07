@@ -4,6 +4,7 @@ import prisma from "../config/prisma.js";
 import crypto from "crypto";
 import type { WsEnvelope, SocketMeta } from "../types/ws.types.js";
 import { verifyToken } from "src/utils/jwt.util.js";
+import { Server } from "http";
 
 interface AuthenticatedSocket extends WebSocket {
 	meta?: SocketMeta;
@@ -16,15 +17,25 @@ function send(socket: AuthenticatedSocket, envelope: WsEnvelope) {
 	socket.send(JSON.stringify(envelope));
 }
 
-async function sendingMessage(socket: AuthenticatedSocket, payload: Record<string, any>) {
-	
-}
+async function sendingMessage(
+	socket: AuthenticatedSocket,
+	payload: Record<string, any>,
+) {}
 
-async function connectionAuth(socket: AuthenticatedSocket, payload: Record<string, any>, req: IncomingMessage) {
+async function connectionAuth(
+	socket: AuthenticatedSocket,
+	payload: Record<string, any>,
+	req: IncomingMessage,
+) {
 	const { apiKey, customerJwt } = payload;
 
 	if (!apiKey || !customerJwt) {
-		send(socket, { type: "error", payload: { message: `you have to provide APIKey and customerJwt within the payload` } });
+		send(socket, {
+			type: "error",
+			payload: {
+				message: `you have to provide APIKey and customerJwt within the payload`,
+			},
+		});
 		socket.close();
 		return;
 	}
@@ -37,7 +48,12 @@ async function connectionAuth(socket: AuthenticatedSocket, payload: Record<strin
 	});
 
 	if (!isKey || !isKey.isActive || !isKey.organizationId) {
-		send(socket, { type: "error", payload: { message: "Invalid API key. your organizations is not authorized." } });
+		send(socket, {
+			type: "error",
+			payload: {
+				message: "Invalid API key. your organizations is not authorized.",
+			},
+		});
 		socket.close();
 		return;
 	}
@@ -53,10 +69,16 @@ async function connectionAuth(socket: AuthenticatedSocket, payload: Record<strin
 	let customer = null;
 
 	if (customerJwt) {
-		let customerPayload: any = verifyToken(customerJwt, isKey.organization.widgetSecret);
+		let customerPayload: any = verifyToken(
+			customerJwt,
+			isKey.organization.widgetSecret,
+		);
 
 		if (!customerPayload) {
-			send(socket, { type: "error", payload: { message: "not a valid customerJwt" } });
+			send(socket, {
+				type: "error",
+				payload: { message: "not a valid customerJwt" },
+			});
 			socket.close();
 			return;
 		}
@@ -147,7 +169,7 @@ async function connectionAuth(socket: AuthenticatedSocket, payload: Record<strin
 	});
 }
 
-export function setupWebSocket(wss: WebSocketServer) {
+export function setupWebSocket(wss: Server) {
 	wss.on("connection", (socket: AuthenticatedSocket, req: IncomingMessage) => {
 		socket.authenticated = false;
 
@@ -167,7 +189,10 @@ export function setupWebSocket(wss: WebSocketServer) {
 						clearTimeout(authTimeout);
 						await connectionAuth(socket, envelope.payload, req);
 					} else {
-						send(socket, { type: "error", payload: { message: "Not authenticated" } });
+						send(socket, {
+							type: "error",
+							payload: { message: "Not authenticated" },
+						});
 						socket.close();
 					}
 					return;
