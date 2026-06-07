@@ -1,151 +1,151 @@
 (function () {
-  // ── 1. CONFIG ──────────────────────────────────────────────────────────────
-  const config = window.SupportNestConfig || {};
-  const API_KEY = config.apiKey;
-  const CUSTOMER_TOKEN = config.customerToken || null;
-  const BASE_URL = config.baseUrl || "http://localhost:3001";
+	// ── 1. CONFIG ──────────────────────────────────────────────────────────────
+	const config = window.SupportNestConfig || {};
+	const API_KEY = config.apiKey;
+	const CUSTOMER_TOKEN = config.customerToken || null;
+	const BASE_URL = config.baseUrl || "http://localhost:3001";
 
-  if (!API_KEY) {
-    console.error("[SupportNest] No apiKey found in window.SupportNestConfig");
-    return;
-  }
+	if (!API_KEY) {
+		console.error("[SupportNest] No apiKey found in window.SupportNestConfig");
+		return;
+	}
 
-  // ── 2. STATE ───────────────────────────────────────────────────────────────
-  let ws = null;
-  let reconnectDelay = 1000;
-  let widgetConfig = {};
-  let isOpen = false;
-  let isSending = false;
-  let isAuthenticated = false;
+	// ── 2. STATE ───────────────────────────────────────────────────────────────
+	let ws = null;
+	let reconnectDelay = 1000;
+	let widgetConfig = {};
+	let isOpen = false;
+	let isSending = false;
+	let isAuthenticated = false;
 
-  // ── 3. WEBSOCKET ───────────────────────────────────────────────────────────
-  function connect() {
-    const wsUrl = BASE_URL.replace(/^http/, "ws");
-    ws = new WebSocket(`${wsUrl}/widget/ws`);
+	// ── 3. WEBSOCKET ───────────────────────────────────────────────────────────
+	function connect() {
+		const wsUrl = BASE_URL.replace(/^http/, "ws");
+		ws = new WebSocket(`${wsUrl}/widget/ws`);
 
-    ws.onopen = function () {
-      reconnectDelay = 1000;
-      ws.send(
-        JSON.stringify({
-          type: "auth",
-          payload: { apiKey: API_KEY, customerJwt: CUSTOMER_TOKEN || null },
-        })
-      );
-    };
+		ws.onopen = function () {
+			reconnectDelay = 1000;
+			ws.send(
+				JSON.stringify({
+					type: "auth",
+					payload: { apiKey: API_KEY, customerJwt: CUSTOMER_TOKEN || null },
+				}),
+			);
+		};
 
-    ws.onmessage = function (event) {
-      try {
-        const envelope = JSON.parse(event.data);
-        handleEvent(envelope);
-      } catch (e) {
-        console.error("[SupportNest] Failed to parse message:", e);
-      }
-    };
+		ws.onmessage = function (event) {
+			try {
+				const envelope = JSON.parse(event.data);
+				handleEvent(envelope);
+			} catch (e) {
+				console.error("[SupportNest] Failed to parse message:", e);
+			}
+		};
 
-    ws.onclose = function () {
-      isAuthenticated = false;
-      scheduleReconnect();
-    };
+		ws.onclose = function () {
+			isAuthenticated = false;
+			scheduleReconnect();
+		};
 
-    ws.onerror = function (err) {
-      console.error("[SupportNest] WebSocket error:", err);
-    };
-  }
+		ws.onerror = function (err) {
+			console.error("[SupportNest] WebSocket error:", err);
+		};
+	}
 
-  function scheduleReconnect() {
-    setTimeout(function () {
-      connect();
-    }, reconnectDelay);
-    reconnectDelay = Math.min(reconnectDelay * 2, 30000);
-  }
+	function scheduleReconnect() {
+		setTimeout(function () {
+			connect();
+		}, reconnectDelay);
+		reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+	}
 
-  function sendWs(type, payload) {
-    if (!ws || ws.readyState !== WebSocket.OPEN) {
-      console.warn("[SupportNest] WebSocket not open, cannot send:", type);
-      return false;
-    }
-    ws.send(JSON.stringify({ type, payload }));
-    return true;
-  }
+	function sendWs(type, payload) {
+		if (!ws || ws.readyState !== WebSocket.OPEN) {
+			console.warn("[SupportNest] WebSocket not open, cannot send:", type);
+			return false;
+		}
+		ws.send(JSON.stringify({ type, payload }));
+		return true;
+	}
 
-  // ── 4. EVENT HANDLER ───────────────────────────────────────────────────────
-  function handleEvent(envelope) {
-    const { type, payload } = envelope;
+	// ── 4. EVENT HANDLER ───────────────────────────────────────────────────────
+	function handleEvent(envelope) {
+		const { type, payload } = envelope;
 
-    switch (type) {
-      case "auth_ack": {
-        isAuthenticated = true;
-        // Apply widget config from server (colors, title, greeting, etc.)
-        if (payload.widgetConfig) {
-          widgetConfig = payload.widgetConfig;
-          applyWidgetConfig();
-        }
-        // Load conversation history
-        loadHistory(payload.history || []);
-        // Enable input now that we are connected
-        setInputDisabled(false);
-        break;
-      }
+		switch (type) {
+			case "auth_ack": {
+				isAuthenticated = true;
+				// Apply widget config from server (colors, title, greeting, etc.)
+				if (payload.widgetConfig) {
+					widgetConfig = payload.widgetConfig;
+					applyWidgetConfig();
+				}
+				// Load conversation history
+				loadHistory(payload.history || []);
+				// Enable input now that we are connected
+				setInputDisabled(false);
+				break;
+			}
 
-      case "typing": {
-        showTyping();
-        break;
-      }
+			case "typing": {
+				showTyping();
+				break;
+			}
 
-      case "message_ai": {
-        hideTyping();
-        appendMessage("ai", payload.message.content);
-        // Reset sending state now that the full round-trip is done
-        isSending = false;
-        var sendBtn = document.getElementById("sn-send-btn");
-        var input = document.getElementById("sn-input");
-        if (sendBtn && input) {
-          sendBtn.disabled = !input.value.trim();
-        }
-        break;
-      }
+			case "message_ai": {
+				hideTyping();
+				appendMessage("ai", payload.message.content);
+				// Reset sending state now that the full round-trip is done
+				isSending = false;
+				var sendBtn = document.getElementById("sn-send-btn");
+				var input = document.getElementById("sn-input");
+				if (sendBtn && input) {
+					sendBtn.disabled = !input.value.trim();
+				}
+				break;
+			}
 
-      case "escalated": {
-        hideTyping();
-        isSending = false;
-        appendSystemMessage("You are now connected with a human agent.");
-        break;
-      }
+			case "escalated": {
+				hideTyping();
+				isSending = false;
+				appendSystemMessage("You are now connected with a human agent.");
+				break;
+			}
 
-      case "error": {
-        console.error("[SupportNest] Server error:", payload.message);
-        hideTyping();
-        isSending = false;
-        appendSystemMessage("Something went wrong. Please try again.");
-        var sendBtnErr = document.getElementById("sn-send-btn");
-        var inputErr = document.getElementById("sn-input");
-        if (sendBtnErr && inputErr) {
-          sendBtnErr.disabled = !inputErr.value.trim();
-        }
-        break;
-      }
+			case "error": {
+				console.error("[SupportNest] Server error:", payload.message);
+				hideTyping();
+				isSending = false;
+				appendSystemMessage("Something went wrong. Please try again.");
+				var sendBtnErr = document.getElementById("sn-send-btn");
+				var inputErr = document.getElementById("sn-input");
+				if (sendBtnErr && inputErr) {
+					sendBtnErr.disabled = !inputErr.value.trim();
+				}
+				break;
+			}
 
-      default:
-        console.warn("[SupportNest] Unknown event type:", type);
-    }
-  }
+			default:
+				console.warn("[SupportNest] Unknown event type:", type);
+		}
+	}
 
-  // ── 5. HISTORY ─────────────────────────────────────────────────────────────
-  function loadHistory(messages) {
-    if (!messages || messages.length === 0) return;
-    messages.forEach(function (msg) {
-      if (msg.role === "CUSTOMER") {
-        appendMessage("customer", msg.content);
-      } else if (msg.role === "AI" || msg.role === "HUMAN_AGENT") {
-        appendMessage("ai", msg.content);
-      }
-    });
-  }
+	// ── 5. HISTORY ─────────────────────────────────────────────────────────────
+	function loadHistory(messages) {
+		if (!messages || messages.length === 0) return;
+		messages.forEach(function (msg) {
+			if (msg.role === "CUSTOMER") {
+				appendMessage("customer", msg.content);
+			} else if (msg.role === "AI" || msg.role === "HUMAN_AGENT") {
+				appendMessage("ai", msg.content);
+			}
+		});
+	}
 
-  // ── 6. STYLES ──────────────────────────────────────────────────────────────
-  function injectStyles() {
-    var style = document.createElement("style");
-    style.textContent = `
+	// ── 6. STYLES ──────────────────────────────────────────────────────────────
+	function injectStyles() {
+		var style = document.createElement("style");
+		style.textContent = `
       #sn-btn {
         position: fixed;
         bottom: 24px;
@@ -344,29 +344,29 @@
       #sn-send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
       #sn-send-btn svg { width: 18px; height: 18px; fill: white; }
     `;
-    document.head.appendChild(style);
-  }
+		document.head.appendChild(style);
+	}
 
-  // ── 7. BUILD DOM ───────────────────────────────────────────────────────────
-  function buildDOM() {
-    document.documentElement.style.setProperty("--sn-accent", "#6366f1");
+	// ── 7. BUILD DOM ───────────────────────────────────────────────────────────
+	function buildDOM() {
+		document.documentElement.style.setProperty("--sn-accent", "#6366f1");
 
-    var btn = document.createElement("button");
-    btn.id = "sn-btn";
-    btn.setAttribute("aria-label", "Open support chat");
-    btn.innerHTML = `
+		var btn = document.createElement("button");
+		btn.id = "sn-btn";
+		btn.setAttribute("aria-label", "Open support chat");
+		btn.innerHTML = `
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path d="M20 2H4a2 2 0 00-2 2v18l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2z"/>
       </svg>
     `;
-    btn.addEventListener("click", togglePanel);
-    document.body.appendChild(btn);
+		btn.addEventListener("click", togglePanel);
+		document.body.appendChild(btn);
 
-    var panel = document.createElement("div");
-    panel.id = "sn-panel";
-    panel.setAttribute("role", "dialog");
-    panel.setAttribute("aria-label", "Support chat");
-    panel.innerHTML = `
+		var panel = document.createElement("div");
+		panel.id = "sn-panel";
+		panel.setAttribute("role", "dialog");
+		panel.setAttribute("aria-label", "Support chat");
+		panel.innerHTML = `
       <div id="sn-header">
         <div id="sn-header-icon">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -404,144 +404,147 @@
         </button>
       </div>
     `;
-    document.body.appendChild(panel);
+		document.body.appendChild(panel);
 
-    wireEvents();
-  }
+		wireEvents();
+	}
 
-  // ── 8. APPLY SERVER CONFIG ─────────────────────────────────────────────────
-  function applyWidgetConfig() {
-    if (widgetConfig.accentColor) {
-      document.documentElement.style.setProperty("--sn-accent", widgetConfig.accentColor);
-    }
-    var titleEl = document.getElementById("sn-header-title");
-    if (titleEl && widgetConfig.title) {
-      titleEl.textContent = widgetConfig.title;
-    }
-    var inputEl = document.getElementById("sn-input");
-    if (inputEl && widgetConfig.placeholder) {
-      inputEl.placeholder = widgetConfig.placeholder;
-    }
-    var connectingEl = document.getElementById("sn-connecting");
-    if (connectingEl) {
-      connectingEl.classList.remove("sn-visible");
-    }
-  }
+	// ── 8. APPLY SERVER CONFIG ─────────────────────────────────────────────────
+	function applyWidgetConfig() {
+		if (widgetConfig.accentColor) {
+			document.documentElement.style.setProperty(
+				"--sn-accent",
+				widgetConfig.accentColor,
+			);
+		}
+		var titleEl = document.getElementById("sn-header-title");
+		if (titleEl && widgetConfig.title) {
+			titleEl.textContent = widgetConfig.title;
+		}
+		var inputEl = document.getElementById("sn-input");
+		if (inputEl && widgetConfig.placeholder) {
+			inputEl.placeholder = widgetConfig.placeholder;
+		}
+		var connectingEl = document.getElementById("sn-connecting");
+		if (connectingEl) {
+			connectingEl.classList.remove("sn-visible");
+		}
+	}
 
-  // ── 9. EVENTS ──────────────────────────────────────────────────────────────
-  function wireEvents() {
-    var input = document.getElementById("sn-input");
-    var sendBtn = document.getElementById("sn-send-btn");
+	// ── 9. EVENTS ──────────────────────────────────────────────────────────────
+	function wireEvents() {
+		var input = document.getElementById("sn-input");
+		var sendBtn = document.getElementById("sn-send-btn");
 
-    input.addEventListener("input", function () {
-      sendBtn.disabled = !input.value.trim() || isSending || !isAuthenticated;
-      input.style.height = "auto";
-      input.style.height = Math.min(input.scrollHeight, 100) + "px";
-    });
+		input.addEventListener("input", function () {
+			sendBtn.disabled = !input.value.trim() || isSending || !isAuthenticated;
+			input.style.height = "auto";
+			input.style.height = Math.min(input.scrollHeight, 100) + "px";
+		});
 
-    input.addEventListener("keydown", function (e) {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        if (!sendBtn.disabled) handleSend();
-      }
-    });
+		input.addEventListener("keydown", function (e) {
+			if (e.key === "Enter" && !e.shiftKey) {
+				e.preventDefault();
+				if (!sendBtn.disabled) handleSend();
+			}
+		});
 
-    sendBtn.addEventListener("click", handleSend);
-  }
+		sendBtn.addEventListener("click", handleSend);
+	}
 
-  // ── 10. UI HELPERS ─────────────────────────────────────────────────────────
-  function appendMessage(role, content) {
-    var messages = document.getElementById("sn-messages");
-    var typing = document.getElementById("sn-typing");
-    var bubble = document.createElement("div");
-    bubble.className = "sn-bubble " + role;
-    bubble.textContent = content;
-    messages.insertBefore(bubble, typing);
-    messages.scrollTop = messages.scrollHeight;
-  }
+	// ── 10. UI HELPERS ─────────────────────────────────────────────────────────
+	function appendMessage(role, content) {
+		var messages = document.getElementById("sn-messages");
+		var typing = document.getElementById("sn-typing");
+		var bubble = document.createElement("div");
+		bubble.className = "sn-bubble " + role;
+		bubble.textContent = content;
+		messages.insertBefore(bubble, typing);
+		messages.scrollTop = messages.scrollHeight;
+	}
 
-  function appendSystemMessage(text) {
-    appendMessage("system", text);
-  }
+	function appendSystemMessage(text) {
+		appendMessage("system", text);
+	}
 
-  function showTyping() {
-    var typing = document.getElementById("sn-typing");
-    if (typing) typing.classList.add("sn-visible");
-    var messages = document.getElementById("sn-messages");
-    if (messages) messages.scrollTop = messages.scrollHeight;
-  }
+	function showTyping() {
+		var typing = document.getElementById("sn-typing");
+		if (typing) typing.classList.add("sn-visible");
+		var messages = document.getElementById("sn-messages");
+		if (messages) messages.scrollTop = messages.scrollHeight;
+	}
 
-  function hideTyping() {
-    var typing = document.getElementById("sn-typing");
-    if (typing) typing.classList.remove("sn-visible");
-  }
+	function hideTyping() {
+		var typing = document.getElementById("sn-typing");
+		if (typing) typing.classList.remove("sn-visible");
+	}
 
-  function setInputDisabled(disabled) {
-    var input = document.getElementById("sn-input");
-    var sendBtn = document.getElementById("sn-send-btn");
-    if (input) input.disabled = disabled;
-    // send button stays disabled until user types something
-    if (sendBtn) sendBtn.disabled = true;
-  }
+	function setInputDisabled(disabled) {
+		var input = document.getElementById("sn-input");
+		var sendBtn = document.getElementById("sn-send-btn");
+		if (input) input.disabled = disabled;
+		// send button stays disabled until user types something
+		if (sendBtn) sendBtn.disabled = true;
+	}
 
-  // ── 11. SEND FLOW ──────────────────────────────────────────────────────────
-  function handleSend() {
-    var input = document.getElementById("sn-input");
-    var sendBtn = document.getElementById("sn-send-btn");
-    var content = input.value.trim();
+	// ── 11. SEND FLOW ──────────────────────────────────────────────────────────
+	function handleSend() {
+		var input = document.getElementById("sn-input");
+		var sendBtn = document.getElementById("sn-send-btn");
+		var content = input.value.trim();
 
-    if (!content) return;
-    if (isSending) return;
-    if (!isAuthenticated) return;
+		if (!content) return;
+		if (isSending) return;
+		if (!isAuthenticated) return;
 
-    isSending = true;
-    sendBtn.disabled = true;
-    input.value = "";
-    input.style.height = "auto";
+		isSending = true;
+		sendBtn.disabled = true;
+		input.value = "";
+		input.style.height = "auto";
 
-    appendMessage("customer", content);
-    showTyping();
+		appendMessage("customer", content);
+		showTyping();
 
-    var sent = sendWs("message_send", { content: content });
-    if (!sent) {
-      // WS not open — show error immediately
-      hideTyping();
-      isSending = false;
-      appendSystemMessage("Not connected. Please wait and try again.");
-      sendBtn.disabled = !input.value.trim();
-    }
-    // If sent OK, isSending stays true until message_ai or error event arrives
-  }
+		var sent = sendWs("message_send", { content: content });
+		if (!sent) {
+			// WS not open — show error immediately
+			hideTyping();
+			isSending = false;
+			appendSystemMessage("Not connected. Please wait and try again.");
+			sendBtn.disabled = !input.value.trim();
+		}
+		// If sent OK, isSending stays true until message_ai or error event arrives
+	}
 
-  // ── 12. TOGGLE PANEL ──────────────────────────────────────────────────────
-  function togglePanel() {
-    isOpen = !isOpen;
-    var panel = document.getElementById("sn-panel");
-    panel.classList.toggle("sn-open", isOpen);
+	// ── 12. TOGGLE PANEL ──────────────────────────────────────────────────────
+	function togglePanel() {
+		isOpen = !isOpen;
+		var panel = document.getElementById("sn-panel");
+		panel.classList.toggle("sn-open", isOpen);
 
-    if (isOpen) {
-      // Show greeting only once, only after auth
-      if (isAuthenticated && widgetConfig.greetingMessage) {
-        var bubbles = document.querySelectorAll(".sn-bubble");
-        if (bubbles.length === 0) {
-          appendMessage("ai", widgetConfig.greetingMessage);
-        }
-      }
-      var input = document.getElementById("sn-input");
-      if (input && !input.disabled) input.focus();
-    }
-  }
+		if (isOpen) {
+			// Show greeting only once, only after auth
+			if (isAuthenticated && widgetConfig.greetingMessage) {
+				var bubbles = document.querySelectorAll(".sn-bubble");
+				if (bubbles.length === 0) {
+					appendMessage("ai", widgetConfig.greetingMessage);
+				}
+			}
+			var input = document.getElementById("sn-input");
+			if (input && !input.disabled) input.focus();
+		}
+	}
 
-  // ── 13. BOOT ───────────────────────────────────────────────────────────────
-  function boot() {
-    injectStyles();
-    buildDOM();
-    connect(); // WS handles everything: auth → config → history → messaging
-  }
+	// ── 13. BOOT ───────────────────────────────────────────────────────────────
+	function boot() {
+		injectStyles();
+		buildDOM();
+		connect(); // WS handles everything: auth → config → history → messaging
+	}
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot);
-  } else {
-    boot();
-  }
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", boot);
+	} else {
+		boot();
+	}
 })();

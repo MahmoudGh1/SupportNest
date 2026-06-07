@@ -29,25 +29,27 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-<<<<<<< HEAD
-app.use(helmet());
-
-
-app.use(cors({
-  origin: "http://localhost:3000",
-  credentials: true,
-}));
-
-app.use(express.static("public"));
-=======
 app.use(
 	helmet({
 		crossOriginResourcePolicy: false,
 		contentSecurityPolicy: false,
 	}),
 );
-app.use(cors({ origin: "*", credentials: true }));
->>>>>>> 07d9dfd0f35feb4a453eb059215e268ef3afa1c6
+
+
+app.use(
+	cors({
+		// Dynamically sets the header to match whoever is making the request
+		origin: function (origin, callback) {
+			// Allow requests with no origin (like mobile apps, curl, or postman)
+			if (!origin) return callback(null, true);
+
+			callback(null, true);
+		},
+		credentials: true,
+	}),
+);
+
 app.use(morgan("dev"));
 
 const publicDir = path.resolve(process.cwd(), "public");

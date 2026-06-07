@@ -1,4 +1,8 @@
-import { AgentAction, AgentTier, MessageRole } from "generated/prisma/enums.js";
+import {
+	AgentAction,
+	AgentTier,
+	MessageRole,
+} from "generated/prisma/enums.js";
 import prisma from "src/config/prisma.js";
 import { askTier0Agent } from "src/services/rag.service.js";
 
@@ -16,7 +20,11 @@ export async function handleMessageSend(ws: any, payload: any) {
 
 	ws.send(JSON.stringify({ type: "typing", payload: {} }));
 
-	const aiResponse = await askTier0Agent(content, organizationId, conversationId);
+	const aiResponse = await askTier0Agent(
+		content,
+		organizationId,
+		conversationId,
+	);
 
 	const aiMessage = await prisma.message.create({
 		data: {
