@@ -16,6 +16,7 @@ import OrganizationRoutes from "./routes/organization.routes.js";
 import authRouter from "./routes/auth.routes.js";
 import ragRouter from "./routes/rag.routes.js";
 import cookieParser from "cookie-parser";
+import paymentRoutes from "./routes/payment.routes.js";
 import prisma from "./config/prisma.js";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
@@ -63,6 +64,8 @@ app.use("/api/v1/widget", WidgetRouter);
 app.use("/api/v1/organizations", OrganizationRoutes);
 
 app.use("/api/v1/widget/conversations", conversationsRoutes);
+
+app.use("/api/v1/payments", paymentRoutes);
 app.use(notFoundHandler);
 
 app.use(errorHandler);
