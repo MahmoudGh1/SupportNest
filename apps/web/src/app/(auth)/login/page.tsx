@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -6,8 +6,8 @@ import { useAuth } from "@/context/auth-context"
 import { Input, Btn } from "@/components/ui"
 
 export default function LoginPage() {
-  const { login } = useAuth()
-  const router = useRouter()
+	const { login } = useAuth();
+	const router = useRouter();
 
   const [email,       setEmail]       = useState("")
   const [password,    setPassword]    = useState("")
@@ -16,13 +16,13 @@ export default function LoginPage() {
   const [error,       setError]       = useState("")
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
-  const validate = () => {
-    const errs: Record<string, string> = {}
-    if (!email) errs.email = "Email is required."
-    else if (!/\S+@\S+\.\S+/.test(email)) errs.email = "Enter a valid email."
-    if (!password) errs.password = "Password is required."
-    return errs
-  }
+	const validate = () => {
+		const errs: Record<string, string> = {};
+		if (!email) errs.email = "Email is required.";
+		else if (!/\S+@\S+\.\S+/.test(email)) errs.email = "Enter a valid email.";
+		if (!password) errs.password = "Password is required.";
+		return errs;
+	};
 
   const handleSubmit = async () => {
     const errs = validate()

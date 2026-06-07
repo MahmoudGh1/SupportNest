@@ -8,8 +8,8 @@ import { knowledgeQueue } from "src/queues/knowledgeQueue.js";
 
 export const uploadDocument: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
-		const userId = req.user?.sub;
-		// const userId = "c14a63e5-48d5-48af-b40e-c2432732cec4";
+		// const userId = req.user?.sub;
+		const userId = "e0f59984-8a12-4b05-9950-c2ab3655d9d6";
 		const { orgId } = req.params;
 		const { title, type } = req.body;
 		const file = req.file; // Buffer from multer memoryStorage
@@ -44,5 +44,31 @@ export const uploadDocument: RequestHandler = asyncHandler(
 		});
 
 		res.status(202).json({ documentId: doc.id, status: "PROCESSING" });
+	},
+);
+
+export const getKnowledgeDocuments: RequestHandler = asyncHandler(
+	async (req: AuthenticatedRequest, res: Response) => {
+		console.log(req.params.id);
+		const organization = await prisma.organization.findUnique({
+			where: {
+				id: req.params.orgId as string,
+			},
+		});
+		if (!organization) throw new AppError("organization not found", 404);
+
+		const documents = await prisma.knowledgeDocument.findMany({
+			where: {
+				organizationId: organization.id,
+			},
+		});
+
+		res.status(200).json({
+			success: true,
+			message: "documents fetched successfully",
+			data: {
+				documents,
+			},
+		});
 	},
 );

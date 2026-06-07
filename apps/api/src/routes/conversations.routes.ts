@@ -7,11 +7,8 @@ const router: Router = express.Router();
 
 router.use(validateApiKey);
 
-router.post(
-	"/",
-	// authMiddleware,
-	conversationsController.startConversation,
-);
+router.post("/", conversationsController.startConversation);
 
 router.post("/:id/messages", conversationsController.sendMessage);
+
 export default router;
