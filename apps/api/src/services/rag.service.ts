@@ -31,6 +31,7 @@ export async function askTier0Agent(
     ORDER BY embedding <=> ${vectorLiteral}::vector
     LIMIT 5
   `;
+  console.log("[RAG] chunks found:", chunks.length, "for org:", organizationId);
 
 	if (chunks.length === 0) {
 		return "Oh. about that thing. maybe you are talking about something else we don't have.";

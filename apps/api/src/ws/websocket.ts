@@ -22,12 +22,16 @@ async function connectionAuth(
 ) {
 	const { apiKey, customerJwt } = payload;
 
-	if (!apiKey || !customerJwt) {
+	// if (!apiKey || !customerJwt) {
+	// 	send(socket, { type: "error", payload: { message: `you have to provide APIKey and customerJwt within the payload` } });
+	// 	socket.close();
+	// 	return;
+	// }
+
+	if (!apiKey) {
 		send(socket, {
 			type: "error",
-			payload: {
-				message: `you have to provide APIKey and customerJwt within the payload`,
-			},
+			payload: { message: "apiKey is required" },
 		});
 		socket.close();
 		return;
@@ -51,13 +55,15 @@ async function connectionAuth(
 		return;
 	}
 
-	const { origin }: any = req.headers;
+	const origin =
+		typeof req.headers.origin == "string" ? req.headers.origin : undefined;
 
-	const isAllowedOrigin: boolean = isKey.allowedOrigins.includes(origin);
+	const isAllowedOrigin: boolean =
+		origin !== undefined && isKey.allowedOrigins.includes(origin);
 
-	if (!isAllowedOrigin) {
-		return null;
-	}
+	// if (!isAllowedOrigin) {
+	// 	return null;
+	// }
 
 	let customer = null;
 

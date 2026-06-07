@@ -26,11 +26,7 @@ export async function upsertCustomer({ organizationId, customerData }) {
 	});
 }
 
-export async function getOrCreateConversation({
-	organizationId,
-	customerId,
-	apiKeyId,
-}) {
+export async function getOrCreateConversation({ organizationId, customerId, apiKeyId }) {
 	// Resume existing active conversation if any
 	const existing = await prisma.conversation.findFirst({
 		where: { customerId, conversationStatus: ConversationStatus.ACTIVE },

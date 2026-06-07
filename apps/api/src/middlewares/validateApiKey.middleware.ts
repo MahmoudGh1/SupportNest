@@ -42,10 +42,10 @@ export const validateApiKey = async (req: AuthenticatedWidgetRequest, res: Respo
 			return;
 		}
 
-		if (origin && !apiKeyRecord.allowedOrigins.includes(origin)) {
-			res.status(403).json({ error: "Invalid origin" });
-			return;
-		}
+		// if (origin && !apiKeyRecord.allowedOrigins.includes(origin)) {
+		// 	res.status(403).json({ error: "Invalid origin" });
+		// 	return;
+		// }
 
 		await prisma.apiKey.update({
 			where: {
