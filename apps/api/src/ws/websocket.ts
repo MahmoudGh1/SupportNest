@@ -2,22 +2,15 @@ import { WebSocketServer, WebSocket } from "ws";
 import { IncomingMessage } from "http";
 import prisma from "../config/prisma.js";
 import crypto from "crypto";
-import type { WsEnvelope, SocketMeta } from "../types/ws.types.js";
+import type { WsEnvelope, SocketMeta, AuthenticatedSocket } from "../types/ws.types.js";
 import { verifyToken } from "src/utils/jwt.util.js";
+import { handleMessageSend } from "src/websocket/handlers/message.handler.js";
+import { activeSockets } from "src/websocket/ws.map.js";
 
-interface AuthenticatedSocket extends WebSocket {
-	meta?: SocketMeta;
-	authenticated?: boolean;
-}
 
-export const activeSockets = new Map<string, AuthenticatedSocket>();
 
 function send(socket: AuthenticatedSocket, envelope: WsEnvelope) {
 	socket.send(JSON.stringify(envelope));
-}
-
-async function sendingMessage(socket: AuthenticatedSocket, payload: Record<string, any>) {
-	
 }
 
 async function connectionAuth(socket: AuthenticatedSocket, payload: Record<string, any>, req: IncomingMessage) {
@@ -174,10 +167,10 @@ export function setupWebSocket(wss: WebSocketServer) {
 				}
 
 				if (envelope.type === "message_send") {
-					await sendingMessage(socket, envelope.payload);
+					await handleMessageSend(socket, envelope.payload);
 				}
 			} catch (err) {
-				console.error("[WS] Error:", err);
+				console.error("Web Socket Error:", err);
 				send(socket, { type: "error", payload: { message: "Server error" } });
 			}
 		});

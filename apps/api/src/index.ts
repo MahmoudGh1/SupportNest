@@ -19,6 +19,7 @@ import cookieParser from "cookie-parser";
 import prisma from "./config/prisma.js";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
+import { setupWebSocket } from "./ws/websocket.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -68,6 +69,7 @@ app.use(errorHandler);
 
 const Server = createServer(app);
 const wss = new WebSocketServer({ server: Server, path: "/widget/ws" });
+setupWebSocket(wss)
 
 Server.listen(PORT, () => {
 	console.log("Server is running on port:", PORT);
