@@ -35,7 +35,19 @@ app.use(
 		contentSecurityPolicy: false,
 	}),
 );
-app.use(cors({ origin: "*", credentials: true }));
+
+app.use(
+	cors({
+		// Dynamically sets the header to match whoever is making the request
+		origin: function (origin, callback) {
+			// Allow requests with no origin (like mobile apps, curl, or postman)
+			if (!origin) return callback(null, true);
+
+			callback(null, true);
+		},
+		credentials: true,
+	}),
+);
 app.use(morgan("dev"));
 
 const publicDir = path.resolve(process.cwd(), "public");
