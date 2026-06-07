@@ -16,7 +16,7 @@ export async function askTier0AgentController(req: Request, res: Response): Prom
 
 	try {
 		const answer = await askTier0Agent(question.trim(), organizationId);
-		res.status(200).json({ answer });
+		res.status(200).json( answer.data );
 	} catch (err) {
 		console.error("RAG Controller Error:", err);
 		res.status(500).json({

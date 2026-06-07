@@ -8,8 +8,8 @@ import errorHandler from "./middlewares/errorhandler.middleware.js";
 import notFoundHandler from "./middlewares/notFoundHandler.middleware.js";
 import { rateLimit } from "./utils/rateLimiter.util.js";
 import {
-  RegisterController,
-  LoginController,
+	RegisterController,
+	LoginController,
 } from "./controllers/auth.controller.js";
 import knowledgeRoutes from "./routes/knowledge.routes.js";
 import * as authController from "./controllers/auth.controller.js";
@@ -22,6 +22,7 @@ import authRouter from "./routes/auth.routes.js";
 import ragRouter from "./routes/rag.routes.js";
 import cookieParser from "cookie-parser";
 import paymentRoutes from "./routes/payment.routes.js";
+import prisma from "./config/prisma.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -33,7 +34,7 @@ app.use(cookieParser());
 app.use(helmet());
 app.use(
   cors({
-    origin: "*",
+    origin: "http://localhost:3000",
     credentials: true,
   }),
 );
@@ -48,9 +49,9 @@ app.use(rateLimit);
 // https://api.supportnest.io/widget.js
 
 app.get("/widget.js", (req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Content-Type", "application/javascript");
-  next();
+	res.setHeader("Access-Control-Allow-Origin", "*");
+	res.setHeader("Content-Type", "application/javascript");
+	next();
 });
 app.use(express.static(path.join(__dirname, "../public")));
 
@@ -71,7 +72,7 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log("Server is running on port:", PORT);
+	console.log("Server is running on port:", PORT);
 });
 
 // async function main() {
