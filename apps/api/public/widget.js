@@ -1,205 +1,151 @@
 (function () {
-	// 1. CONFIG
-	// Read what the business set on their page via window.SupportNestConfig
+  // ── 1. CONFIG ──────────────────────────────────────────────────────────────
+  const config = window.SupportNestConfig || {};
+  const API_KEY = config.apiKey;
+  const CUSTOMER_TOKEN = config.customerToken || null;
+  const BASE_URL = config.baseUrl || "http://localhost:3001";
 
-	const config = window.SupportNestConfig || {};
-	const API_KEY = config.apiKey;
-	const CUSTOMER_TOKEN = config.customerToken || null;
-	const BASE_URL = config.baseUrl || "http://localhost:3001";
-	let reconnectDelay = 1000;
-	let ws;
+  if (!API_KEY) {
+    console.error("[SupportNest] No apiKey found in window.SupportNestConfig");
+    return;
+  }
 
-	if (!API_KEY) {
-		console.error("[SupportNest] No apiKey found in window.SupportNestConfig");
-		return;
-	}
+  // ── 2. STATE ───────────────────────────────────────────────────────────────
+  let ws = null;
+  let reconnectDelay = 1000;
+  let widgetConfig = {};
+  let isOpen = false;
+  let isSending = false;
+  let isAuthenticated = false;
 
-	// 2. STATE
-	// Everything the widget needs to track during its lifetime
+  // ── 3. WEBSOCKET ───────────────────────────────────────────────────────────
+  function connect() {
+    const wsUrl = BASE_URL.replace(/^http/, "ws");
+    ws = new WebSocket(`${wsUrl}/widget/ws`);
 
-	let sessionToken = null; // ← must be uncommented
-	let conversationId = sessionStorage.getItem("sn_conversation_id") || null;
-	let customerId = null;
-	let widgetConfig = {};
-	let isOpen = false;
-	let isSending = false;
-	let conversationStatus = "ACTIVE";
+    ws.onopen = function () {
+      reconnectDelay = 1000;
+      ws.send(
+        JSON.stringify({
+          type: "auth",
+          payload: { apiKey: API_KEY, customerJwt: CUSTOMER_TOKEN || null },
+        })
+      );
+    };
 
-	// 3. API LAYER
-	// Two functions handle all HTTP communication with your Express backend
+    ws.onmessage = function (event) {
+      try {
+        const envelope = JSON.parse(event.data);
+        handleEvent(envelope);
+      } catch (e) {
+        console.error("[SupportNest] Failed to parse message:", e);
+      }
+    };
 
-	async function post(endpoint, body, useSession = false) {
-		const headers = { "Content-Type": "application/json", Credentials: "include" };
+    ws.onclose = function () {
+      isAuthenticated = false;
+      scheduleReconnect();
+    };
 
-		// if (useSession) {
-		//   All requests after init use the session token
-		//   headers["Authorization"] = `Bearer ${sessionToken}`;
-		// } else {
-		//   Only /widget/init uses the raw API key
-		//   headers["x-api-key"] = API_KEY;
-		// }
-		headers["x-api-key"] = API_KEY;
+    ws.onerror = function (err) {
+      console.error("[SupportNest] WebSocket error:", err);
+    };
+  }
 
-		const res = await fetch(`${BASE_URL}${endpoint}`, {
-			method: "POST",
-			headers,
-			body: JSON.stringify(body),
-		});
+  function scheduleReconnect() {
+    setTimeout(function () {
+      connect();
+    }, reconnectDelay);
+    reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+  }
 
-		const data = await res.json();
+  function sendWs(type, payload) {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.warn("[SupportNest] WebSocket not open, cannot send:", type);
+      return false;
+    }
+    ws.send(JSON.stringify({ type, payload }));
+    return true;
+  }
 
-		if (!res.ok) {
-			throw new Error(data.error || "Request failed");
-		}
-		return data;
-	}
+  // ── 4. EVENT HANDLER ───────────────────────────────────────────────────────
+  function handleEvent(envelope) {
+    const { type, payload } = envelope;
 
-	async function get(endpoint) {
-		const res = await fetch(`${BASE_URL}${endpoint}`, {
-			method: "GET",
-			headers: {
-				Authorization: `Bearer ${sessionToken}`,
-				Credentials: "include",
-			},
-		});
+    switch (type) {
+      case "auth_ack": {
+        isAuthenticated = true;
+        // Apply widget config from server (colors, title, greeting, etc.)
+        if (payload.widgetConfig) {
+          widgetConfig = payload.widgetConfig;
+          applyWidgetConfig();
+        }
+        // Load conversation history
+        loadHistory(payload.history || []);
+        // Enable input now that we are connected
+        setInputDisabled(false);
+        break;
+      }
 
-		const data = await res.json();
-		if (!res.ok) {
-			throw new Error(data.error || "Request failed");
-		}
-		return data;
-	}
+      case "typing": {
+        showTyping();
+        break;
+      }
 
-	// 4. API CALLS
-	// One function per endpoint — clean and easy to debug individually
+      case "message_ai": {
+        hideTyping();
+        appendMessage("ai", payload.message.content);
+        // Reset sending state now that the full round-trip is done
+        isSending = false;
+        var sendBtn = document.getElementById("sn-send-btn");
+        var input = document.getElementById("sn-input");
+        if (sendBtn && input) {
+          sendBtn.disabled = !input.value.trim();
+        }
+        break;
+      }
 
-	async function connect() {
-		const wsUrl = BASE_URL.replace(/^http/, "ws");
-		ws = new WebSocket(`${wsUrl}/widget/ws`);
+      case "escalated": {
+        hideTyping();
+        isSending = false;
+        appendSystemMessage("You are now connected with a human agent.");
+        break;
+      }
 
-		ws.onopen = () => {
-			reconnectDelay = 1000;
-			ws.send(
-				JSON.stringify({
-					type: "auth",
-					payload: { apiKey: API_KEY, customerJwt: CUSTOMER_TOKEN || null },
-				}),
-			);
-		};
+      case "error": {
+        console.error("[SupportNest] Server error:", payload.message);
+        hideTyping();
+        isSending = false;
+        appendSystemMessage("Something went wrong. Please try again.");
+        var sendBtnErr = document.getElementById("sn-send-btn");
+        var inputErr = document.getElementById("sn-input");
+        if (sendBtnErr && inputErr) {
+          sendBtnErr.disabled = !inputErr.value.trim();
+        }
+        break;
+      }
 
-		ws.onmessage = (event) => {
-			const envelope = JSON.parse(event.data);
-			handleEvent(envelope);
-		};
+      default:
+        console.warn("[SupportNest] Unknown event type:", type);
+    }
+  }
 
-		ws.onclose = () => scheduleReconnect();
-		ws.onerror = () => scheduleReconnect();
-	}
+  // ── 5. HISTORY ─────────────────────────────────────────────────────────────
+  function loadHistory(messages) {
+    if (!messages || messages.length === 0) return;
+    messages.forEach(function (msg) {
+      if (msg.role === "CUSTOMER") {
+        appendMessage("customer", msg.content);
+      } else if (msg.role === "AI" || msg.role === "HUMAN_AGENT") {
+        appendMessage("ai", msg.content);
+      }
+    });
+  }
 
-	async function handleEvent({ type, payload }) {
-		if (type === "auth_ack") {
-			sessionStorage.setItem("sn_conversation_id", payload.conversationId);
-			conversationStatus = "ACTIVE";
-			loadHistory(payload.history);
-		} else if (type === "typing") {
-			showTyping();
-		} else if (type === "message_ai") {
-			hideTyping();
-			appendMessage("ai", payload.message.content);
-		} else if (type === "escalated") {
-			hideTyping();
-		} else if (type === "error") {
-			console.error("[SupportNest]", payload.message);
-		}
-	}
-	// POST /widget/init   ==> Validates API key, identifies customer, returns sessionToken + widgetConfig
-	async function initSession() {
-		const data = await post("/api/v1/widget/init", {
-			customerToken: CUSTOMER_TOKEN,
-		});
-
-		sessionToken = data.sessionToken;
-		customerId = data.customer.id;
-		widgetConfig = data.widgetConfig || {};
-
-		return data;
-	}
-
-	// POST /conversations  ==> Creates a new conversation, returns conversationId
-	async function startConversation() {
-		const data = await post("/api/v1/widget/conversations", { customerId }, true);
-		conversationId = data.data.conversationId;
-		conversationStatus = data.data.status;
-		return data;
-	}
-
-	// GET /conversations/:id/messages  ==> Loads all previous messages when widget opens for the first time
-	function loadHistory(messages) {
-		if (!messages || messages.length === 0) return;
-		messages.forEach((msg) => {
-			if (msg.role === "CUSTOMER") {
-				appendMessage("customer", msg.content);
-			} else if (msg.role === "AI" || msg.role === "HUMAN_AGENT") {
-				appendMessage("ai", msg.content);
-			}
-		});
-	}
-
-	function loadHIstory(messages) {
-		if (!messages || messages.length === 0) return;
-
-		messages.forEach((msg) => {
-			if (msg.role === "customer") {
-				appendMessage(msg.content, "customer");
-			} else if (msg.role === "ai" || msg.role === "human_agent") {
-				appendMessage(msg.content, "agent");
-			}
-		});
-	}
-	// POST /conversations/:id/messages
-	// Sends customer message and triggers the AI pipeline
-	// Returns AI response or escalation status
-	async function sendMessage(content) {
-		ws.send(JSON.stringify({ type: "message_send", payload: { content } }));
-		// const data = await post(
-		// 	`/api/v1/widget/conversations/${conversationId}/messages`,
-		// 	{ content },
-		// 	false,
-		// );
-
-		// Render AI or human agent response
-		// if (data.aiMessage) {
-		// 	appendMessage(data.aiMessage.role, data.aiMessage.content);
-		// }
-
-		// Handle escalation — switch UI to escalated mode
-		// if (data.status === "escalated") {
-		// 	conversationStatus = "escalated";
-		// 	appendSystemMessage("You are now connected with a human agent.");
-		// 	showCsatPrompt();
-		// }
-
-		// return data;
-	}
-
-	async function scheduleReconnect() {
-		setTimeout(() => connect(), reconnectDelay);
-		reconnectDelay = Math.min(reconnectDelay * 2, 30000);
-	}
-	// POST /widget/csat   ==> Submits the star rating after conversation ends
-	async function submitCsat(score, comment) {
-		await post("/api/v1/widget/csat", { conversationId, score, comment }, true);
-		appendSystemMessage("Thank you for your feedback!");
-		hideCsatPrompt();
-	}
-
-	// 5. STYLES
-	// Everything injected into the page — scoped with sn- prefix
-	// so it never conflicts with the business's own CSS
-
-	function injectStyles() {
-		const style = document.createElement("style");
-		style.textContent = `
+  // ── 6. STYLES ──────────────────────────────────────────────────────────────
+  function injectStyles() {
+    var style = document.createElement("style");
+    style.textContent = `
       #sn-btn {
         position: fixed;
         bottom: 24px;
@@ -217,18 +163,11 @@
         z-index: 2147483647;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
       }
-
       #sn-btn:hover {
         transform: scale(1.1);
         box-shadow: 0 6px 24px rgba(0,0,0,0.25);
       }
-
-      #sn-btn svg {
-        width: 26px;
-        height: 26px;
-        fill: white;
-        transition: opacity 0.2s;
-      }
+      #sn-btn svg { width: 26px; height: 26px; fill: white; }
 
       #sn-panel {
         position: fixed;
@@ -251,14 +190,12 @@
         pointer-events: none;
         transition: opacity 0.2s ease, transform 0.2s ease;
       }
-
       #sn-panel.sn-open {
         opacity: 1;
         transform: scale(1) translateY(0);
         pointer-events: all;
       }
 
-      /* ── Header ── */
       #sn-header {
         background: var(--sn-accent, #6366f1);
         padding: 14px 18px;
@@ -267,7 +204,6 @@
         gap: 12px;
         flex-shrink: 0;
       }
-
       #sn-header-icon {
         width: 36px;
         height: 36px;
@@ -278,26 +214,21 @@
         justify-content: center;
         flex-shrink: 0;
       }
+      #sn-header-icon svg { width: 18px; height: 18px; fill: white; }
+      #sn-header-title { color: white; font-weight: 600; font-size: 15px; }
+      #sn-header-subtitle { color: rgba(255,255,255,0.72); font-size: 12px; margin-top: 1px; }
 
-      #sn-header-icon svg {
-        width: 18px;
-        height: 18px;
-        fill: white;
-      }
-
-      #sn-header-title {
-        color: white;
-        font-weight: 600;
-        font-size: 15px;
-      }
-
-      #sn-header-subtitle {
-        color: rgba(255,255,255,0.72);
+      #sn-connecting {
+        text-align: center;
+        padding: 10px;
         font-size: 12px;
-        margin-top: 1px;
+        color: #9ca3af;
+        background: #fafafa;
+        border-bottom: 1px solid #f3f4f6;
+        display: none;
       }
+      #sn-connecting.sn-visible { display: block; }
 
-      /* ── Messages ── */
       #sn-messages {
         flex: 1;
         overflow-y: auto;
@@ -308,15 +239,8 @@
         scroll-behavior: smooth;
         background: #fafafa;
       }
-
-      #sn-messages::-webkit-scrollbar {
-        width: 4px;
-      }
-
-      #sn-messages::-webkit-scrollbar-thumb {
-        background: #e5e7eb;
-        border-radius: 99px;
-      }
+      #sn-messages::-webkit-scrollbar { width: 4px; }
+      #sn-messages::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 99px; }
 
       .sn-bubble {
         max-width: 78%;
@@ -325,27 +249,22 @@
         word-wrap: break-word;
         animation: snFadeUp 0.18s ease;
       }
-
       @keyframes snFadeUp {
         from { opacity: 0; transform: translateY(6px); }
         to   { opacity: 1; transform: translateY(0); }
       }
-
       .sn-bubble.customer {
         background: var(--sn-accent, #6366f1);
         color: white;
         align-self: flex-end;
         border-bottom-right-radius: 4px;
       }
-
-      .sn-bubble.ai,
-      .sn-bubble.human_agent {
+      .sn-bubble.ai, .sn-bubble.human_agent {
         background: #f3f4f6;
         color: #111827;
         align-self: flex-start;
         border-bottom-left-radius: 4px;
       }
-
       .sn-bubble.system {
         background: transparent;
         color: #9ca3af;
@@ -356,7 +275,6 @@
         max-width: 100%;
       }
 
-      /* ── Typing indicator ── */
       #sn-typing {
         display: none;
         align-self: flex-start;
@@ -367,11 +285,7 @@
         gap: 4px;
         align-items: center;
       }
-
-      #sn-typing.sn-visible {
-        display: flex;
-      }
-
+      #sn-typing.sn-visible { display: flex; }
       .sn-dot {
         width: 7px;
         height: 7px;
@@ -379,52 +293,13 @@
         background: #9ca3af;
         animation: snBounce 1.2s infinite ease-in-out;
       }
-
       .sn-dot:nth-child(2) { animation-delay: 0.2s; }
       .sn-dot:nth-child(3) { animation-delay: 0.4s; }
-
       @keyframes snBounce {
         0%, 60%, 100% { transform: translateY(0); }
         30%           { transform: translateY(-6px); }
       }
 
-      /* ── CSAT ── */
-      #sn-csat {
-        display: none;
-        padding: 14px 18px;
-        border-top: 1px solid #f3f4f6;
-        text-align: center;
-        flex-shrink: 0;
-        background: white;
-      }
-
-      #sn-csat.sn-visible {
-        display: block;
-      }
-
-      #sn-csat-label {
-        color: #374151;
-        font-weight: 500;
-        font-size: 13px;
-        margin-bottom: 10px;
-      }
-
-      .sn-star {
-        font-size: 26px;
-        cursor: pointer;
-        color: #d1d5db;
-        display: inline-block;
-        transition: color 0.15s, transform 0.15s;
-        line-height: 1;
-      }
-
-      .sn-star:hover,
-      .sn-star.sn-active {
-        color: #f59e0b;
-        transform: scale(1.2);
-      }
-
-      /* ── Input row ── */
       #sn-input-row {
         padding: 10px 12px;
         border-top: 1px solid #f3f4f6;
@@ -434,7 +309,6 @@
         flex-shrink: 0;
         background: white;
       }
-
       #sn-input {
         flex: 1;
         border: 1px solid #e5e7eb;
@@ -450,14 +324,9 @@
         background: white;
         color: #111827;
       }
-
-      #sn-input:focus {
-        border-color: var(--sn-accent, #6366f1);
-      }
-
-      #sn-input::placeholder {
-        color: #9ca3af;
-      }
+      #sn-input:focus { border-color: var(--sn-accent, #6366f1); }
+      #sn-input::placeholder { color: #9ca3af; }
+      #sn-input:disabled { background: #f9fafb; cursor: not-allowed; }
 
       #sn-send-btn {
         width: 38px;
@@ -472,47 +341,32 @@
         flex-shrink: 0;
         transition: opacity 0.15s;
       }
-
-      #sn-send-btn:disabled {
-        opacity: 0.35;
-        cursor: not-allowed;
-      }
-
-      #sn-send-btn svg {
-        width: 18px;
-        height: 18px;
-        fill: white;
-      }
+      #sn-send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+      #sn-send-btn svg { width: 18px; height: 18px; fill: white; }
     `;
-		document.head.appendChild(style);
-	}
+    document.head.appendChild(style);
+  }
 
-	// 6. BUILD DOM
-	// Creates the chat button and panel from scratch
-	// Injected into whatever page the widget loads on
+  // ── 7. BUILD DOM ───────────────────────────────────────────────────────────
+  function buildDOM() {
+    document.documentElement.style.setProperty("--sn-accent", "#6366f1");
 
-	function buildDOM() {
-		// Set accent color CSS variable from widgetConfig
-		document.documentElement.style.setProperty("--sn-accent", widgetConfig.accentColor || "#6366f1");
-
-		// ── Chat bubble button ──
-		const btn = document.createElement("button");
-		btn.id = "sn-btn";
-		btn.setAttribute("aria-label", "Open support chat");
-		btn.innerHTML = `
+    var btn = document.createElement("button");
+    btn.id = "sn-btn";
+    btn.setAttribute("aria-label", "Open support chat");
+    btn.innerHTML = `
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path d="M20 2H4a2 2 0 00-2 2v18l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2z"/>
       </svg>
     `;
-		btn.addEventListener("click", togglePanel);
-		document.body.appendChild(btn);
+    btn.addEventListener("click", togglePanel);
+    document.body.appendChild(btn);
 
-		// ── Chat panel ──
-		const panel = document.createElement("div");
-		panel.id = "sn-panel";
-		panel.setAttribute("role", "dialog");
-		panel.setAttribute("aria-label", "Support chat");
-		panel.innerHTML = `
+    var panel = document.createElement("div");
+    panel.id = "sn-panel";
+    panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-label", "Support chat");
+    panel.innerHTML = `
       <div id="sn-header">
         <div id="sn-header-icon">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -520,10 +374,12 @@
           </svg>
         </div>
         <div>
-          <div id="sn-header-title">${widgetConfig.title || "Support"}</div>
+          <div id="sn-header-title">Support</div>
           <div id="sn-header-subtitle">We typically reply instantly</div>
         </div>
       </div>
+
+      <div id="sn-connecting" class="sn-visible">Connecting...</div>
 
       <div id="sn-messages">
         <div id="sn-typing">
@@ -533,23 +389,13 @@
         </div>
       </div>
 
-      <div id="sn-csat">
-        <div id="sn-csat-label">How was your experience?</div>
-        <div id="sn-stars">
-          <span class="sn-star" data-score="1" role="button" aria-label="1 star">★</span>
-          <span class="sn-star" data-score="2" role="button" aria-label="2 stars">★</span>
-          <span class="sn-star" data-score="3" role="button" aria-label="3 stars">★</span>
-          <span class="sn-star" data-score="4" role="button" aria-label="4 stars">★</span>
-          <span class="sn-star" data-score="5" role="button" aria-label="5 stars">★</span>
-        </div>
-      </div>
-
       <div id="sn-input-row">
         <textarea
           id="sn-input"
           rows="1"
-          placeholder="${widgetConfig.placeholder || "Type a message..."}"
+          placeholder="Type a message..."
           aria-label="Message"
+          disabled
         ></textarea>
         <button id="sn-send-btn" aria-label="Send" disabled>
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -558,188 +404,144 @@
         </button>
       </div>
     `;
-		document.body.appendChild(panel);
+    document.body.appendChild(panel);
 
-		// ── Wire up events ──
-		wireEvents();
-	}
+    wireEvents();
+  }
 
-	// 7. EVENTS
-	// All user interaction handlers
+  // ── 8. APPLY SERVER CONFIG ─────────────────────────────────────────────────
+  function applyWidgetConfig() {
+    if (widgetConfig.accentColor) {
+      document.documentElement.style.setProperty("--sn-accent", widgetConfig.accentColor);
+    }
+    var titleEl = document.getElementById("sn-header-title");
+    if (titleEl && widgetConfig.title) {
+      titleEl.textContent = widgetConfig.title;
+    }
+    var inputEl = document.getElementById("sn-input");
+    if (inputEl && widgetConfig.placeholder) {
+      inputEl.placeholder = widgetConfig.placeholder;
+    }
+    var connectingEl = document.getElementById("sn-connecting");
+    if (connectingEl) {
+      connectingEl.classList.remove("sn-visible");
+    }
+  }
 
-	function wireEvents() {
-		const input = document.getElementById("sn-input");
-		const sendBtn = document.getElementById("sn-send-btn");
+  // ── 9. EVENTS ──────────────────────────────────────────────────────────────
+  function wireEvents() {
+    var input = document.getElementById("sn-input");
+    var sendBtn = document.getElementById("sn-send-btn");
 
-		// Enable send button only when input has text
-		input.addEventListener("input", function () {
-			sendBtn.disabled = !input.value.trim() || isSending;
+    input.addEventListener("input", function () {
+      sendBtn.disabled = !input.value.trim() || isSending || !isAuthenticated;
+      input.style.height = "auto";
+      input.style.height = Math.min(input.scrollHeight, 100) + "px";
+    });
 
-			// Auto-grow textarea height with content
-			input.style.height = "auto";
-			input.style.height = Math.min(input.scrollHeight, 100) + "px";
-		});
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        if (!sendBtn.disabled) handleSend();
+      }
+    });
 
-		// Enter to send, Shift+Enter for new line
-		input.addEventListener("keydown", function (e) {
-			if (e.key === "Enter" && !e.shiftKey) {
-				e.preventDefault();
-				if (!sendBtn.disabled) handleSend();
-			}
-		});
+    sendBtn.addEventListener("click", handleSend);
+  }
 
-		// Send button click
-		sendBtn.addEventListener("click", handleSend);
+  // ── 10. UI HELPERS ─────────────────────────────────────────────────────────
+  function appendMessage(role, content) {
+    var messages = document.getElementById("sn-messages");
+    var typing = document.getElementById("sn-typing");
+    var bubble = document.createElement("div");
+    bubble.className = "sn-bubble " + role;
+    bubble.textContent = content;
+    messages.insertBefore(bubble, typing);
+    messages.scrollTop = messages.scrollHeight;
+  }
 
-		// Star rating clicks
-		var stars = document.querySelectorAll(".sn-star");
-		stars.forEach(function (star) {
-			star.addEventListener("click", function () {
-				var score = parseInt(star.getAttribute("data-score"));
+  function appendSystemMessage(text) {
+    appendMessage("system", text);
+  }
 
-				// Highlight all stars up to selected
-				stars.forEach(function (s) {
-					var sScore = parseInt(s.getAttribute("data-score"));
-					if (sScore <= score) {
-						s.classList.add("sn-active");
-					} else {
-						s.classList.remove("sn-active");
-					}
-				});
+  function showTyping() {
+    var typing = document.getElementById("sn-typing");
+    if (typing) typing.classList.add("sn-visible");
+    var messages = document.getElementById("sn-messages");
+    if (messages) messages.scrollTop = messages.scrollHeight;
+  }
 
-				// Submit after short delay so user sees the highlight
-				setTimeout(function () {
-					submitCsat(score, "");
-				}, 400);
-			});
-		});
-	}
+  function hideTyping() {
+    var typing = document.getElementById("sn-typing");
+    if (typing) typing.classList.remove("sn-visible");
+  }
 
-	// 8. UI HELPERS
-	// Small focused functions that update the DOM
+  function setInputDisabled(disabled) {
+    var input = document.getElementById("sn-input");
+    var sendBtn = document.getElementById("sn-send-btn");
+    if (input) input.disabled = disabled;
+    // send button stays disabled until user types something
+    if (sendBtn) sendBtn.disabled = true;
+  }
 
-	function appendMessage(role, content) {
-		var messages = document.getElementById("sn-messages");
-		var typing = document.getElementById("sn-typing");
+  // ── 11. SEND FLOW ──────────────────────────────────────────────────────────
+  function handleSend() {
+    var input = document.getElementById("sn-input");
+    var sendBtn = document.getElementById("sn-send-btn");
+    var content = input.value.trim();
 
-		var bubble = document.createElement("div");
-		bubble.className = "sn-bubble " + role;
-		bubble.textContent = content;
+    if (!content) return;
+    if (isSending) return;
+    if (!isAuthenticated) return;
 
-		// Always insert before the typing indicator
-		// so typing dots stay at the bottom
-		messages.insertBefore(bubble, typing);
-		messages.scrollTop = messages.scrollHeight;
-	}
+    isSending = true;
+    sendBtn.disabled = true;
+    input.value = "";
+    input.style.height = "auto";
 
-	function appendSystemMessage(text) {
-		appendMessage("system", text);
-	}
+    appendMessage("customer", content);
+    showTyping();
 
-	function showTyping() {
-		var typing = document.getElementById("sn-typing");
-		typing.classList.add("sn-visible");
-		var messages = document.getElementById("sn-messages");
-		messages.scrollTop = messages.scrollHeight;
-	}
+    var sent = sendWs("message_send", { content: content });
+    if (!sent) {
+      // WS not open — show error immediately
+      hideTyping();
+      isSending = false;
+      appendSystemMessage("Not connected. Please wait and try again.");
+      sendBtn.disabled = !input.value.trim();
+    }
+    // If sent OK, isSending stays true until message_ai or error event arrives
+  }
 
-	function hideTyping() {
-		document.getElementById("sn-typing").classList.remove("sn-visible");
-	}
+  // ── 12. TOGGLE PANEL ──────────────────────────────────────────────────────
+  function togglePanel() {
+    isOpen = !isOpen;
+    var panel = document.getElementById("sn-panel");
+    panel.classList.toggle("sn-open", isOpen);
 
-	function showCsatPrompt() {
-		document.getElementById("sn-csat").classList.add("sn-visible");
-		document.getElementById("sn-input-row").style.display = "none";
-	}
+    if (isOpen) {
+      // Show greeting only once, only after auth
+      if (isAuthenticated && widgetConfig.greetingMessage) {
+        var bubbles = document.querySelectorAll(".sn-bubble");
+        if (bubbles.length === 0) {
+          appendMessage("ai", widgetConfig.greetingMessage);
+        }
+      }
+      var input = document.getElementById("sn-input");
+      if (input && !input.disabled) input.focus();
+    }
+  }
 
-	function hideCsatPrompt() {
-		document.getElementById("sn-csat").classList.remove("sn-visible");
-		document.getElementById("sn-input-row").style.display = "flex";
-	}
+  // ── 13. BOOT ───────────────────────────────────────────────────────────────
+  function boot() {
+    injectStyles();
+    buildDOM();
+    connect(); // WS handles everything: auth → config → history → messaging
+  }
 
-	function setInputDisabled(disabled) {
-		var input = document.getElementById("sn-input");
-		var sendBtn = document.getElementById("sn-send-btn");
-		input.disabled = disabled;
-		sendBtn.disabled = disabled;
-	}
-
-	// 9. SEND FLOW
-	// The main user action — send message and show response
-
-	async function handleSend() {
-		var input = document.getElementById("sn-input");
-		var sendBtn = document.getElementById("sn-send-btn");
-		var content = input.value.trim();
-
-		// Guards
-		if (!content) return;
-		if (isSending) return;
-		if (conversationStatus !== "ACTIVE") return;
-
-		// Clear input immediately — don't wait for server
-		input.value = "";
-		input.style.height = "auto";
-		isSending = true;
-		sendBtn.disabled = true;
-
-		// Show customer message immediately (optimistic UI)
-		appendMessage("customer", content);
-		showTyping();
-
-		try {
-			await sendMessage(content);
-		} catch (err) {
-			appendSystemMessage("Failed to send. Please try again.");
-			console.error("[SupportNest] Send error:", err.message);
-		} finally {
-			hideTyping();
-			isSending = false;
-			sendBtn.disabled = !input.value.trim();
-			input.focus();
-		}
-	}
-
-	// 10. TOGGLE PANEL
-	// Open and close the chat panel
-	// First open triggers conversation start + history load
-
-	async function togglePanel() {
-		isOpen = !isOpen;
-		var panel = document.getElementById("sn-panel");
-		panel.classList.toggle("sn-open", isOpen);
-
-		if (isOpen && widgetConfig.greetingMessage) {
-			var bubbles = document.querySelectorAll(".sn-bubble");
-			if (bubbles.length === 0) {
-				appendMessage("ai", widgetConfig.greetingMessage);
-			}
-		}
-	}
-
-	// 11. BOOT
-	// Entry point — runs once when script loads
-	// Order matters: init first (get sessionToken + widgetConfig)
-	//                then build DOM using widgetConfig values
-
-	async function boot() {
-		try {
-			await initSession(); // must happen before buildDOM
-			injectStyles(); // inject CSS after we have widgetConfig
-			buildDOM(); // build HTML using widgetConfig values
-			connect(); // connect to WebSocket
-		} catch (err) {
-			// Init failed — log and stop silently
-			// Don't render anything broken on the customer's site
-			// console.error("[SupportNest] Init failed:", err.message);
-			console.error("[SupportNest] Init failed:", err);
-		}
-	}
-
-	// Wait for DOM to be ready then boot
-	if (document.readyState === "loading") {
-		document.addEventListener("DOMContentLoaded", boot);
-	} else {
-		boot();
-	}
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
 })();

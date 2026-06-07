@@ -1,4 +1,4 @@
-import { AgentTier, MessageRole } from "generated/prisma/enums.js";
+import { AgentAction, AgentTier, MessageRole } from "generated/prisma/enums.js";
 import prisma from "src/config/prisma.js";
 import { askTier0Agent } from "src/services/rag.service.js";
 
@@ -6,7 +6,6 @@ export async function handleMessageSend(ws: any, payload: any) {
 	const { content } = payload;
 	const { conversationId, organizationId } = ws.meta!;
 
-	// 1 - Persist customer message
 	await prisma.message.create({
 		data: {
 			conversationId,
@@ -15,39 +14,18 @@ export async function handleMessageSend(ws: any, payload: any) {
 		},
 	});
 
-	// 2 - Tell the client AI is thinking
 	ws.send(JSON.stringify({ type: "typing", payload: {} }));
 
-	// 3 - Run AI pipeline - returns
-	/*{
-          responseText: parsed.agentText,
-          action: AgentAction.NO_MATCH,
-          tier: MessageTier.TIER1,
-          agentLog: {
-            tier: AgentTier.TIER1,
-            confidenceScore: parsed.confidenceScore,
-            latencyMs: 1500,
-            tokensUsed: usage?.total_tokens ?? 0,
-  },*/
-
-	const aiResponse = await askTier0Agent(
-		content,
-		organizationId,
-		conversationId,
-	);
-
-	// 4. Persist AI response
+	const aiResponse = await askTier0Agent(content, organizationId, conversationId);
 
 	const aiMessage = await prisma.message.create({
 		data: {
-			conversationId: conversationId,
+			conversationId,
 			role: MessageRole.AI,
 			content: aiResponse.responseText,
 			tier: AgentTier.TIER1,
 		},
 	});
-
-	// 5. Persist agent log
 
 	await prisma.agentLog.create({
 		data: {
@@ -62,9 +40,6 @@ export async function handleMessageSend(ws: any, payload: any) {
 		},
 	});
 
-	// 6. Handle escalation path
-
-	// 7. Send AI reply
 	ws.send(
 		JSON.stringify({
 			type: "message_ai",
