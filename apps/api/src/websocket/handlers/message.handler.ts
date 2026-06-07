@@ -2,8 +2,8 @@ import { AgentTier, MessageRole } from "generated/prisma/enums.js";
 import prisma from "src/config/prisma.js";
 import { askTier0Agent } from "src/services/rag.service.js";
 
-export async function handleMessageSend(ws: any, envelope: any) {
-	const { content } = envelope.payload;
+export async function handleMessageSend(ws: any, payload: any) {
+	const { content } = payload;
 	const { conversationId, organizationId } = ws.meta!;
 
 	// 1 - Persist customer message

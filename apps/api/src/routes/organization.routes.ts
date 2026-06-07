@@ -1,9 +1,5 @@
 import express, { Router } from "express";
-import {
-  getMyOrgController,
-  updateOrgProfileController,
-  updateWidgetConfigController,
-} from "src/controllers/organization.controller.js";
+import { getMyOrgController, updateOrgProfileController, updateWidgetConfigController } from "src/controllers/organization.controller.js";
 import { authMiddleware } from "src/middlewares/auth.middleware.js";
 
 const router: Router = express.Router();

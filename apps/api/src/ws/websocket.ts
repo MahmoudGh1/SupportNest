@@ -7,8 +7,6 @@ import { verifyToken } from "src/utils/jwt.util.js";
 import { handleMessageSend } from "src/websocket/handlers/message.handler.js";
 import { activeSockets } from "src/websocket/ws.map.js";
 
-
-
 function send(socket: AuthenticatedSocket, envelope: WsEnvelope) {
 	socket.send(JSON.stringify(envelope));
 }
@@ -16,8 +14,14 @@ function send(socket: AuthenticatedSocket, envelope: WsEnvelope) {
 async function connectionAuth(socket: AuthenticatedSocket, payload: Record<string, any>, req: IncomingMessage) {
 	const { apiKey, customerJwt } = payload;
 
-	if (!apiKey || !customerJwt) {
-		send(socket, { type: "error", payload: { message: `you have to provide APIKey and customerJwt within the payload` } });
+	// if (!apiKey || !customerJwt) {
+	// 	send(socket, { type: "error", payload: { message: `you have to provide APIKey and customerJwt within the payload` } });
+	// 	socket.close();
+	// 	return;
+	// }
+
+	if (!apiKey) {
+		send(socket, { type: "error", payload: { message: "apiKey is required" } });
 		socket.close();
 		return;
 	}
@@ -35,13 +39,13 @@ async function connectionAuth(socket: AuthenticatedSocket, payload: Record<strin
 		return;
 	}
 
-	const { origin }: any = req.headers;
+	const origin = typeof req.headers.origin == "string" ? req.headers.origin : undefined;
 
-	const isAllowedOrigin: boolean = isKey.allowedOrigins.includes(origin);
+	const isAllowedOrigin: boolean = origin !== undefined && isKey.allowedOrigins.includes(origin);
 
-	if (!isAllowedOrigin) {
-		return null;
-	}
+	// if (!isAllowedOrigin) {
+	// 	return null;
+	// }
 
 	let customer = null;
 

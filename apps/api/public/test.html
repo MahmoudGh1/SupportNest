@@ -73,16 +73,22 @@
 
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Widget Test</title>
-  </head>
-  <body>
-    <h1>My Test Store</h1>
-    <p>Some page content here.</p>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Widget Test</title>
+	</head>
+	<body>
+		<h1>My Test Store</h1>
+		<p>Some page content here.</p>
 
-    <script src="./config.js"></script>
+		<!-- <script src="http://localhost:3001/config.js"></script> -->
+		<script>
+			window.SupportNestConfig = {
+				apiKey: "sk_6220cfe6fbe12e37a2ba902b5b419b98be9c232b4fce7f5ec5b31aa5e241ef39",
+				baseUrl: "http://localhost:3001",
+			};
+		</script>
 
-    <script src="./widget.js"></script>
-  </body>
+		<script crossorigin="anonymous" src="http://localhost:3001/widget.js"></script>
+	</body>
 </html>

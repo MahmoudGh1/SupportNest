@@ -7,8 +7,8 @@ authRouter.post("/register", RegisterController);
 
 authRouter.post("/login", LoginController);
 
-authRouter.post("/logout", LogoutController)
+authRouter.post("/logout", LogoutController);
 
-authRouter.get("/me", userController)
+authRouter.get("/me", userController);
 
 export default authRouter;

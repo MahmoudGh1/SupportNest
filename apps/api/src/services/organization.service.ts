@@ -4,95 +4,90 @@ import AppError from "src/utils/appError.js";
 // ─── Get My Organization
 
 export const getMyOrgService = async (organizationId: string) => {
-  const org = await prisma.organization.findUnique({
-    where: { id: organizationId, isActive: true },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      email: true,
-      widgetConfig: true,
-      isActive: true,
-      createdAt: true,
-      updatedAt: true,
-      planId: true,
-      // widgetSecret NEVER selected
-    },
-  });
+	const org = await prisma.organization.findUnique({
+		where: { id: organizationId, isActive: true },
+		select: {
+			id: true,
+			name: true,
+			slug: true,
+			email: true,
+			widgetConfig: true,
+			isActive: true,
+			createdAt: true,
+			updatedAt: true,
+			planId: true,
+			// widgetSecret NEVER selected
+		},
+	});
 
-  if (!org) throw new AppError("Organization not found", 404);
+	if (!org) throw new AppError("Organization not found", 404);
 
-  return org;
+	return org;
 };
 
 // ─── Update Widget Config
 
 export const updateWidgetConfigService = async (
-  organizationId: string,
-  widgetConfig: {
-    title?: string;
-    greetingMessage?: string;
-    accentColor?: string;
-    placeholder?: string;
-  },
+	organizationId: string,
+	widgetConfig: {
+		title?: string;
+		greetingMessage?: string;
+		accentColor?: string;
+		placeholder?: string;
+	},
 ) => {
-  // Validate accent color format if provided
-  if (widgetConfig.accentColor) {
-    const isValidHex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(
-      widgetConfig.accentColor,
-    );
-    if (!isValidHex) {
-      throw new AppError(
-        "accentColor must be a valid hex color e.g. #6366f1",
-        400,
-      );
-    }
-  }
+	// Validate accent color format if provided
+	if (widgetConfig.accentColor) {
+		const isValidHex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(widgetConfig.accentColor);
+		if (!isValidHex) {
+			throw new AppError("accentColor must be a valid hex color e.g. #6366f1", 400);
+		}
+	}
 
-  const org = await prisma.organization.update({
-    where: { id: organizationId },
-    data: { widgetConfig },
-    select: {
-      id: true,
-      name: true,
-      widgetConfig: true,
-      // widgetSecret NEVER selected
-    },
-  });
+	const org = await prisma.organization.update({
+		where: { id: organizationId },
+		data: { widgetConfig },
+		select: {
+			id: true,
+			name: true,
+			widgetConfig: true,
+			// widgetSecret NEVER selected
+		},
+	});
 
-  return org;
+	return org;
 };
 
 // ─── Update Organization Profile
 
 export const updateOrgProfileService = async (
-  organizationId: string,
-  data: {
-    name?: string;
-    email?: string;
-  },
+	organizationId: string,
+	data: {
+		name?: string;
+		email?: string;
+	},
 ) => {
-  if (!data.name && !data.email) {
-    throw new AppError("Nothing to update", 400);
-  }
+	if (!data.name && !data.email) {
+		throw new AppError("Nothing to update", 400);
+	}
 
-  const org = await prisma.organization.update({
-    where: { id: organizationId },
-    data: {
-      ...(data.name && { name: data.name }),
-      ...(data.email && { email: data.email }),
-    },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      email: true,
-      widgetConfig: true,
-      updatedAt: true,
-    },
-  });
+	const org = await prisma.organization.update({
+		where: { id: organizationId },
+		data: {
+			...(data.name && { name: data.name }),
+			...(data.email && { email: data.email }),
+		},
+		select: {
+			id: true,
+			name: true,
+			slug: true,
+			email: true,
+			widgetConfig: true,
+			updatedAt: true,
+		},
+	});
 
-  return org;
+	return org;
 };
 
 // ─── Get Organization Stats (for dashboard home)

@@ -5,7 +5,7 @@
 	const config = window.SupportNestConfig || {};
 	const API_KEY = config.apiKey;
 	const CUSTOMER_TOKEN = config.customerToken || null;
-	const BASE_URL = config.baseUrl || "http://localhost:3000";
+	const BASE_URL = config.baseUrl || "http://localhost:3001";
 	let reconnectDelay = 1000;
 	let ws;
 
@@ -17,19 +17,19 @@
 	// 2. STATE
 	// Everything the widget needs to track during its lifetime
 
-	// let sessionToken = null;
+	let sessionToken = null; // ← must be uncommented
 	let conversationId = sessionStorage.getItem("sn_conversation_id") || null;
 	let customerId = null;
 	let widgetConfig = {};
 	let isOpen = false;
 	let isSending = false;
-	let conversationStatus = "active"; // active | escalated | closed
+	let conversationStatus = "ACTIVE";
 
 	// 3. API LAYER
 	// Two functions handle all HTTP communication with your Express backend
 
 	async function post(endpoint, body, useSession = false) {
-		const headers = { "Content-Type": "application/json" };
+		const headers = { "Content-Type": "application/json", Credentials: "include" };
 
 		// if (useSession) {
 		//   All requests after init use the session token
@@ -59,6 +59,7 @@
 			method: "GET",
 			headers: {
 				Authorization: `Bearer ${sessionToken}`,
+				Credentials: "include",
 			},
 		});
 
@@ -73,21 +74,22 @@
 	// One function per endpoint — clean and easy to debug individually
 
 	async function connect() {
-		ws = new WebSocket("wss://localhost/widget/ws");
+		const wsUrl = BASE_URL.replace(/^http/, "ws");
+		ws = new WebSocket(`${wsUrl}/widget/ws`);
 
 		ws.onopen = () => {
 			reconnectDelay = 1000;
 			ws.send(
 				JSON.stringify({
 					type: "auth",
-					payload: { apiKey: this },
+					payload: { apiKey: API_KEY, customerJwt: CUSTOMER_TOKEN || null },
 				}),
 			);
 		};
 
 		ws.onmessage = (event) => {
 			const envelope = JSON.parse(event.data);
-			this.handleEvent(envelope);
+			handleEvent(envelope);
 		};
 
 		ws.onclose = () => scheduleReconnect();
@@ -97,12 +99,13 @@
 	async function handleEvent({ type, payload }) {
 		if (type === "auth_ack") {
 			sessionStorage.setItem("sn_conversation_id", payload.conversationId);
+			conversationStatus = "ACTIVE";
 			loadHistory(payload.history);
 		} else if (type === "typing") {
 			showTyping();
 		} else if (type === "message_ai") {
 			hideTyping();
-			appendMessage({ role: "ai", content: payload.content });
+			appendMessage("ai", payload.message.content);
 		} else if (type === "escalated") {
 			hideTyping();
 		} else if (type === "error") {
@@ -124,35 +127,23 @@
 
 	// POST /conversations  ==> Creates a new conversation, returns conversationId
 	async function startConversation() {
-		const data = await post(
-			"/api/v1/widget/conversations",
-			{ customerId },
-			true,
-		);
+		const data = await post("/api/v1/widget/conversations", { customerId }, true);
 		conversationId = data.data.conversationId;
 		conversationStatus = data.data.status;
 		return data;
 	}
 
 	// GET /conversations/:id/messages  ==> Loads all previous messages when widget opens for the first time
-	// async function loadHistory() {
-	// 	if (!conversationId) return;
-
-	// 	// const data = await get(
-	// 	//   `/api/v1/widget/conversations/${conversationId}/messages`,
-	// 	// );
-	// 	const data = {
-	// 		conversationId: "b11eabcc-2683-4055-b84b-552eb254aa53",
-	// 		status: "ACTIVE",
-	// 	};
-	// 	conversationStatus = data.status;
-
-	// 	// If already escalated show the banner
-	// 	if (conversationStatus === "escalated") {
-	// 		appendSystemMessage("You are connected with a human agent.");
-	// 	}
-	// 	return data;
-	// }
+	function loadHistory(messages) {
+		if (!messages || messages.length === 0) return;
+		messages.forEach((msg) => {
+			if (msg.role === "CUSTOMER") {
+				appendMessage("customer", msg.content);
+			} else if (msg.role === "AI" || msg.role === "HUMAN_AGENT") {
+				appendMessage("ai", msg.content);
+			}
+		});
+	}
 
 	function loadHIstory(messages) {
 		if (!messages || messages.length === 0) return;
@@ -169,7 +160,6 @@
 	// Sends customer message and triggers the AI pipeline
 	// Returns AI response or escalation status
 	async function sendMessage(content) {
-		appendMessage({ role: "customer", content });
 		ws.send(JSON.stringify({ type: "message_send", payload: { content } }));
 		// const data = await post(
 		// 	`/api/v1/widget/conversations/${conversationId}/messages`,
@@ -198,11 +188,7 @@
 	}
 	// POST /widget/csat   ==> Submits the star rating after conversation ends
 	async function submitCsat(score, comment) {
-		await post(
-			"/api/v1/widget/csat",
-			{ conversationId, score, comment },
-			true,
-		);
+		await post("/api/v1/widget/csat", { conversationId, score, comment }, true);
 		appendSystemMessage("Thank you for your feedback!");
 		hideCsatPrompt();
 	}
@@ -507,10 +493,7 @@
 
 	function buildDOM() {
 		// Set accent color CSS variable from widgetConfig
-		document.documentElement.style.setProperty(
-			"--sn-accent",
-			widgetConfig.accentColor || "#6366f1",
-		);
+		document.documentElement.style.setProperty("--sn-accent", widgetConfig.accentColor || "#6366f1");
 
 		// ── Chat bubble button ──
 		const btn = document.createElement("button");
@@ -684,38 +667,38 @@
 	// 9. SEND FLOW
 	// The main user action — send message and show response
 
-	// async function handleSend() {
-	// 	var input = document.getElementById("sn-input");
-	// 	var sendBtn = document.getElementById("sn-send-btn");
-	// 	var content = input.value.trim();
+	async function handleSend() {
+		var input = document.getElementById("sn-input");
+		var sendBtn = document.getElementById("sn-send-btn");
+		var content = input.value.trim();
 
-	// 	// Guards
-	// 	if (!content) return;
-	// 	if (isSending) return;
-	// 	if (conversationStatus !== "ACTIVE") return;
+		// Guards
+		if (!content) return;
+		if (isSending) return;
+		if (conversationStatus !== "ACTIVE") return;
 
-	// 	// Clear input immediately — don't wait for server
-	// 	input.value = "";
-	// 	input.style.height = "auto";
-	// 	isSending = true;
-	// 	sendBtn.disabled = true;
+		// Clear input immediately — don't wait for server
+		input.value = "";
+		input.style.height = "auto";
+		isSending = true;
+		sendBtn.disabled = true;
 
-	// 	// Show customer message immediately (optimistic UI)
-	// 	appendMessage("customer", content);
-	// 	showTyping();
+		// Show customer message immediately (optimistic UI)
+		appendMessage("customer", content);
+		showTyping();
 
-	// 	try {
-	// 		await sendMessage(content);
-	// 	} catch (err) {
-	// 		appendSystemMessage("Failed to send. Please try again.");
-	// 		console.error("[SupportNest] Send error:", err.message);
-	// 	} finally {
-	// 		hideTyping();
-	// 		isSending = false;
-	// 		sendBtn.disabled = !input.value.trim();
-	// 		input.focus();
-	// 	}
-	// }
+		try {
+			await sendMessage(content);
+		} catch (err) {
+			appendSystemMessage("Failed to send. Please try again.");
+			console.error("[SupportNest] Send error:", err.message);
+		} finally {
+			hideTyping();
+			isSending = false;
+			sendBtn.disabled = !input.value.trim();
+			input.focus();
+		}
+	}
 
 	// 10. TOGGLE PANEL
 	// Open and close the chat panel
@@ -726,28 +709,10 @@
 		var panel = document.getElementById("sn-panel");
 		panel.classList.toggle("sn-open", isOpen);
 
-		if (isOpen && !conversationId) {
-			// First time opening — start conversation
-			setInputDisabled(true);
-
-			try {
-				await startConversation();
-
-				await loadHistory();
-
-				// Show greeting only if no history messages exist
-				var bubbles = document.querySelectorAll(".sn-bubble");
-				if (bubbles.length === 0 && widgetConfig.greetingMessage) {
-					appendMessage("ai", widgetConfig.greetingMessage);
-				}
-			} catch (err) {
-				appendSystemMessage(
-					"Could not connect. Please refresh and try again.",
-				);
-				console.error("[SupportNest] Connection error:", err.message);
-			} finally {
-				setInputDisabled(false);
-				document.getElementById("sn-input").focus();
+		if (isOpen && widgetConfig.greetingMessage) {
+			var bubbles = document.querySelectorAll(".sn-bubble");
+			if (bubbles.length === 0) {
+				appendMessage("ai", widgetConfig.greetingMessage);
 			}
 		}
 	}
@@ -766,7 +731,8 @@
 		} catch (err) {
 			// Init failed — log and stop silently
 			// Don't render anything broken on the customer's site
-			console.error("[SupportNest] Init failed:", err.message);
+			// console.error("[SupportNest] Init failed:", err.message);
+			console.error("[SupportNest] Init failed:", err);
 		}
 	}
 
