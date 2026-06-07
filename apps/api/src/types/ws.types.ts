@@ -1,3 +1,5 @@
+import { WebSocket } from "ws";
+
 export type WsEventType =
   | 'auth'           // client → server: first message to authenticate
   | 'auth_ack'       // server → client: auth confirmed, sends back conversation context
@@ -17,4 +19,9 @@ export interface SocketMeta {
   customerId: string;
   conversationId: string;
   apiKeyId: string;
+}
+
+export interface AuthenticatedSocket extends WebSocket {
+	meta?: SocketMeta;
+	authenticated?: boolean;
 }
