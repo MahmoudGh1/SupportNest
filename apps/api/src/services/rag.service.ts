@@ -59,6 +59,7 @@ export async function askTier0Agent(question: string, organizationId: string, co
 		- Do not make up information.
 		- if the answer is not in the knowledge base then response with agentText: i don't know what are you talking about it's not in our knowledge base
 		- Only answer greeting message, and when user say anything outside the context of the knowledge base then tell him it's out of our specifications and tell him to ask the question or the issue he want.
+		- 
 
 		Return JSON only, no markdown:
 		{

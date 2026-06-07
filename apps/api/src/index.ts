@@ -7,12 +7,7 @@ import morgan from "morgan";
 import errorHandler from "./middlewares/errorhandler.middleware.js";
 import notFoundHandler from "./middlewares/notFoundHandler.middleware.js";
 import { rateLimit } from "./utils/rateLimiter.util.js";
-import {
-	RegisterController,
-	LoginController,
-} from "./controllers/auth.controller.js";
 import knowledgeRoutes from "./routes/knowledge.routes.js";
-import * as authController from "./controllers/auth.controller.js";
 import "./workers/knowledgeWorker.js";
 import conversationsRoutes from "./routes/conversations.routes.js";
 import ApiKeyRouter from "./routes/apiKey.routes.js";
@@ -22,6 +17,8 @@ import authRouter from "./routes/auth.routes.js";
 import ragRouter from "./routes/rag.routes.js";
 import cookieParser from "cookie-parser";
 import prisma from "./config/prisma.js";
+import { createServer } from "http";
+import { WebSocketServer } from "ws";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -32,10 +29,10 @@ app.use(cookieParser());
 
 app.use(helmet());
 app.use(
-  cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-  }),
+	cors({
+		origin: "http://localhost:3000",
+		credentials: true,
+	}),
 );
 
 app.use(express.static("public"));
@@ -68,7 +65,11 @@ app.use(notFoundHandler);
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+
+const Server = createServer(app);
+const wss = new WebSocketServer({ server: Server, path: "/widget/ws" });
+
+Server.listen(PORT, () => {
 	console.log("Server is running on port:", PORT);
 });
 
