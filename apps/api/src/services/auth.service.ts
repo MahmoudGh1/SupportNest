@@ -16,7 +16,7 @@ import {
 } from "src/utils/password.util.js";
 import apiKey from "src/utils/apiKey.utils.js";
 import { hashApiKey } from "src/utils/crypto.utils.js";
-import { jwt } from "jsonwebtoken";
+import Jwt from "jsonwebtoken";
 
 export const registerService = async ({
 	businessName,
@@ -168,7 +168,7 @@ export async function verifyCustomerJWT(
 	if (!org) return null;
 
 	try {
-		const payload = jwt.verify(token, org.widgetSecret) as any;
+		const payload = Jwt.verify(token, org.widgetSecret) as any;
 		return {
 			externalId: payload.sub,
 			email: payload.email,

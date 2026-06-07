@@ -4,6 +4,7 @@ import { askTier0Agent } from "src/services/rag.service.js";
 
 export async function handleMessageSend(ws: any, envelope: any) {
 	const { content } = envelope.payload;
+  console.log(content);
 	const { conversationId, organizationId } = ws.meta!;
 
 	// 1 - Persist customer message

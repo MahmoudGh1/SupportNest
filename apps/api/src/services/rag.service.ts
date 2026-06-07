@@ -1,7 +1,11 @@
 import prisma from "src/config/prisma.js";
 import { queryEmbeddings, model } from "../config/langChain.js";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
-import { AgentAction, AgentTier, MessageTier } from "generated/prisma/enums.js";
+import {
+	AgentAction,
+	AgentTier,
+	MessageTier,
+} from "generated/prisma/enums.js";
 import type { Message } from "generated/prisma/client.js";
 
 interface ChunkResult {
@@ -9,7 +13,12 @@ interface ChunkResult {
 	similarity: number;
 }
 
-export async function askTier0Agent(question: string, organizationId: string, convesationId: string = "Empty", conversationHistory: Message[] = []): Promise<any> {
+export async function askTier0Agent(
+	question: string,
+	organizationId: string,
+	convesationId: string = "Empty",
+	conversationHistory: Message[] = [],
+): Promise<any> {
 	const questionVector = await queryEmbeddings.embedQuery(question);
 	const vectorLiteral = `[${questionVector.join(",")}]`;
 
@@ -27,7 +36,9 @@ export async function askTier0Agent(question: string, organizationId: string, co
 		return "Oh. about that thing. maybe you are talking about something else we don't have.";
 	}
 
-	const context = chunks.map((chunk, i) => `[Source ${i + 1}]:\n${chunk.content}`).join("\n\n");
+	const context = chunks
+		.map((chunk, i) => `[Source ${i + 1}]:\n${chunk.content}`)
+		.join("\n\n");
 
 	const response = await model.invoke([
 		new SystemMessage(`
@@ -73,11 +84,16 @@ export async function askTier0Agent(question: string, organizationId: string, co
 		new HumanMessage(question),
 	]);
 
-	const raw = typeof response.content === "string" ? response.content : (response.content[0] as { text: string }).text;
+	const raw =
+		typeof response.content === "string"
+			? response.content
+			: (response.content[0] as { text: string }).text;
 
 	const parsed = JSON.parse(raw);
 
-	const usage = response.usage_metadata as { total_tokens?: number } | undefined;
+	const usage = response.usage_metadata as
+		| { total_tokens?: number }
+		| undefined;
 
 	const data = {
 		responseText: parsed.agentText,
@@ -91,5 +107,5 @@ export async function askTier0Agent(question: string, organizationId: string, co
 		},
 	};
 
-	return { data };
+	return data;
 }

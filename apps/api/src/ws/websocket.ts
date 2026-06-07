@@ -179,8 +179,9 @@ export function setupWebSocket(wss: WebSocketServer) {
 
 				if (!socket.authenticated) {
 					if (envelope.type === "auth") {
-						clearTimeout(authTimeout);
 						await connectionAuth(socket, envelope.payload, req);
+						clearTimeout(authTimeout);
+						return;
 					} else {
 						send(socket, {
 							type: "error",

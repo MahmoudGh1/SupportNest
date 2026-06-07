@@ -73,7 +73,7 @@
 	// One function per endpoint — clean and easy to debug individually
 
 	async function connect() {
-		ws = new WebSocket("wss://localhost/widget/ws");
+		ws = new WebSocket("wss://localhost:3000/widget/ws");
 
 		ws.onopen = () => {
 			reconnectDelay = 1000;
@@ -684,38 +684,38 @@
 	// 9. SEND FLOW
 	// The main user action — send message and show response
 
-	// async function handleSend() {
-	// 	var input = document.getElementById("sn-input");
-	// 	var sendBtn = document.getElementById("sn-send-btn");
-	// 	var content = input.value.trim();
+	async function handleSend() {
+		var input = document.getElementById("sn-input");
+		var sendBtn = document.getElementById("sn-send-btn");
+		var content = input.value.trim();
 
-	// 	// Guards
-	// 	if (!content) return;
-	// 	if (isSending) return;
-	// 	if (conversationStatus !== "ACTIVE") return;
+		// Guards
+		if (!content) return;
+		if (isSending) return;
+		if (conversationStatus !== "ACTIVE") return;
 
-	// 	// Clear input immediately — don't wait for server
-	// 	input.value = "";
-	// 	input.style.height = "auto";
-	// 	isSending = true;
-	// 	sendBtn.disabled = true;
+		// Clear input immediately — don't wait for server
+		input.value = "";
+		input.style.height = "auto";
+		isSending = true;
+		sendBtn.disabled = true;
 
-	// 	// Show customer message immediately (optimistic UI)
-	// 	appendMessage("customer", content);
-	// 	showTyping();
+		// Show customer message immediately (optimistic UI)
+		appendMessage("customer", content);
+		showTyping();
 
-	// 	try {
-	// 		await sendMessage(content);
-	// 	} catch (err) {
-	// 		appendSystemMessage("Failed to send. Please try again.");
-	// 		console.error("[SupportNest] Send error:", err.message);
-	// 	} finally {
-	// 		hideTyping();
-	// 		isSending = false;
-	// 		sendBtn.disabled = !input.value.trim();
-	// 		input.focus();
-	// 	}
-	// }
+		try {
+			await sendMessage(content);
+		} catch (err) {
+			appendSystemMessage("Failed to send. Please try again.");
+			console.error("[SupportNest] Send error:", err.message);
+		} finally {
+			hideTyping();
+			isSending = false;
+			sendBtn.disabled = !input.value.trim();
+			input.focus();
+		}
+	}
 
 	// 10. TOGGLE PANEL
 	// Open and close the chat panel
