@@ -5,11 +5,13 @@
 	"main": "index.js",
 	"scripts": {
 		"dev:web": "pnpm --filter web dev",
-		"dev:api": "pnpm --filter api dev"
+		"dev:api": "pnpm --filter api dev",
+		"dev": "turbo dev"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
+	"packageManager": "pnpm@9.0.0",
 	"devEngines": {
 		"packageManager": {
 			"name": "pnpm",
@@ -17,5 +19,8 @@
 			"onFail": "download"
 		}
 	},
-	"type": "module"
+	"type": "module",
+	"devDependencies": {
+		"turbo": "^2.9.16"
+	}
 }
