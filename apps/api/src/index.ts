@@ -36,6 +36,7 @@ app.use(
 	}),
 );
 
+
 app.use(
 	cors({
 		// Dynamically sets the header to match whoever is making the request
@@ -48,6 +49,7 @@ app.use(
 		credentials: true,
 	}),
 );
+
 app.use(morgan("dev"));
 
 const publicDir = path.resolve(process.cwd(), "public");
