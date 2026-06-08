@@ -16,4 +16,10 @@ router.get(
 	// authMiddleware,
 	knowledgeController.getKnowledgeDocuments,
 );
+
+router.delete(
+	"/organizations/:orgId/knowledge/:docId",
+	// authMiddleware,
+	knowledgeController.deleteKnowledgeDocument,
+);
 export default router;

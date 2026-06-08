@@ -72,7 +72,6 @@ let mockUserProfile: UserProfile = {
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-const session = getSession();
 
 export const api = {
 	async login(email: string, password: string): Promise<LoginResponse> {
@@ -150,35 +149,35 @@ export const api = {
 				{
 					id: 1,
 					customer: "Sarah K.",
-					status: "active",
+					status: "ACTIVE",
 					tier: "Tier 1",
 					time: "2m ago",
 				},
 				{
 					id: 2,
 					customer: "James O.",
-					status: "escalated",
+					status: "ESCALATED",
 					tier: "Human",
 					time: "8m ago",
 				},
 				{
 					id: 3,
 					customer: "Lena M.",
-					status: "closed",
+					status: "CLOSED",
 					tier: "Tier 2",
 					time: "15m ago",
 				},
 				{
 					id: 4,
 					customer: "Tom B.",
-					status: "active",
+					status: "ACTIVE",
 					tier: "Tier 1",
 					time: "21m ago",
 				},
 				{
 					id: 5,
 					customer: "Aisha F.",
-					status: "closed",
+					status: "CLOSED",
 					tier: "Tier 1",
 					time: "34m ago",
 				},
@@ -190,6 +189,8 @@ export const api = {
 	// ─── KNOWLEDGE BASE ─────────────────────────────────────────────────────────
 
 	async getKnowledgeDocs(): Promise<GetKnowledgeDocsResponse> {
+		const session = getSession();
+
 		const user = session?.user;
 		if (!user) {
 			throw new Error("User not found");
@@ -208,6 +209,8 @@ export const api = {
 	async uploadPdf(
 		input: UploadPdfInput,
 	): Promise<{ document: KnowledgeDocument }> {
+		const session = getSession();
+
 		const user = session?.user;
 		if (!user) {
 			throw new Error("User not found");
@@ -234,43 +237,71 @@ export const api = {
 		return response.json(); // expects { document: KnowledgeDocument }
 	},
 
-	async uploadFaq(
-		input: UploadFaqInput,
-	): Promise<{ document: KnowledgeDocument }> {
-		await mockDelay(600);
-		const newDoc: KnowledgeDocument = {
-			id: "doc_" + Date.now(),
-			organization_id: "org1",
-			title: input.title,
-			type: "faq",
-			storagePath: input.storagePath,
-			status: "processing",
-			metadata: {
-				faqCategory: input.faqCategory,
-			},
-			created_by: "u1",
-			created_at: new Date().toISOString(),
-			updated_at: new Date().toISOString(),
-		};
-		mockDocs = [newDoc, ...mockDocs];
+	// async uploadFaq(
+	// 	input: UploadFaqInput,
+	// ): Promise<{ document: KnowledgeDocument }> {
+	// 	await mockDelay(600);
+	// 	const newDoc: KnowledgeDocument = {
+	// 		id: "doc_" + Date.now(),
+	// 		organization_id: "org1",
+	// 		title: input.title,
+	// 		type: "faq",
+	// 		storagePath: input.storagePath,
+	// 		status: "processing",
+	// 		metadata: {
+	// 			faqCategory: input.faqCategory,
+	// 		},
+	// 		created_by: "u1",
+	// 		created_at: new Date().toISOString(),
+	// 		updated_at: new Date().toISOString(),
+	// 	};
+	// 	mockDocs = [newDoc, ...mockDocs];
 
-		// Simulate background job: flip to ready after 3s
-		setTimeout(() => {
-			mockDocs = mockDocs.map((d) =>
-				d.id === newDoc.id ? { ...d, status: "ready" } : d,
-			);
-		}, 3000);
+	// 	// Simulate background job: flip to ready after 3s
+	// 	setTimeout(() => {
+	// 		mockDocs = mockDocs.map((d) =>
+	// 			d.id === newDoc.id ? { ...d, status: "ready" } : d,
+	// 		);
+	// 	}, 3000);
 
-		return { document: newDoc };
-	},
+	// 	return { document: newDoc };
+	// },
 
 	async deleteKnowledgeDoc(id: string): Promise<{ success: boolean }> {
-		await mockDelay(400);
-		const exists = mockDocs.find((d) => d.id === id);
-		if (!exists) throw new Error("Document not found.");
-		mockDocs = mockDocs.filter((d) => d.id !== id);
-		// document_chunks are deleted by backend cascade
-		return { success: true };
+		const session = getSession();
+
+		const user = session?.user;
+		if (!user) {
+			throw new Error("User not found");
+		}
+		try {
+			const response = await fetch(
+				`http://localhost:3001/api/v1/organizations/${user.orgId}/knowledge/${id}`,
+				{
+					method: "DELETE",
+					headers: {
+						"Content-Type": "application/json",
+						credentials: "include",
+					},
+				},
+			);
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.message || "Something went wrong");
+			}
+
+			console.log("Success:", data.message);
+			return { success: data.success };
+		} catch (error) {
+			if (error instanceof Error) {
+				console.error("Error deleting item:", error.message);
+			} else {
+				console.log("An unexpected error occurred", error);
+			}
+			return { success: false };
+		}
 	},
 
 	// ─── SETTINGS ───────────────────────────────────────────────────────────────
@@ -329,82 +360,80 @@ export const api = {
 		return { organization: { ...mockOrgProfile } };
 	},
 	async getApiKeys(): Promise<ApiKey[]> {
-  const response = await fetch(
-    "http://localhost:3001/api/v1/dashboard/apiKey/keys",
-    {
-      credentials: "include",
-	   headers: {
-        Authorization: `Bearer ${getSession()?.token ?? ""}`,  // ← add this
-      },
-    }
-  );
+		const response = await fetch(
+			"http://localhost:3001/api/v1/dashboard/apiKey/keys",
+			{
+				credentials: "include",
+				headers: {
+					Authorization: `Bearer ${getSession()?.token ?? ""}`, // ← add this
+				},
+			},
+		);
 
-  let data;
+		let data;
 
-  try {
-    data = await response.json();
-  } catch {
-    data = await response.text();
-  }
+		try {
+			data = await response.json();
+		} catch {
+			data = await response.text();
+		}
 
-  console.log("=== API KEYS DEBUG ===");
-  console.log("Status:", response.status);
-  console.log("OK:", response.ok);
-  console.log("Response:", data);
+		console.log("=== API KEYS DEBUG ===");
+		console.log("Status:", response.status);
+		console.log("OK:", response.ok);
+		console.log("Response:", data);
 
-  if (!response.ok) {
-    // DON'T throw yet
-    return [];
-  }
+		if (!response.ok) {
+			// DON'T throw yet
+			return [];
+		}
 
-  return data;
-},
-async createApiKey(allowedOrigins: string[]): Promise<string> {
-  const response = await fetch(
-    "http://localhost:3001/api/v1/dashboard/apiKey/create",
-    {
-      method: "POST",
-     
-      headers: { "Content-Type": "application/json" 
-		,Authorization: `Bearer ${getSession()?.token ?? ""}`,
-		 credentials: "include",
-	  },
-      body: JSON.stringify({ allowedOrigins }),
-    }
-  )
+		return data;
+	},
+	async createApiKey(allowedOrigins: string[]): Promise<string> {
+		const response = await fetch(
+			"http://localhost:3001/api/v1/dashboard/apiKey/create",
+			{
+				method: "POST",
 
-  const data = await response.json()
-  console.log("STATUS:", response.status)
-  console.log("BODY:", data)  // ← add this
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${getSession()?.token ?? ""}`,
+					credentials: "include",
+				},
+				body: JSON.stringify({ allowedOrigins }),
+			},
+		);
 
-  if (!response.ok) {
-	console.log("bvhjdhhdddddddddddd")
-    throw new Error(data.error ?? "Failed to create API key")
-	
-  }
+		const data = await response.json();
+		console.log("STATUS:", response.status);
+		console.log("BODY:", data); // ← add this
 
+		if (!response.ok) {
+			console.log("bvhjdhhdddddddddddd");
+			throw new Error(data.error ?? "Failed to create API key");
+		}
 
-  return data
-},
-async revokeApiKey(id: string) {
-  const response = await fetch(
-    `http://localhost:3001/api/v1/dashboard/api-keys/${id}/revoke`,
-    {
-      method: "PATCH",
-      credentials: "include",
-	   headers: {
-        Authorization: `Bearer ${getSession()?.token ?? ""}`,  
-      },
-    },
-	 
-  );
+		return data;
+	},
+	async revokeApiKey(id: string) {
+		const response = await fetch(
+			`http://localhost:3001/api/v1/dashboard/api-keys/${id}/revoke`,
+			{
+				method: "PATCH",
+				credentials: "include",
+				headers: {
+					Authorization: `Bearer ${getSession()?.token ?? ""}`,
+				},
+			},
+		);
 
-  const data = await response.json();
+		const data = await response.json();
 
-  if (!response.ok) {
-    throw new Error(data.error ?? "Failed to revoke API key");
-  }
+		if (!response.ok) {
+			throw new Error(data.error ?? "Failed to revoke API key");
+		}
 
-  return data;
-}
+		return data;
+	},
 };

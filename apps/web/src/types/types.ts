@@ -99,6 +99,8 @@ export interface UploadFaqInput {
 	faqCategory?: string;
 }
 
+export type DashboardStatsStatus = "ACTIVE" | "ESCALATED" | "CLOSED";
+
 export interface DashboardStats {
 	totalConversations: number;
 	aiResolutionRate: number;
@@ -107,7 +109,7 @@ export interface DashboardStats {
 	recentConversations: {
 		id: number;
 		customer: string;
-		status: "active" | "escalated" | "closed";
+		status: DashboardStatsStatus;
 		tier: string;
 		time: string;
 	}[];
@@ -121,15 +123,15 @@ export interface GetKnowledgeDocsResponse {
 }
 
 export interface ApiKey {
-  id: string;
-  key_prefix: string;
-  key_hash: string;
-  allowed_origins: string[];
-  is_active: boolean;
-  last_used_at: string | null;
-  created_at: string;
+	id: string;
+	key_prefix: string;
+	key_hash: string;
+	allowed_origins: string[];
+	is_active: boolean;
+	last_used_at: string | null;
+	created_at: string;
 }
 
 export interface CreateApiKeyInput {
-  allowedOrigins: string[];
+	allowedOrigins: string[];
 }
