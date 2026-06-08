@@ -35,7 +35,7 @@ app.use(
 		contentSecurityPolicy: false,
 	}),
 );
-app.use(cors({ origin: "*", credentials: true }));
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(morgan("dev"));
 
 const publicDir = path.resolve(process.cwd(), "public");
@@ -59,10 +59,9 @@ app.use(notFoundHandler);
 
 app.use(errorHandler);
 
-
 const Server = createServer(app);
 const wss = new WebSocketServer({ server: Server, path: "/widget/ws" });
-setupWebSocket(wss)
+setupWebSocket(wss);
 
 Server.listen(PORT, () => {
 	console.log("Server is running on port:", PORT);
