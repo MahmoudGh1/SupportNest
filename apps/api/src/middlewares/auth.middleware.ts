@@ -6,7 +6,7 @@ import { AuthError } from "../utils/appError.js";
 export function authMiddleware(req: AuthenticatedRequest, _res: Response, next: NextFunction): void {
 	const cookieToken = req.cookies.accessToken;
 
-	if (cookieToken) {
+	if (!cookieToken) {
 		return next(new AuthError("Missing or malformed authorization header"));
 	}
 
