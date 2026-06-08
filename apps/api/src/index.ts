@@ -17,10 +17,10 @@ import authRouter from "./routes/auth.routes.js";
 import ragRouter from "./routes/rag.routes.js";
 import cookieParser from "cookie-parser";
 import paymentRoutes from "./routes/payment.routes.js";
+import prisma from "./config/prisma.js";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
 import { setupWebSocket } from "./ws/websocket.js";
-import prisma from "./config/prisma.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -51,15 +51,18 @@ app.use("/api/v1/rag", ragRouter);
 app.use("/api/v1/dashboard/apikey", ApiKeyRouter);
 app.use("/api/v1/widget", WidgetRouter);
 app.use("/api/v1/organizations", OrganizationRoutes);
-app.use("/api/v1/widget/conversations", conversationsRoutes);
-app.use("/api/v1/payments", paymentRoutes);
 
+app.use("/api/v1/widget/conversations", conversationsRoutes);
+
+app.use("/api/v1/payments", paymentRoutes);
 app.use(notFoundHandler);
+
 app.use(errorHandler);
+
 
 const Server = createServer(app);
 const wss = new WebSocketServer({ server: Server, path: "/widget/ws" });
-setupWebSocket(wss);
+setupWebSocket(wss)
 
 Server.listen(PORT, () => {
 	console.log("Server is running on port:", PORT);
@@ -67,6 +70,14 @@ Server.listen(PORT, () => {
 
 // async function main() {
 // 	const val = await prisma.organization.findMany();
-// 	console.log(val);
+//   console.log(val)
 // }
-// main();
+// main()
+// 	.then(async () => {
+// 		await prisma.$disconnect();
+// 	})
+// 	.catch(async (e) => {
+// 		console.error(e);
+// 		await prisma.$disconnect();
+// 		process.exit(1);
+// 	});

@@ -12,7 +12,7 @@ function send(socket: AuthenticatedSocket, envelope: WsEnvelope) {
 }
 
 async function connectionAuth(socket: AuthenticatedSocket, payload: Record<string, any>, req: IncomingMessage) {
-	const { apiKey, customerJwt } = payload;
+	const { apiKey, customerJwt, visitorId } = payload;
 
 	// if (!apiKey || !customerJwt) {
 	// 	send(socket, { type: "error", payload: { message: `you have to provide APIKey and customerJwt within the payload` } });
@@ -80,9 +80,18 @@ async function connectionAuth(socket: AuthenticatedSocket, payload: Record<strin
 			},
 		});
 	} else {
-		customer = await prisma.customer.create({
-			data: {
+		customer = await prisma.customer.upsert({
+			where: {
+				organizationId_externalId: {
+					organizationId: isKey.organizationId,
+					externalId: visitorId ?? `anon_fallback_${Date.now()}`,
+				},
+			},
+			update: {},
+			create: {
 				organizationId: isKey.organizationId,
+				externalId: visitorId,
+				isAnonymous: true,
 			},
 		});
 	}

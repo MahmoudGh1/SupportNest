@@ -5,7 +5,7 @@ export const widgetInitController = async (req: Request, res: Response) => {
 	try {
 		const rawApiKey = req.headers["x-api-key"] as string;
 		const origin = req.headers["origin"] as string;
-		const { customerToken } = req.body;
+		const { customerToken, visitorId } = req.body;
 
 		if (!rawApiKey) {
 			return res.status(401).json({ error: "Missing API key" });
@@ -15,6 +15,7 @@ export const widgetInitController = async (req: Request, res: Response) => {
 			rawApiKey,
 			origin,
 			customerToken,
+			visitorId,
 		});
 		return res.status(200).json(result);
 	} catch (error: any) {

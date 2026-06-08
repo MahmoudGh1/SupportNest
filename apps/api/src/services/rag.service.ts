@@ -1,15 +1,15 @@
 import prisma from "src/config/prisma.js";
 import { queryEmbeddings, model } from "../config/langChain.js";
-import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { HumanMessage, SystemMessage, AIMessage, BaseMessage } from "@langchain/core/messages";
 import { AgentAction, AgentTier, MessageTier } from "generated/prisma/enums.js";
-import type { Message } from "generated/prisma/client.js";
+import type { MemoryMessage } from "../utils/conversationMemory.utils.js";
 
 interface ChunkResult {
 	content: string;
 	similarity: number;
 }
 
-export async function askTier0Agent(question: string, organizationId: string, convesationId: string = "Empty", conversationHistory: Message[] = []): Promise<any> {
+export async function askTier0Agent(question: string, organizationId: string, convesationId: string = "Empty", conversationHistory: MemoryMessage[] = []): Promise<any> {
 	const questionVector = await queryEmbeddings.embedQuery(question);
 	const vectorLiteral = `[${questionVector.join(",")}]`;
 
@@ -22,13 +22,19 @@ export async function askTier0Agent(question: string, organizationId: string, co
     ORDER BY embedding <=> ${vectorLiteral}::vector
     LIMIT 5
   `;
-  console.log("[RAG] chunks found:", chunks.length, "for org:", organizationId);
+	console.log("[RAG] chunks found:", chunks.length, "for org:", organizationId);
 
 	if (chunks.length === 0) {
-		return "Oh. about that thing. maybe you are talking about something else we don't have.";
+		return buildResponse("Oh. about that thing. maybe you are talking about something else we don't have.", AgentAction.NO_MATCH, 0, 0);
 	}
 
 	const context = chunks.map((chunk, i) => `[Source ${i + 1}]:\n${chunk.content}`).join("\n\n");
+
+	const historyMessages = conversationHistory.flatMap((msg): BaseMessage[] => {
+		if (msg.role === "customer") return [new HumanMessage(msg.content)];
+		if (msg.role === "ai") return [new AIMessage(msg.content)];
+		return [];
+	});
 
 	const response = await model.invoke([
 		new SystemMessage(`
@@ -60,7 +66,6 @@ export async function askTier0Agent(question: string, organizationId: string, co
 		- Do not make up information.
 		- if the answer is not in the knowledge base then response with agentText: i don't know what are you talking about it's not in our knowledge base
 		- Only answer greeting message, and when user say anything outside the context of the knowledge base then tell him it's out of our specifications and tell him to ask the question or the issue he want.
-		- 
 
 		Return JSON only, no markdown:
 		{
@@ -71,26 +76,37 @@ export async function askTier0Agent(question: string, organizationId: string, co
 		Context:
 		${context}
 	`),
+		...historyMessages,
 		new HumanMessage(question),
 	]);
 
 	const raw = typeof response.content === "string" ? response.content : (response.content[0] as { text: string }).text;
 
-	const parsed = JSON.parse(raw);
+	let parsed: { agentText: string; confidenceScore: number };
+
+	try {
+		const cleaned = raw.replace(/```json|```/g, "").trim();
+		parsed = JSON.parse(cleaned);
+	} catch {
+		console.error("[RAG] Failed to parse model JSON response:", raw);
+		parsed = { agentText: raw, confidenceScore: 0.5 };
+	}
 
 	const usage = response.usage_metadata as { total_tokens?: number } | undefined;
 
-	const data = {
-		responseText: parsed.agentText,
-		action: AgentAction.NO_MATCH,
+	return buildResponse(parsed.agentText, AgentAction.NO_MATCH, parsed.confidenceScore, usage?.total_tokens ?? 0);
+}
+
+function buildResponse(responseText: string, action: AgentAction, confidenceScore: number, tokensUsed: number) {
+	return {
+		responseText,
+		action,
 		tier: MessageTier.TIER1,
 		agentLog: {
 			tier: AgentTier.TIER1,
-			confidenceScore: parsed.confidenceScore,
-			latencyMs: 1500,
-			tokensUsed: usage?.total_tokens ?? 0,
+			confidenceScore,
+			latencyMs: 0,
+			tokensUsed,
 		},
 	};
-
-	return data;
 }

@@ -28,7 +28,7 @@
       ws.send(
         JSON.stringify({
           type: "auth",
-          payload: { apiKey: API_KEY, customerJwt: CUSTOMER_TOKEN || null },
+          payload: { apiKey: API_KEY, customerJwt: CUSTOMER_TOKEN || null, visitorId: getOrCreateVisitorId() },
         })
       );
     };
@@ -545,3 +545,14 @@
     boot();
   }
 })();
+
+// ── 14. Anonymous Customer Identity ───────────────────────────────────────────────────────────────
+function getOrCreateVisitorId() {
+  const key = "sn_visitor_id";
+  let id = localStorage.getItem(key);
+  if (!id) {
+    id = "anon_" + crypto.randomUUID();
+    localStorage.setItem(key, id);
+  }
+  return id;
+}

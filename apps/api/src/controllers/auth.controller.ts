@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import prisma from "src/config/prisma.js";
 import { loginService, registerService, userService } from "src/services/auth.service.js";
+import type { AuthenticatedRequest } from "src/types/auth.types.js";
 import { signAccessToken, verifyAccessToken } from "src/utils/jwt.util.js";
 
 export const RegisterController = async (req: Request, res: Response) => {
@@ -63,15 +64,13 @@ export const LogoutController = (req: Request, res: Response) => {
 	return res.status(200).json({ message: "Token has been cleared successfully" });
 };
 
-export const userController = async (req: Request, res: Response) => {
+export const userController = async (req: AuthenticatedRequest, res: Response) => {
 	try {
-		const token = req.cookies.accessToken;
-		if (!token) {
-			return res.status(401).json({ error: "No session" });
-		}
-
-		const payloadToken = verifyAccessToken(token);
-		const result = await userService(payloadToken);
+		const { user } = req;
+		if (!user) {
+            return res.status(401).json({ error: "User not found" });
+        }
+		const result = await userService(user);
 
 		if (!result) {
 			return res.status(401).json({ error: "User not found" });

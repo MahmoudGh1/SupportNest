@@ -62,12 +62,12 @@ export const loginService = async ({ email, password }: LoginInput): Promise<Ora
 	try {
 		const user = await prisma.user.findUnique({ where: { email } });
 		if (!user) {
-			throw new AppError("Wrong Email or Password", 409);
+			throw new AppError("Wrong Email or Password", 401);
 		}
 
 		const passwordCheck = await comparePassword(password, user.passwordHash);
 		if (!passwordCheck) {
-			throw new AppError("Wrong Email or Password", 409);
+			throw new AppError("Wrong Email or Password", 401);
 		}
 
 		const { passwordHash: _password, ...dataDTO } = user;
@@ -93,7 +93,7 @@ export const userService = async (payloadToken: TokenPayload): Promise<userData>
 		});
 
 		if (!user) {
-			throw new AppError("Wrong Email or Password", 409);
+			throw new AppError("User not found!", 401);
 		}
 
 		return user as userData;
