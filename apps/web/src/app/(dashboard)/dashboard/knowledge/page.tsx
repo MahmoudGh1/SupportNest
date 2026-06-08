@@ -1,4 +1,5 @@
 "use client";
+import { useDebouncedCallback } from "use-debounce";
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
@@ -10,10 +11,32 @@ import Loading from "@/features/knowledgebase/Loading";
 import ProcessingNotice from "@/features/knowledgebase/ProcessingNotice";
 import Header from "@/features/knowledgebase/Header";
 import Toast from "@/features/knowledgebase/Toast";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/router";
+import { useUrlFilters } from "@/hooks/use-url-filters";
+import DocumentFilter from "@/features/knowledgebase/DocumentFilter";
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function KnowledgePage() {
+	const { searchParams, updateFilters } = useUrlFilters();
+
 	const [docs, setDocs] = useState<KnowledgeDocument[]>([]);
+
+	const [filterState, setFilterState] = useState({
+		title: searchParams.get("title") ?? "",
+		type: searchParams.get("type") ?? "",
+		createdAt: searchParams.get("createdAt") ?? "",
+		createdById: searchParams.get("createdById") ?? "",
+		page: Number(searchParams.get("page")) || 1,
+		limit: Number(searchParams.get("limit")) || 10,
+	});
+	const [searchInput, setSearchInput] = useState(filterState.title);
+	const debouncedTitleUpdate = useDebouncedCallback((value: string) => {
+		setFilterState((prev) => ({ ...prev, title: value, page: 1 }));
+		updateFilters("title", value);
+		updateFilters("page", null);
+	}, 400);
+
 	const [pageLoading, setPageLoading] = useState(true);
 	const [deleteTarget, setDeleteTarget] = useState<KnowledgeDocument | null>(
 		null,
@@ -23,13 +46,18 @@ export default function KnowledgePage() {
 
 	// ── Fetch ──────────────────────────────────────────────────────────────────
 	const fetchDocs = async () => {
-		const documents = (await api.getKnowledgeDocs()).data.documents;
+		const documents = (await api.getKnowledgeDocs(filterState)).data.documents;
 		setDocs(documents);
 	};
 
 	useEffect(() => {
 		fetchDocs().finally(() => setPageLoading(false));
-	}, []);
+	}, [
+		filterState.title,
+		filterState.type,
+		filterState.page,
+		filterState.limit,
+	]);
 
 	// ── Polling: only runs while any doc is "processing" ──────────────────────
 	useEffect(() => {
@@ -94,6 +122,19 @@ export default function KnowledgePage() {
 					{processing > 0 && <ProcessingNotice processing={processing} />}
 				</div>
 				<div className="mt-6">
+					<DocumentFilter
+						title={searchInput}
+						type={filterState.type}
+						onSearchChange={(value) => {
+							setSearchInput(value);
+							debouncedTitleUpdate(value);
+						}}
+						onFilterChange={(value) => {
+							setFilterState((prev) => ({ ...prev, type: value, page: 1 }));
+							updateFilters("type", value);
+							updateFilters("page", null);
+						}}
+					/>
 					<DocumentList
 						docs={docs}
 						handleDelete={handleDelete}
