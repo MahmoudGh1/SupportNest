@@ -48,6 +48,7 @@ app.use(
 		credentials: true,
 	}),
 );
+
 app.use(morgan("dev"));
 
 const publicDir = path.resolve(process.cwd(), "public");
