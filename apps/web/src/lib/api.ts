@@ -188,15 +188,23 @@ export const api = {
 
 	// ─── KNOWLEDGE BASE ─────────────────────────────────────────────────────────
 
-	async getKnowledgeDocs(): Promise<GetKnowledgeDocsResponse> {
+	async getKnowledgeDocs(filterState: any): Promise<GetKnowledgeDocsResponse> {
 		const session = getSession();
 
 		const user = session?.user;
 		if (!user) {
 			throw new Error("User not found");
 		}
+
+		const params = new URLSearchParams();
+
+		Object.entries(filterState).forEach(([key, value]) => {
+			if (value !== undefined && value !== null) {
+				params.append(key, String(value));
+			}
+		});
 		const response = await fetch(
-			`http://localhost:3001/api/v1/organizations/${user.orgId}/knowledge`,
+			`http://localhost:3001/api/v1/organizations/${user.orgId}/knowledge?${params.toString()}`,
 			{
 				credentials: "include",
 			},

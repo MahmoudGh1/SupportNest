@@ -6,6 +6,12 @@ import type { Response, RequestHandler } from "express";
 import type { AuthenticatedRequest } from "src/types/auth.types.js";
 import { knowledgeQueue } from "src/queues/knowledgeQueue.js";
 import { PrismaClientKnownRequestError } from "generated/prisma/internal/prismaNamespace.js";
+import {
+	buildFilter,
+	buildPagination,
+	type QueryParams,
+} from "src/utils/filterBuilder.js";
+import type { KnowledgeDocumentType } from "generated/prisma/enums.js";
 
 export const uploadDocument: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
@@ -50,25 +56,47 @@ export const uploadDocument: RequestHandler = asyncHandler(
 
 export const getKnowledgeDocuments: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
-		console.log(req.params.id);
 		const organization = await prisma.organization.findUnique({
 			where: {
 				id: req.params.orgId as string,
 			},
 		});
+
 		if (!organization) throw new AppError("organization not found", 404);
 
-		const documents = await prisma.knowledgeDocument.findMany({
-			where: {
-				organizationId: organization.id,
-			},
-		});
+		const filter = buildFilter(req.query);
+		const { page, limit, skip } = buildPagination(req.query as QueryParams);
+
+		const baseWhere = {
+			organizationId: organization.id,
+			...filter,
+		};
+
+		const [total, documents] = await Promise.all([
+			prisma.knowledgeDocument.count({ where: baseWhere }),
+			prisma.knowledgeDocument.findMany({
+				where: baseWhere,
+				skip,
+				take: limit,
+				orderBy: { createdAt: "desc" },
+			}),
+		]);
+
+		const totalPages = Math.ceil(total / limit);
 
 		res.status(200).json({
 			success: true,
 			message: "documents fetched successfully",
 			data: {
 				documents,
+			},
+			metadata: {
+				total,
+				page,
+				limit,
+				totalPages,
+				hasNextPage: page < totalPages,
+				hasPrevPage: page > 1,
 			},
 		});
 	},
