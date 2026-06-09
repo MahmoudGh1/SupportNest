@@ -15,9 +15,11 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useUrlFilters } from "@/hooks/use-url-filters";
 import DocumentFilter from "@/features/knowledgebase/DocumentFilter";
+import { useLingui } from "@lingui/react/macro";
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function KnowledgePage() {
+	const { i18n } = useLingui();
 	const { searchParams, updateFilters } = useUrlFilters();
 
 	const [docs, setDocs] = useState<KnowledgeDocument[]>([]);
@@ -46,7 +48,8 @@ export default function KnowledgePage() {
 
 	// ── Fetch ──────────────────────────────────────────────────────────────────
 	const fetchDocs = async () => {
-		const documents = (await api.getKnowledgeDocs(filterState)).data.documents;
+		const data = await api.getKnowledgeDocs(filterState);
+		const documents = data ? data.data.documents : [];
 		setDocs(documents);
 	};
 

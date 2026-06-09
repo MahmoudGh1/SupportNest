@@ -1,6 +1,7 @@
 import { S } from "@/components/ui";
 import { api } from "@/lib/api";
 import { formatBytes } from "@/lib/utils/utils";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useRef, useState } from "react";
 
 // ─── UPLOAD PDF PANEL ─────────────────────────────────────────────────────────
@@ -98,10 +99,10 @@ export default function UploadPdfPanel({
 				</div>
 				<div>
 					<div style={{ fontSize: 13, fontWeight: 600, color: S.dark }}>
-						Upload PDF
+						<Trans>Upload PDF</Trans>
 					</div>
 					<div style={{ fontSize: 11, color: S.textMuted }}>
-						Max 20 MB · PDF only
+						<Trans>Max 20 MB · PDF only</Trans>
 					</div>
 				</div>
 			</div>
@@ -186,10 +187,10 @@ export default function UploadPdfPanel({
 							}}
 						/>
 						<div style={{ fontSize: 13, color: S.dark, fontWeight: 500 }}>
-							Drop PDF here or click to browse
+							<Trans>Drop PDF here or click to browse</Trans>
 						</div>
 						<div style={{ fontSize: 11, color: S.textMuted, marginTop: 4 }}>
-							PDF files up to 20 MB
+							<Trans>PDF files up to 20 MB</Trans>
 						</div>
 					</>
 				)}
@@ -206,7 +207,7 @@ export default function UploadPdfPanel({
 						marginBottom: 5,
 					}}
 				>
-					Document Title
+					<Trans>Document Title</Trans>
 				</label>
 				<input
 					value={title}
@@ -279,7 +280,7 @@ export default function UploadPdfPanel({
 							className="ti ti-loader-2"
 							style={{ fontSize: 15, animation: "spin 1s linear infinite" }}
 						/>{" "}
-						Uploading…
+						<Trans>Uploading…</Trans>
 					</>
 				) : (
 					<>
@@ -287,7 +288,7 @@ export default function UploadPdfPanel({
 							className="ti ti-upload"
 							style={{ fontSize: 15 }}
 						/>{" "}
-						Upload PDF
+						<Trans>Upload PDF</Trans>
 					</>
 				)}
 			</button>

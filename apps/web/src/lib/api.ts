@@ -150,36 +150,36 @@ export const api = {
 					id: 1,
 					customer: "Sarah K.",
 					status: "ACTIVE",
-					tier: "Tier 1",
-					time: "2m ago",
+					tier: "TIER_1",
+					timestamp: "2026-06-09T01:50:00Z",
 				},
 				{
 					id: 2,
 					customer: "James O.",
 					status: "ESCALATED",
-					tier: "Human",
-					time: "8m ago",
+					tier: "HUMAN",
+					timestamp: "2026-06-09T01:42:00Z",
 				},
 				{
 					id: 3,
 					customer: "Lena M.",
 					status: "CLOSED",
-					tier: "Tier 2",
-					time: "15m ago",
+					tier: "TIER_2",
+					timestamp: "2026-06-09T01:35:00Z",
 				},
 				{
 					id: 4,
 					customer: "Tom B.",
 					status: "ACTIVE",
-					tier: "Tier 1",
-					time: "21m ago",
+					tier: "TIER_1",
+					timestamp: "2026-06-09T01:50:00Z",
 				},
 				{
 					id: 5,
 					customer: "Aisha F.",
 					status: "CLOSED",
-					tier: "Tier 1",
-					time: "34m ago",
+					tier: "TIER_1",
+					timestamp: "2026-06-09T01:50:00Z",
 				},
 			],
 			resolutionByTier: { tier1: 58, tier2: 23, human: 19 },
@@ -188,7 +188,9 @@ export const api = {
 
 	// ─── KNOWLEDGE BASE ─────────────────────────────────────────────────────────
 
-	async getKnowledgeDocs(filterState: any): Promise<GetKnowledgeDocsResponse> {
+	async getKnowledgeDocs(
+		filterState: any,
+	): Promise<GetKnowledgeDocsResponse | null> {
 		const session = getSession();
 
 		const user = session?.user;
@@ -203,15 +205,21 @@ export const api = {
 				params.append(key, String(value));
 			}
 		});
-		const response = await fetch(
-			`http://localhost:3001/api/v1/organizations/${user.orgId}/knowledge?${params.toString()}`,
-			{
-				credentials: "include",
-			},
-		);
-		if (!response.ok) throw new Error(response.statusText);
+		try {
+			const response = await fetch(
+				`http://localhost:3001/api/v1/organizations/${user.orgId}/knowledge?${params.toString()}`,
+				{
+					credentials: "include",
+				},
+			);
+			console.log(response);
+			if (!response.ok) throw new Error(response.statusText);
 
-		return response.json();
+			return response.json();
+		} catch (error: any) {
+			console.log(error.message);
+			return null;
+		}
 	},
 
 	async uploadPdf(
