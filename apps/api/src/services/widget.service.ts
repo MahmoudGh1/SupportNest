@@ -3,7 +3,7 @@ import prisma from "src/config/prisma.js";
 import AppError from "src/utils/appError.js";
 import { hashApiKey } from "src/utils/crypto.utils.js";
 
-export const widgetInitService = async ({ rawApiKey, origin, customerToken }: { rawApiKey: string; origin: string; customerToken?: string }) => {
+export const widgetInitService = async ({ rawApiKey, origin, customerToken, visitorId }: { rawApiKey: string; origin: string; customerToken?: string, visitorId?: string }) => {
 	// ── 1. Find API key by prefix (fast lookup)
 	const prefix = rawApiKey.slice(0, 8);
 
@@ -79,18 +79,33 @@ export const widgetInitService = async ({ rawApiKey, origin, customerToken }: { 
 			});
 		} catch (err) {
 			// Invalid customer token — treat as anonymous
-			customer = await prisma.customer.create({
-				data: {
+			customer = await prisma.customer.upsert({
+				where: {
+					organizationId_externalId: {
+						organizationId: org.id,
+						externalId: visitorId ?? `anon_fallback_${Date.now()}`,
+					},
+				},
+				update: {},
+				create: {
 					organizationId: org.id,
+					externalId: visitorId,
 					isAnonymous: true,
 				},
 			});
 		}
 	} else {
-		// No customer token — anonymous visitor
-		customer = await prisma.customer.create({
-			data: {
+		customer = await prisma.customer.upsert({
+			where: {
+				organizationId_externalId: {
+					organizationId: org.id,
+					externalId: visitorId ?? `anon_fallback_${Date.now()}`,
+				},
+			},
+			update: {},
+			create: {
 				organizationId: org.id,
+				externalId: visitorId,
 				isAnonymous: true,
 			},
 		});

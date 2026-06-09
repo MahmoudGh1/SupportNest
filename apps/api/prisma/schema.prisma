@@ -6,10 +6,12 @@
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider = "postgresql"
+  extensions = [vector]
 }
 
 model Organization {
@@ -28,6 +30,11 @@ model Organization {
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  invitations Invitation[]
+
+  businessApiConfig  BusinessApiConfig?
+  toolDefinitions    ToolDefinition[]
 
   users                  User[]
   apiKeys                ApiKey[]
@@ -62,6 +69,8 @@ model User {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
+  sentInvitations Invitation[] @relation("SentInvitations")
+
   assignedTickets Ticket[]
   knowledgeDocuments KnowledgeDocument[]
 
@@ -69,6 +78,54 @@ model User {
 
   @@map("users")
 }
+
+model BusinessApiConfig {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @unique @db.Uuid
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  baseUrl        String       // e.g. "https://api.theirbusiness.com"
+  authType       ApiAuthType  // API_KEY, BEARER, BASIC
+  authValue      String       // encrypted token/key they provide
+  headerName     String?      // e.g. "x-api-key" if authType is API_KEY
+
+  isVerified     Boolean      @default(false)  // did they pass our config test?
+  lastVerifiedAt DateTime?
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  toolDefinitions ToolDefinition[]
+
+  @@map("business_api_configs")
+}
+
+
+model ToolDefinition {
+  id             String            @id @default(uuid()) @db.Uuid
+  organizationId String            @db.Uuid
+  organization   Organization      @relation(fields: [organizationId], references: [id])
+
+  apiConfigId    String            @db.Uuid
+  apiConfig      BusinessApiConfig @relation(fields: [apiConfigId], references: [id])
+
+  name           String       // e.g. "getOrderById"
+  description    String       // what this tool does — the agent reads this to decide when to call it
+  method         HttpMethod   // GET, POST, PUT, DELETE
+  path           String       // e.g. "/orders/{orderId}"
+
+  parameters     Json         // { name, type, required, location: "path"|"query"|"body", description }[]
+  responseSchema Json         // what the response looks like so agent can parse it
+
+  isActive       Boolean      @default(true)
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
+  @@map("tool_definitions")
+}
+
 
 model ApiKey {
   id              String       @id @default(uuid()) @db.Uuid
@@ -211,12 +268,23 @@ model Ticket {
   assignedToId      String?      @db.Uuid
   assignedTo        User?        @relation(fields: [assignedToId], references: [id])
 
-  status            TicketStatus
-  priority          TicketPriority
+  status            TicketStatus @default(OPEN)
+  priority          TicketPriority @default(MEDIUM)
 
   resolutionNote    String?
 
   resolvedAt        DateTime?
+
+  issueType          String?
+  issueDescription   String?
+  language           String?
+
+  escalationReason   String?
+  tiersVisited       AgentTier[]   // array of which tiers handled this
+  knowledgeResults   Json          @default("[]")  // what RAG found
+  agentAttempts      Int           @default(0)
+
+  customerMessage    String?       // the triggering message
 
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
@@ -395,6 +463,30 @@ model Payment {
   @@map("payments")
 }
 
+model Invitation {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  organization   Organization     @relation(fields: [organizationId], references: [id])
+
+  email          String
+  token          String           @unique
+  role           Role             @default(SUPPORT_AGENT)
+
+  status         InvitationStatus @default(PENDING)
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+
+  invitedById    String           @db.Uuid
+  invitedBy      User             @relation("SentInvitations", fields: [invitedById], references: [id])
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([token])
+  @@index([organizationId])
+  @@map("invitations")
+}
+
 enum Role {
   SUPER_ADMIN
   ORG_ADMIN
@@ -444,6 +536,8 @@ enum KnowledgeDocumentType {
   TEXT
   DOCX
   CSV
+  API_DOC
+  SWAGGER_URL
 }
 
 enum KnowledgeDocumentStatus {
@@ -475,4 +569,24 @@ enum PaymentStatus {
 enum MessageTier {
   TIER1
   TIER2
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+}
+
+enum ApiAuthType {
+  API_KEY
+  BEARER
+  BASIC
+}
+
+enum HttpMethod {
+  GET
+  POST
+  PUT
+  PATCH
+  DELETE
 }

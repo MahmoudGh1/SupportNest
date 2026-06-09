@@ -9,4 +9,9 @@ function hashApiKey(apiKey: string) {
 	return crypto.createHash("sha256").update(apiKey).digest("hex");
 }
 
-export { generateApiKey, hashApiKey };
+function generateInviteToken(): string {
+	const randomBytes = crypto.randomBytes(32).toString("hex");
+	return `${randomBytes}`
+}
+
+export { generateApiKey, hashApiKey, generateInviteToken };

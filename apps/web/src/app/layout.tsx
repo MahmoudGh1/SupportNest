@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Sora } from "next/font/google";
 import { AuthProvider } from "@/context/auth-context";
+import { PlanProvider } from "@/context/plan-context";
 import "./globals.css";
 
 const sora = Sora({
@@ -22,14 +23,17 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<head>
-				{/* Tabler Icons */}
 				<link
 					rel="stylesheet"
 					href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"
 				/>
 			</head>
 			<body className={`${sora.variable} font-sans antialiased`}>
-				<AuthProvider>{children}</AuthProvider>
+				<PlanProvider>
+					<AuthProvider>
+						{children}
+					</AuthProvider>
+				</PlanProvider>
 			</body>
 		</html>
 	);

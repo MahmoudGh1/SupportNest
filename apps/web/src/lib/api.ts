@@ -4,24 +4,7 @@
 // The function signatures stay exactly the same — nothing else in the app changes.
 
 import { getSession } from "@/lib/auth";
-import {
-	AuthUser,
-	DashboardStats,
-	GetKnowledgeDocsResponse,
-	getKnowledgeDocsResponse,
-	KnowledgeDocument,
-	LoginResponse,
-	OrgProfile,
-	OrgSetupData,
-	UpdatePasswordInput,
-	UpdateProfileInput,
-	UpdateWidgetConfigInput,
-	UploadFaqInput,
-	UploadPdfInput,
-	UserProfile,
-	ApiKey,
-	CreateApiKeyInput,
-} from "@/types/types";
+import { AuthUser, DashboardStats, GetKnowledgeDocsResponse, getKnowledgeDocsResponse, KnowledgeDocument, LoginResponse, OrgProfile, OrgSetupData, UpdatePasswordInput, UpdateProfileInput, UpdateWidgetConfigInput, UploadFaqInput, UploadPdfInput, UserProfile, ApiKey, CreateApiKeyInput } from "@/types/types";
 
 const mockDelay = (ms = 600) => new Promise((r) => setTimeout(r, ms));
 
@@ -71,69 +54,53 @@ let mockUserProfile: UserProfile = {
 };
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 export const api = {
 	async login(email: string, password: string): Promise<LoginResponse> {
-		const res = await fetch("http://localhost:3001/api/v1/auth/login", {
+		const res = await fetch(`${BASE_URL}/api/v1/auth/login`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ email, password }),
 			credentials: "include",
 		});
-
 		const data = await res.json();
-		if (!res.ok) {
-			throw new Error("Login failed");
-		}
+		if (!res.ok) throw new Error(data.error ?? "Login failed");
 
-		const {
-			id,
-			email: orgEmail,
-			firstName,
-			lastName,
-			role,
-			organizationId,
-			onboarded,
-		} = data.result;
-		const user: AuthUser = {
-			id,
-			email: orgEmail,
-			firstName,
-			lastName,
-			role,
-			orgId: organizationId,
-			onboarded,
-		};
-
+		const { id, email: userEmail, firstName, lastName, role, organizationId, onboarded } = data.result;
+		const user: AuthUser = { id, email: userEmail, firstName, lastName, role, orgId: organizationId, onboarded };
 		return { user };
 	},
 
-	async register(data: {
-		email: string;
-		password: string;
-		firstName: string;
-		lastName: string;
-		planId: string;
-	}): Promise<LoginResponse> {
-		const res = await fetch("http://localhost:3001/api/v1/auth/register", {
+	async register(data: { email: string; password: string; firstName: string; lastName: string; businessName: string; planId: string }): Promise<LoginResponse> {
+		const res = await fetch(`${BASE_URL}/api/v1/auth/register`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(data),
 			credentials: "include",
 		});
 		const body = await res.json();
-
-		if (!res.ok) {
-			throw new Error("Registration failed");
-		}
-
-		return api.login(data.email, data.password);
+		if (!res.ok) throw new Error(body.error ?? "Registration failed");
 	},
 
-	async setupOrg(
-		data: OrgSetupData,
-	): Promise<{ orgId: string } & OrgSetupData> {
+	async getMe(): Promise<AuthUser> {
+		const res = await fetch(`${BASE_URL}/api/v1/auth/me`, {
+			credentials: "include",
+		});
+		if (!res.ok) throw new Error("No active session");
+		const data = await res.json();
+		const { id, email, firstName, lastName, role, organizationId, onboarded } = data.result;
+		return { id, email, firstName, lastName, role, orgId: organizationId, onboarded };
+	},
+
+	async logout(): Promise<void> {
+		await fetch(`${BASE_URL}/api/v1/auth/logout`, {
+			method: "POST",
+			credentials: "include",
+		});
+	},
+
+	async setupOrg(data: OrgSetupData): Promise<{ orgId: string } & OrgSetupData> {
 		await mockDelay(1000);
 		return { orgId: "org-" + Date.now(), ...data };
 	},
@@ -189,9 +156,7 @@ export const api = {
 	// ─── KNOWLEDGE BASE ─────────────────────────────────────────────────────────
 
 	async getKnowledgeDocs(filterState: any): Promise<GetKnowledgeDocsResponse> {
-		const session = getSession();
-
-		const user = session?.user;
+		const user = getSession();
 		if (!user) {
 			throw new Error("User not found");
 		}
@@ -203,20 +168,15 @@ export const api = {
 				params.append(key, String(value));
 			}
 		});
-		const response = await fetch(
-			`http://localhost:3001/api/v1/organizations/${user.orgId}/knowledge?${params.toString()}`,
-			{
-				credentials: "include",
-			},
-		);
+		const response = await fetch(`http://localhost:3001/api/v1/organizations/${user.orgId}/knowledge?${params.toString()}`, {
+			credentials: "include",
+		});
 		if (!response.ok) throw new Error(response.statusText);
 
 		return response.json();
 	},
 
-	async uploadPdf(
-		input: UploadPdfInput,
-	): Promise<{ document: KnowledgeDocument }> {
+	async uploadPdf(input: UploadPdfInput): Promise<{ document: KnowledgeDocument }> {
 		const session = getSession();
 
 		const user = session?.user;
@@ -228,14 +188,11 @@ export const api = {
 		formData.append("title", input.title);
 		formData.append("type", "PDF");
 
-		const response = await fetch(
-			`http://localhost:3001/api/v1/organizations/${user.orgId}/knowledge`,
-			{
-				method: "POST",
-				body: formData,
-				credentials: "include",
-			},
-		);
+		const response = await fetch(`http://localhost:3001/api/v1/organizations/${user.orgId}/knowledge`, {
+			method: "POST",
+			body: formData,
+			credentials: "include",
+		});
 
 		if (!response.ok) {
 			const error = await response.json().catch(() => ({}));
@@ -283,16 +240,13 @@ export const api = {
 			throw new Error("User not found");
 		}
 		try {
-			const response = await fetch(
-				`http://localhost:3001/api/v1/organizations/${user.orgId}/knowledge/${id}`,
-				{
-					method: "DELETE",
-					headers: {
-						"Content-Type": "application/json",
-						credentials: "include",
-					},
+			const response = await fetch(`http://localhost:3001/api/v1/organizations/${user.orgId}/knowledge/${id}`, {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json",
+					credentials: "include",
 				},
-			);
+			});
 
 			const data = await response.json();
 
@@ -319,13 +273,10 @@ export const api = {
 		return { user: { ...mockUserProfile } };
 	},
 
-	async updateUserProfile(
-		input: UpdateProfileInput,
-	): Promise<{ user: UserProfile }> {
+	async updateUserProfile(input: UpdateProfileInput): Promise<{ user: UserProfile }> {
 		await mockDelay(600);
 		if (!input.email) throw new Error("Email is required.");
-		if (!/\S+@\S+\.\S+/.test(input.email))
-			throw new Error("Enter a valid email.");
+		if (!/\S+@\S+\.\S+/.test(input.email)) throw new Error("Enter a valid email.");
 		mockUserProfile = {
 			...mockUserProfile,
 			...input,
@@ -334,15 +285,11 @@ export const api = {
 		return { user: { ...mockUserProfile } };
 	},
 
-	async updatePassword(
-		input: UpdatePasswordInput,
-	): Promise<{ success: boolean }> {
+	async updatePassword(input: UpdatePasswordInput): Promise<{ success: boolean }> {
 		await mockDelay(700);
 		// Mock: only accept "password" as current password (matches mock user)
-		if (input.current_password !== "password")
-			throw new Error("Current password is incorrect.");
-		if (input.new_password.length < 8)
-			throw new Error("New password must be at least 8 characters.");
+		if (input.current_password !== "password") throw new Error("Current password is incorrect.");
+		if (input.new_password.length < 8) throw new Error("New password must be at least 8 characters.");
 		return { success: true };
 	},
 
@@ -351,13 +298,10 @@ export const api = {
 		return { organization: { ...mockOrgProfile } };
 	},
 
-	async updateOrgProfile(
-		input: UpdateWidgetConfigInput,
-	): Promise<{ organization: OrgProfile }> {
+	async updateOrgProfile(input: UpdateWidgetConfigInput): Promise<{ organization: OrgProfile }> {
 		await mockDelay(600);
 		if (!input.name.trim()) throw new Error("Organization name is required.");
-		if (!input.email.trim())
-			throw new Error("Organization email is required.");
+		if (!input.email.trim()) throw new Error("Organization email is required.");
 		mockOrgProfile = {
 			...mockOrgProfile,
 			name: input.name,
@@ -368,15 +312,12 @@ export const api = {
 		return { organization: { ...mockOrgProfile } };
 	},
 	async getApiKeys(): Promise<ApiKey[]> {
-		const response = await fetch(
-			"http://localhost:3001/api/v1/dashboard/apiKey/keys",
-			{
-				credentials: "include",
-				headers: {
-					Authorization: `Bearer ${getSession()?.token ?? ""}`, // ← add this
-				},
+		const response = await fetch("http://localhost:3001/api/v1/dashboard/apiKey/keys", {
+			credentials: "include",
+			headers: {
+				Authorization: `Bearer ${getSession()?.token ?? ""}`, // ← add this
 			},
-		);
+		});
 
 		let data;
 
@@ -399,19 +340,16 @@ export const api = {
 		return data;
 	},
 	async createApiKey(allowedOrigins: string[]): Promise<string> {
-		const response = await fetch(
-			"http://localhost:3001/api/v1/dashboard/apiKey/create",
-			{
-				method: "POST",
+		const response = await fetch("http://localhost:3001/api/v1/dashboard/apiKey/create", {
+			method: "POST",
 
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${getSession()?.token ?? ""}`,
-					credentials: "include",
-				},
-				body: JSON.stringify({ allowedOrigins }),
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${getSession()?.token ?? ""}`,
+				credentials: "include",
 			},
-		);
+			body: JSON.stringify({ allowedOrigins }),
+		});
 
 		const data = await response.json();
 		console.log("STATUS:", response.status);
@@ -425,16 +363,13 @@ export const api = {
 		return data;
 	},
 	async revokeApiKey(id: string) {
-		const response = await fetch(
-			`http://localhost:3001/api/v1/dashboard/api-keys/${id}/revoke`,
-			{
-				method: "PATCH",
-				credentials: "include",
-				headers: {
-					Authorization: `Bearer ${getSession()?.token ?? ""}`,
-				},
+		const response = await fetch(`http://localhost:3001/api/v1/dashboard/api-keys/${id}/revoke`, {
+			method: "PATCH",
+			credentials: "include",
+			headers: {
+				Authorization: `Bearer ${getSession()?.token ?? ""}`,
 			},
-		);
+		});
 
 		const data = await response.json();
 

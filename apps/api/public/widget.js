@@ -1,11 +1,12 @@
 (function () {
 	// ── 1. CONFIG ──────────────────────────────────────────────────────────────
 	const config = window.SupportNestConfig || {};
-	const API_KEY = config.apiKey;
 	const CUSTOMER_TOKEN = config.customerToken || null;
-	const BASE_URL = config.baseUrl || "http://localhost:3001";
+	const currentScript = document.currentScript;
+	const WIDGET_KEY = currentScript?.dataset?.widgetKey;
+	const BASE_URL = currentScript?.dataset?.baseUrl ?? "http://localhost:3001";
 
-	if (!API_KEY) {
+	if (!WIDGET_KEY) {
 		console.error("[SupportNest] No apiKey found in window.SupportNestConfig");
 		return;
 	}
@@ -18,6 +19,16 @@
 	let isSending = false;
 	let isAuthenticated = false;
 
+	function getOrCreateVisitorId() {
+		var key = "sn_visitor_id";
+		var id = localStorage.getItem(key);
+		if (!id) {
+			id = "anon_" + crypto.randomUUID();
+			localStorage.setItem(key, id);
+		}
+		return id;
+	}
+
 	// ── 3. WEBSOCKET ───────────────────────────────────────────────────────────
 	function connect() {
 		const wsUrl = BASE_URL.replace(/^http/, "ws");
@@ -28,7 +39,7 @@
 			ws.send(
 				JSON.stringify({
 					type: "auth",
-					payload: { apiKey: API_KEY, customerJwt: CUSTOMER_TOKEN || null },
+					payload: { apiKey: WIDGET_KEY, customerJwt: CUSTOMER_TOKEN || null, visitorId: getOrCreateVisitorId() },
 				}),
 			);
 		};
@@ -412,10 +423,7 @@
 	// ── 8. APPLY SERVER CONFIG ─────────────────────────────────────────────────
 	function applyWidgetConfig() {
 		if (widgetConfig.accentColor) {
-			document.documentElement.style.setProperty(
-				"--sn-accent",
-				widgetConfig.accentColor,
-			);
+			document.documentElement.style.setProperty("--sn-accent", widgetConfig.accentColor);
 		}
 		var titleEl = document.getElementById("sn-header-title");
 		if (titleEl && widgetConfig.title) {

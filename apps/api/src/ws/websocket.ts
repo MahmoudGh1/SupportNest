@@ -2,11 +2,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { IncomingMessage } from "http";
 import prisma from "../config/prisma.js";
 import crypto from "crypto";
-import type {
-	WsEnvelope,
-	SocketMeta,
-	AuthenticatedSocket,
-} from "../types/ws.types.js";
+import type { WsEnvelope, SocketMeta, AuthenticatedSocket } from "../types/ws.types.js";
 import { verifyToken } from "src/utils/jwt.util.js";
 import { handleMessageSend } from "src/websocket/handlers/message.handler.js";
 import { activeSockets } from "src/websocket/ws.map.js";
@@ -15,12 +11,8 @@ function send(socket: AuthenticatedSocket, envelope: WsEnvelope) {
 	socket.send(JSON.stringify(envelope));
 }
 
-async function connectionAuth(
-	socket: AuthenticatedSocket,
-	payload: Record<string, any>,
-	req: IncomingMessage,
-) {
-	const { apiKey, customerJwt } = payload;
+async function connectionAuth(socket: AuthenticatedSocket, payload: Record<string, any>, req: IncomingMessage) {
+	const { apiKey, customerJwt, visitorId } = payload;
 
 	// if (!apiKey || !customerJwt) {
 	// 	send(socket, { type: "error", payload: { message: `you have to provide APIKey and customerJwt within the payload` } });
@@ -29,10 +21,7 @@ async function connectionAuth(
 	// }
 
 	if (!apiKey) {
-		send(socket, {
-			type: "error",
-			payload: { message: "apiKey is required" },
-		});
+		send(socket, { type: "error", payload: { message: "apiKey is required" } });
 		socket.close();
 		return;
 	}
@@ -45,21 +34,14 @@ async function connectionAuth(
 	});
 
 	if (!isKey || !isKey.isActive || !isKey.organizationId) {
-		send(socket, {
-			type: "error",
-			payload: {
-				message: "Invalid API key. your organizations is not authorized.",
-			},
-		});
+		send(socket, { type: "error", payload: { message: "Invalid API key. your organizations is not authorized." } });
 		socket.close();
 		return;
 	}
 
-	const origin =
-		typeof req.headers.origin == "string" ? req.headers.origin : undefined;
+	const origin = typeof req.headers.origin == "string" ? req.headers.origin : undefined;
 
-	const isAllowedOrigin: boolean =
-		origin !== undefined && isKey.allowedOrigins.includes(origin);
+	const isAllowedOrigin: boolean = origin !== undefined && isKey.allowedOrigins.includes(origin);
 
 	// if (!isAllowedOrigin) {
 	// 	return null;
@@ -68,16 +50,10 @@ async function connectionAuth(
 	let customer = null;
 
 	if (customerJwt) {
-		let customerPayload: any = verifyToken(
-			customerJwt,
-			isKey.organization.widgetSecret,
-		);
+		let customerPayload: any = verifyToken(customerJwt, isKey.organization.widgetSecret);
 
 		if (!customerPayload) {
-			send(socket, {
-				type: "error",
-				payload: { message: "not a valid customerJwt" },
-			});
+			send(socket, { type: "error", payload: { message: "not a valid customerJwt" } });
 			socket.close();
 			return;
 		}
@@ -104,9 +80,18 @@ async function connectionAuth(
 			},
 		});
 	} else {
-		customer = await prisma.customer.create({
-			data: {
+		customer = await prisma.customer.upsert({
+			where: {
+				organizationId_externalId: {
+					organizationId: isKey.organizationId,
+					externalId: visitorId ?? `anon_fallback_${Date.now()}`,
+				},
+			},
+			update: {},
+			create: {
 				organizationId: isKey.organizationId,
+				externalId: visitorId,
+				isAnonymous: true,
 			},
 		});
 	}
@@ -185,14 +170,10 @@ export function setupWebSocket(wss: WebSocketServer) {
 
 				if (!socket.authenticated) {
 					if (envelope.type === "auth") {
-						await connectionAuth(socket, envelope.payload, req);
 						clearTimeout(authTimeout);
-						return;
+						await connectionAuth(socket, envelope.payload, req);
 					} else {
-						send(socket, {
-							type: "error",
-							payload: { message: "Not authenticated" },
-						});
+						send(socket, { type: "error", payload: { message: "Not authenticated" } });
 						socket.close();
 					}
 					return;
