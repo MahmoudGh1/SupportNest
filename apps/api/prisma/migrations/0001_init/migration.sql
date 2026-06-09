@@ -1,3 +1,11 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS "vector";
+CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
+
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('SUPER_ADMIN', 'ORG_ADMIN', 'SUPPORT_AGENT');
 
@@ -264,6 +272,9 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 CREATE INDEX "users_organizationId_idx" ON "users"("organizationId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "api_keys_keyHash_key" ON "api_keys"("keyHash");
+
+-- CreateIndex
 CREATE INDEX "api_keys_keyHash_idx" ON "api_keys"("keyHash");
 
 -- CreateIndex
@@ -394,3 +405,4 @@ ALTER TABLE "payments" ADD CONSTRAINT "payments_organizationId_fkey" FOREIGN KEY
 
 -- AddForeignKey
 ALTER TABLE "payments" ADD CONSTRAINT "payments_pricingId_fkey" FOREIGN KEY ("pricingId") REFERENCES "pricing"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+

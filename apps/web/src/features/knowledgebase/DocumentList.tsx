@@ -4,6 +4,8 @@ import TypeBadge from "@/features/knowledgebase/TypeBadge";
 import { api } from "@/lib/api";
 import { formatBytes, formatDate } from "@/lib/utils/utils";
 import { KnowledgeDocument } from "@/types/types";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import React, { Dispatch, SetStateAction } from "react";
 
 const DocumentList = ({
@@ -37,10 +39,10 @@ const DocumentList = ({
 							marginBottom: 4,
 						}}
 					>
-						No documents yet
+						<Trans>No documents yet</Trans>
 					</div>
 					<div style={{ fontSize: 13 }}>
-						Upload a PDF or add a FAQ URL above to get started.
+						<Trans>Upload a PDF or add a FAQ URL above to get started.</Trans>
 					</div>
 				</div>
 			) : (
@@ -64,17 +66,17 @@ const DocumentList = ({
 							<thead>
 								<tr style={{ borderBottom: `0.5px solid ${S.border}` }}>
 									{[
-										"Document",
-										"Type",
-										"Status",
-										"Size / Info",
-										"Added",
+										t`Document`,
+										t`Type`,
+										t`Status`,
+										t`Size / Info`,
+										t`Added`,
 										"",
 									].map((h) => (
 										<th
 											key={h}
+											className="text-start"
 											style={{
-												textAlign: "left",
 												padding: "10px 16px",
 												fontSize: 10,
 												fontWeight: 600,

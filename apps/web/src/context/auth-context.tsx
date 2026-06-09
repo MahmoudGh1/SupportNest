@@ -7,8 +7,9 @@ import {
 	useState,
 	useCallback,
 } from "react";
-import { api, AuthUser } from "@/lib/api";
+import { api } from "@/lib/api";
 import { saveSession, getSession, clearSession } from "@/lib/auth";
+import { AuthUser } from "@/types/types";
 
 interface AuthState {
 	user: AuthUser | null;
