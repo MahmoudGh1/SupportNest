@@ -4,13 +4,15 @@ import { Role } from "generated/prisma/enums.js";
 export interface RefreshTokenInput {
 	refreshToken: string;
 }
-
+//edit here for user data to use in update profile and password
 export interface TokenPayload {
 	sub: string;
 	email: string;
 	role: string;
 	name?: string;
 	organizationId: string | null;
+	/* firstName?: string;   // add this
+	lastName?: string;    // add this */
 }
 
 export interface JwtPayload extends TokenPayload {

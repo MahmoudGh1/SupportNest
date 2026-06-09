@@ -281,32 +281,39 @@ export const api = {
 	},
 
 	async updateUserProfile(
-		input: UpdateProfileInput,
-	): Promise<{ user: UserProfile }> {
-		await mockDelay(600);
-		if (!input.email) throw new Error("Email is required.");
-		if (!/\S+@\S+\.\S+/.test(input.email))
-			throw new Error("Enter a valid email.");
-		mockUserProfile = {
-			...mockUserProfile,
-			...input,
-			updated_at: new Date().toISOString(),
-		} as any;
-		return { user: { ...mockUserProfile } };
-	},
+  input: UpdateProfileInput,
+): Promise<{ user: UserProfile }> {
+  const res = await fetch("http://localhost:3001/api/v1/users/me", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  body: JSON.stringify({
+      firstName: input.first_name,
+      lastName:  input.last_name,
+      email:     input.email,
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error ?? "Failed to update profile.");
+  return { user: data.result };
+},
 
 	async updatePassword(
-		input: UpdatePasswordInput,
-	): Promise<{ success: boolean }> {
-		await mockDelay(700);
-		// Mock: only accept "password" as current password (matches mock user)
-		if (input.current_password !== "password")
-			throw new Error("Current password is incorrect.");
-		if (input.new_password.length < 8)
-			throw new Error("New password must be at least 8 characters.");
-		return { success: true };
-	},
-
+  input: UpdatePasswordInput,
+): Promise<{ success: boolean }> {
+  const res = await fetch("http://localhost:3001/api/v1/users/me/password", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      current_password: input.current_password,
+      new_password:     input.new_password,
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error ?? "Failed to update password.");
+  return { success: true };
+},
 	async getOrgProfile(): Promise<{ organization: OrgProfile }> {
 		await mockDelay(300);
 		return { organization: { ...mockOrgProfile } };

@@ -4,7 +4,7 @@ import AppError from "src/utils/appError.js";
 import asyncHandler from "src/utils/asyncHandler.js";
 import type { Response, RequestHandler } from "express";
 import type { AuthenticatedRequest } from "src/types/auth.types.js";
-import { knowledgeQueue } from "src/queues/knowledgeQueue.js";
+//import { knowledgeQueue } from "src/queues/knowledgeQueue.js";
 
 export const uploadDocument: RequestHandler = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
 	// const userId = req.user?.sub;
@@ -36,11 +36,11 @@ export const uploadDocument: RequestHandler = asyncHandler(async (req: Authentic
 	});
 
 	// 3. Queue chunking + embedding job in BullMQ
-	await knowledgeQueue.add("process-document", {
+	/* await knowledgeQueue.add("process-document", {
 		documentId: doc.id,
 		fileUrl: storagePath,
 		orgId,
-	});
+	}); */
 
 	res.status(202).json({ documentId: doc.id, status: "PROCESSING" });
 });

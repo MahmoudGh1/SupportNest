@@ -25,43 +25,18 @@ interface UpdateProfileInput {
   email: string;
 }
 
-// ─── MOCK API KEY STORE ───────────────────────────────────────────────────────
-let mockApiKeys: ApiKey[] = [
-  {
-    id: "key_1",
-    key_prefix: "sn_live_a",
-    key_hash: "hashed_xxxx",
-    name: "Production",
-    allowed_origins: ["https://acme.com", "https://app.acme.com"],
-    is_active: true,
-    last_used_at: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-    created_at: "2024-01-15T10:00:00Z",
-  },
-];
-
-function generateKey(): string {
-  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-  return "sn_live_" + Array.from({ length: 32 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-}
-
 // ─── REAL API KEY WRAPPER ─────────────────────────────
-
 const apiKeyApi = {
-
-
-	async getApiKeys(): Promise<ApiKey[]> {
-		const res = await api.getApiKeys();
-		return res as ApiKey[];
-	},
-
-
-	async createApiKey(name: string, origins: string[]): Promise<any> {
-  return await api.createApiKey(origins)
-},
-	async revokeApiKey(id: string): Promise<any> {
-		return await api.revokeApiKey(id);
-	},
-
+  async getApiKeys(): Promise<ApiKey[]> {
+    const res = await api.getApiKeys();
+    return res as ApiKey[];
+  },
+  async createApiKey(name: string, origins: string[]): Promise<any> {
+    return await api.createApiKey(origins);
+  },
+  async revokeApiKey(id: string): Promise<any> {
+    return await api.revokeApiKey(id);
+  },
 };
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -273,13 +248,6 @@ function ApiKeysSection() {
     finally { setRevoking(null); }
   };
 
-  // const handleDelete = async (id: string) => {
-  //   setDeleting(id);
-  //   try { await apiKeyApi.deleteApiKey(id); setKeys(k => k.filter(x => x.id !== id)); setToast({ msg: "API key deleted", type: "success" }); }
-  //   catch { setToast({ msg: "Failed to delete key", type: "error" }); }
-  //   finally { setDeleting(null); }
-  // };
-
   return (
     <>
       <Section title="API Keys" subtitle="Keys authenticate your embeddable widget. Never expose them client-side outside the widget.">
@@ -333,11 +301,6 @@ function ApiKeysSection() {
                     Revoke
                   </button>
                 )}
-                <button onClick={() => handleDelete(key.id)} disabled={deleting === key.id}
-                  style={{ padding: "6px 12px", borderRadius: 7, border: "1px solid #FCA5A5", background: "#FEF2F2", color: "#DC2626", fontSize: 12, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 5, opacity: deleting === key.id ? 0.6 : 1 }}>
-                  {deleting === key.id ? <i className="ti ti-loader-2" style={{ fontSize: 13, animation: "spin 1s linear infinite" }} /> : <i className="ti ti-trash" style={{ fontSize: 13 }} />}
-                  Delete
-                </button>
               </div>
             </div>
           </div>
@@ -350,24 +313,18 @@ function ApiKeysSection() {
   );
 }
 
-// ─── PROFILE SECTION — reads from real auth context ───────────────────────────
+// ─── PROFILE SECTION ─────────────────────────────────────────────────────────
 function ProfileSection() {
-  const { user: authUser } = useAuth()  // ← real logged-in user
+  const { user: authUser } = useAuth()
 
-  const [form, setForm] = useState<UpdateProfileInput>({
-    first_name: "",
-    last_name:  "",
-    email:      "",
-  })
+  const [form, setForm] = useState<UpdateProfileInput>({ first_name: "", last_name: "", email: "" })
   const [loading, setLoading] = useState(false)
   const [saved,   setSaved]   = useState(false)
   const [error,   setError]   = useState("")
 
-  // Pre-fill form with real user data as soon as auth loads
   useEffect(() => {
     if (!authUser) return
     setForm({
-      // AuthUser uses camelCase (firstName) — map to snake_case for the form
       first_name: authUser.firstName ?? "",
       last_name:  authUser.lastName  ?? "",
       email:      authUser.email     ?? "",
@@ -402,7 +359,6 @@ function ProfileSection() {
 
   return (
     <Section title="Profile Information" subtitle="Update your personal details and login email.">
-      {/* Avatar row — shows real user name */}
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24, paddingBottom: 20, borderBottom: `0.5px solid ${S.border}` }}>
         <div style={{ width: 56, height: 56, borderRadius: "50%", background: S.purple, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 700, color: "#fff", flexShrink: 0 }}>
           {initials}
@@ -418,7 +374,6 @@ function ProfileSection() {
         </div>
       </div>
 
-      {/* Form — pre-filled with real user data */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
         <Input label="First name" value={form.first_name} onChange={set("first_name")} placeholder="First name" icon="user" />
         <Input label="Last name"  value={form.last_name}  onChange={set("last_name")}  placeholder="Last name" />
@@ -512,6 +467,112 @@ function PasswordSection() {
   )
 }
 
+// ─── ACCOUNT INFO SECTION — design only, wire backend later ──────────────────
+function AccountInfoSection() {
+  const { user: authUser } = useAuth()
+
+  const roleLabel: Record<string, string> = {
+    org_admin:     "Admin",
+    support_agent: "Support Agent",
+    super_admin:   "Super Admin",
+  }
+
+  const roleColor: Record<string, { bg: string; color: string }> = {
+    org_admin:     { bg: S.purpleBg,  color: S.purple   },
+    support_agent: { bg: S.greenBg,   color: "#0F6E56"  },
+    super_admin:   { bg: "#FEF3C7",   color: "#92400E"  },
+  }
+
+  const role     = authUser?.role ?? "org_admin"
+  const colors   = roleColor[role] ?? { bg: S.purpleBg, color: S.purple }
+
+  // Static placeholder date — replace with authUser.createdAt when backend returns it
+  const memberSince = "January 1, 2025"
+
+  const InfoRow = ({ icon, label, value, badge }: {
+    icon: string; label: string; value: string; badge?: { bg: string; color: string }
+  }) => (
+    <div style={{
+      display: "flex", alignItems: "center", justifyContent: "space-between",
+      padding: "12px 0",
+      borderBottom: `0.5px solid ${S.border}`,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{
+          width: 32, height: 32, borderRadius: 8,
+          background: S.purpleBg,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          flexShrink: 0,
+        }}>
+          <i className={`ti ti-${icon}`} style={{ fontSize: 15, color: S.purple }} />
+        </div>
+        <span style={{ fontSize: 13, color: S.textMuted, fontWeight: 500 }}>{label}</span>
+      </div>
+      {badge ? (
+        <span style={{
+          fontSize: 11, fontWeight: 600,
+          padding: "3px 10px", borderRadius: 999,
+          background: badge.bg, color: badge.color,
+        }}>
+          {value}
+        </span>
+      ) : (
+        <span style={{ fontSize: 13, fontWeight: 500, color: S.dark }}>{value}</span>
+      )}
+    </div>
+  )
+
+  return (
+    <div style={{
+      background: "#fff",
+      borderRadius: 12,
+      border: `0.5px solid ${S.border}`,
+      padding: "1.5rem",
+      marginBottom: 16,
+    }}>
+      <div style={{ marginBottom: 20 }}>
+        <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: S.dark }}>Account Info</h3>
+        <p style={{ margin: "4px 0 0", fontSize: 12, color: S.textMuted }}>Read-only account details.</p>
+      </div>
+
+      <InfoRow
+        icon="shield-check"
+        label="Role"
+        value={roleLabel[role] ?? role}
+        badge={colors}
+      />
+      <InfoRow
+        icon="calendar"
+        label="Member since"
+        value={memberSince}
+      />
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "12px 0",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: 8,
+            background: S.greenBg,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0,
+          }}>
+            <i className="ti ti-circle-check" style={{ fontSize: 15, color: "#0F6E56" }} />
+          </div>
+          <span style={{ fontSize: 13, color: S.textMuted, fontWeight: 500 }}>Account status</span>
+        </div>
+        <span style={{
+          fontSize: 11, fontWeight: 600,
+          padding: "3px 10px", borderRadius: 999,
+          background: S.greenBg, color: "#0F6E56",
+        }}>
+          Active
+        </span>
+      </div>
+    </div>
+  )
+}
+
 // ─── DANGER ZONE ──────────────────────────────────────────────────────────────
 function DangerZone() {
   const [confirm, setConfirm] = useState(false)
@@ -566,6 +627,8 @@ export default function ProfilePage() {
         <>
           <ProfileSection />
           <PasswordSection />
+          {/* ── Account Info — wire createdAt from backend when ready ── */}
+          <AccountInfoSection />
           <DangerZone />
         </>
       )}

@@ -1,4 +1,4 @@
-import { Worker } from "bullmq";
+/* import { Worker } from "bullmq";
 import { redis } from "../config/redis.js";
 import prisma from "src/config/prisma.js";
 import bulkInsertChunks from "src/utils/bulkInsertChunks.util.js";
@@ -35,3 +35,4 @@ knowledgeWorker.on("completed", (job) => {
 knowledgeWorker.on("failed", (job, err) => {
 	console.error(`Document ${job?.id} failed:`, err.message);
 });
+ */
