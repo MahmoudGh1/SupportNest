@@ -12,8 +12,6 @@ export const RegisterController = async (req: Request, res: Response) => {
 			return res.status(400).json({ error: "Missing required fields" });
 		}
 
-		console.log({ businessName, email, password, firstName, lastName, planId })
-
 		const result = await registerService({
 			businessName,
 			email,

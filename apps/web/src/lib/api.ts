@@ -6,51 +6,36 @@
 import { getSession } from "@/lib/auth";
 import { AuthUser, DashboardStats, GetKnowledgeDocsResponse, getKnowledgeDocsResponse, KnowledgeDocument, LoginResponse, OrgProfile, OrgSetupData, UpdatePasswordInput, UpdateProfileInput, UpdateWidgetConfigInput, UploadFaqInput, UploadPdfInput, UserProfile, ApiKey, CreateApiKeyInput } from "@/types/types";
 
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 const mockDelay = (ms = 600) => new Promise((r) => setTimeout(r, ms));
 
-const mockUsers = [
-	{
-		id: "u1",
-		email: "admin@acme.com",
-		password: "password",
-		firstName: "Mohamed",
-		lastName: "Rashad",
-		role: "org_admin",
-		orgId: "org1",
-		orgName: "Acme Corp",
-		onboarded: true,
-	},
-];
+// ─── MOCK DATA (settings + dashboard only) ────────────────────────────────────
 
-// ─── KB MOCK DATA STORE ───────────────────────────────────────────────────────
-// Mutable in-memory store — simulates the database for this session
-
-// ─── SETTINGS MOCK DATA ───────────────────────────────────────────────────────
 let mockOrgProfile: OrgProfile = {
-	id: "org1",
-	name: "Acme Corp",
-	slug: "acme-corp",
-	email: "support@acme.com",
-	widget_config: {
-		color: "#534AB7",
-		greeting: "Hi! How can we help you today?",
-		position: "bottom-right",
-	},
-	plan_id: "plan_starter",
-	is_active: true,
-	created_at: "2024-01-15T10:00:00Z",
-	updated_at: "2024-01-15T10:00:00Z",
+  id: "org1",
+  name: "Acme Corp",
+  slug: "acme-corp",
+  email: "support@acme.com",
+  widget_config: {
+    color: "#534AB7",
+    greeting: "Hi! How can we help you today?",
+    position: "bottom-right",
+  },
+  plan_id: "plan_starter",
+  is_active: true,
+  created_at: "2024-01-15T10:00:00Z",
+  updated_at: "2024-01-15T10:00:00Z",
 };
 
 let mockUserProfile: UserProfile = {
-	id: "u1",
-	email: "admin@acme.com",
-	first_name: "Mohamed",
-	last_name: "Rashad",
-	role: "org_admin",
-	organization_id: "org1",
-	is_active: true,
-	created_at: "2024-01-15T10:00:00Z",
+  id: "u1",
+  email: "admin@acme.com",
+  first_name: "Mohamed",
+  last_name: "Rashad",
+  role: "org_admin",
+  organization_id: "org1",
+  is_active: true,
+  created_at: "2024-01-15T10:00:00Z",
 };
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
@@ -153,7 +138,11 @@ export const api = {
 		};
 	},
 
-	// ─── KNOWLEDGE BASE ─────────────────────────────────────────────────────────
+  // SETTINGS (mock until backend is ready)
+  async getUserProfile(): Promise<{ user: UserProfile }> {
+    await mockDelay(300);
+    return { user: { ...mockUserProfile } };
+  },
 
 	async getKnowledgeDocs(filterState: any): Promise<GetKnowledgeDocsResponse> {
 		const user = getSession();
@@ -173,8 +162,12 @@ export const api = {
 		});
 		if (!response.ok) throw new Error(response.statusText);
 
-		return response.json();
-	},
+  async updatePassword(input: UpdatePasswordInput): Promise<{ success: boolean }> {
+    await mockDelay(700);
+    if (input.current_password !== "password") throw new Error("Current password is incorrect.");
+    if (input.new_password.length < 8) throw new Error("New password must be at least 8 characters.");
+    return { success: true };
+  },
 
 	async uploadPdf(input: UploadPdfInput): Promise<{ document: KnowledgeDocument }> {
 		const session = getSession();
