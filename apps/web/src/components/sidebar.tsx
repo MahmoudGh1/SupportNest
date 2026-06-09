@@ -8,7 +8,7 @@ const navItems = [
   { icon: "message-2",        label: "Conversations", page: "conversations" },
   { icon: "ticket",           label: "Tickets",       page: "tickets"       },
   { icon: "book",             label: "Knowledge Base",page: "knowledge"     },
-  { icon: "users",            label: "Team",          page: "team"          },
+  { icon: "users",            label: "Team",          page: "teams"          },
   { icon: "chart-bar",        label: "Analytics",     page: "analytics"     },
   { icon: "code",             label: "API & Widget",  page: "api"           },
   { icon: "settings",         label: "Settings",      page: "settings"      },

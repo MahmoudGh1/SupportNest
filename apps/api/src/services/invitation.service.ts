@@ -5,11 +5,9 @@ import { sendInvitationEmail } from "src/config/mailer.js";
 import { InvitationStatus, Role } from "generated/prisma/enums.js";
 import { generateInviteToken } from "src/utils/crypto.utils.js";
 
-
 function sevenDaysFromNow(): Date {
 	return new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 }
-
 
 export async function sendInvitationService(organizationId: string, invitedById: string, email: string): Promise<void> {
 	const org = await prisma.organization.findUnique({
@@ -41,7 +39,7 @@ export async function sendInvitationService(organizationId: string, invitedById:
 	});
 
 	const token = generateInviteToken();
-    console.log(token)
+	console.log(token);
 	await prisma.invitation.create({
 		data: {
 			organizationId,
@@ -57,7 +55,6 @@ export async function sendInvitationService(organizationId: string, invitedById:
 	const inviterName = `${inviter.firstName} ${inviter.lastName}`;
 	await sendInvitationEmail(email, org.name, inviterName, token);
 }
-
 
 export async function validateInvitationService(token: string) {
 	const invitation = await prisma.invitation.findUnique({
@@ -76,15 +73,14 @@ export async function validateInvitationService(token: string) {
 		throw new AppError("This invitation has expired", 410);
 	}
 
-    const DTO = {
+	const DTO = {
 		email: invitation.email,
 		organizationName: invitation.organization.name,
 		role: invitation.role,
-    }
+	};
 
 	return DTO;
 }
-
 
 export async function acceptInvitationService(token: string, firstName: string, lastName: string, password: string) {
 	const invitation = await prisma.invitation.findUnique({
@@ -139,7 +135,6 @@ export async function acceptInvitationService(token: string, firstName: string, 
 	};
 }
 
-
 export async function getTeamService(organizationId: string) {
 	const [members, pendingInvitations] = await Promise.all([
 		prisma.user.findMany({
@@ -178,7 +173,6 @@ export async function getTeamService(organizationId: string) {
 
 	return { members, pendingInvitations };
 }
-
 
 export async function revokeInvitationService(invitationId: string, organizationId: string): Promise<void> {
 	const invitation = await prisma.invitation.findUnique({

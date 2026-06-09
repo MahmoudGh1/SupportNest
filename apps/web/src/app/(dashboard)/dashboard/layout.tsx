@@ -9,7 +9,7 @@ import { ProtectedRoute } from "@/components/protected-route"
 const pageMeta: Record<string, string> = {
   "/dashboard":              "Overview",
   "/dashboard/conversations":"Conversations",
-  "/dashboard/tickets":      "Tickets",
+  "/dashboard/teams":      "Team",
   "/dashboard/knowledge":    "Knowledge Base",
   "/dashboard/analytics":    "Analytics",
   "/dashboard/settings":     "Settings",

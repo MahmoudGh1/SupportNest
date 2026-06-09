@@ -88,7 +88,6 @@ export const userService = async (payloadToken: TokenPayload): Promise<userData>
 				lastName: true,
 				role: true,
 				organizationId: true,
-				onboarded: true,
 			},
 		});
 
