@@ -1,1 +1,1 @@
-export { default } from "@/app/(auth)/layout"
+export { default } from "@/app/[locale]/(auth)/layout.tsx";
