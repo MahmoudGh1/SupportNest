@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		}) => {
 			const data = await api.register({
 				...formData,
-				planId: "c76ec77c-25de-4383-9d1a-986f70ef7694",
+				planId: "fdfb9397-de6b-4977-a9b9-de2610881d8as",
 			});
 			setUser(data.user);
 			saveSession(data.user);
