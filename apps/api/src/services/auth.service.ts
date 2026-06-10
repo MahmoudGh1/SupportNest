@@ -54,6 +54,7 @@ export const registerService = async ({ businessName, email, password, firstName
 			},
 		};
 	} catch (err) {
+		console.log(err);
 		throw new AppError("Transaction Failed", 500);
 	}
 };

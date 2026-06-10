@@ -24,7 +24,7 @@ const navItems = [
 	},
 	{ icon: "users", label: msg`Team`, page: "team" },
 	{ icon: "chart-bar", label: msg`Analytics`, page: "analytics" },
-	// { icon: "code", label: msg({ message: "API & Widget" }), page: "api" },
+	{ icon: "code", label: msg({ message: "API & Widget" }), page: "api" },
 	{ icon: "settings", label: msg`Settings`, page: "settings" },
 	{ icon: "user-circle", label: msg`Profile`, page: "profile" },
 ];

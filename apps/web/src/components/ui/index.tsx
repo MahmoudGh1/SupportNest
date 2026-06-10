@@ -2,6 +2,8 @@
 
 import { DashboardStatsStatus, DocStatus } from "@/types/types";
 import { useState } from "react";
+import { useLingui } from "@lingui/react/macro";
+import { t } from "@lingui/core/macro";
 
 // ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
 export const S = {
@@ -225,23 +227,25 @@ export function Btn({
 
 // ─── STATUS BADGE ─────────────────────────────────────────────────────────────
 export function StatusBadge({ status }: { status: DashboardStatsStatus }) {
+	const { i18n } = useLingui();
+
 	const map = {
 		ACTIVE: {
 			bg: S.greenBg,
 			color: S.green,
-			label: "Active",
+			label: t`Active`,
 			icon: "circle-check",
 		},
 		ESCALATED: {
 			bg: "#EEF2FF",
 			color: "#4F46E5",
-			label: "Escalated",
+			label: t`Escalated`,
 			icon: "loader-2",
 		},
 		CLOSED: {
 			bg: S.dangerBg,
 			color: S.danger,
-			label: "Closed",
+			label: t`Closed`,
 			icon: "alert-circle",
 		},
 	};

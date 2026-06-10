@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import {
+	createContext,
+	useContext,
+	useEffect,
+	useState,
+	useCallback,
+} from "react";
 import { api } from "@/lib/api";
 import { saveSession, getSession, clearSession } from "@/lib/auth";
 import type { AuthUser } from "@/types/types";
@@ -44,6 +50,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		saveSession(data.user);
 		return data.user;
 	}, []);
+
+	// const register = useCallback(
+	// 	async (formData: {
+	// 		email: string;
+	// 		password: string;
+	// 		firstName: string;
+	// 		lastName: string;
+	// 	}) => {
+	// 		const data = await api.register({
+	// 			...formData,
+	// 			planId: "fdfb9397-de6b-4977-a9b9-de2610881d8as",
+	// 		});
+	// 		setUser(data.user);
+	// 		saveSession(data.user);
+	// 		return data.user;
+	// 	},
+	// 	[],
+	// );
+
+	// const completeOnboarding = useCallback(
+	// 	(orgData: { orgId: string; name: string }) => {
+	// 		setUser((prev) => {
+	// 			if (!prev) return prev;
+	// 			const updated = {
+	// 				...prev,
+	// 				orgId: orgData.orgId,
+	// 				orgName: orgData.name,
+	// 				onboarded: true,
+	// 			};
+	// 			saveSession(updated);
+	// 			return updated;
+	// 		});
+	// 	},
+	// 	[token],
+	// );
 
 	const logout = useCallback(async () => {
 		await api.logout();

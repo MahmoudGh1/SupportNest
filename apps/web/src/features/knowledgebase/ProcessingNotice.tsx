@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import React from "react";
 
 const ProcessingNotice = ({ processing }: { processing: number }) => {
@@ -25,8 +26,10 @@ const ProcessingNotice = ({ processing }: { processing: number }) => {
 				}}
 			/>
 			<span>
-				<strong>{processing}</strong> document{processing > 1 ? "s" : ""} being
-				processed by the AI pipeline. This page updates automatically.
+				<Trans>
+					<strong>{processing}</strong> document{processing > 1 ? "s" : ""}{" "}
+					being processed by the AI pipeline. This page updates automatically.
+				</Trans>
 			</span>
 		</div>
 	);

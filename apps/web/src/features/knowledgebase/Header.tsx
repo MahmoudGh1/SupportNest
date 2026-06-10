@@ -1,7 +1,11 @@
+"use client";
 import { S } from "@/components/ui";
 import StatsItem from "@/features/knowledgebase/StatsItem";
 import { StatsItemProps } from "@/features/knowledgebase/types";
-import React, { useMemo, useState } from "react";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
+import { useMemo } from "react";
+
 const Header = ({
 	stats,
 }: {
@@ -9,10 +13,10 @@ const Header = ({
 }) => {
 	const statsItems = useMemo<StatsItemProps[]>(
 		() => [
-			{ label: "Total", value: stats.total, color: S.dark },
-			{ label: "Ready", value: stats.ready, color: S.green },
-			{ label: "Processing", value: stats.processing, color: "#4F46E5" },
-			{ label: "Failed", value: stats.failed, color: S.danger },
+			{ label: t`Total`, value: stats.total, color: S.dark },
+			{ label: t`Ready`, value: stats.ready, color: S.green },
+			{ label: t`Processing`, value: stats.processing, color: "#4F46E5" },
+			{ label: t`Failed`, value: stats.failed, color: S.danger },
 		],
 		[stats],
 	);
@@ -28,10 +32,12 @@ const Header = ({
 						margin: "0 0 4px",
 					}}
 				>
-					Knowledge Base
+					<Trans>Knowledge Base</Trans>
 				</h1>
 				<p style={{ fontSize: 13, color: S.textMuted, margin: 0 }}>
-					Documents your AI pipeline uses to answer customer questions.
+					<Trans>
+						Documents your AI pipeline uses to answer customer questions.
+					</Trans>
 				</p>
 			</div>
 			{/* Live stats */}

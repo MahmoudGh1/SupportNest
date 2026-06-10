@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { KnowledgeDocumentType } from "../../../../api/generated/prisma/enums";
+import { t } from "@lingui/core/macro";
 
 type FilterOption = KnowledgeDocumentType | "all";
 
@@ -23,7 +24,7 @@ export default function DocumentFilter({
 				type="text"
 				value={title}
 				onChange={(e) => onSearchChange(e.target.value)}
-				placeholder="Search documents..."
+				placeholder={t`Search documents...`}
 				className="w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
 			/>
 			<div className="flex gap-2">
