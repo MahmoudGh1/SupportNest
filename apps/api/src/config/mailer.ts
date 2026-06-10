@@ -12,7 +12,12 @@ export const transporter = nodemailer.createTransport({
 	},
 });
 
-export async function sendInvitationEmail(toEmail: string, businessName: string, inviterName: string, token: string): Promise<void> {
+export async function sendInvitationEmail(
+	toEmail: string,
+	businessName: string,
+	inviterName: string,
+	token: string,
+): Promise<void> {
 	const inviteUrl = `${process.env.FRONTEND_URL}/accept-invite?token=${token}`;
 
 	await transporter.sendMail({

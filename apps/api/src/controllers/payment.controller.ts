@@ -1,8 +1,15 @@
 import type { Request, Response } from "express";
-import { createPaymentIntentionService, getPaymentHistoryService, handleWebhookService } from "src/services/payment.service.js";
+import {
+	createPaymentIntentionService,
+	getPaymentHistoryService,
+	handleWebhookService,
+} from "src/services/payment.service.js";
 import type { AuthenticatedRequest } from "src/types/auth.types.js";
 
-export const createPaymentIntentionController = async (req: AuthenticatedRequest, res: Response) => {
+export const createPaymentIntentionController = async (
+	req: AuthenticatedRequest,
+	res: Response,
+) => {
 	try {
 		const organizationId = req.user?.organizationId;
 		const { pricingId, amountCents, currency, billingData } = req.body;
@@ -21,7 +28,8 @@ export const createPaymentIntentionController = async (req: AuthenticatedRequest
 
 		return res.status(201).json(result);
 	} catch (error: any) {
-		if (error.status) return res.status(error.status).json({ error: error.message });
+		if (error.status)
+			return res.status(error.status).json({ error: error.message });
 		return res.status(500).json({ error: "Internal server error" });
 	}
 };
@@ -42,13 +50,17 @@ export const handleWebhookController = async (req: Request, res: Response) => {
 	}
 };
 
-export const getPaymentHistoryController = async (req: AuthenticatedRequest, res: Response) => {
+export const getPaymentHistoryController = async (
+	req: AuthenticatedRequest,
+	res: Response,
+) => {
 	try {
 		const organizationId = req.user?.organizationId;
 		const payments = await getPaymentHistoryService(organizationId as string);
 		return res.status(200).json(payments);
 	} catch (error: any) {
-		if (error.status) return res.status(error.status).json({ error: error.message });
+		if (error.status)
+			return res.status(error.status).json({ error: error.message });
 		return res.status(500).json({ error: "Internal server error" });
 	}
 };

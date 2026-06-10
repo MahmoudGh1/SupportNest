@@ -39,7 +39,11 @@
 			ws.send(
 				JSON.stringify({
 					type: "auth",
-					payload: { apiKey: WIDGET_KEY, customerJwt: CUSTOMER_TOKEN || null, visitorId: getOrCreateVisitorId() },
+					payload: {
+						apiKey: WIDGET_KEY,
+						customerJwt: CUSTOMER_TOKEN || null,
+						visitorId: getOrCreateVisitorId(),
+					},
 				}),
 			);
 		};
@@ -423,7 +427,10 @@
 	// ── 8. APPLY SERVER CONFIG ─────────────────────────────────────────────────
 	function applyWidgetConfig() {
 		if (widgetConfig.accentColor) {
-			document.documentElement.style.setProperty("--sn-accent", widgetConfig.accentColor);
+			document.documentElement.style.setProperty(
+				"--sn-accent",
+				widgetConfig.accentColor,
+			);
 		}
 		var titleEl = document.getElementById("sn-header-title");
 		if (titleEl && widgetConfig.title) {

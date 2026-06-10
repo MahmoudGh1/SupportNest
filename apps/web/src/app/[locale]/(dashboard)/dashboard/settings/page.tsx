@@ -2,12 +2,16 @@
 
 import { useEffect, useState, useRef } from "react";
 import {
-	api,
+	UserProfile,
 	OrgProfile,
 	WidgetConfig,
+	UpdateProfileInput,
+	UpdatePasswordInput,
 	UpdateWidgetConfigInput,
-} from "@/lib/api";
+} from "@/types/types";
 import { S } from "@/components/ui";
+import { updateWidgetConfig } from "@/app/[locale]/apis/widget_config";
+import { api } from "@/lib/api";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 const fieldStyle = (
@@ -194,7 +198,7 @@ function Toast({ message, onDone }: { message: string; onDone: () => void }) {
 				bottom: 24,
 				right: 24,
 				zIndex: 200,
-				background: S.dark,
+				background: isError ? "#1a1830" : S.dark,
 				color: "#fff",
 				fontSize: 13,
 				padding: "10px 16px",
@@ -215,7 +219,405 @@ function Toast({ message, onDone }: { message: string; onDone: () => void }) {
 	);
 }
 
-// ─── ORGANIZATION TAB ────────────────────────────────────────────────────────
+// ─── TAB: PROFILE ─────────────────────────────────────────────────────────────
+function ProfileTab({ user }: { user: UserProfile }) {
+	const [form, setForm] = useState<UpdateProfileInput>({
+		first_name: user.first_name,
+		last_name: user.last_name,
+		email: user.email,
+	});
+	const [errors, setErrors] = useState<Partial<UpdateProfileInput>>({});
+	const [loading, setLoading] = useState(false);
+	const [toast, setToast] = useState("");
+
+	// Password change state
+	const [pwForm, setPwForm] = useState<UpdatePasswordInput>({
+		current_password: "",
+		new_password: "",
+	});
+	const [pwErrors, setPwErrors] = useState<Partial<UpdatePasswordInput>>({});
+	const [pwLoading, setPwLoading] = useState(false);
+	const [showCurrent, setShowCurrent] = useState(false);
+	const [showNew, setShowNew] = useState(false);
+
+	const set = (k: keyof UpdateProfileInput) => (v: string) =>
+		setForm((f) => ({ ...f, [k]: v }));
+	const setPw = (k: keyof UpdatePasswordInput) => (v: string) =>
+		setPwForm((f) => ({ ...f, [k]: v }));
+
+	const initials =
+		`${form.first_name[0] ?? ""}${form.last_name[0] ?? ""}`.toUpperCase();
+
+	const roleLabel: Record<string, string> = {
+		org_admin: "Admin",
+		support_agent: "Support Agent",
+		super_admin: "Super Admin",
+	};
+
+	// Password strength
+	const strength = (() => {
+		const p = pwForm.new_password;
+		if (!p) return 0;
+		let s = 0;
+		if (p.length >= 8) s++;
+		if (/[A-Z]/.test(p)) s++;
+		if (/[0-9]/.test(p)) s++;
+		if (/[^A-Za-z0-9]/.test(p)) s++;
+		return s;
+	})();
+	const strengthLabel = ["", "Weak", "Fair", "Good", "Strong"];
+	const strengthColor = ["", "#E24B4A", "#EF9F27", S.green, S.green];
+
+	const validateProfile = () => {
+		const e: Partial<UpdateProfileInput> = {};
+		if (!form.first_name.trim()) e.first_name = "Required.";
+		if (!form.last_name.trim()) e.last_name = "Required.";
+		if (!form.email.trim()) e.email = "Required.";
+		else if (!/\S+@\S+\.\S+/.test(form.email))
+			e.email = "Enter a valid email.";
+		return e;
+	};
+
+	const handleSaveProfile = async () => {
+		const e = validateProfile();
+		if (Object.keys(e).length) {
+			setErrors(e);
+			return;
+		}
+		setErrors({});
+		setLoading(true);
+		try {
+			await api.updateUserProfile(form);
+			setToast("Profile saved.");
+		} catch (err: any) {
+			setToast("Error: " + err.message);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const validatePassword = () => {
+		const e: Partial<UpdatePasswordInput> = {};
+		if (!pwForm.current_password) e.current_password = "Required.";
+		if (!pwForm.new_password) e.new_password = "Required.";
+		else if (pwForm.new_password.length < 8)
+			e.new_password = "At least 8 characters.";
+		return e;
+	};
+
+	const handleSavePassword = async () => {
+		const e = validatePassword();
+		if (Object.keys(e).length) {
+			setPwErrors(e);
+			return;
+		}
+		setPwErrors({});
+		setPwLoading(true);
+		try {
+			await api.updatePassword(pwForm);
+			setPwForm({ current_password: "", new_password: "" });
+			setToast("Password updated.");
+		} catch (err: any) {
+			setToast("Error: " + err.message);
+		} finally {
+			setPwLoading(false);
+		}
+	};
+
+	return (
+		<>
+			{/* Profile banner */}
+			<div
+				style={{
+					background: `linear-gradient(135deg, #534AB7 0%, #7F77DD 100%)`,
+					borderRadius: 12,
+					padding: "1.5rem 1.5rem 1.25rem",
+					display: "flex",
+					alignItems: "center",
+					gap: 16,
+					marginBottom: 16,
+				}}
+			>
+				<div
+					style={{
+						width: 60,
+						height: 60,
+						borderRadius: "50%",
+						background: "rgba(255,255,255,0.2)",
+						border: "2.5px solid rgba(255,255,255,0.4)",
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+						fontSize: 20,
+						fontWeight: 600,
+						color: "#fff",
+						flexShrink: 0,
+					}}
+				>
+					{initials}
+				</div>
+				<div>
+					<div style={{ fontSize: 18, fontWeight: 600, color: "#fff" }}>
+						{form.first_name} {form.last_name}
+					</div>
+					<div
+						style={{
+							display: "flex",
+							alignItems: "center",
+							gap: 8,
+							marginTop: 4,
+						}}
+					>
+						<span
+							style={{
+								background: "rgba(255,255,255,0.2)",
+								color: "#fff",
+								fontSize: 11,
+								fontWeight: 500,
+								padding: "2px 9px",
+								borderRadius: 999,
+							}}
+						>
+							{roleLabel[user.role] ?? user.role}
+						</span>
+						<span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>
+							{form.email}
+						</span>
+					</div>
+				</div>
+			</div>
+
+			{/* Personal info */}
+			<SectionCard
+				title="Personal Information"
+				icon="user"
+			>
+				<div
+					style={{
+						display: "grid",
+						gridTemplateColumns: "1fr 1fr",
+						gap: 14,
+						marginBottom: 14,
+					}}
+				>
+					<Field
+						label="First Name"
+						value={form.first_name}
+						onChange={set("first_name")}
+						placeholder="Mohamed"
+						error={errors.first_name}
+					/>
+					<Field
+						label="Last Name"
+						value={form.last_name}
+						onChange={set("last_name")}
+						placeholder="Rashad"
+						error={errors.last_name}
+					/>
+				</div>
+				<div style={{ marginBottom: 20 }}>
+					<Field
+						label="Email Address"
+						value={form.email}
+						onChange={set("email")}
+						type="email"
+						placeholder="you@company.com"
+						error={errors.email}
+					/>
+				</div>
+				<div style={{ display: "flex", justifyContent: "flex-end" }}>
+					<SaveBtn
+						loading={loading}
+						onClick={handleSaveProfile}
+					/>
+				</div>
+			</SectionCard>
+
+			{/* Security */}
+			<SectionCard
+				title="Security"
+				icon="lock"
+			>
+				<div
+					style={{
+						display: "grid",
+						gridTemplateColumns: "1fr 1fr",
+						gap: 14,
+						marginBottom: 14,
+					}}
+				>
+					{/* Current password */}
+					<div>
+						<label
+							style={{
+								display: "block",
+								fontSize: 12,
+								fontWeight: 500,
+								color: S.dark,
+								marginBottom: 5,
+							}}
+						>
+							Current Password
+						</label>
+						<div style={{ position: "relative" }}>
+							<input
+								type={showCurrent ? "text" : "password"}
+								value={pwForm.current_password}
+								onChange={(e) => setPw("current_password")(e.target.value)}
+								placeholder="••••••••"
+								style={{
+									...fieldStyle(false, pwErrors.current_password),
+									paddingRight: 36,
+								}}
+							/>
+							<button
+								onClick={() => setShowCurrent((p) => !p)}
+								style={{
+									position: "absolute",
+									right: 10,
+									top: "50%",
+									transform: "translateY(-50%)",
+									background: "none",
+									border: "none",
+									cursor: "pointer",
+									color: S.textMuted,
+									padding: 0,
+									display: "flex",
+								}}
+							>
+								<i
+									className={`ti ti-eye${showCurrent ? "-off" : ""}`}
+									style={{ fontSize: 16 }}
+								/>
+							</button>
+						</div>
+						{pwErrors.current_password && (
+							<p style={{ fontSize: 11, color: "#E24B4A", margin: "4px 0 0" }}>
+								{pwErrors.current_password}
+							</p>
+						)}
+					</div>
+
+					{/* New password */}
+					<div>
+						<label
+							style={{
+								display: "block",
+								fontSize: 12,
+								fontWeight: 500,
+								color: S.dark,
+								marginBottom: 5,
+							}}
+						>
+							New Password
+						</label>
+						<div style={{ position: "relative" }}>
+							<input
+								type={showNew ? "text" : "password"}
+								value={pwForm.new_password}
+								onChange={(e) => setPw("new_password")(e.target.value)}
+								placeholder="Min. 8 characters"
+								style={{
+									...fieldStyle(false, pwErrors.new_password),
+									paddingRight: 36,
+								}}
+							/>
+							<button
+								onClick={() => setShowNew((p) => !p)}
+								style={{
+									position: "absolute",
+									right: 10,
+									top: "50%",
+									transform: "translateY(-50%)",
+									background: "none",
+									border: "none",
+									cursor: "pointer",
+									color: S.textMuted,
+									padding: 0,
+									display: "flex",
+								}}
+							>
+								<i
+									className={`ti ti-eye${showNew ? "-off" : ""}`}
+									style={{ fontSize: 16 }}
+								/>
+							</button>
+						</div>
+						{pwErrors.new_password && (
+							<p style={{ fontSize: 11, color: "#E24B4A", margin: "4px 0 0" }}>
+								{pwErrors.new_password}
+							</p>
+						)}
+						{/* strength meter */}
+						{pwForm.new_password && (
+							<div style={{ marginTop: 6 }}>
+								<div style={{ display: "flex", gap: 3, marginBottom: 3 }}>
+									{[1, 2, 3, 4].map((i) => (
+										<div
+											key={i}
+											style={{
+												flex: 1,
+												height: 3,
+												borderRadius: 2,
+												background:
+													i <= strength ? strengthColor[strength] : S.border,
+												transition: "background .2s",
+											}}
+										/>
+									))}
+								</div>
+								<span style={{ fontSize: 11, color: strengthColor[strength] }}>
+									{strengthLabel[strength]}
+								</span>
+							</div>
+						)}
+					</div>
+				</div>
+				<div style={{ display: "flex", justifyContent: "flex-end" }}>
+					<SaveBtn
+						loading={pwLoading}
+						onClick={handleSavePassword}
+						label="Update password"
+					/>
+				</div>
+			</SectionCard>
+
+			{/* Read-only account info */}
+			<SectionCard
+				title="Account Info"
+				icon="info-circle"
+			>
+				<div
+					style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
+				>
+					<Field
+						label="Role"
+						value={roleLabel[user.role] ?? user.role}
+						disabled
+					/>
+					<Field
+						label="Member since"
+						value={new Date(user.created_at).toLocaleDateString("en-US", {
+							month: "long",
+							day: "numeric",
+							year: "numeric",
+						})}
+						disabled
+					/>
+				</div>
+			</SectionCard>
+
+			{toast && (
+				<Toast
+					message={toast}
+					onDone={() => setToast("")}
+				/>
+			)}
+		</>
+	);
+}
+
+// ─── TAB: ORGANIZATION ────────────────────────────────────────────────────────
 function OrgTab({ org }: { org: OrgProfile }) {
 	const [name, setName] = useState(org.name);
 	const [email, setEmail] = useState(org.email);
@@ -246,7 +648,16 @@ function OrgTab({ org }: { org: OrgProfile }) {
 		setErrors({});
 		setLoading(true);
 		try {
-			await api.updateOrgProfile({ name, email, widget_config: widget });
+			// Save org profile + widget config in parallel
+			await Promise.all([
+				// api.updateOrgProfile({ name, email }),
+				updateWidgetConfig({
+					title: widget.title, // ← map your fields
+					greetingMessage: widget.greeting,
+					accentColor: widget.color,
+					placeholder: "Type a message...",
+				}),
+			]);
 			setToast("Organization settings saved.");
 		} catch (err: any) {
 			setToast("Error: " + err.message);
@@ -254,6 +665,9 @@ function OrgTab({ org }: { org: OrgProfile }) {
 			setLoading(false);
 		}
 	};
+
+	// Live widget preview colors
+	const previewBg = widget.color;
 
 	return (
 		<>
@@ -391,6 +805,65 @@ function OrgTab({ org }: { org: OrgProfile }) {
 							</div>
 						</div>
 
+						{/* Title */}
+						<div>
+							<label
+								style={{
+									display: "block",
+									fontSize: 12,
+									fontWeight: 500,
+									color: S.dark,
+									marginBottom: 5,
+								}}
+							>
+								Widget Title
+								<span
+									style={{
+										color: S.textMuted,
+										fontWeight: 400,
+										marginLeft: 6,
+									}}
+								>
+									({(widget.title ?? "").length}/30)
+								</span>
+							</label>
+							<input
+								type="text"
+								value={widget.title ?? ""}
+								onChange={(e) => {
+									if (e.target.value.length <= 30)
+										setW("title")(e.target.value);
+								}}
+								placeholder="e.g. Support"
+								style={{
+									width: "100%",
+									boxSizing: "border-box",
+									padding: "10px 12px",
+									border: `1.5px solid ${errors.title ? "#E24B4A" : S.border}`,
+									borderRadius: 8,
+									fontSize: 13,
+									fontFamily: "inherit",
+									color: S.dark,
+									outline: "none",
+									background: "#fafafa",
+									transition: "border-color .15s",
+								}}
+								onFocus={(e) => (e.target.style.borderColor = S.purple)}
+								onBlur={(e) =>
+									(e.target.style.borderColor = errors.title
+										? "#E24B4A"
+										: S.border)
+								}
+							/>
+							{errors.title && (
+								<p
+									style={{ fontSize: 11, color: "#E24B4A", margin: "4px 0 0" }}
+								>
+									{errors.title}
+								</p>
+							)}
+						</div>
+
 						{/* Greeting */}
 						<div>
 							<label
@@ -449,54 +922,6 @@ function OrgTab({ org }: { org: OrgProfile }) {
 									{errors.greeting}
 								</p>
 							)}
-						</div>
-
-						{/* Position */}
-						<div>
-							<label
-								style={{
-									display: "block",
-									fontSize: 12,
-									fontWeight: 500,
-									color: S.dark,
-									marginBottom: 8,
-								}}
-							>
-								Widget Position
-							</label>
-							<div style={{ display: "flex", gap: 10 }}>
-								{(["bottom-left", "bottom-right"] as const).map((pos) => (
-									<button
-										key={pos}
-										onClick={() => setW("position")(pos)}
-										style={{
-											flex: 1,
-											padding: "10px 12px",
-											borderRadius: 8,
-											cursor: "pointer",
-											fontFamily: "inherit",
-											border: `1.5px solid ${widget.position === pos ? S.purple : S.border}`,
-											background:
-												widget.position === pos ? S.purpleBg : "#fff",
-											color:
-												widget.position === pos ? S.purple : S.textSecondary,
-											fontSize: 13,
-											fontWeight: widget.position === pos ? 500 : 400,
-											display: "flex",
-											alignItems: "center",
-											justifyContent: "center",
-											gap: 7,
-											transition: "all .15s",
-										}}
-									>
-										<i
-											className={`ti ti-layout-bottombar-${pos === "bottom-left" ? "collapse" : "expand"}`}
-											style={{ fontSize: 16 }}
-										/>
-										{pos === "bottom-left" ? "Bottom Left" : "Bottom Right"}
-									</button>
-								))}
-							</div>
 						</div>
 					</div>
 
@@ -565,17 +990,17 @@ function OrgTab({ org }: { org: OrgProfile }) {
 									yoursite.com
 								</div>
 							</div>
+
 							{/* Widget bubble */}
 							<div
 								style={{
 									position: "absolute",
 									bottom: 16,
-									...(widget.position === "bottom-right"
-										? { right: 16 }
-										: { left: 16 }),
+									right: 16,
 									transition: "left .3s, right .3s",
 								}}
 							>
+								{/* Chat window */}
 								<div
 									style={{
 										background: "#fff",
@@ -586,13 +1011,12 @@ function OrgTab({ org }: { org: OrgProfile }) {
 										overflow: "hidden",
 									}}
 								>
-									<div
-										style={{ background: widget.color, padding: "10px 12px" }}
-									>
+									{/* Header */}
+									<div style={{ background: previewBg, padding: "10px 12px" }}>
 										<div
 											style={{ fontSize: 12, fontWeight: 600, color: "#fff" }}
 										>
-											Support
+											{widget.title ?? "Support"}
 										</div>
 										<div
 											style={{
@@ -604,6 +1028,7 @@ function OrgTab({ org }: { org: OrgProfile }) {
 											We typically reply instantly
 										</div>
 									</div>
+									{/* Greeting bubble */}
 									<div style={{ padding: "10px 12px" }}>
 										<div
 											style={{
@@ -618,6 +1043,7 @@ function OrgTab({ org }: { org: OrgProfile }) {
 											{widget.greeting || "Hi! How can we help?"}
 										</div>
 									</div>
+									{/* Input */}
 									<div style={{ padding: "0 10px 10px" }}>
 										<div
 											style={{
@@ -637,7 +1063,7 @@ function OrgTab({ org }: { org: OrgProfile }) {
 													width: 18,
 													height: 18,
 													borderRadius: "50%",
-													background: widget.color,
+													background: previewBg,
 													display: "flex",
 													alignItems: "center",
 													justifyContent: "center",
@@ -651,18 +1077,18 @@ function OrgTab({ org }: { org: OrgProfile }) {
 										</div>
 									</div>
 								</div>
+								{/* FAB */}
 								<div
 									style={{
 										width: 40,
 										height: 40,
 										borderRadius: "50%",
-										background: widget.color,
+										background: previewBg,
 										display: "flex",
 										alignItems: "center",
 										justifyContent: "center",
 										boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-										marginLeft:
-											widget.position === "bottom-right" ? "auto" : 0,
+										marginLeft: "auto",
 										cursor: "pointer",
 									}}
 								>
@@ -706,15 +1132,21 @@ function OrgTab({ org }: { org: OrgProfile }) {
 	);
 }
 
-// ─── MAIN PAGE — Organization only, no tab switcher ──────────────────────────
+// ─── MAIN PAGE ────────────────────────────────────────────────────────────────
+type Tab = "profile" | "organization";
+
 export default function SettingsPage() {
+	const [tab, setTab] = useState<Tab>("profile");
+	const [user, setUser] = useState<UserProfile | null>(null);
 	const [org, setOrg] = useState<OrgProfile | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		api
-			.getOrgProfile()
-			.then((o) => setOrg(o.organization))
+		Promise.all([api.getUserProfile(), api.getOrgProfile()])
+			.then(([u, o]) => {
+				setUser(u.user);
+				setOrg(o.organization);
+			})
 			.finally(() => setLoading(false));
 	}, []);
 
@@ -738,11 +1170,16 @@ export default function SettingsPage() {
 		);
 	}
 
+	const tabs: { key: Tab; label: string; icon: string }[] = [
+		{ key: "profile", label: "Profile", icon: "user" },
+		{ key: "organization", label: "Organization", icon: "building" },
+	];
+
 	return (
 		<>
 			<style>{`
-        @keyframes spin   { to { transform: rotate(360deg) } }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:translateY(0) } }
+        @keyframes spin    { to { transform: rotate(360deg) } }
+        @keyframes fadeIn  { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:translateY(0) } }
       `}</style>
 
 			<div style={{ padding: "1.5rem", maxWidth: 860, margin: "0 auto" }}>
@@ -759,11 +1196,64 @@ export default function SettingsPage() {
 						Settings
 					</h1>
 					<p style={{ fontSize: 13, color: S.textMuted, margin: 0 }}>
-						Manage your organization name and widget configuration.
+						Manage your profile, security, and widget configuration.
 					</p>
 				</div>
 
-				{org && <OrgTab org={org} />}
+				{/* Tabs */}
+				<div
+					style={{
+						display: "flex",
+						gap: 4,
+						background: "#f0eff8",
+						borderRadius: 10,
+						padding: 4,
+						marginBottom: 20,
+						width: "fit-content",
+					}}
+				>
+					{tabs.map((t) => (
+						<button
+							key={t.key}
+							onClick={() => setTab(t.key)}
+							style={{
+								padding: "7px 16px",
+								borderRadius: 7,
+								border: "none",
+								cursor: "pointer",
+								fontFamily: "inherit",
+								fontSize: 13,
+								fontWeight: 500,
+								background: tab === t.key ? "#fff" : "transparent",
+								color: tab === t.key ? S.dark : S.textMuted,
+								boxShadow:
+									tab === t.key ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+								display: "flex",
+								alignItems: "center",
+								gap: 7,
+								transition: "all .15s",
+							}}
+						>
+							<i
+								className={`ti ti-${t.icon}`}
+								style={{
+									fontSize: 15,
+									color: tab === t.key ? S.purple : S.textMuted,
+								}}
+							/>
+							{t.label}
+						</button>
+					))}
+				</div>
+
+				{/* Tab content */}
+				<div
+					style={{ animation: "fadeIn .2s ease" }}
+					key={tab}
+				>
+					{tab === "profile" && user && <ProfileTab user={user} />}
+					{tab === "organization" && org && <OrgTab org={org} />}
+				</div>
 			</div>
 		</>
 	);

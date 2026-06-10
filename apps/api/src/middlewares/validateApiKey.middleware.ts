@@ -6,7 +6,11 @@ import prisma from "src/config/prisma.js";
 import apiKey from "src/utils/apiKey.utils.js";
 import type { AuthenticatedWidgetRequest } from "src/types/apiKey.types.js";
 
-export const validateApiKey = async (req: AuthenticatedWidgetRequest, res: Response, next: NextFunction): Promise<void> => {
+export const validateApiKey = async (
+	req: AuthenticatedWidgetRequest,
+	res: Response,
+	next: NextFunction,
+): Promise<void> => {
 	const incomingApiKey = req.headers["x-api-key"] || req.headers["x-apikey"];
 	const origin = req.get("origin");
 	if (!incomingApiKey) {
