@@ -8,17 +8,18 @@ export async function handleMessageSend(ws: any, payload: any) {
 	const { content } = payload;
 	const { conversationId, organizationId } = ws.meta!;
 
-	await prisma.message.create({
-		data: {
-			conversationId,
-			role: MessageRole.CUSTOMER,
-			content,
-		},
-	});
+	const [, memory] = await Promise.all([
+		prisma.message.create({
+			data: {
+				conversationId,
+				role: MessageRole.CUSTOMER,
+				content,
+			},
+		}),
+		loadMemory(conversationId),
+	]);
 
 	ws.send(JSON.stringify({ type: "typing", payload: {} }));
-
-	const memory = await loadMemory(conversationId);
 
 	const aiResponse = await askTier0Agent(content, organizationId, conversationId, memory);
 
@@ -30,21 +31,6 @@ export async function handleMessageSend(ws: any, payload: any) {
 			tier: AgentTier.TIER1,
 		},
 	});
-
-	await prisma.agentLog.create({
-		data: {
-			conversationId,
-			tier: aiResponse.agentLog.tier,
-			action: aiResponse.action,
-			input: content,
-			output: aiResponse.responseText,
-			confidenceScore: aiResponse.agentLog.confidenceScore,
-			latencyMs: aiResponse.agentLog.latencyMs,
-			tokensUsed: aiResponse.agentLog.tokensUsed,
-		},
-	});
-
-	await appendToMemory(conversationId, content, aiResponse.responseText);
 
 	ws.send(
 		JSON.stringify({
@@ -61,4 +47,20 @@ export async function handleMessageSend(ws: any, payload: any) {
 			},
 		}),
 	);
+
+	Promise.all([
+		prisma.agentLog.create({
+			data: {
+				conversationId,
+				tier: aiResponse.agentLog.tier,
+				action: aiResponse.action,
+				input: content,
+				output: aiResponse.responseText,
+				confidenceScore: aiResponse.agentLog.confidenceScore,
+				latencyMs: aiResponse.agentLog.latencyMs,
+				tokensUsed: aiResponse.agentLog.tokensUsed,
+			},
+		}),
+		appendToMemory(conversationId, content, aiResponse.responseText),
+	]).catch((err) => console.error("[Handler] Background writes failed:", err));
 }
