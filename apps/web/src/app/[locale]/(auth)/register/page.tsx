@@ -1,188 +1,414 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/context/auth-context"
-import { Input, Btn } from "@/components/ui"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+	PaymentStep,
+	type RegistrationData,
+} from "@/components/auth/PaymentStep";
+import { StepIndicator } from "@/components/auth/StepIndicator";
+
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const T = {
+	white: "#FFFFFF",
+	violet: "#534AB7",
+	violetHover: "#6259D0",
+	darkBg: "#141414",
+	darkSurface: "#1E1E1E",
+	darkBorder: "rgba(255,255,255,0.08)",
+	darkBorder2: "rgba(255,255,255,0.12)",
+	gray300: "rgba(255,255,255,0.55)",
+	gray500: "rgba(255,255,255,0.30)",
+	errorText: "#f87171",
+	radius: "10px",
+	radiusLg: "14px",
+	font: "'Sora', system-ui, sans-serif",
+} as const;
+
+const INDUSTRIES = [
+	"Technology",
+	"Healthcare",
+	"Finance",
+	"Retail & E-commerce",
+	"Education",
+	"Real Estate",
+	"Hospitality",
+	"Manufacturing",
+	"Media & Entertainment",
+	"Other",
+];
+const SIZES = ["1–10", "11–50", "51–200", "201–500", "500+"];
+
+// ── Initial form state ────────────────────────────────────────────────────────
+const EMPTY: RegistrationData = {
+	firstName: "",
+	lastName: "",
+	email: "",
+	password: "",
+	confirmPassword: "",
+	businessName: "",
+	industry: "",
+	size: "",
+	phone: "",
+};
 
 export default function RegisterPage() {
-  const { register } = useAuth()
-  const router = useRouter()
+	const router = useRouter();
+	const [step, setStep] = useState<1 | 2>(1);
+	const [form, setForm] = useState<RegistrationData>(EMPTY);
+	const [errors, setErrors] = useState<Partial<RegistrationData>>({});
 
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "", businessName: "" })
-  const [showPass,    setShowPass]    = useState(false)
-  const [loading,     setLoading]     = useState(false)
-  const [error,       setError]       = useState("")
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+	// ── Helpers ───────────────────────────────────────────────────────────────
+	function field(key: keyof RegistrationData) {
+		return {
+			value: form[key],
+			onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+				setForm((f) => ({ ...f, [key]: e.target.value })),
+		};
+	}
 
-  const set = (k: keyof typeof form) => (v: string) => setForm(f => ({ ...f, [k]: v }))
+	function validate(): boolean {
+		const e: Partial<RegistrationData> = {};
+		if (!form.firstName.trim()) e.firstName = "Required";
+		if (!form.lastName.trim()) e.lastName = "Required";
+		if (!form.email.trim()) e.email = "Required";
+		else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Enter a valid email";
+		if (!form.phone.trim()) e.phone = "Required";
+		if (!form.password) e.password = "Required";
+		else if (form.password.length < 8) e.password = "At least 8 characters";
+		if (form.password !== form.confirmPassword)
+			e.confirmPassword = "Passwords don't match";
+		if (!form.businessName.trim()) e.businessName = "Required";
+		if (!form.industry) e.industry = "Select an industry";
+		if (!form.size) e.size = "Select a company size";
+		setErrors(e);
+		return Object.keys(e).length === 0;
+	}
 
-  const validate = () => {
-    const errs: Record<string, string> = {}
-    if (!form.firstName.trim()) errs.firstName = "Required."
-    if (!form.lastName.trim())  errs.lastName  = "Required."
-    if (!form.email)            errs.email     = "Email is required."
-    else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = "Enter a valid email."
-    if (!form.password)         errs.password  = "Password is required."
-    else if (form.password.length < 8)          errs.password = "At least 8 characters."
-    return errs
-  }
+	function handleNext() {
+		if (validate()) setStep(2);
+	}
 
-  const handleSubmit = async () => {
-    const errs = validate()
-    if (Object.keys(errs).length) { setFieldErrors(errs); return }
-    setFieldErrors({}); setError(""); setLoading(true)
-    try {
-      await register(form)
-      router.push("/setup")
-    } catch (e: any) {
-      setError(e.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+	// ── Shared input style ────────────────────────────────────────────────────
+	const inputStyle: React.CSSProperties = {
+		width: "100%",
+		padding: "11px 14px",
+		background: T.darkSurface,
+		border: `1.5px solid ${T.darkBorder2}`,
+		borderRadius: T.radius,
+		color: T.white,
+		fontSize: 14,
+		fontFamily: T.font,
+		outline: "none",
+		boxSizing: "border-box",
+		transition: "border-color .15s",
+	};
 
-  // Password strength
-  const strength = (() => {
-    const p = form.password
-    if (!p) return 0
-    let s = 0
-    if (p.length >= 8) s++
-    if (/[A-Z]/.test(p)) s++
-    if (/[0-9]/.test(p)) s++
-    if (/[^A-Za-z0-9]/.test(p)) s++
-    return s
-  })()
+	const labelStyle: React.CSSProperties = {
+		fontSize: 13,
+		fontWeight: 500,
+		color: T.gray300,
+		marginBottom: 6,
+		display: "block",
+	};
 
-  const strengthLabel = ["", "Weak", "Fair", "Good", "Strong"]
-  const strengthColor = [
-    "",
-    "text-red-500",
-    "text-amber-500",
-    "text-success",
-    "text-success",
-  ]
-  const strengthBarColor = [
-    "",
-    "bg-red-500",
-    "bg-amber-500",
-    "bg-success",
-    "bg-success",
-  ]
+	const errorStyle: React.CSSProperties = {
+		fontSize: 12,
+		color: T.errorText,
+		marginTop: 4,
+	};
 
-  return (
-    <>
-      {/* Heading */}
-      <h1 className="text-xl font-semibold text-dark mb-1.5 mt-0">
-        Create your workspace
-      </h1>
-      <p className="text-sm text-body mb-7 mt-0">
-        Get started — it only takes a minute.
-      </p>
+	// ── Render ────────────────────────────────────────────────────────────────
+	return (
+		<div
+			style={{
+				minHeight: "100vh",
+				background: T.darkBg,
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+				fontFamily: T.font,
+				padding: "40px 16px",
+			}}
+		>
+			<div style={{ width: "100%", maxWidth: 500 }}>
+				{/* Logo / wordmark */}
+				<div style={{ textAlign: "center", marginBottom: 32 }}>
+					<span
+						style={{
+							fontSize: 22,
+							fontWeight: 700,
+							color: T.white,
+							letterSpacing: "-0.02em",
+						}}
+					>
+						SupportNest
+					</span>
+				</div>
 
-      {/* Error banner */}
-      {error && (
-        <div className="flex items-center gap-2 bg-danger-bg border border-red-200 rounded-lg px-3.5 py-2.5 mb-4 text-sm text-danger">
-          <i className="ti ti-alert-circle text-base shrink-0" />
-          {error}
-        </div>
-      )}
+				{/* Heading */}
+				<h1
+					style={{
+						fontSize: 26,
+						fontWeight: 700,
+						color: T.white,
+						margin: "0 0 6px",
+						textAlign: "center",
+					}}
+				>
+					{step === 1 ? "Create your account" : "Complete your order"}
+				</h1>
+				<p
+					style={{
+						fontSize: 14,
+						color: T.gray500,
+						textAlign: "center",
+						margin: "0 0 32px",
+					}}
+				>
+					{step === 1
+						? "Tell us about you and your business."
+						: "Review your plan and pay securely."}
+				</p>
 
-      {/* Name row */}
-      <div className="grid grid-cols-2 gap-3">
-        <Input label="First name" value={form.firstName} onChange={set("firstName")} placeholder="Mohamed" error={fieldErrors.firstName} />
-        <Input label="Last name"  value={form.lastName}  onChange={set("lastName")}  placeholder="Rashad"   error={fieldErrors.lastName}  />
-      </div>
+				<StepIndicator current={step} />
 
-      {/* Email */}
-      <Input
-        label="Work email"
-        type="email"
-        value={form.email}
-        onChange={set("email")}
-        placeholder="you@company.com"
-        icon="mail"
-        error={fieldErrors.email}
-      />
+				{/* ── Step 1 ── Account + Business details ─────────────────── */}
+				{step === 1 && (
+					<div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+						{/* Name row */}
+						<div
+							style={{
+								display: "grid",
+								gridTemplateColumns: "1fr 1fr",
+								gap: 12,
+							}}
+						>
+							<div>
+								<label style={labelStyle}>First name</label>
+								<input
+									style={inputStyle}
+									placeholder="Jane"
+									{...field("firstName")}
+								/>
+								{errors.firstName && (
+									<p style={errorStyle}>{errors.firstName}</p>
+								)}
+							</div>
+							<div>
+								<label style={labelStyle}>Last name</label>
+								<input
+									style={inputStyle}
+									placeholder="Smith"
+									{...field("lastName")}
+								/>
+								{errors.lastName && (
+									<p style={errorStyle}>{errors.lastName}</p>
+								)}
+							</div>
+						</div>
 
-      {/* Business name */}
-      <Input
-        label="Business Name"
-        type="text"
-        value={form.businessName}
-        onChange={set("businessName")}
-        placeholder="Your company name..."
-        icon="building"
-        error={fieldErrors.businessName}
-      />
+						{/* Email */}
+						<div>
+							<label style={labelStyle}>Work email</label>
+							<input
+								style={inputStyle}
+								type="email"
+								placeholder="jane@company.com"
+								{...field("email")}
+							/>
+							{errors.email && <p style={errorStyle}>{errors.email}</p>}
+						</div>
 
-      {/* Password */}
-      <Input
-        label="Password"
-        type={showPass ? "text" : "password"}
-        value={form.password}
-        onChange={set("password")}
-        placeholder="Min. 8 characters"
-        icon="lock"
-        error={fieldErrors.password}
-        rightEl={
-          <button
-            onClick={() => setShowPass(p => !p)}
-            className="flex items-center text-body hover:text-dark bg-transparent border-none cursor-pointer p-0 transition-colors"
-          >
-            <i className={`ti ti-eye${showPass ? "-off" : ""} text-[17px]`} />
-          </button>
-        }
-      />
+						{/* Phone */}
+						<div>
+							<label style={labelStyle}>Phone number</label>
+							<input
+								style={inputStyle}
+								type="tel"
+								placeholder="+20 10 0000 0000"
+								{...field("phone")}
+							/>
+							{errors.phone && <p style={errorStyle}>{errors.phone}</p>}
+						</div>
 
-      {/* Password strength meter */}
-      {form.password && (
-        <div className="-mt-2 mb-4">
-          <div className="flex gap-1 mb-1">
-            {[1, 2, 3, 4].map(i => (
-              <div
-                key={i}
-                className={`flex-1 h-[3px] rounded-sm transition-colors duration-200 ${
-                  i <= strength ? strengthBarColor[strength] : "bg-border"
-                }`}
-              />
-            ))}
-          </div>
-          <span className={`text-[11px] font-medium ${strengthColor[strength]}`}>
-            {strengthLabel[strength]}
-          </span>
-        </div>
-      )}
+						{/* Password row */}
+						<div
+							style={{
+								display: "grid",
+								gridTemplateColumns: "1fr 1fr",
+								gap: 12,
+							}}
+						>
+							<div>
+								<label style={labelStyle}>Password</label>
+								<input
+									style={inputStyle}
+									type="password"
+									placeholder="Min. 8 characters"
+									{...field("password")}
+								/>
+								{errors.password && (
+									<p style={errorStyle}>{errors.password}</p>
+								)}
+							</div>
+							<div>
+								<label style={labelStyle}>Confirm password</label>
+								<input
+									style={inputStyle}
+									type="password"
+									placeholder="Repeat password"
+									{...field("confirmPassword")}
+								/>
+								{errors.confirmPassword && (
+									<p style={errorStyle}>{errors.confirmPassword}</p>
+								)}
+							</div>
+						</div>
 
-      {/* Submit */}
-      <Btn onClick={handleSubmit} loading={loading} fullWidth>
-        Create account →
-      </Btn>
+						{/* Divider */}
+						<div
+							style={{
+								display: "flex",
+								alignItems: "center",
+								gap: 12,
+								margin: "4px 0",
+							}}
+						>
+							<div style={{ flex: 1, height: 1, background: T.darkBorder }} />
+							<span style={{ fontSize: 12, color: T.gray500 }}>
+								Business details
+							</span>
+							<div style={{ flex: 1, height: 1, background: T.darkBorder }} />
+						</div>
 
-      {/* Terms */}
-      <p className="text-[11px] text-body text-center mt-3 mb-0">
-        By creating an account you agree to our{" "}
-        <button className="text-[11px] text-brand hover:text-brand-dark bg-transparent border-none cursor-pointer p-0 font-[inherit] transition-colors">
-          Terms
-        </button>
-        {" "}and{" "}
-        <button className="text-[11px] text-brand hover:text-brand-dark bg-transparent border-none cursor-pointer p-0 font-[inherit] transition-colors">
-          Privacy Policy
-        </button>.
-      </p>
+						{/* Business name */}
+						<div>
+							<label style={labelStyle}>Business name</label>
+							<input
+								style={inputStyle}
+								placeholder="Acme Corp"
+								{...field("businessName")}
+							/>
+							{errors.businessName && (
+								<p style={errorStyle}>{errors.businessName}</p>
+							)}
+						</div>
 
-      {/* Sign in link */}
-      <div className="mt-5 text-center">
-        <p className="text-sm text-body m-0">
-          Already have an account?{" "}
-          <button
-            onClick={() => router.push("/login")}
-            className="text-sm text-brand font-medium hover:text-brand-dark bg-transparent border-none cursor-pointer p-0 font-[inherit] transition-colors"
-          >
-            Sign in →
-          </button>
-        </p>
-      </div>
-    </>
-  )
+						{/* Industry + Size */}
+						<div
+							style={{
+								display: "grid",
+								gridTemplateColumns: "1fr 1fr",
+								gap: 12,
+							}}
+						>
+							<div>
+								<label style={labelStyle}>Industry</label>
+								<select
+									style={{ ...inputStyle, appearance: "none" }}
+									{...field("industry")}
+								>
+									<option value="">Select…</option>
+									{INDUSTRIES.map((i) => (
+										<option
+											key={i}
+											value={i}
+										>
+											{i}
+										</option>
+									))}
+								</select>
+								{errors.industry && (
+									<p style={errorStyle}>{errors.industry}</p>
+								)}
+							</div>
+							<div>
+								<label style={labelStyle}>Company size</label>
+								<select
+									style={{ ...inputStyle, appearance: "none" }}
+									{...field("size")}
+								>
+									<option value="">Select…</option>
+									{SIZES.map((s) => (
+										<option
+											key={s}
+											value={s}
+										>
+											{s} employees
+										</option>
+									))}
+								</select>
+								{errors.size && <p style={errorStyle}>{errors.size}</p>}
+							</div>
+						</div>
+
+						{/* Next button */}
+						<button
+							onClick={handleNext}
+							style={{
+								width: "100%",
+								padding: "13px",
+								background: T.violet,
+								color: T.white,
+								border: "none",
+								borderRadius: T.radius,
+								fontSize: 15,
+								fontWeight: 600,
+								fontFamily: T.font,
+								cursor: "pointer",
+								marginTop: 4,
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+								gap: 8,
+								transition: "background .15s",
+							}}
+							onMouseEnter={(e) =>
+								(e.currentTarget.style.background = T.violetHover)
+							}
+							onMouseLeave={(e) =>
+								(e.currentTarget.style.background = T.violet)
+							}
+						>
+							Continue to Payment
+							<i
+								className="ti ti-arrow-right"
+								style={{ fontSize: 16 }}
+							/>
+						</button>
+
+						<p
+							style={{
+								textAlign: "center",
+								fontSize: 13,
+								color: T.gray500,
+								margin: 0,
+							}}
+						>
+							Already have an account?{" "}
+							<a
+								href="/login"
+								style={{
+									color: T.violet,
+									textDecoration: "none",
+									fontWeight: 500,
+								}}
+							>
+								Sign in
+							</a>
+						</p>
+					</div>
+				)}
+
+				{/* ── Step 2 ── Payment ─────────────────────────────────────── */}
+				{step === 2 && (
+					<PaymentStep
+						registrationData={form}
+						onBack={() => setStep(1)}
+					/>
+				)}
+			</div>
+		</div>
+	);
 }

@@ -31,19 +31,18 @@ msgstr "↓ 0.2s improvement"
 
 #. placeholder {0}: processing > 1 ? "s" : ""
 #: src/features/knowledgebase/ProcessingNotice.tsx:29
-msgid "<0>{processing}</0> document{0} being processed by the AI pipeline. This "
-"page updates automatically."
-msgstr "<0>{processing}</0> document{0} being processed by the AI pipeline. "
-"This page updates automatically."
+#~ msgid "<0>{processing}</0> document{0} being processed by the AI pipeline. This "
+#~ "page updates automatically."
+#~ msgstr "<0>{processing}</0> document{0} being processed by the AI pipeline. "
+#~ "This page updates automatically."
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:142
-#: src/components/ui/index.tsx:236
 msgid "Active"
 msgstr "Active"
 
 #: src/features/knowledgebase/DocumentList.tsx:73
-msgid "Added"
-msgstr "Added"
+#~ msgid "Added"
+#~ msgstr "Added"
 
 #: src/components/sidebar.tsx:199
 msgid "AI Mode"
@@ -53,15 +52,14 @@ msgstr "AI Mode"
 msgid "AI Resolution Rate"
 msgstr "AI Resolution Rate"
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:10
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:16
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:17
 #: src/components/sidebar.tsx:26
 msgid "Analytics"
 msgstr "Analytics"
 
 #: src/components/sidebar.tsx:27
-msgid "API & Widget"
-msgstr "API & Widget"
+#~ msgid "API & Widget"
+#~ msgstr "API & Widget"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:184
 msgid "At a glance"
@@ -72,7 +70,6 @@ msgid "Avg Response Time"
 msgstr "Avg Response Time"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:144
-#: src/components/ui/index.tsx:248
 msgid "Closed"
 msgstr "Closed"
 
@@ -89,34 +86,33 @@ msgstr "CSAT Score"
 msgid "Customer"
 msgstr "Customer"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:43
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:44
 msgid "Dashboard"
 msgstr "Dashboard"
 
 #: src/features/knowledgebase/DocumentList.tsx:69
-msgid "Document"
-msgstr "Document"
+#~ msgid "Document"
+#~ msgstr "Document"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:210
-msgid "Document Title"
-msgstr "Document Title"
+#~ msgid "Document Title"
+#~ msgstr "Document Title"
 
 #: src/features/knowledgebase/Header.tsx:38
-msgid "Documents your AI pipeline uses to answer customer questions."
-msgstr "Documents your AI pipeline uses to answer customer questions."
+#~ msgid "Documents your AI pipeline uses to answer customer questions."
+#~ msgstr "Documents your AI pipeline uses to answer customer questions."
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:190
-msgid "Drop PDF here or click to browse"
-msgstr "Drop PDF here or click to browse"
+#~ msgid "Drop PDF here or click to browse"
+#~ msgstr "Drop PDF here or click to browse"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:143
-#: src/components/ui/index.tsx:242
 msgid "Escalated"
 msgstr "Escalated"
 
 #: src/features/knowledgebase/Header.tsx:19
-msgid "Failed"
-msgstr "Failed"
+#~ msgid "Failed"
+#~ msgstr "Failed"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:138
 msgid "Human"
@@ -126,9 +122,8 @@ msgstr "Human"
 msgid "Human Agent"
 msgstr "Human Agent"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:15
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:16
 #: src/components/sidebar.tsx:22
-#: src/features/knowledgebase/Header.tsx:35
 msgid "Knowledge Base"
 msgstr "Knowledge Base"
 
@@ -138,12 +133,12 @@ msgid "Logout"
 msgstr "Logout"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:105
-msgid "Max 20 MB · PDF only"
-msgstr "Max 20 MB · PDF only"
+#~ msgid "Max 20 MB · PDF only"
+#~ msgstr "Max 20 MB · PDF only"
 
 #: src/features/knowledgebase/DocumentList.tsx:42
-msgid "No documents yet"
-msgstr "No documents yet"
+#~ msgid "No documents yet"
+#~ msgstr "No documents yet"
 
 #: src/components/sidebar.tsx:11
 msgid "Org Admin"
@@ -155,45 +150,44 @@ msgid "Overview"
 msgstr "Overview"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:193
-msgid "PDF files up to 20 MB"
-msgstr "PDF files up to 20 MB"
+#~ msgid "PDF files up to 20 MB"
+#~ msgstr "PDF files up to 20 MB"
 
 #: src/features/knowledgebase/Header.tsx:18
-msgid "Processing"
-msgstr "Processing"
+#~ msgid "Processing"
+#~ msgstr "Processing"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:18
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:19
 #: src/components/sidebar.tsx:29
 msgid "Profile"
 msgstr "Profile"
 
 #: src/features/knowledgebase/Header.tsx:17
-msgid "Ready"
-msgstr "Ready"
+#~ msgid "Ready"
+#~ msgstr "Ready"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:244
 msgid "Recent Conversations"
 msgstr "Recent Conversations"
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:12
-msgid "Resolution rates CSAT trends response times and tier breakdowns."
-msgstr "Resolution rates CSAT trends response times and tier breakdowns."
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:13
+#~ msgid "Resolution rates CSAT trends response times and tier breakdowns."
+#~ msgstr "Resolution rates CSAT trends response times and tier breakdowns."
 
 #: src/features/knowledgebase/DocumentFilter.tsx:27
-msgid "Search documents..."
-msgstr "Search documents..."
+#~ msgid "Search documents..."
+#~ msgstr "Search documents..."
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:17
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:18
 #: src/components/sidebar.tsx:28
 msgid "Settings"
 msgstr "Settings"
 
 #: src/features/knowledgebase/DocumentList.tsx:72
-msgid "Size / Info"
-msgstr "Size / Info"
+#~ msgid "Size / Info"
+#~ msgstr "Size / Info"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:251
-#: src/features/knowledgebase/DocumentList.tsx:71
 msgid "Status"
 msgstr "Status"
 
@@ -205,11 +199,12 @@ msgstr "Super Admin"
 msgid "Support Agent"
 msgstr "Support Agent"
 
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:14
 #: src/components/sidebar.tsx:25
 msgid "Team"
 msgstr "Team"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:14
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:15
 #: src/components/sidebar.tsx:19
 msgid "Tickets"
 msgstr "Tickets"
@@ -239,29 +234,29 @@ msgid "Time"
 msgstr "Time"
 
 #: src/features/knowledgebase/Header.tsx:16
-msgid "Total"
-msgstr "Total"
+#~ msgid "Total"
+#~ msgstr "Total"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:197
 msgid "Total Conversations"
 msgstr "Total Conversations"
 
 #: src/features/knowledgebase/DocumentList.tsx:70
-msgid "Type"
-msgstr "Type"
+#~ msgid "Type"
+#~ msgstr "Type"
 
 #: src/features/knowledgebase/DocumentList.tsx:45
-msgid "Upload a PDF or add a FAQ URL above to get started."
-msgstr "Upload a PDF or add a FAQ URL above to get started."
+#~ msgid "Upload a PDF or add a FAQ URL above to get started."
+#~ msgstr "Upload a PDF or add a FAQ URL above to get started."
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:102
 #: src/features/knowledgebase/UploadPdfPanel.tsx:291
-msgid "Upload PDF"
-msgstr "Upload PDF"
+#~ msgid "Upload PDF"
+#~ msgstr "Upload PDF"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:283
-msgid "Uploading…"
-msgstr "Uploading…"
+#~ msgid "Uploading…"
+#~ msgstr "Uploading…"
 
 #: src/components/sidebar.tsx:111
 msgid "Your workspace"

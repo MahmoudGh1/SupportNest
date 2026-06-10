@@ -11,6 +11,7 @@ import { useLingui } from "@lingui/react";
 export const getPageMeta = (): Record<string, string> => ({
 	"/dashboard": t`Overview`,
 	"/dashboard/conversations": t`Conversations`,
+	"/dashboard/team": t`Team`,
 	"/dashboard/tickets": t`Tickets`,
 	"/dashboard/knowledge": t`Knowledge Base`,
 	"/dashboard/analytics": t`Analytics`,

@@ -2,15 +2,16 @@
 
 import { useEffect, useState, useRef } from "react";
 import {
-	api,
 	UserProfile,
 	OrgProfile,
 	WidgetConfig,
 	UpdateProfileInput,
 	UpdatePasswordInput,
 	UpdateWidgetConfigInput,
-} from "@/lib/api";
+} from "@/types/types";
 import { S } from "@/components/ui";
+import { updateWidgetConfig } from "@/app/[locale]/apis/widget_config";
+import { api } from "@/lib/api";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 const fieldStyle = (
@@ -647,7 +648,16 @@ function OrgTab({ org }: { org: OrgProfile }) {
 		setErrors({});
 		setLoading(true);
 		try {
-			await api.updateOrgProfile({ name, email, widget_config: widget });
+			// Save org profile + widget config in parallel
+			await Promise.all([
+				// api.updateOrgProfile({ name, email }),
+				updateWidgetConfig({
+					title: widget.title, // ← map your fields
+					greetingMessage: widget.greeting,
+					accentColor: widget.color,
+					placeholder: "Type a message...",
+				}),
+			]);
 			setToast("Organization settings saved.");
 		} catch (err: any) {
 			setToast("Error: " + err.message);
@@ -722,7 +732,6 @@ function OrgTab({ org }: { org: OrgProfile }) {
 								Widget Color
 							</label>
 							<div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-								{/* Clickable swatch */}
 								<div
 									onClick={() => colorRef.current?.click()}
 									style={{
@@ -749,7 +758,6 @@ function OrgTab({ org }: { org: OrgProfile }) {
 										height: 0,
 									}}
 								/>
-								{/* Hex input */}
 								<input
 									value={widget.color}
 									onChange={(e) => {
@@ -770,7 +778,6 @@ function OrgTab({ org }: { org: OrgProfile }) {
 										background: "#fafafa",
 									}}
 								/>
-								{/* Preset swatches */}
 								<div style={{ display: "flex", gap: 6 }}>
 									{[
 										"#534AB7",
@@ -796,6 +803,65 @@ function OrgTab({ org }: { org: OrgProfile }) {
 									))}
 								</div>
 							</div>
+						</div>
+
+						{/* Title */}
+						<div>
+							<label
+								style={{
+									display: "block",
+									fontSize: 12,
+									fontWeight: 500,
+									color: S.dark,
+									marginBottom: 5,
+								}}
+							>
+								Widget Title
+								<span
+									style={{
+										color: S.textMuted,
+										fontWeight: 400,
+										marginLeft: 6,
+									}}
+								>
+									({(widget.title ?? "").length}/30)
+								</span>
+							</label>
+							<input
+								type="text"
+								value={widget.title ?? ""}
+								onChange={(e) => {
+									if (e.target.value.length <= 30)
+										setW("title")(e.target.value);
+								}}
+								placeholder="e.g. Support"
+								style={{
+									width: "100%",
+									boxSizing: "border-box",
+									padding: "10px 12px",
+									border: `1.5px solid ${errors.title ? "#E24B4A" : S.border}`,
+									borderRadius: 8,
+									fontSize: 13,
+									fontFamily: "inherit",
+									color: S.dark,
+									outline: "none",
+									background: "#fafafa",
+									transition: "border-color .15s",
+								}}
+								onFocus={(e) => (e.target.style.borderColor = S.purple)}
+								onBlur={(e) =>
+									(e.target.style.borderColor = errors.title
+										? "#E24B4A"
+										: S.border)
+								}
+							/>
+							{errors.title && (
+								<p
+									style={{ fontSize: 11, color: "#E24B4A", margin: "4px 0 0" }}
+								>
+									{errors.title}
+								</p>
+							)}
 						</div>
 
 						{/* Greeting */}
@@ -856,54 +922,6 @@ function OrgTab({ org }: { org: OrgProfile }) {
 									{errors.greeting}
 								</p>
 							)}
-						</div>
-
-						{/* Position */}
-						<div>
-							<label
-								style={{
-									display: "block",
-									fontSize: 12,
-									fontWeight: 500,
-									color: S.dark,
-									marginBottom: 8,
-								}}
-							>
-								Widget Position
-							</label>
-							<div style={{ display: "flex", gap: 10 }}>
-								{(["bottom-left", "bottom-right"] as const).map((pos) => (
-									<button
-										key={pos}
-										onClick={() => setW("position")(pos)}
-										style={{
-											flex: 1,
-											padding: "10px 12px",
-											borderRadius: 8,
-											cursor: "pointer",
-											fontFamily: "inherit",
-											border: `1.5px solid ${widget.position === pos ? S.purple : S.border}`,
-											background:
-												widget.position === pos ? S.purpleBg : "#fff",
-											color:
-												widget.position === pos ? S.purple : S.textSecondary,
-											fontSize: 13,
-											fontWeight: widget.position === pos ? 500 : 400,
-											display: "flex",
-											alignItems: "center",
-											justifyContent: "center",
-											gap: 7,
-											transition: "all .15s",
-										}}
-									>
-										<i
-											className={`ti ti-layout-bottombar-${pos === "bottom-left" ? "collapse" : "expand"}`}
-											style={{ fontSize: 16 }}
-										/>
-										{pos === "bottom-left" ? "Bottom Left" : "Bottom Right"}
-									</button>
-								))}
-							</div>
 						</div>
 					</div>
 
@@ -978,9 +996,7 @@ function OrgTab({ org }: { org: OrgProfile }) {
 								style={{
 									position: "absolute",
 									bottom: 16,
-									...(widget.position === "bottom-right"
-										? { right: 16 }
-										: { left: 16 }),
+									right: 16,
 									transition: "left .3s, right .3s",
 								}}
 							>
@@ -1000,7 +1016,7 @@ function OrgTab({ org }: { org: OrgProfile }) {
 										<div
 											style={{ fontSize: 12, fontWeight: 600, color: "#fff" }}
 										>
-											Support
+											{widget.title ?? "Support"}
 										</div>
 										<div
 											style={{
@@ -1072,8 +1088,7 @@ function OrgTab({ org }: { org: OrgProfile }) {
 										alignItems: "center",
 										justifyContent: "center",
 										boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-										marginLeft:
-											widget.position === "bottom-right" ? "auto" : 0,
+										marginLeft: "auto",
 										cursor: "pointer",
 									}}
 								>

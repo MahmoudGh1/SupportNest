@@ -1,5 +1,11 @@
 import express, { Router } from "express";
-import { getMyOrgController, updateOrgProfileController, updateWidgetConfigController } from "src/controllers/organization.controller.js";
+import upload from "src/middlewares/upload.middleware.js";
+import * as knowledgeController from "../controllers/knowledge.controller.js";
+import {
+	getMyOrgController,
+	updateOrgProfileController,
+	updateWidgetConfigController,
+} from "src/controllers/organization.controller.js";
 import { authMiddleware } from "src/middlewares/auth.middleware.js";
 
 const router: Router = express.Router();
@@ -23,4 +29,25 @@ router.get("/me", getMyOrgController);
 router.patch("/me", updateOrgProfileController);
 router.patch("/widget-config", updateWidgetConfigController);
 
+/* ------------------------------ */
+/* ----Knowledge Base Routes----- */
+/* ------------------------------ */
+router.post(
+	"/:orgId/knowledge",
+	// authMiddleware,
+	upload.single("file"),
+	knowledgeController.uploadDocument,
+);
+
+router.get(
+	"/:orgId/knowledge",
+	// authMiddleware,
+	knowledgeController.getKnowledgeDocuments,
+);
+
+router.delete(
+	"/:orgId/knowledge/:docId",
+	// authMiddleware,
+	knowledgeController.deleteKnowledgeDocument,
+);
 export default router;

@@ -31,19 +31,18 @@ msgstr "↓ تحسن بمقدار 0.2 ثانية"
 
 #. placeholder {0}: processing > 1 ? "s" : ""
 #: src/features/knowledgebase/ProcessingNotice.tsx:29
-msgid "<0>{processing}</0> document{0} being processed by the AI pipeline. This "
-"page updates automatically."
-msgstr "<0>{processing}</0> من المستندات يتم معالجتها حاليًا بواسطة مسار الذكاء "
-"الاصطناعي. تتحدث هذه الصفحة تلقائيًا."
+#~ msgid "<0>{processing}</0> document{0} being processed by the AI pipeline. This "
+#~ "page updates automatically."
+#~ msgstr "<0>{processing}</0> من المستندات يتم معالجتها حاليًا بواسطة مسار الذكاء "
+#~ "الاصطناعي. تتحدث هذه الصفحة تلقائيًا."
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:142
-#: src/components/ui/index.tsx:236
 msgid "Active"
 msgstr "نشط"
 
 #: src/features/knowledgebase/DocumentList.tsx:73
-msgid "Added"
-msgstr "تاريخ الإضافة"
+#~ msgid "Added"
+#~ msgstr "تاريخ الإضافة"
 
 #: src/components/sidebar.tsx:199
 msgid "AI Mode"
@@ -53,15 +52,14 @@ msgstr "وضع ال AI"
 msgid "AI Resolution Rate"
 msgstr "معدل الحلول بالذكاء الاصطناعي"
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:10
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:16
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:17
 #: src/components/sidebar.tsx:26
 msgid "Analytics"
 msgstr "التحليلات"
 
 #: src/components/sidebar.tsx:27
-msgid "API & Widget"
-msgstr "واجهة برمجة التطبيقات والأداة"
+#~ msgid "API & Widget"
+#~ msgstr "واجهة برمجة التطبيقات والأداة"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:184
 msgid "At a glance"
@@ -72,7 +70,6 @@ msgid "Avg Response Time"
 msgstr "متوسط وقت الاستجابة"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:144
-#: src/components/ui/index.tsx:248
 msgid "Closed"
 msgstr "مغلق"
 
@@ -89,35 +86,34 @@ msgstr "مؤشر رضا العملاء (CSAT)"
 msgid "Customer"
 msgstr "العميل"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:43
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:44
 msgid "Dashboard"
 msgstr "لوحة القيادة"
 
 #: src/features/knowledgebase/DocumentList.tsx:69
-msgid "Document"
-msgstr "المستند"
+#~ msgid "Document"
+#~ msgstr "المستند"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:210
-msgid "Document Title"
-msgstr "عنوان المستند"
+#~ msgid "Document Title"
+#~ msgstr "عنوان المستند"
 
 #: src/features/knowledgebase/Header.tsx:38
-msgid "Documents your AI pipeline uses to answer customer questions."
-msgstr "المستندات التي يستخدمها مسار الذكاء الاصطناعي للإجابة على أسئلة "
-"العملاء."
+#~ msgid "Documents your AI pipeline uses to answer customer questions."
+#~ msgstr "المستندات التي يستخدمها مسار الذكاء الاصطناعي للإجابة على أسئلة "
+#~ "العملاء."
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:190
-msgid "Drop PDF here or click to browse"
-msgstr "أفلت ملف الـ PDF هنا أو انقر للتصفح"
+#~ msgid "Drop PDF here or click to browse"
+#~ msgstr "أفلت ملف الـ PDF هنا أو انقر للتصفح"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:143
-#: src/components/ui/index.tsx:242
 msgid "Escalated"
 msgstr "مُصعَّد"
 
 #: src/features/knowledgebase/Header.tsx:19
-msgid "Failed"
-msgstr "فشلت"
+#~ msgid "Failed"
+#~ msgstr "فشلت"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:138
 msgid "Human"
@@ -127,9 +123,8 @@ msgstr "بشري"
 msgid "Human Agent"
 msgstr "وكيل بشري"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:15
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:16
 #: src/components/sidebar.tsx:22
-#: src/features/knowledgebase/Header.tsx:35
 msgid "Knowledge Base"
 msgstr "قاعدة المعرفة"
 
@@ -139,12 +134,12 @@ msgid "Logout"
 msgstr "تسجيل خروج"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:105
-msgid "Max 20 MB · PDF only"
-msgstr "الحد الأقصى 20 ميجابايت · ملفات PDF فقط"
+#~ msgid "Max 20 MB · PDF only"
+#~ msgstr "الحد الأقصى 20 ميجابايت · ملفات PDF فقط"
 
 #: src/features/knowledgebase/DocumentList.tsx:42
-msgid "No documents yet"
-msgstr "لا توجد مستندات بعد"
+#~ msgid "No documents yet"
+#~ msgstr "لا توجد مستندات بعد"
 
 #: src/components/sidebar.tsx:11
 msgid "Org Admin"
@@ -156,45 +151,44 @@ msgid "Overview"
 msgstr "نظرة عامة"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:193
-msgid "PDF files up to 20 MB"
-msgstr "ملفات PDF بحجم يصل إلى 20 ميجابايت"
+#~ msgid "PDF files up to 20 MB"
+#~ msgstr "ملفات PDF بحجم يصل إلى 20 ميجابايت"
 
 #: src/features/knowledgebase/Header.tsx:18
-msgid "Processing"
-msgstr "قيد المعالجة"
+#~ msgid "Processing"
+#~ msgstr "قيد المعالجة"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:18
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:19
 #: src/components/sidebar.tsx:29
 msgid "Profile"
 msgstr "الملف الشخصى"
 
 #: src/features/knowledgebase/Header.tsx:17
-msgid "Ready"
-msgstr "جاهزة"
+#~ msgid "Ready"
+#~ msgstr "جاهزة"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:244
 msgid "Recent Conversations"
 msgstr "المحادثات الأخيرة"
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:12
-msgid "Resolution rates CSAT trends response times and tier breakdowns."
-msgstr "معدلات الحلول، اتجاهات رضا العملاء، أوقات الاستجابة، وتصنيفات الفئات."
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:13
+#~ msgid "Resolution rates CSAT trends response times and tier breakdowns."
+#~ msgstr "معدلات الحلول، اتجاهات رضا العملاء، أوقات الاستجابة، وتصنيفات الفئات."
 
 #: src/features/knowledgebase/DocumentFilter.tsx:27
-msgid "Search documents..."
-msgstr "البحث في المستندات..."
+#~ msgid "Search documents..."
+#~ msgstr "البحث في المستندات..."
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:17
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:18
 #: src/components/sidebar.tsx:28
 msgid "Settings"
 msgstr "الاعدادات"
 
 #: src/features/knowledgebase/DocumentList.tsx:72
-msgid "Size / Info"
-msgstr "الحجم / معلومات"
+#~ msgid "Size / Info"
+#~ msgstr "الحجم / معلومات"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:251
-#: src/features/knowledgebase/DocumentList.tsx:71
 msgid "Status"
 msgstr "الحالة"
 
@@ -206,11 +200,12 @@ msgstr "المسؤول العام"
 msgid "Support Agent"
 msgstr "وكيل الدعم"
 
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:14
 #: src/components/sidebar.tsx:25
 msgid "Team"
 msgstr "الفريق"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:14
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:15
 #: src/components/sidebar.tsx:19
 msgid "Tickets"
 msgstr "التذاكر"
@@ -240,29 +235,29 @@ msgid "Time"
 msgstr "الوقت"
 
 #: src/features/knowledgebase/Header.tsx:16
-msgid "Total"
-msgstr "الإجمالي"
+#~ msgid "Total"
+#~ msgstr "الإجمالي"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:197
 msgid "Total Conversations"
 msgstr "إجمالي المحادثات"
 
 #: src/features/knowledgebase/DocumentList.tsx:70
-msgid "Type"
-msgstr "النوع"
+#~ msgid "Type"
+#~ msgstr "النوع"
 
 #: src/features/knowledgebase/DocumentList.tsx:45
-msgid "Upload a PDF or add a FAQ URL above to get started."
-msgstr "قم بتحميل ملف PDF أو أضف رابطًا للأسئلة الشائعة أعلاه للبدء."
+#~ msgid "Upload a PDF or add a FAQ URL above to get started."
+#~ msgstr "قم بتحميل ملف PDF أو أضف رابطًا للأسئلة الشائعة أعلاه للبدء."
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:102
 #: src/features/knowledgebase/UploadPdfPanel.tsx:291
-msgid "Upload PDF"
-msgstr "تحميل ملف PDF"
+#~ msgid "Upload PDF"
+#~ msgstr "تحميل ملف PDF"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:283
-msgid "Uploading…"
-msgstr "جاري التحميل..."
+#~ msgid "Uploading…"
+#~ msgstr "جاري التحميل..."
 
 #: src/components/sidebar.tsx:111
 msgid "Your workspace"

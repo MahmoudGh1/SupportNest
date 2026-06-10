@@ -3,20 +3,22 @@ import { verifyAccessToken } from "../utils/jwt.util.js";
 import type { AuthenticatedRequest } from "../types/auth.types.js";
 import { AuthError } from "../utils/appError.js";
 
-export function authMiddleware(req: AuthenticatedRequest, _res: Response, next: NextFunction): void {
-	const authHeader = req.headers.authorization;
+export function authMiddleware(
+	req: AuthenticatedRequest,
+	_res: Response,
+	next: NextFunction,
+): void {
+	const cookieToken = req.cookies["accessToken"];
 
-	if (!authHeader || !authHeader.startsWith("Bearer ")) {
-		throw new AuthError("Missing or malformed authorization header");
+	if (!cookieToken) {
+		return next(new AuthError("Missing or malformed authorization header"));
 	}
 
-	const authToken = authHeader.replace("Bearer ", "");
-
 	try {
-		const payload = verifyAccessToken(authToken!);
+		const payload = verifyAccessToken(cookieToken);
 		req.user = payload;
 		next();
 	} catch (error) {
-		next(error);
+		next(new AuthError("Session expired or invalid. Please log in again."));
 	}
 }

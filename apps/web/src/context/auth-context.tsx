@@ -9,20 +9,12 @@ import {
 } from "react";
 import { api } from "@/lib/api";
 import { saveSession, getSession, clearSession } from "@/lib/auth";
-import { AuthUser } from "@/types/types";
+import type { AuthUser } from "@/types/types";
 
 interface AuthState {
 	user: AuthUser | null;
-	token: string | null;
 	loading: boolean;
 	login: (email: string, password: string) => Promise<AuthUser>;
-	register: (data: {
-		email: string;
-		password: string;
-		firstName: string;
-		lastName: string;
-	}) => Promise<AuthUser>;
-	completeOnboarding: (orgData: { orgId: string; name: string }) => void;
 	logout: () => Promise<void>;
 }
 
@@ -30,34 +22,25 @@ const AuthCtx = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [user, setUser] = useState<AuthUser | null>(null);
-	const [token, setToken] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 
-	// Rehydrate from sessionStorage on mount
 	useEffect(() => {
 		const rehydrate = async () => {
-			const session = getSession();
-			if (session) {
-				setUser(session.user);
+			const cached = getSession();
+			if (cached) {
+				setUser(cached);
 				setLoading(false);
 				return;
 			}
-
 			try {
-				const res = await fetch("http://localhost:3001/api/v1/auth/me", {
-					credentials: "include",
-				});
-				if (res.ok) {
-					const data = await res.json();
-					setUser(data.result);
-					saveSession(data.result);
-				}
+				const user = await api.getMe();
+				setUser(user);
+				saveSession(user);
 			} catch {
 			} finally {
 				setLoading(false);
 			}
 		};
-
 		rehydrate();
 	}, []);
 
@@ -68,63 +51,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		return data.user;
 	}, []);
 
-	const register = useCallback(
-		async (formData: {
-			email: string;
-			password: string;
-			firstName: string;
-			lastName: string;
-		}) => {
-			const data = await api.register({
-				...formData,
-				planId: "fdfb9397-de6b-4977-a9b9-de2610881d8as",
-			});
-			setUser(data.user);
-			saveSession(data.user);
-			return data.user;
-		},
-		[],
-	);
+	// const register = useCallback(
+	// 	async (formData: {
+	// 		email: string;
+	// 		password: string;
+	// 		firstName: string;
+	// 		lastName: string;
+	// 	}) => {
+	// 		const data = await api.register({
+	// 			...formData,
+	// 			planId: "fdfb9397-de6b-4977-a9b9-de2610881d8as",
+	// 		});
+	// 		setUser(data.user);
+	// 		saveSession(data.user);
+	// 		return data.user;
+	// 	},
+	// 	[],
+	// );
 
-	const completeOnboarding = useCallback(
-		(orgData: { orgId: string; name: string }) => {
-			setUser((prev) => {
-				if (!prev) return prev;
-				const updated = {
-					...prev,
-					orgId: orgData.orgId,
-					orgName: orgData.name,
-					onboarded: true,
-				};
-				saveSession(updated);
-				return updated;
-			});
-		},
-		[token],
-	);
+	// const completeOnboarding = useCallback(
+	// 	(orgData: { orgId: string; name: string }) => {
+	// 		setUser((prev) => {
+	// 			if (!prev) return prev;
+	// 			const updated = {
+	// 				...prev,
+	// 				orgId: orgData.orgId,
+	// 				orgName: orgData.name,
+	// 				onboarded: true,
+	// 			};
+	// 			saveSession(updated);
+	// 			return updated;
+	// 		});
+	// 	},
+	// 	[token],
+	// );
 
 	const logout = useCallback(async () => {
-		await fetch("http://localhost:3001/api/v1/auth/logout", {
-			method: "POST",
-			credentials: "include",
-		});
+		await api.logout();
 		setUser(null);
-		setToken(null);
 		clearSession();
 	}, []);
 
 	return (
-		<AuthCtx.Provider
-			value={{
-				user,
-				token,
-				loading,
-				login,
-				register,
-				completeOnboarding,
-				logout,
-			}}
-		>
+		<AuthCtx.Provider value={{ user, loading, login, logout }}>
 			{children}
 		</AuthCtx.Provider>
 	);

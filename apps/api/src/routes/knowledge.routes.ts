@@ -4,22 +4,22 @@ import upload from "src/middlewares/upload.middleware.js";
 import * as knowledgeController from "../controllers/knowledge.controller.js";
 const router: Router = express.Router();
 
-// router.post(
-// 	"/organizations/:orgId/knowledge",
-// 	// authMiddleware,
-// 	upload.single("file"),
-// 	knowledgeController.uploadDocument,
-// );
+router.post(
+	"/organizations/:orgId/knowledge",
+	authMiddleware,
+	upload.single("file"),
+	knowledgeController.uploadDocument,
+);
 
 router.get(
 	"/organizations/:orgId/knowledge",
-	// authMiddleware,
+	authMiddleware,
 	knowledgeController.getKnowledgeDocuments,
 );
 
 router.delete(
 	"/organizations/:orgId/knowledge/:docId",
-	// authMiddleware,
+	authMiddleware,
 	knowledgeController.deleteKnowledgeDocument,
 );
 export default router;

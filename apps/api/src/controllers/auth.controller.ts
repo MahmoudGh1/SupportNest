@@ -5,6 +5,7 @@ import {
 	registerService,
 	userService,
 } from "src/services/auth.service.js";
+import type { AuthenticatedRequest } from "src/types/auth.types.js";
 import { signAccessToken, verifyAccessToken } from "src/utils/jwt.util.js";
 
 export const RegisterController = async (req: Request, res: Response) => {
@@ -15,6 +16,15 @@ export const RegisterController = async (req: Request, res: Response) => {
 		if (!businessName || !email || !password) {
 			return res.status(400).json({ error: "Missing required fields" });
 		}
+
+		console.log({
+			businessName,
+			email,
+			password,
+			firstName,
+			lastName,
+			planId,
+		});
 
 		const result = await registerService({
 			businessName,
@@ -70,15 +80,16 @@ export const LogoutController = (req: Request, res: Response) => {
 		.json({ message: "Token has been cleared successfully" });
 };
 
-export const userController = async (req: Request, res: Response) => {
+export const userController = async (
+	req: AuthenticatedRequest,
+	res: Response,
+) => {
 	try {
-		const token = req.cookies.accessToken;
-		if (!token) {
-			return res.status(401).json({ error: "No session" });
+		const { user } = req;
+		if (!user) {
+			return res.status(401).json({ error: "User not found" });
 		}
-
-		const payloadToken = verifyAccessToken(token);
-		const result = await userService(payloadToken);
+		const result = await userService(user);
 
 		if (!result) {
 			return res.status(401).json({ error: "User not found" });

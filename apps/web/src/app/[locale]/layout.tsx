@@ -6,6 +6,7 @@ import { Sora } from "next/font/google";
 import "../globals.css";
 import { getI18nInstance } from "@/lib/lingui";
 import { setI18n } from "@lingui/react/server";
+import { PlanProvider } from "@/context/plan-context";
 
 const sora = Sora({
 	subsets: ["latin"],
@@ -40,9 +41,11 @@ export default async function LocaleLayout({
 				/>
 			</head>
 			<body className={`${sora.variable} font-sans antialiased`}>
-				<AuthProvider>
-					<Providers locale={locale as Locale}>{children}</Providers>
-				</AuthProvider>
+				<PlanProvider>
+					<AuthProvider>
+						<Providers locale={locale as Locale}>{children}</Providers>
+					</AuthProvider>
+				</PlanProvider>
 			</body>
 		</html>
 	);

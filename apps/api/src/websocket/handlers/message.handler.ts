@@ -1,10 +1,8 @@
-import {
-	AgentAction,
-	AgentTier,
-	MessageRole,
-} from "generated/prisma/enums.js";
+import { AgentAction, AgentTier, MessageRole } from "generated/prisma/enums.js";
 import prisma from "src/config/prisma.js";
 import { askTier0Agent } from "src/services/rag.service.js";
+import { loadMemory, appendToMemory } from "../../utils/conversationMemory.utils.js";
+import { activeSockets } from "../ws.map.js";
 
 export async function handleMessageSend(ws: any, payload: any) {
 	const { content } = payload;
@@ -20,11 +18,9 @@ export async function handleMessageSend(ws: any, payload: any) {
 
 	ws.send(JSON.stringify({ type: "typing", payload: {} }));
 
-	const aiResponse = await askTier0Agent(
-		content,
-		organizationId,
-		conversationId,
-	);
+	const memory = await loadMemory(conversationId);
+
+	const aiResponse = await askTier0Agent(content, organizationId, conversationId, memory);
 
 	const aiMessage = await prisma.message.create({
 		data: {
@@ -47,6 +43,8 @@ export async function handleMessageSend(ws: any, payload: any) {
 			tokensUsed: aiResponse.agentLog.tokensUsed,
 		},
 	});
+
+	await appendToMemory(conversationId, content, aiResponse.responseText);
 
 	ws.send(
 		JSON.stringify({

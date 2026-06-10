@@ -71,25 +71,23 @@ let mockUserProfile: UserProfile = {
 };
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const BASE_URL =
+	process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
 
 export const api = {
 	async login(email: string, password: string): Promise<LoginResponse> {
-		const res = await fetch("http://localhost:3001/api/v1/auth/login", {
+		const res = await fetch(`${BASE_URL}/auth/login`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ email, password }),
 			credentials: "include",
 		});
-
 		const data = await res.json();
-		if (!res.ok) {
-			throw new Error("Login failed");
-		}
+		if (!res.ok) throw new Error(data.error ?? "Login failed");
 
 		const {
 			id,
-			email: orgEmail,
+			email: userEmail,
 			firstName,
 			lastName,
 			role,
@@ -98,14 +96,13 @@ export const api = {
 		} = data.result;
 		const user: AuthUser = {
 			id,
-			email: orgEmail,
+			email: userEmail,
 			firstName,
 			lastName,
 			role,
 			orgId: organizationId,
 			onboarded,
 		};
-
 		return { user };
 	},
 
@@ -114,21 +111,44 @@ export const api = {
 		password: string;
 		firstName: string;
 		lastName: string;
+		businessName: string;
 		planId: string;
 	}): Promise<LoginResponse> {
-		const res = await fetch("http://localhost:3001/api/v1/auth/register", {
+		const res = await fetch(`${BASE_URL}/api/v1/auth/register`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(data),
 			credentials: "include",
 		});
 		const body = await res.json();
+		if (!res.ok) throw new Error(body.error ?? "Registration failed");
+		return body;
+	},
 
-		if (!res.ok) {
-			throw new Error("Registration failed");
-		}
+	async getMe(): Promise<AuthUser> {
+		const res = await fetch(`${BASE_URL}/auth/me`, {
+			credentials: "include",
+		});
+		if (!res.ok) throw new Error("No active session");
+		const data = await res.json();
+		const { id, email, firstName, lastName, role, organizationId, onboarded } =
+			data.result;
+		return {
+			id,
+			email,
+			firstName,
+			lastName,
+			role,
+			orgId: organizationId,
+			onboarded,
+		};
+	},
 
-		return api.login(data.email, data.password);
+	async logout(): Promise<void> {
+		await fetch(`${BASE_URL}/auth/logout`, {
+			method: "POST",
+			credentials: "include",
+		});
 	},
 
 	async setupOrg(
@@ -192,14 +212,12 @@ export const api = {
 		filterState: any,
 	): Promise<GetKnowledgeDocsResponse | null> {
 		const session = getSession();
-
-		const user = session?.user;
+		const user = getSession();
+		// const user = session?.user;
 		if (!user) {
 			throw new Error("User not found");
 		}
-
 		const params = new URLSearchParams();
-
 		Object.entries(filterState).forEach(([key, value]) => {
 			if (value !== undefined && value !== null) {
 				params.append(key, String(value));
@@ -207,7 +225,7 @@ export const api = {
 		});
 		try {
 			const response = await fetch(
-				`http://localhost:3001/api/v1/organizations/${user.orgId}/knowledge?${params.toString()}`,
+				`${BASE_URL}/organizations/${user.orgId}/knowledge?${params.toString()}`,
 				{
 					credentials: "include",
 				},
@@ -225,19 +243,16 @@ export const api = {
 	async uploadPdf(
 		input: UploadPdfInput,
 	): Promise<{ document: KnowledgeDocument }> {
-		const session = getSession();
+		const user = getSession();
+		if (!user) throw new Error("User not found");
 
-		const user = session?.user;
-		if (!user) {
-			throw new Error("User not found");
-		}
 		const formData = new FormData();
 		formData.append("file", input.file);
 		formData.append("title", input.title);
 		formData.append("type", "PDF");
 
 		const response = await fetch(
-			`http://localhost:3001/api/v1/organizations/${user.orgId}/knowledge`,
+			`${BASE_URL}/organizations/${user.orgId}/knowledge`,
 			{
 				method: "POST",
 				body: formData,
@@ -250,63 +265,26 @@ export const api = {
 			throw new Error(error.message ?? `Upload failed: ${response.status}`);
 		}
 
-		return response.json(); // expects { document: KnowledgeDocument }
+		return response.json();
 	},
 
-	// async uploadFaq(
-	// 	input: UploadFaqInput,
-	// ): Promise<{ document: KnowledgeDocument }> {
-	// 	await mockDelay(600);
-	// 	const newDoc: KnowledgeDocument = {
-	// 		id: "doc_" + Date.now(),
-	// 		organization_id: "org1",
-	// 		title: input.title,
-	// 		type: "faq",
-	// 		storagePath: input.storagePath,
-	// 		status: "processing",
-	// 		metadata: {
-	// 			faqCategory: input.faqCategory,
-	// 		},
-	// 		created_by: "u1",
-	// 		created_at: new Date().toISOString(),
-	// 		updated_at: new Date().toISOString(),
-	// 	};
-	// 	mockDocs = [newDoc, ...mockDocs];
-
-	// 	// Simulate background job: flip to ready after 3s
-	// 	setTimeout(() => {
-	// 		mockDocs = mockDocs.map((d) =>
-	// 			d.id === newDoc.id ? { ...d, status: "ready" } : d,
-	// 		);
-	// 	}, 3000);
-
-	// 	return { document: newDoc };
-	// },
-
 	async deleteKnowledgeDoc(id: string): Promise<{ success: boolean }> {
-		const session = getSession();
+		const user = getSession();
+		if (!user) throw new Error("User not found");
 
-		const user = session?.user;
-		if (!user) {
-			throw new Error("User not found");
-		}
 		try {
 			const response = await fetch(
-				`http://localhost:3001/api/v1/organizations/${user.orgId}/knowledge/${id}`,
+				`${BASE_URL}/organizations/${user.orgId}/knowledge/${id}`,
 				{
 					method: "DELETE",
-					headers: {
-						"Content-Type": "application/json",
-						credentials: "include",
-					},
+					headers: { "Content-Type": "application/json" },
+					credentials: "include",
 				},
 			);
 
 			const data = await response.json();
-
-			if (!response.ok) {
+			if (!response.ok)
 				throw new Error(data.message || "Something went wrong");
-			}
 
 			console.log("Success:", data.message);
 			return { success: data.success };
@@ -330,27 +308,35 @@ export const api = {
 	async updateUserProfile(
 		input: UpdateProfileInput,
 	): Promise<{ user: UserProfile }> {
-		await mockDelay(600);
-		if (!input.email) throw new Error("Email is required.");
-		if (!/\S+@\S+\.\S+/.test(input.email))
-			throw new Error("Enter a valid email.");
-		mockUserProfile = {
-			...mockUserProfile,
-			...input,
-			updated_at: new Date().toISOString(),
-		} as any;
-		return { user: { ...mockUserProfile } };
+		const res = await fetch(`${BASE_URL}/users/me`, {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify({
+				firstName: input.first_name,
+				lastName: input.last_name,
+				email: input.email,
+			}),
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to update profile.");
+		return { user: data.result };
 	},
 
 	async updatePassword(
 		input: UpdatePasswordInput,
 	): Promise<{ success: boolean }> {
-		await mockDelay(700);
-		// Mock: only accept "password" as current password (matches mock user)
-		if (input.current_password !== "password")
-			throw new Error("Current password is incorrect.");
-		if (input.new_password.length < 8)
-			throw new Error("New password must be at least 8 characters.");
+		const res = await fetch(`${BASE_URL}/users/me/password`, {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify({
+				current_password: input.current_password,
+				new_password: input.new_password,
+			}),
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to update password.");
 		return { success: true };
 	},
 
@@ -376,15 +362,12 @@ export const api = {
 		return { organization: { ...mockOrgProfile } };
 	},
 	async getApiKeys(): Promise<ApiKey[]> {
-		const response = await fetch(
-			"http://localhost:3001/api/v1/dashboard/apiKey/keys",
-			{
-				credentials: "include",
-				headers: {
-					Authorization: `Bearer ${getSession()?.token ?? ""}`, // ← add this
-				},
+		const response = await fetch(`${BASE_URL}/dashboard/apiKey/keys`, {
+			credentials: "include",
+			headers: {
+				Authorization: `Bearer ${getSession()?.token ?? ""}`, // ← add this
 			},
-		);
+		});
 
 		let data;
 
@@ -407,19 +390,16 @@ export const api = {
 		return data;
 	},
 	async createApiKey(allowedOrigins: string[]): Promise<string> {
-		const response = await fetch(
-			"http://localhost:3001/api/v1/dashboard/apiKey/create",
-			{
-				method: "POST",
+		const response = await fetch(`${BASE_URL}/dashboard/apiKey/create`, {
+			method: "POST",
 
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${getSession()?.token ?? ""}`,
-					credentials: "include",
-				},
-				body: JSON.stringify({ allowedOrigins }),
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${getSession()?.token ?? ""}`,
+				credentials: "include",
 			},
-		);
+			body: JSON.stringify({ allowedOrigins }),
+		});
 
 		const data = await response.json();
 		console.log("STATUS:", response.status);
@@ -434,7 +414,7 @@ export const api = {
 	},
 	async revokeApiKey(id: string) {
 		const response = await fetch(
-			`http://localhost:3001/api/v1/dashboard/api-keys/${id}/revoke`,
+			`${BASE_URL}/dashboard/api-keys/${id}/revoke`,
 			{
 				method: "PATCH",
 				credentials: "include",
@@ -451,5 +431,54 @@ export const api = {
 		}
 
 		return data;
+	},
+	// ─── TEAM / INVITATIONS ─────────────────────────────────────────────────────
+
+	async getTeam(): Promise<{
+		members: {
+			id: string;
+			firstName: string;
+			lastName: string;
+			email: string;
+			role: string;
+			isActive: boolean;
+			createdAt: string;
+		}[];
+		pendingInvitations: {
+			id: string;
+			email: string;
+			role: string;
+			status: string;
+			createdAt: string;
+			expiresAt: string;
+			invitedBy: { firstName: string; lastName: string };
+		}[];
+	}> {
+		const res = await fetch(`${BASE_URL}/invitations/team`, {
+			credentials: "include",
+		});
+		if (!res.ok) throw new Error("Failed to fetch team");
+		return res.json();
+	},
+
+	async sendInvitation(email: string): Promise<void> {
+		const res = await fetch(`${BASE_URL}/invitations/invite`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ email }),
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.message ?? "Failed to send invitation");
+	},
+
+	async revokeInvitation(id: string): Promise<void> {
+		const res = await fetch(`${BASE_URL}/invitations/invitations/${id}`, {
+			method: "DELETE",
+			credentials: "include",
+		});
+		if (!res.ok) {
+			throw new Error("Failed to revoke invitation");
+		}
 	},
 };
