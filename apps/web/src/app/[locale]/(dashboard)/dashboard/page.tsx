@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { StatusBadge, S } from "@/components/ui";
-import { DashboardStats } from "@/types/types";
+import { DashboardStats, DashboardStatsStatus, Tiers } from "@/types/types";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
+import { ST } from "next/dist/shared/lib/utils";
+import { useLingui } from "@lingui/react";
 
 function StatCard({
 	label,
@@ -78,9 +82,9 @@ function TierBar({
 	return (
 		<div>
 			{[
-				{ label: "Tier 1 — AI Instant", pct: tier1, color: S.purple },
-				{ label: "Tier 2 — AI Complex", pct: tier2, color: S.purpleLight },
-				{ label: "Human Agent", pct: human, color: "#AFA9EC" },
+				{ label: t`Tier 1 — AI Instant`, pct: tier1, color: S.purple },
+				{ label: t`Tier 2 — AI Complex`, pct: tier2, color: S.purpleLight },
+				{ label: t`Human Agent`, pct: human, color: "#AFA9EC" },
 			].map((item) => (
 				<div
 					key={item.label}
@@ -126,6 +130,19 @@ function TierBar({
 
 export default function OverviewPage() {
 	const [stats, setStats] = useState<DashboardStats | null>(null);
+	const { i18n } = useLingui();
+
+	const TIER_LABELS = {
+		TIER_1: t`Tier 1`,
+		TIER_2: t`Tier 2`,
+		HUMAN: t`Human`,
+	};
+
+	const STATUS_LABELS = {
+		ACTIVE: t`Active`,
+		ESCALATED: t`Escalated`,
+		CLOSED: t`Closed`,
+	};
 
 	useEffect(() => {
 		api.getDashboardStats().then(setStats);
@@ -164,7 +181,7 @@ export default function OverviewPage() {
 					marginTop: 0,
 				}}
 			>
-				At a glance
+				<Trans>At a glance</Trans>
 			</p>
 
 			{/* Stat cards */}
@@ -177,27 +194,27 @@ export default function OverviewPage() {
 				}}
 			>
 				<StatCard
-					label="Total Conversations"
+					label={t`Total Conversations`}
 					value={stats.totalConversations.toLocaleString()}
-					delta="↑ 12% this week"
+					delta={t`↑ 12% this week`}
 					icon="message-2"
 				/>
 				<StatCard
-					label="AI Resolution Rate"
+					label={t`AI Resolution Rate`}
 					value={`${stats.aiResolutionRate}%`}
-					delta="↑ 3% vs last week"
+					delta={t`↑ 3% vs last week`}
 					icon="chart-bar"
 				/>
 				<StatCard
-					label="Avg Response Time"
+					label={t`Avg Response Time`}
 					value={stats.avgResponseTime}
-					delta="↓ 0.2s improvement"
+					delta={t`↓ 0.2s improvement`}
 					icon="clock"
 				/>
 				<StatCard
-					label="CSAT Score"
+					label={t`CSAT Score`}
 					value={stats.csatScore}
-					delta="↑ 0.3 this month"
+					delta={t`↑ 0.3 this month`}
 					icon="star"
 				/>
 			</div>
@@ -224,14 +241,14 @@ export default function OverviewPage() {
 							marginTop: 0,
 						}}
 					>
-						Recent Conversations
+						<Trans>Recent Conversations</Trans>
 					</p>
 					<table
 						style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}
 					>
 						<thead>
 							<tr>
-								{["Customer", "Status", "Tier", "Time"].map((h) => (
+								{[t`Customer`, t`Status`, t`Tier`, t`Time`].map((h) => (
 									<th
 										key={h}
 										style={{
@@ -277,7 +294,7 @@ export default function OverviewPage() {
 											color: S.textMuted,
 										}}
 									>
-										{c.tier}
+										{i18n._(TIER_LABELS[c.tier]) as Tiers}
 									</td>
 									<td
 										style={{
@@ -286,7 +303,7 @@ export default function OverviewPage() {
 											color: S.textMuted,
 										}}
 									>
-										{c.time}
+										{c.timestamp}
 									</td>
 								</tr>
 							))}

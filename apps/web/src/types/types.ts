@@ -4,10 +4,16 @@ export interface AuthUser {
 	email: string;
 	firstName: string;
 	lastName: string;
-	role: string;
+	role: Role;
 	orgId: string | null;
 	orgName?: string;
 	onboarded: boolean;
+}
+
+export enum Role {
+	SUPER_ADMIN = "SUPER_ADMIN",
+	ORG_ADMIN = "ORG_ADMIN",
+	SUPPORT_AGENT = "SUPPORT_AGENT",
 }
 
 export interface LoginResponse {
@@ -98,7 +104,7 @@ export interface UploadFaqInput {
 	storagePath: string; // the FAQ URL
 	faqCategory?: string;
 }
-
+export type Tiers = "TIER_1" | "TIER_2" | "HUMAN";
 export type DashboardStatsStatus = "ACTIVE" | "ESCALATED" | "CLOSED";
 
 export interface DashboardStats {
@@ -110,8 +116,8 @@ export interface DashboardStats {
 		id: number;
 		customer: string;
 		status: DashboardStatsStatus;
-		tier: string;
-		time: string;
+		tier: Tiers;
+		timestamp: string;
 	}[];
 	resolutionByTier: { tier1: number; tier2: number; human: number };
 }

@@ -15,5 +15,7 @@ allowBuilds:
   '@google/genai': true
   protobufjs: true
   '@prisma/client': false
+  '@parcel/watcher': true
+  '@swc/core': true
 
 preferWorkspacePackages: true

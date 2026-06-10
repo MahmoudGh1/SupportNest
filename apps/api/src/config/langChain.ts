@@ -26,7 +26,7 @@ export const queryEmbeddings = new GeminiEmbeddingsWithDimensions({
 });
 
 export const model = new langChain.ChatGoogleGenerativeAI({
-	model: "gemini-3.5-flash",
+	model: "gemini-2.5-flash",
 	apiKey: apiKey,
 });
 

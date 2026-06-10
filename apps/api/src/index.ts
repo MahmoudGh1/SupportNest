@@ -7,7 +7,6 @@ import morgan from "morgan";
 import errorHandler from "./middlewares/errorhandler.middleware.js";
 import notFoundHandler from "./middlewares/notFoundHandler.middleware.js";
 import { rateLimit } from "./utils/rateLimiter.util.js";
-import knowledgeRoutes from "./routes/knowledge.routes.js";
 import "./workers/knowledgeWorker.js";
 import conversationsRoutes from "./routes/conversations.routes.js";
 import ApiKeyRouter from "./routes/apiKey.routes.js";
@@ -23,7 +22,8 @@ import { WebSocketServer } from "ws";
 import { setupWebSocket } from "./ws/websocket.js";
 import invitationRouter from "./routes/invitation.routes.js";
 import businessApiConfigRouter from "./routes/businessApiConfig.routes.js";
-
+import ticketRouter from "./routes/ticket.routes.js";
+import userRouter from "./routes/user.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -38,7 +38,20 @@ app.use(
 		contentSecurityPolicy: false,
 	}),
 );
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+
+app.use(
+	cors({
+		// Dynamically sets the header to match whoever is making the request
+		origin: function (origin, callback) {
+			// Allow requests with no origin (like mobile apps, curl, or postman)
+			if (!origin) return callback(null, true);
+
+			callback(null, true);
+		},
+		credentials: true,
+	}),
+);
+
 app.use(morgan("dev"));
 
 const publicDir = path.resolve(process.cwd(), "public");
@@ -48,8 +61,8 @@ app.use(express.static(publicDir));
 app.use(rateLimit);
 app.get("/health", (_, res) => res.json({ ok: true }));
 
-app.use("/api/v1", knowledgeRoutes);
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/users", userRouter);
 app.use("/api/v1/rag", ragRouter);
 app.use("/api/v1/dashboard/apikey", ApiKeyRouter);
 app.use("/api/v1/widget", WidgetRouter);
@@ -60,6 +73,8 @@ app.use("/api/v1/organizations/api-config", businessApiConfigRouter);
 
 app.use("/api/v1/payments", paymentRoutes);
 app.use("/api/v1/invitations", invitationRouter);
+app.use("/api/v1/tickets", ticketRouter);
+
 app.use(notFoundHandler);
 
 app.use(errorHandler);
@@ -71,17 +86,3 @@ setupWebSocket(wss);
 Server.listen(PORT, () => {
 	console.log("Server is running on port:", PORT);
 });
-
-// async function main() {
-// 	const val = await prisma.organization.findMany();
-//   console.log(val)
-// }
-// main()
-// 	.then(async () => {
-// 		await prisma.$disconnect();
-// 	})
-// 	.catch(async (e) => {
-// 		console.error(e);
-// 		await prisma.$disconnect();
-// 		process.exit(1);
-// 	});
