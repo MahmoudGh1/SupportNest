@@ -33,23 +33,23 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(
-	helmet({
-		crossOriginResourcePolicy: false,
-		contentSecurityPolicy: false,
-	}),
+  helmet({
+    crossOriginResourcePolicy: false,
+    contentSecurityPolicy: false,
+  }),
 );
 
 app.use(
-	cors({
-		// Dynamically sets the header to match whoever is making the request
-		origin: function (origin, callback) {
-			// Allow requests with no origin (like mobile apps, curl, or postman)
-			if (!origin) return callback(null, true);
+  cors({
+    // Dynamically sets the header to match whoever is making the request
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl, or postman)
+      if (!origin) return callback(null, true);
 
-			callback(null, true);
-		},
-		credentials: true,
-	}),
+      callback(null, true);
+    },
+    credentials: true,
+  }),
 );
 
 app.use(morgan("dev"));
@@ -84,5 +84,5 @@ const wss = new WebSocketServer({ server: Server, path: "/widget/ws" });
 setupWebSocket(wss);
 
 Server.listen(PORT, () => {
-	console.log("Server is running on port:", PORT);
+  console.log("Server is running on port:", PORT);
 });
