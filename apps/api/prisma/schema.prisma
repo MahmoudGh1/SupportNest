@@ -244,10 +244,10 @@ model AgentLog {
   input             String
   output            String
 
-  confidenceScore   Float
+  confidenceScore   Float?
 
   latencyMs         Int
-  tokensUsed        Int
+  tokensUsed        Int?
 
   createdAt         DateTime     @default(now())
 
@@ -507,14 +507,17 @@ enum MessageRole {
 
 enum AgentTier {
   ROUTER
+  TIER0
   TIER1
   TIER2
 }
 
 enum AgentAction {
   RESOLVED
+  ESCALATED_TO_TIER1
   ESCALATED_TO_TIER2
   ESCALATED_TO_HUMAN
+  REJECTED_OUTPUT
   NO_MATCH
 }
 
@@ -547,6 +550,7 @@ enum KnowledgeDocumentStatus {
 }
 
 enum ResolutionTier {
+  TIER0
   TIER1
   TIER2
   HUMAN
@@ -567,6 +571,7 @@ enum PaymentStatus {
 }
 
 enum MessageTier {
+  TIER0
   TIER1
   TIER2
 }

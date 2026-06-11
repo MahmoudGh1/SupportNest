@@ -1,10 +1,25 @@
-import { AgentAction, AgentTier, MessageRole } from "generated/prisma/enums.js";
+import {
+	AgentAction,
+	AgentTier,
+	MessageRole,
+} from "generated/prisma/enums.js";
 import prisma from "src/config/prisma.js";
 import { askTier0Agent } from "src/services/rag.service.js";
-import { loadMemory, appendToMemory } from "../../utils/conversationMemory.utils.js";
+import {
+	loadMemory,
+	appendToMemory,
+} from "../../utils/conversationMemory.utils.js";
 import { activeSockets } from "../ws.map.js";
+import type {
+	ConversationMessage,
+	PipelineContext,
+} from "src/types/agent.types.js";
+import { runRouter } from "src/agents/router.agent.js";
 
-export async function handleMessageSend(ws: any, payload: any) {
+export async function handleMessageSend(
+	ws: WebSocket,
+	payload: { conversationId: string; content: string },
+) {
 	const { content } = payload;
 	const { conversationId, organizationId } = ws.meta!;
 
@@ -16,48 +31,88 @@ export async function handleMessageSend(ws: any, payload: any) {
 		},
 	});
 
-	ws.send(JSON.stringify({ type: "typing", payload: {} }));
+	ws.send(JSON.stringify({ type: "typing", conversationId }));
 
-	const memory = await loadMemory(conversationId);
+	// load conversation context
+	// fetch org id from conversation (needed for PipelineContext)
+	const conversation = await prisma.conversation.findUnique({
+		where: { id: conversationId },
+		select: { organizationId: true },
+	});
 
-	const aiResponse = await askTier0Agent(content, organizationId, conversationId, memory);
+	if (!conversation) {
+		ws.send(
+			JSON.stringify({
+				type: "error",
+				conversationId,
+				message: "Conversation not found.",
+			}),
+		);
+		return;
+	}
 
+	// load history from Redis
+	const redisHistory = await loadMemory(conversationId);
+
+	// Build PipelineContext for the router
+	console.log(organizationId);
+	const context: PipelineContext = {
+		conversationId,
+		organizationId,
+		latestMessage: content,
+		conversationHistory: redisHistory as ConversationMessage[],
+	};
+
+	// run the router
+	const routerOutput = await runRouter(context);
+
+	// save AI message to DB
 	const aiMessage = await prisma.message.create({
 		data: {
 			conversationId,
-			role: MessageRole.AI,
-			content: aiResponse.responseText,
-			tier: AgentTier.TIER1,
+			role: routerOutput.resolvedByTier === "HUMAN" ? "HUMAN_AGENT" : "AI",
+			content: routerOutput.finalResponse,
+			tier:
+				routerOutput.resolvedByTier === "HUMAN"
+					? null
+					: routerOutput.resolvedByTier,
 		},
 	});
 
-	await prisma.agentLog.create({
-		data: {
-			conversationId,
-			tier: aiResponse.agentLog.tier,
-			action: aiResponse.action,
-			input: content,
-			output: aiResponse.responseText,
-			confidenceScore: aiResponse.agentLog.confidenceScore,
-			latencyMs: aiResponse.agentLog.latencyMs,
-			tokensUsed: aiResponse.agentLog.tokensUsed,
-		},
-	});
+	// If human escalation - create a ticket
+	if (routerOutput.resolvedByTier === "HUMAN") {
+		await prisma.ticket.create({
+			data: {
+				conversationId,
+				organizationId: conversation.organizationId,
+				status: "OPEN",
+				priority: "MEDIUM",
+			},
+		});
 
-	await appendToMemory(conversationId, content, aiResponse.responseText);
+		await prisma.conversation.update({
+			where: { id: conversationId },
+			data: { conversationStatus: "ESCALATED" },
+		});
+	}
+
+	// append both messages to redis history
+	await appendToMemory(conversationId, content, routerOutput.finalResponse);
 
 	ws.send(
 		JSON.stringify({
 			type: "message_ai",
 			payload: {
 				message: {
-					id: aiMessage.id,
-					role: aiMessage.role,
-					content: aiMessage.content,
-					tier: aiMessage.tier,
+					conversationId,
+					role: "AI",
+					content: routerOutput.finalResponse,
+					tier:
+						routerOutput.resolvedByTier === "HUMAN"
+							? null
+							: routerOutput.resolvedByTier,
 					created_at: aiMessage.createdAt,
 				},
-				action: aiResponse.action,
 			},
 		}),
 	);

@@ -1,10 +1,5 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- CreateExtension
 CREATE EXTENSION IF NOT EXISTS "vector";
-CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
-
--- CreateSchema
-CREATE SCHEMA IF NOT EXISTS "public";
 
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('SUPER_ADMIN', 'ORG_ADMIN', 'SUPPORT_AGENT');
@@ -16,10 +11,10 @@ CREATE TYPE "ConversationStatus" AS ENUM ('ACTIVE', 'ESCALATED', 'CLOSED');
 CREATE TYPE "MessageRole" AS ENUM ('CUSTOMER', 'AI', 'HUMAN_AGENT');
 
 -- CreateEnum
-CREATE TYPE "AgentTier" AS ENUM ('ROUTER', 'TIER1', 'TIER2');
+CREATE TYPE "AgentTier" AS ENUM ('ROUTER', 'TIER0', 'TIER1', 'TIER2');
 
 -- CreateEnum
-CREATE TYPE "AgentAction" AS ENUM ('RESOLVED', 'ESCALATED_TO_TIER2', 'ESCALATED_TO_HUMAN', 'NO_MATCH');
+CREATE TYPE "AgentAction" AS ENUM ('RESOLVED', 'ESCALATED_TO_TIER1', 'ESCALATED_TO_TIER2', 'ESCALATED_TO_HUMAN', 'REJECTED_OUTPUT', 'NO_MATCH');
 
 -- CreateEnum
 CREATE TYPE "TicketStatus" AS ENUM ('OPEN', 'IN_PROGRESS', 'RESOLVED');
@@ -28,13 +23,13 @@ CREATE TYPE "TicketStatus" AS ENUM ('OPEN', 'IN_PROGRESS', 'RESOLVED');
 CREATE TYPE "TicketPriority" AS ENUM ('LOW', 'MEDIUM', 'HIGH');
 
 -- CreateEnum
-CREATE TYPE "KnowledgeDocumentType" AS ENUM ('PDF', 'URL', 'TEXT', 'DOCX', 'CSV');
+CREATE TYPE "KnowledgeDocumentType" AS ENUM ('PDF', 'URL', 'TEXT', 'DOCX', 'CSV', 'API_DOC', 'SWAGGER_URL');
 
 -- CreateEnum
 CREATE TYPE "KnowledgeDocumentStatus" AS ENUM ('PROCESSING', 'READY', 'FAILED');
 
 -- CreateEnum
-CREATE TYPE "ResolutionTier" AS ENUM ('TIER1', 'TIER2', 'HUMAN', 'UNRESOLVED');
+CREATE TYPE "ResolutionTier" AS ENUM ('TIER0', 'TIER1', 'TIER2', 'HUMAN', 'UNRESOLVED');
 
 -- CreateEnum
 CREATE TYPE "Sentiment" AS ENUM ('POSITIVE', 'NEUTRAL', 'NEGATIVE');
@@ -43,7 +38,16 @@ CREATE TYPE "Sentiment" AS ENUM ('POSITIVE', 'NEUTRAL', 'NEGATIVE');
 CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'SUCCEEDED', 'FAILED', 'REFUNDED');
 
 -- CreateEnum
-CREATE TYPE "MessageTier" AS ENUM ('TIER1', 'TIER2');
+CREATE TYPE "MessageTier" AS ENUM ('TIER0', 'TIER1', 'TIER2');
+
+-- CreateEnum
+CREATE TYPE "InvitationStatus" AS ENUM ('PENDING', 'ACCEPTED', 'EXPIRED');
+
+-- CreateEnum
+CREATE TYPE "ApiAuthType" AS ENUM ('API_KEY', 'BEARER', 'BASIC');
+
+-- CreateEnum
+CREATE TYPE "HttpMethod" AS ENUM ('GET', 'POST', 'PUT', 'PATCH', 'DELETE');
 
 -- CreateTable
 CREATE TABLE "organizations" (
@@ -75,6 +79,40 @@ CREATE TABLE "users" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "business_api_configs" (
+    "id" UUID NOT NULL,
+    "organizationId" UUID NOT NULL,
+    "baseUrl" TEXT NOT NULL,
+    "authType" "ApiAuthType" NOT NULL,
+    "authValue" TEXT NOT NULL,
+    "headerName" TEXT,
+    "isVerified" BOOLEAN NOT NULL DEFAULT false,
+    "lastVerifiedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "business_api_configs_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tool_definitions" (
+    "id" UUID NOT NULL,
+    "organizationId" UUID NOT NULL,
+    "apiConfigId" UUID NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "method" "HttpMethod" NOT NULL,
+    "path" TEXT NOT NULL,
+    "parameters" JSONB NOT NULL,
+    "responseSchema" JSONB NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "tool_definitions_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -142,9 +180,9 @@ CREATE TABLE "agent_logs" (
     "action" "AgentAction" NOT NULL,
     "input" TEXT NOT NULL,
     "output" TEXT NOT NULL,
-    "confidenceScore" DOUBLE PRECISION NOT NULL,
+    "confidenceScore" DOUBLE PRECISION,
     "latencyMs" INTEGER NOT NULL,
-    "tokensUsed" INTEGER NOT NULL,
+    "tokensUsed" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "agent_logs_pkey" PRIMARY KEY ("id")
@@ -156,10 +194,18 @@ CREATE TABLE "tickets" (
     "conversationId" UUID NOT NULL,
     "organizationId" UUID NOT NULL,
     "assignedToId" UUID,
-    "status" "TicketStatus" NOT NULL,
-    "priority" "TicketPriority" NOT NULL,
+    "status" "TicketStatus" NOT NULL DEFAULT 'OPEN',
+    "priority" "TicketPriority" NOT NULL DEFAULT 'MEDIUM',
     "resolutionNote" TEXT,
     "resolvedAt" TIMESTAMP(3),
+    "issueType" TEXT,
+    "issueDescription" TEXT,
+    "language" TEXT,
+    "escalationReason" TEXT,
+    "tiersVisited" "AgentTier"[],
+    "knowledgeResults" JSONB NOT NULL DEFAULT '[]',
+    "agentAttempts" INTEGER NOT NULL DEFAULT 0,
+    "customerMessage" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -262,6 +308,23 @@ CREATE TABLE "payments" (
     CONSTRAINT "payments_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "invitations" (
+    "id" UUID NOT NULL,
+    "organizationId" UUID NOT NULL,
+    "email" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "role" "Role" NOT NULL DEFAULT 'SUPPORT_AGENT',
+    "status" "InvitationStatus" NOT NULL DEFAULT 'PENDING',
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "acceptedAt" TIMESTAMP(3),
+    "invitedById" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "invitations_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "organizations_slug_key" ON "organizations"("slug");
 
@@ -270,6 +333,12 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
 CREATE INDEX "users_organizationId_idx" ON "users"("organizationId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "business_api_configs_organizationId_key" ON "business_api_configs"("organizationId");
+
+-- CreateIndex
+CREATE INDEX "tool_definitions_organizationId_idx" ON "tool_definitions"("organizationId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "api_keys_keyHash_key" ON "api_keys"("keyHash");
@@ -337,11 +406,29 @@ CREATE UNIQUE INDEX "payments_providerPaymentId_key" ON "payments"("providerPaym
 -- CreateIndex
 CREATE INDEX "payments_organizationId_idx" ON "payments"("organizationId");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "invitations_token_key" ON "invitations"("token");
+
+-- CreateIndex
+CREATE INDEX "invitations_token_idx" ON "invitations"("token");
+
+-- CreateIndex
+CREATE INDEX "invitations_organizationId_idx" ON "invitations"("organizationId");
+
 -- AddForeignKey
 ALTER TABLE "organizations" ADD CONSTRAINT "organizations_planId_fkey" FOREIGN KEY ("planId") REFERENCES "pricing"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "business_api_configs" ADD CONSTRAINT "business_api_configs_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tool_definitions" ADD CONSTRAINT "tool_definitions_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tool_definitions" ADD CONSTRAINT "tool_definitions_apiConfigId_fkey" FOREIGN KEY ("apiConfigId") REFERENCES "business_api_configs"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "api_keys" ADD CONSTRAINT "api_keys_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -406,3 +493,8 @@ ALTER TABLE "payments" ADD CONSTRAINT "payments_organizationId_fkey" FOREIGN KEY
 -- AddForeignKey
 ALTER TABLE "payments" ADD CONSTRAINT "payments_pricingId_fkey" FOREIGN KEY ("pricingId") REFERENCES "pricing"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
+-- AddForeignKey
+ALTER TABLE "invitations" ADD CONSTRAINT "invitations_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "invitations" ADD CONSTRAINT "invitations_invitedById_fkey" FOREIGN KEY ("invitedById") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

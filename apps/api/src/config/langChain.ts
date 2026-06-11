@@ -25,8 +25,14 @@ export const queryEmbeddings = new GeminiEmbeddingsWithDimensions({
 	taskType: TaskType.RETRIEVAL_QUERY,
 });
 
+export const fastModel = new langChain.ChatGoogleGenerativeAI({
+	model: "gemini-2.5-flash-lite",
+	apiKey: apiKey,
+	// maxOutputTokens: 500,
+});
+
 export const model = new langChain.ChatGoogleGenerativeAI({
-	model: "gemini-2.5-flash",
+	model: "gemini-2.5-flash-lite",
 	apiKey: apiKey,
 });
 

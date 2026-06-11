@@ -15,8 +15,10 @@ import type { KnowledgeDocumentType } from "generated/prisma/enums.js";
 
 export const uploadDocument: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
-		// const userId = req.user?.sub;
-		const userId = "e0f59984-8a12-4b05-9950-c2ab3655d9d6";
+		const userId = req.user?.sub;
+		console.log(userId);
+		console.log(req.user);
+		// const userId = "e0f59984-8a12-4b05-9950-c2ab3655d9d6";
 		const { orgId } = req.params;
 		const { title, type } = req.body;
 		const file = req.file; // Buffer from multer memoryStorage
