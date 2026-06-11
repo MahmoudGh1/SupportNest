@@ -24,7 +24,7 @@ import invitationRouter from "./routes/invitation.routes.js";
 import businessApiConfigRouter from "./routes/businessApiConfig.routes.js";
 import ticketRouter from "./routes/ticket.routes.js";
 import userRouter from "./routes/user.routes.js";
-import knowledgeRouter from "./routes/knowledge.routes.js"
+import pricingRouter from "./routes/pricing.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -59,7 +59,6 @@ app.use(express.static(publicDir));
 app.use(rateLimit);
 app.get("/health", (_, res) => res.json({ ok: true }));
 
-app.use("/api/v1", knowledgeRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/rag", ragRouter);
@@ -71,6 +70,7 @@ app.use("/api/v1/widget/conversations", conversationsRoutes);
 app.use("/api/v1/organizations/api-config", businessApiConfigRouter);
 
 app.use("/api/v1/payments", paymentRoutes);
+app.use("/api/v1/pricing", pricingRouter);
 app.use("/api/v1/invitations", invitationRouter);
 app.use("/api/v1/tickets", ticketRouter);
 

@@ -3,6 +3,7 @@
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { S } from "@/components/ui";
 import { useAuth } from "@/context/auth-context";
+import { useRouter } from "next/navigation";
 
 interface TopbarProps {
 	pageTitle: string;
@@ -10,10 +11,19 @@ interface TopbarProps {
 }
 
 export function Topbar({ pageTitle, onToggleSidebar }: TopbarProps) {
-	const { user } = useAuth();
+	const { user, logout } = useAuth();
+	const router = useRouter();
 	const initials = user
 		? `${user.firstName?.[0]}${user.lastName?.[0]}`.toUpperCase()
 		: "U";
+	const displayName = user
+		? `${user.firstName} ${user.lastName}`.trim()
+		: "User";
+
+	async function handleLogout() {
+		await logout();
+		router.push("/");
+	}
 
 	return (
 		<div
@@ -41,17 +51,32 @@ export function Topbar({ pageTitle, onToggleSidebar }: TopbarProps) {
 						borderRadius: 6,
 					}}
 				>
-					<i
-						className="ti ti-menu-2"
-						style={{ fontSize: 19 }}
-					/>
+					<i className="ti ti-menu-2" style={{ fontSize: 19 }} />
 				</button>
 				<span style={{ fontSize: 15, fontWeight: 600, color: S.dark }}>
 					{pageTitle}
 				</span>
 			</div>
 
-			<div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+			<div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+				<div
+					style={{
+						display: "flex",
+						flexDirection: "column",
+						alignItems: "flex-end",
+						lineHeight: 1.3,
+					}}
+				>
+					<span style={{ fontSize: 13, fontWeight: 600, color: S.dark }}>
+						{displayName}
+					</span>
+					{user?.orgName && (
+						<span style={{ fontSize: 11, color: S.textMuted }}>
+							{user.orgName}
+						</span>
+					)}
+				</div>
+
 				<div
 					style={{
 						width: 34,
@@ -64,11 +89,28 @@ export function Topbar({ pageTitle, onToggleSidebar }: TopbarProps) {
 						fontSize: 12,
 						fontWeight: 500,
 						color: "#fff",
-						cursor: "pointer",
 					}}
 				>
 					{initials}
 				</div>
+
+				<button
+					type="button"
+					onClick={handleLogout}
+					style={{
+						background: "none",
+						border: `1px solid ${S.border}`,
+						borderRadius: 8,
+						padding: "6px 12px",
+						fontSize: 12,
+						fontWeight: 500,
+						color: S.textMuted,
+						cursor: "pointer",
+					}}
+				>
+					Logout
+				</button>
+
 				<LanguageSwitcher />
 			</div>
 		</div>

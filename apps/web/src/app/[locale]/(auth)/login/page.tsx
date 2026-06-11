@@ -166,7 +166,7 @@ function FormPanel() {
 			const user = await login(email, password);
 			// how user.onboarded is handled frontend or backend?
 			// it gives me error
-			router.push(user.onboarded ? "/dashboard" : "/setup");
+			router.push("/dashboard");
 		} catch (e: any) {
 			setError(e.message ?? "Invalid email or password.");
 		} finally {

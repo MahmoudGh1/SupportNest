@@ -14,68 +14,6 @@ function useInView(threshold = 0.12) {
   return { ref, visible }
 }
 
-// ─── NAVBAR ───────────────────────────────────────────────────────────────────
-function Navbar() {
-  const [scrolled, setScrolled] = useState(false)
-  useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 30)
-    window.addEventListener("scroll", fn)
-    return () => window.removeEventListener("scroll", fn)
-  }, [])
-
-  const navLinks: [string, string][] = [
-    ["Features",         "#features"      ],
-    ["How It Works",     "#pipeline"      ],
-    ["Pricing",          "#pricing"       ],
-    ["Customer Stories", "#testimonials"  ],
-    ["About",            "#about"         ],
-    ["Contact",          "#contact"       ],
-  ]
-
-  return (
-    <nav className={`fixed top-0 left-0 right-0 z-[100] h-16 px-[5%] flex items-center justify-between transition-all duration-300 backdrop-blur-md ${
-      scrolled ? "bg-white/95 border-b border-[#e8e6f0]" : "bg-white/80 border-b border-transparent"
-    }`}>
-      {/* Logo */}
-      <a href="#" className="flex items-center gap-2.5 no-underline">
-        <div className="w-9 h-9 bg-[#534AB7] rounded-[10px] flex items-center justify-center shrink-0">
-          <i className="ti ti-shield-check text-white text-lg" />
-        </div>
-        <span className="text-[#1a1830] text-[17px] font-bold tracking-tight">SupportNest</span>
-      </a>
-
-      {/* Nav links */}
-      <div className="flex items-center gap-7">
-        {navLinks.map(([label, href]) => (
-          <a
-            key={label}
-            href={href}
-            className="text-[#64607a] text-sm font-medium no-underline hover:text-[#534AB7] transition-colors duration-150"
-          >
-            {label}
-          </a>
-        ))}
-      </div>
-
-      {/* CTAs */}
-      <div className="flex items-center gap-2.5">
-        <Link
-          href="/login"
-          className="text-[#3d3a55] text-sm font-medium no-underline px-4 py-2 rounded-lg hover:bg-[#EEEDFE] hover:text-[#534AB7] transition-all duration-150"
-        >
-          Login
-        </Link>
-        <Link
-          href="/register"
-          className="bg-[#534AB7] hover:bg-[#7F77DD] text-white text-sm font-medium no-underline px-5 py-2 rounded-lg shadow-[0_2px_8px_rgba(83,74,183,0.3)] hover:-translate-y-px transition-all duration-150"
-        >
-          Get Started
-        </Link>
-      </div>
-    </nav>
-  )
-}
-
 // ─── HERO ─────────────────────────────────────────────────────────────────────
 function Hero() {
   const [on, setOn] = useState(false)
@@ -88,7 +26,7 @@ function Hero() {
   })
 
   return (
-    <section className="relative overflow-hidden bg-white text-center pt-[140px] pb-[100px] px-[5%]">
+    <section className="relative overflow-hidden bg-white text-center pt-36 pb-[100px] px-[5%]">
       <div className="absolute pointer-events-none rounded-full" style={{ top: -120, left: "50%", transform: "translateX(-50%)", width: 800, height: 500, background: "radial-gradient(ellipse, rgba(83,74,183,0.07) 0%, transparent 70%)" }} />
       <div className="absolute pointer-events-none rounded-full" style={{ top: 60, left: "5%", width: 260, height: 260, background: "radial-gradient(circle, rgba(83,74,183,0.05) 0%, transparent 70%)" }} />
       <div className="absolute pointer-events-none rounded-full" style={{ top: 40, right: "5%", width: 220, height: 220, background: "radial-gradient(circle, rgba(175,169,236,0.07) 0%, transparent 70%)" }} />
@@ -565,8 +503,7 @@ function Footer() {
 // ─── ROOT ─────────────────────────────────────────────────────────────────────
 export default function LandingPage() {
   return (
-    <div className="font-sans bg-white overflow-x-hidden">
-      <Navbar />
+    <div className="overflow-x-hidden">
       <Hero />
       <Pipeline />
       <Features />

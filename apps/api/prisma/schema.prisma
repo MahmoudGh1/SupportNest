@@ -41,6 +41,7 @@ model Organization {
   customers              Customer[]
   conversations          Conversation[]
   tickets                Ticket[]
+  reports Report[]
   knowledgeDocuments     KnowledgeDocument[]
   documentChunks         DocumentChunk[]
   csatRatings            CsatRating[]
@@ -207,6 +208,7 @@ model Conversation {
 
   messages            Message[]
   agentLogs           AgentLog[]
+  reports Report[]
   ticket              Ticket?
   csatRating          CsatRating?
   analytics           ConversationAnalytics?
@@ -496,6 +498,41 @@ model Invitation {
   @@index([token])
   @@index([organizationId])
   @@map("invitations")
+}
+
+model Report {
+  id              String       @id @default(uuid()) @db.Uuid
+
+  organizationId  String       @db.Uuid
+
+  organization    Organization @relation(fields: [organizationId], references: [id])
+
+  conversationId  String       @db.Uuid
+
+  conversation    Conversation @relation(fields: [conversationId], references: [id])
+
+  summary         String       
+
+  issueType       String       
+
+  resolution      String       
+
+  language        String       
+
+  sentiment       String       
+
+  tiersVisited    AgentTier[]  
+
+  wasEscalated    Boolean      @default(false)
+
+  resolvedByAi    Boolean      @default(true)
+
+  tokensUsed      Int          @default(0)
+
+  createdAt       DateTime     @default(now())
+
+  @@index([organizationId])
+  @@map("reports")
 }
 
 enum Role {

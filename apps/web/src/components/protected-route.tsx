@@ -22,6 +22,6 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 	}, [user, loading, router]);
 
 	if (loading) return <PageLoader />;
-	// if (!user || !user.onboarded) return null;
+	if (!user) return null;
 	return <>{children}</>;
 }

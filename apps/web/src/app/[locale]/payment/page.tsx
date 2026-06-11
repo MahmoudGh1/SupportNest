@@ -3,16 +3,14 @@
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
+import { api } from "@/lib/api"
+import type { PricingPlan } from "@/types/types"
+import { PaymentRoute } from "@/components/guest-only-route"
+import { useAuth } from "@/context/auth-context"
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 type PaymentMethod = "mastercard" | "vodafone" | "visa" | "instapay" | "fawry"
 type Step = "method" | "details" | "processing" | "success"
-
-const PLANS = {
-  starter:    { name: "Starter",    price: 39,  annual: 29  },
-  growth:     { name: "Growth",     price: 99,  annual: 79  },
-  enterprise: { name: "Enterprise", price: null, annual: null },
-}
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function formatCard(v: string) {
@@ -392,6 +390,12 @@ function SuccessScreen({ plan, method }: { plan: string; method: PaymentMethod }
   const router = useRouter()
   const methodLabel = METHODS.find(m => m.id === method)?.label ?? method
 
+  useEffect(() => {
+    sessionStorage.removeItem("selectedPlan")
+    const timer = setTimeout(() => router.replace("/dashboard"), 2500)
+    return () => clearTimeout(timer)
+  }, [router])
+
   return (
     <div className="text-center py-8">
       {/* Animated checkmark */}
@@ -406,10 +410,11 @@ function SuccessScreen({ plan, method }: { plan: string; method: PaymentMethod }
       </div>
 
       <h2 className="text-[24px] font-bold text-[#1a1830] mb-2">Payment successful!</h2>
-      <p className="text-[14px] text-[#64607a] mb-6">
+      <p className="text-[14px] text-[#64607a] mb-2">
         Your <strong>{plan}</strong> plan is now active.<br/>
         Paid via <strong>{methodLabel}</strong>.
       </p>
+      <p className="text-[13px] text-[#888] mb-6">Redirecting to your dashboard…</p>
 
       <div className="bg-[#f6f5fc] rounded-2xl p-5 mb-6 text-left">
         {[
@@ -450,30 +455,121 @@ function ProcessingScreen() {
 }
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
-export default function PaymentPage() {
+function PaymentPageContent() {
   const router       = useRouter()
   const searchParams = useSearchParams()
+  const { refreshUser } = useAuth()
 
-  const planKey  = (searchParams.get("plan") ?? "growth") as keyof typeof PLANS
-  const isAnnual = searchParams.get("annual") === "true"
-  const plan     = PLANS[planKey] ?? PLANS.growth
-  const amount   = isAnnual ? (plan.annual ?? 0) : (plan.price ?? 0)
+  const [dbPlan, setDbPlan]           = useState<PricingPlan | null>(null)
+  const [isAnnual, setIsAnnual]       = useState(false)
+  const [amount, setAmount]           = useState(0)
+  const [plansLoading, setPlansLoading] = useState(true)
+  const [plansError, setPlansError]   = useState("")
 
   const [method,  setMethod]  = useState<PaymentMethod | null>(null)
   const [step,    setStep]    = useState<Step>("method")
   const [loading, setLoading] = useState(false)
 
+  useEffect(() => {
+    async function loadPlan() {
+      try {
+        const plans = await api.getPlans()
+        const planIdParam = searchParams.get("planId")
+        const stored = sessionStorage.getItem("selectedPlan")
+        let selectedId = planIdParam
+        let annual = searchParams.get("annual") === "true"
+
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored) as {
+              id?: string
+              annual?: boolean
+              price?: number
+            }
+            selectedId = parsed.id ?? selectedId
+            if (parsed.annual !== undefined) annual = parsed.annual
+          } catch {
+            // ignore malformed session data
+          }
+        }
+
+        const matched =
+          plans.find((p) => p.id === selectedId) ?? plans[0] ?? null
+
+        if (!matched) {
+          setPlansError("No active plans found. Please contact support.")
+          return
+        }
+
+        let monthlyAmount = matched.priceMonthly
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored) as { price?: number }
+            if (typeof parsed.price === "number") monthlyAmount = parsed.price
+          } catch {
+            // ignore
+          }
+        }
+
+        setDbPlan(matched)
+        setIsAnnual(annual)
+        setAmount(monthlyAmount)
+      } catch (err) {
+        setPlansError(
+          err instanceof Error ? err.message : "Failed to load pricing plans",
+        )
+      } finally {
+        setPlansLoading(false)
+      }
+    }
+
+    loadPlan()
+  }, [searchParams])
+
+  if (plansLoading) {
+    return (
+      <div className="min-h-screen bg-[#fafafa] flex items-center justify-center">
+        <div className="text-[#64607a] text-sm">Loading your plan…</div>
+      </div>
+    )
+  }
+
+  if (plansError || !dbPlan) {
+    return (
+      <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center gap-4 px-4">
+        <p className="text-[#64607a] text-sm text-center">{plansError ?? "Plan not found."}</p>
+        <Link href="/pricing" className="text-[#534AB7] text-sm font-medium no-underline">
+          ← Back to pricing
+        </Link>
+      </div>
+    )
+  }
+
+  const plan = {
+    name: dbPlan.name,
+    price: dbPlan.priceMonthly,
+    annual: Math.round(dbPlan.priceMonthly * 0.8),
+  }
+
   const handlePay = async () => {
+    if (!dbPlan) return
     setLoading(true)
     setStep("processing")
-    // 🔁 SWAP: replace with your real payment API call
-    // const res = await fetch("/api/payments/create", {
-    //   method: "POST",
-    //   body: JSON.stringify({ plan: planKey, annual: isAnnual, method, amount })
-    // })
-    await new Promise(r => setTimeout(r, 2200))
-    setLoading(false)
-    setStep("success")
+    try {
+      await api.completePayment({
+        pricingId: dbPlan.id,
+        amount: isAnnual ? amount * 12 : amount,
+        currency: "EGP",
+        isAnnual,
+      })
+      await refreshUser()
+      setLoading(false)
+      setStep("success")
+    } catch (err) {
+      setLoading(false)
+      setStep("details")
+      alert(err instanceof Error ? err.message : "Payment failed")
+    }
   }
 
   return (
@@ -577,7 +673,7 @@ export default function PaymentPage() {
               <div className="space-y-2.5 mb-5">
                 <div className="flex justify-between text-[13px]">
                   <span className="text-[#888]">Subtotal</span>
-                  <span className="text-[#1a1830]">${amount}/mo</span>
+                  <span className="text-[#1a1830]">EGP {amount}/mo</span>
                 </div>
                 {isAnnual && (
                   <div className="flex justify-between text-[13px]">
@@ -587,16 +683,16 @@ export default function PaymentPage() {
                 )}
                 <div className="flex justify-between text-[13px]">
                   <span className="text-[#888]">Tax</span>
-                  <span className="text-[#1a1830]">$0.00</span>
+                  <span className="text-[#1a1830]">EGP 0.00</span>
                 </div>
               </div>
               <div className="flex justify-between pt-4 border-t border-[#e8e6f0]">
                 <span className="text-[15px] font-bold text-[#1a1830]">Total today</span>
-                <span className="text-[20px] font-bold text-[#534AB7]">${isAnnual ? amount * 12 : amount}</span>
+                <span className="text-[20px] font-bold text-[#534AB7]">EGP {isAnnual ? amount * 12 : amount}</span>
               </div>
               {isAnnual && (
                 <div className="mt-3 bg-[#E1F5EE] rounded-lg px-3 py-2 text-[11px] text-[#0F6E56] font-medium">
-                  ✓ You save ${((plan.price ?? 0) - (plan.annual ?? 0)) * 12}/year with annual billing
+                  ✓ You save EGP {((plan.price ?? 0) - (plan.annual ?? 0)) * 12}/year with annual billing
                 </div>
               )}
             </div>
@@ -636,5 +732,13 @@ export default function PaymentPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function PaymentPage() {
+  return (
+    <PaymentRoute>
+      <PaymentPageContent />
+    </PaymentRoute>
   )
 }

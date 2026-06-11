@@ -4,6 +4,7 @@
 // The function signatures stay exactly the same — nothing else in the app changes.
 
 import { getSession } from "@/lib/auth";
+import { mapApiUser } from "@/lib/map-user";
 import {
 	AuthUser,
 	DashboardStats,
@@ -11,6 +12,7 @@ import {
 	getKnowledgeDocsResponse,
 	KnowledgeDocument,
 	LoginResponse,
+	PricingPlan,
 	OrgProfile,
 	OrgSetupData,
 	UpdatePasswordInput,
@@ -83,27 +85,9 @@ export const api = {
 			credentials: "include",
 		});
 		const data = await res.json();
-		if (!res.ok) throw new Error(data.error ?? "Login failed");
+		if (!res.ok) throw new Error(data.error ?? data.message ?? "Login failed");
 
-		const {
-			id,
-			email: userEmail,
-			firstName,
-			lastName,
-			role,
-			organizationId,
-			onboarded,
-		} = data.result;
-		const user: AuthUser = {
-			id,
-			email: userEmail,
-			firstName,
-			lastName,
-			role,
-			orgId: organizationId,
-			onboarded,
-		};
-		return { user };
+		return { user: mapApiUser(data.result) };
 	},
 
 	async register(data: {
@@ -114,7 +98,7 @@ export const api = {
 		businessName: string;
 		planId: string;
 	}): Promise<LoginResponse> {
-		const res = await fetch(`${BASE_URL}/api/v1/auth/register`, {
+		const res = await fetch(`${BASE_URL}/auth/register`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(data),
@@ -125,23 +109,50 @@ export const api = {
 		return body;
 	},
 
+	async getPlans(): Promise<PricingPlan[]> {
+		const res = await fetch(`${BASE_URL}/pricing`, {
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to load plans");
+		return data;
+	},
+
 	async getMe(): Promise<AuthUser> {
 		const res = await fetch(`${BASE_URL}/auth/me`, {
 			credentials: "include",
 		});
 		if (!res.ok) throw new Error("No active session");
 		const data = await res.json();
-		const { id, email, firstName, lastName, role, organizationId, onboarded } =
-			data.result;
-		return {
-			id,
-			email,
-			firstName,
-			lastName,
-			role,
-			orgId: organizationId,
-			onboarded,
-		};
+		return mapApiUser(data.result);
+	},
+
+	async refreshToken(): Promise<void> {
+		const res = await fetch(`${BASE_URL}/auth/refresh`, {
+			method: "POST",
+			credentials: "include",
+		});
+		if (!res.ok) {
+			const data = await res.json().catch(() => ({}));
+			throw new Error(data.error ?? "Session expired");
+		}
+	},
+
+	async completePayment(data: {
+		pricingId: string;
+		amount: number;
+		currency?: string;
+		isAnnual: boolean;
+	}): Promise<{ paymentId: string; billingPeriodEnd: string }> {
+		const res = await fetch(`${BASE_URL}/payments/complete`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify(data),
+		});
+		const body = await res.json();
+		if (!res.ok) throw new Error(body.error ?? "Payment failed");
+		return body;
 	},
 
 	async logout(): Promise<void> {

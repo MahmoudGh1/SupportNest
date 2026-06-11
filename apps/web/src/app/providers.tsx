@@ -6,6 +6,7 @@ import { messages } from "@/locales/en/messages";
 import { useEffect, useState } from "react";
 import { LocaleContext } from "@/context/local-context";
 import { usePathname, useRouter } from "next/navigation";
+import { localePath, stripLocale, type AppLocale } from "@/lib/routes";
 
 export type Locale = "en" | "ar";
 
@@ -28,8 +29,8 @@ export function Providers({
 	const pathname = usePathname();
 
 	const setLocale = (newLocale: Locale) => {
-		const newPath = pathname.replace(`/${locale}`, `/${newLocale}`);
-		router.push(newPath);
+		const { pathname: pathWithoutLocale } = stripLocale(pathname);
+		router.push(localePath(pathWithoutLocale, newLocale as AppLocale));
 	};
 
 	useEffect(() => {

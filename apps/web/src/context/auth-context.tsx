@@ -6,85 +6,99 @@ import {
 	useEffect,
 	useState,
 	useCallback,
+	useRef,
 } from "react";
 import { api } from "@/lib/api";
 import { saveSession, getSession, clearSession } from "@/lib/auth";
 import type { AuthUser } from "@/types/types";
+
+const REFRESH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 
 interface AuthState {
 	user: AuthUser | null;
 	loading: boolean;
 	login: (email: string, password: string) => Promise<AuthUser>;
 	logout: () => Promise<void>;
+	refreshUser: () => Promise<AuthUser | null>;
 }
 
 const AuthCtx = createContext<AuthState | null>(null);
 
+async function fetchCurrentUser(): Promise<AuthUser | null> {
+	try {
+		const user = await api.getMe();
+		saveSession(user);
+		return user;
+	} catch {
+		try {
+			await api.refreshToken();
+			const user = await api.getMe();
+			saveSession(user);
+			return user;
+		} catch {
+			clearSession();
+			return null;
+		}
+	}
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [user, setUser] = useState<AuthUser | null>(null);
 	const [loading, setLoading] = useState(true);
+	const refreshTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+	const refreshUser = useCallback(async () => {
+		const current = await fetchCurrentUser();
+		setUser(current);
+		return current;
+	}, []);
 
 	useEffect(() => {
 		const rehydrate = async () => {
 			const cached = getSession();
-			if (cached) {
-				setUser(cached);
-				setLoading(false);
-				return;
-			}
-			try {
-				const user = await api.getMe();
-				setUser(user);
-				saveSession(user);
-			} catch {
-			} finally {
-				setLoading(false);
-			}
+			if (cached) setUser(cached);
+
+			const current = await fetchCurrentUser();
+			setUser(current);
+			setLoading(false);
 		};
 		rehydrate();
 	}, []);
 
+	useEffect(() => {
+		if (!user) {
+			if (refreshTimer.current) {
+				clearInterval(refreshTimer.current);
+				refreshTimer.current = null;
+			}
+			return;
+		}
+
+		const tick = async () => {
+			try {
+				await api.refreshToken();
+				const updated = await api.getMe();
+				setUser(updated);
+				saveSession(updated);
+			} catch {
+				setUser(null);
+				clearSession();
+			}
+		};
+
+		refreshTimer.current = setInterval(tick, REFRESH_INTERVAL_MS);
+		return () => {
+			if (refreshTimer.current) clearInterval(refreshTimer.current);
+		};
+	}, [user?.id]);
+
 	const login = useCallback(async (email: string, password: string) => {
-		const data = await api.login(email, password);
-		setUser(data.user);
-		saveSession(data.user);
-		return data.user;
+		await api.login(email, password);
+		const current = await api.getMe();
+		setUser(current);
+		saveSession(current);
+		return current;
 	}, []);
-
-	// const register = useCallback(
-	// 	async (formData: {
-	// 		email: string;
-	// 		password: string;
-	// 		firstName: string;
-	// 		lastName: string;
-	// 	}) => {
-	// 		const data = await api.register({
-	// 			...formData,
-	// 			planId: "fdfb9397-de6b-4977-a9b9-de2610881d8as",
-	// 		});
-	// 		setUser(data.user);
-	// 		saveSession(data.user);
-	// 		return data.user;
-	// 	},
-	// 	[],
-	// );
-
-	// const completeOnboarding = useCallback(
-	// 	(orgData: { orgId: string; name: string }) => {
-	// 		setUser((prev) => {
-	// 			if (!prev) return prev;
-	// 			const updated = {
-	// 				...prev,
-	// 				orgId: orgData.orgId,
-	// 				orgName: orgData.name,
-	// 				onboarded: true,
-	// 			};
-	// 			saveSession(updated);
-	// 			return updated;
-	// 		});
-	// 	},
-	// 	[token],
-	// );
 
 	const logout = useCallback(async () => {
 		await api.logout();
@@ -93,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	}, []);
 
 	return (
-		<AuthCtx.Provider value={{ user, loading, login, logout }}>
+		<AuthCtx.Provider value={{ user, loading, login, logout, refreshUser }}>
 			{children}
 		</AuthCtx.Provider>
 	);

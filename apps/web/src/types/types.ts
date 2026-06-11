@@ -8,6 +8,7 @@ export interface AuthUser {
 	orgId: string | null;
 	orgName?: string;
 	onboarded: boolean;
+	hasActiveSubscription?: boolean;
 }
 
 export enum Role {
@@ -18,6 +19,16 @@ export enum Role {
 
 export interface LoginResponse {
 	user: AuthUser;
+}
+
+export interface PricingPlan {
+	id: string;
+	name: string;
+	priceMonthly: number;
+	maxConversations: number;
+	maxAgents: number;
+	maxKnowledgeDocuments: number;
+	features: string;
 }
 
 export interface OrgSetupData {

@@ -1,5 +1,5 @@
 import prisma from "src/config/prisma.js";
-import { Role } from "generated/prisma/enums.js";
+import { PaymentStatus, Role } from "generated/prisma/enums.js";
 import slugify from "src/utils/slug.utils.js";
 import type { LoginInput, OraganizationDataDTO, RegisterInput, TokenPayload, userData } from "src/types/auth.types.js";
 import AppError from "src/utils/appError.js";
@@ -77,6 +77,20 @@ export const loginService = async ({ email, password }: LoginInput): Promise<Ora
 	}
 };
 
+export async function hasActiveSubscription(
+	organizationId: string | null,
+): Promise<boolean> {
+	if (!organizationId) return false;
+	const active = await prisma.payment.findFirst({
+		where: {
+			organizationId,
+			status: PaymentStatus.SUCCEEDED,
+			billingPeriodEnd: { gt: new Date() },
+		},
+	});
+	return Boolean(active);
+}
+
 export const userService = async (payloadToken: TokenPayload): Promise<userData> => {
 	try {
 		const user = await prisma.user.findUnique({
@@ -88,6 +102,7 @@ export const userService = async (payloadToken: TokenPayload): Promise<userData>
 				lastName: true,
 				role: true,
 				organizationId: true,
+				organization: { select: { name: true } },
 			},
 		});
 
@@ -95,7 +110,19 @@ export const userService = async (payloadToken: TokenPayload): Promise<userData>
 			throw new AppError("User not found!", 401);
 		}
 
-		return user as userData;
+		const activeSubscription = await hasActiveSubscription(user.organizationId);
+
+		return {
+			id: user.id,
+			email: user.email,
+			firstName: user.firstName,
+			lastName: user.lastName,
+			role: user.role,
+			organizationId: user.organizationId,
+			organizationName: user.organization?.name ?? null,
+			onboarded: Boolean(user.organizationId),
+			hasActiveSubscription: activeSubscription,
+		};
 	} catch (err) {
 		throw err;
 	}

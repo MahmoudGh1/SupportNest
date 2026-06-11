@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { api } from "@/lib/api";
 
 interface Props {
   annual: boolean;
@@ -56,68 +58,60 @@ interface Plan {
   variant: "glass" | "white" | "dark-glass";
 }
 
-const PLANS: Plan[] = [
-  {
-    id: "fdfb9397-de6b-4977-a9b9-de2610881d8a",
-    name: "Starter",
-    monthlyPrice: 500,
-    annualPrice: 350,
-    subline: (annual) =>
-      annual ? `Billed EGP${350 * 12}/yr` : "Billed monthly",
-    cta: "Get started →",
-    variant: "glass",
-    features: [
-      "Up to 3 team members",
-      "5,000 AI conversations / mo",
-      "10 knowledge base docs",
-      "Embeddable chat widget",
-      "Basic analytics dashboard",
-      "Email support",
-    ],
-  },
-  {
-    id: "5a2cbacf-512b-4d2f-8ee6-4421a51d9e0e",
-    name: "Pro",
-    badge: "MOST POPULAR",
-    monthlyPrice: 1500,
-    annualPrice: 1250,
-    subline: (annual) =>
-      annual ? `Billed EGP${1250 * 12}/yr` : "Billed monthly",
-    cta: "Start free trial →",
-    variant: "white",
-    features: [
-      "Up to 15 team members",
-      "Unlimited AI conversations",
-      "50 knowledge base docs",
-      "Tier 1 + Tier 2 AI agents",
-      "Human agent inbox",
-      "Advanced analytics & CSAT",
-      "Custom widget branding",
-      "API access",
-      "Priority support",
-    ],
-  },
-  {
-    id: "80b4d7be-849e-4ce3-b045-8691fb59e360",
-    name: "Enterprise",
-    monthlyPrice: null,
-    annualPrice: null,
-    subline: () => "Custom contract & invoicing",
-    cta: "Contact sales",
-    variant: "dark-glass",
-    features: [
-      "Unlimited team members",
-      "Unlimited AI conversations",
-      "Unlimited knowledge docs",
-      "Full AI agent pipeline",
-      "Dedicated infrastructure",
-      "SSO / SAML login",
-      "Custom integrations",
-      "SLA & uptime guarantee",
-      "Dedicated account manager",
-    ],
-  },
-];
+function parseFeatures(features: string): string[] {
+  try {
+    const parsed = JSON.parse(features) as unknown;
+    if (Array.isArray(parsed)) return parsed.map(String);
+    if (parsed && typeof parsed === "object") {
+      return Object.values(parsed as Record<string, unknown>).map(String);
+    }
+  } catch {
+    // fall through
+  }
+  return features ? [features] : [];
+}
+
+function mapDbPlanToCard(plan: {
+  id: string;
+  name: string;
+  priceMonthly: number;
+  maxConversations: number;
+  maxAgents: number;
+  maxKnowledgeDocuments: number;
+  features: string;
+}, index: number, total: number): Plan {
+  const isEnterprise =
+    plan.name.toLowerCase() === "enterprise" || plan.priceMonthly <= 0;
+  const annualPrice = isEnterprise
+    ? null
+    : Math.round(plan.priceMonthly * 0.8);
+  const featured = index === Math.min(1, total - 1);
+
+  const defaultFeatures = [
+    `${plan.maxAgents || "Unlimited"} team members`,
+    `${plan.maxConversations || "Unlimited"} AI conversations / mo`,
+    `${plan.maxKnowledgeDocuments || "Unlimited"} knowledge base docs`,
+  ];
+  const parsedFeatures = parseFeatures(plan.features);
+  const features =
+    parsedFeatures.length > 0 ? parsedFeatures : defaultFeatures;
+
+  return {
+    id: plan.id,
+    name: plan.name,
+    badge: featured ? "MOST POPULAR" : undefined,
+    monthlyPrice: isEnterprise ? null : plan.priceMonthly,
+    annualPrice,
+    subline: (annual) => {
+      if (isEnterprise) return "Custom contract & invoicing";
+      const price = annual ? annualPrice! : plan.priceMonthly;
+      return annual ? `Billed EGP${price * 12}/yr` : "Billed monthly";
+    },
+    cta: isEnterprise ? "Contact sales" : "Get started →",
+    variant: featured ? "white" : isEnterprise ? "dark-glass" : "glass",
+    features,
+  };
+}
 
 function PlanCard({
   plan,
@@ -151,8 +145,7 @@ function PlanCard({
 
   // ── Handle CTA click ───────────────────────────────────────────────────────
   function handleClick() {
-    // Enterprise → contact page, no sessionStorage
-    if (plan.id === "enterprise") {
+    if (plan.name === "Enterprise") {
       router.push("/contact");
       return;
     }
@@ -262,15 +255,53 @@ function PlanCard({
 }
 
 export default function PricingCards({ annual }: Props) {
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    api
+      .getPlans()
+      .then((dbPlans) => {
+        setPlans(
+          dbPlans.map((plan, index) =>
+            mapDbPlanToCard(plan, index, dbPlans.length),
+          ),
+        );
+      })
+      .catch((err) => {
+        setError(
+          err instanceof Error ? err.message : "Failed to load pricing plans",
+        );
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="max-w-260 mx-auto px-4 py-16 text-center text-black/40 text-sm">
+        Loading plans…
+      </div>
+    );
+  }
+
+  if (error || plans.length === 0) {
+    return (
+      <div className="max-w-260 mx-auto px-4 py-16 text-center text-black/40 text-sm">
+        {error || "No plans available right now."}
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-260 mx-auto px-4">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-stretch">
-        {PLANS.map((plan) => (
+        {plans.map((plan, index) => (
           <PlanCard
             key={plan.id}
             plan={plan}
             annual={annual}
-            featured={plan.id === "c76ac77c-22de-4383-9d1a-986f70ef7694"}
+            featured={index === Math.min(1, plans.length - 1)}
           />
         ))}
       </div>

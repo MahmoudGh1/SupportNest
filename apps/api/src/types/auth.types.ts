@@ -62,6 +62,8 @@ export interface userData {
 	firstName: string;
 	lastName: string;
 	role: string;
-	organizationId: string;
+	organizationId: string | null;
+	organizationName: string | null;
 	onboarded: boolean;
+	hasActiveSubscription: boolean;
 }
