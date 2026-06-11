@@ -25,6 +25,8 @@ import businessApiConfigRouter from "./routes/businessApiConfig.routes.js";
 import ticketRouter from "./routes/ticket.routes.js";
 import userRouter from "./routes/user.routes.js";
 import knowledgeRouter from "./routes/knowledge.routes.js"
+import tier2Router from "./routes/tier2.routes.js";
+import reportRouter from "./routes/reporter.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -69,6 +71,7 @@ app.use("/api/v1/rag", ragRouter);
 app.use("/api/v1/dashboard/apikey", ApiKeyRouter);
 app.use("/api/v1/widget", WidgetRouter);
 app.use("/api/v1/organizations", OrganizationRoutes);
+app.use("/api/v1/reports", reportRouter);
 
 app.use("/api/v1/widget/conversations", conversationsRoutes);
 app.use("/api/v1/organizations/api-config", businessApiConfigRouter);
@@ -77,6 +80,7 @@ app.use("/api/v1/payments", paymentRoutes);
 app.use("/api/v1/invitations", invitationRouter);
 app.use("/api/v1/tickets", ticketRouter);
 
+app.use("/api/v1/tier2", tier2Router);
 app.use(notFoundHandler);
 
 app.use(errorHandler);

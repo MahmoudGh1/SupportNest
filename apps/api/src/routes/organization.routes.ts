@@ -34,7 +34,7 @@ router.patch("/widget-config", updateWidgetConfigController);
 /* ------------------------------ */
 router.post(
 	"/:orgId/knowledge",
-	// authMiddleware,
+	authMiddleware,
 	upload.single("file"),
 	knowledgeController.uploadDocument,
 );
