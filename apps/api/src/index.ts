@@ -25,7 +25,7 @@ import businessApiConfigRouter from "./routes/businessApiConfig.routes.js";
 import ticketRouter from "./routes/ticket.routes.js";
 import userRouter from "./routes/user.routes.js";
 import knowledgeRouter from "./routes/knowledge.routes.js"
-
+import tier2Router from "./routes/tier2.routes.js";
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -77,6 +77,7 @@ app.use("/api/v1/payments", paymentRoutes);
 app.use("/api/v1/invitations", invitationRouter);
 app.use("/api/v1/tickets", ticketRouter);
 
+app.use("/api/v1/tier2", tier2Router);
 app.use(notFoundHandler);
 
 app.use(errorHandler);
