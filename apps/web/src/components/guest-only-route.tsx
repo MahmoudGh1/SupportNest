@@ -12,7 +12,7 @@ export function GuestAuthRoute({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		if (loading) return;
-		if (user) router.replace("/");
+		if (user) router.replace("/dashboard");
 	}, [user, loading, router]);
 
 	if (loading) return <PageLoader />;

@@ -1,6 +1,7 @@
 import { Locale, Providers } from "@/app/providers";
 import { AuthProvider } from "@/context/auth-context";
 import { PlanProvider } from "@/context/plan-context";
+import { ThemeProvider } from "@/context/theme-context";
 
 export default async function LocaleLayout({
 	children,
@@ -12,10 +13,12 @@ export default async function LocaleLayout({
 	const { locale } = await params;
 
 	return (
-		<PlanProvider>
-			<AuthProvider>
-				<Providers locale={locale as Locale}>{children}</Providers>
-			</AuthProvider>
-		</PlanProvider>
+		<ThemeProvider>
+			<PlanProvider>
+				<AuthProvider>
+					<Providers locale={locale as Locale}>{children}</Providers>
+				</AuthProvider>
+			</PlanProvider>
+		</ThemeProvider>
 	);
 }

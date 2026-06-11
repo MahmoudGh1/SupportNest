@@ -1,8 +1,3 @@
-// src/lib/mock-api.ts
-// ─── ALL MOCK ENDPOINTS HERE ──────────────────────────────────────────────────
-// When backend is ready: replace each function body with a real fetch() call.
-// The function signatures stay exactly the same — nothing else in the app changes.
-
 import { getSession } from "@/lib/auth";
 import { mapApiUser } from "@/lib/map-user";
 import {
@@ -24,53 +19,6 @@ import {
 	ApiKey,
 	CreateApiKeyInput,
 } from "@/types/types";
-
-const mockDelay = (ms = 600) => new Promise((r) => setTimeout(r, ms));
-
-const mockUsers = [
-	{
-		id: "u1",
-		email: "admin@acme.com",
-		password: "password",
-		firstName: "Mohamed",
-		lastName: "Rashad",
-		role: "org_admin",
-		orgId: "org1",
-		orgName: "Acme Corp",
-		onboarded: true,
-	},
-];
-
-// ─── KB MOCK DATA STORE ───────────────────────────────────────────────────────
-// Mutable in-memory store — simulates the database for this session
-
-// ─── SETTINGS MOCK DATA ───────────────────────────────────────────────────────
-let mockOrgProfile: OrgProfile = {
-	id: "org1",
-	name: "Acme Corp",
-	slug: "acme-corp",
-	email: "support@acme.com",
-	widget_config: {
-		color: "#534AB7",
-		greeting: "Hi! How can we help you today?",
-		position: "bottom-right",
-	},
-	plan_id: "plan_starter",
-	is_active: true,
-	created_at: "2024-01-15T10:00:00Z",
-	updated_at: "2024-01-15T10:00:00Z",
-};
-
-let mockUserProfile: UserProfile = {
-	id: "u1",
-	email: "admin@acme.com",
-	first_name: "Mohamed",
-	last_name: "Rashad",
-	role: "org_admin",
-	organization_id: "org1",
-	is_active: true,
-	created_at: "2024-01-15T10:00:00Z",
-};
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
 const BASE_URL =
@@ -165,55 +113,17 @@ export const api = {
 	async setupOrg(
 		data: OrgSetupData,
 	): Promise<{ orgId: string } & OrgSetupData> {
-		await mockDelay(1000);
-		return { orgId: "org-" + Date.now(), ...data };
+		throw new Error("Organization setup is not available.");
 	},
 
 	async getDashboardStats(): Promise<DashboardStats> {
-		await mockDelay(500);
 		return {
-			totalConversations: 1284,
-			aiResolutionRate: 81,
-			avgResponseTime: "1.4s",
-			csatScore: 4.7,
-			recentConversations: [
-				{
-					id: 1,
-					customer: "Sarah K.",
-					status: "ACTIVE",
-					tier: "TIER_1",
-					timestamp: "2026-06-09T01:50:00Z",
-				},
-				{
-					id: 2,
-					customer: "James O.",
-					status: "ESCALATED",
-					tier: "HUMAN",
-					timestamp: "2026-06-09T01:42:00Z",
-				},
-				{
-					id: 3,
-					customer: "Lena M.",
-					status: "CLOSED",
-					tier: "TIER_2",
-					timestamp: "2026-06-09T01:35:00Z",
-				},
-				{
-					id: 4,
-					customer: "Tom B.",
-					status: "ACTIVE",
-					tier: "TIER_1",
-					timestamp: "2026-06-09T01:50:00Z",
-				},
-				{
-					id: 5,
-					customer: "Aisha F.",
-					status: "CLOSED",
-					tier: "TIER_1",
-					timestamp: "2026-06-09T01:50:00Z",
-				},
-			],
-			resolutionByTier: { tier1: 58, tier2: 23, human: 19 },
+			totalConversations: 0,
+			aiResolutionRate: 0,
+			avgResponseTime: "—",
+			csatScore: 0,
+			recentConversations: [],
+			resolutionByTier: { tier1: 0, tier2: 0, human: 0 },
 		};
 	},
 
@@ -312,8 +222,12 @@ export const api = {
 	// ─── SETTINGS ───────────────────────────────────────────────────────────────
 
 	async getUserProfile(): Promise<{ user: UserProfile }> {
-		await mockDelay(300);
-		return { user: { ...mockUserProfile } };
+		const res = await fetch(`${BASE_URL}/users/me`, {
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to load profile");
+		return { user: data.result };
 	},
 
 	async updateUserProfile(
@@ -352,25 +266,33 @@ export const api = {
 	},
 
 	async getOrgProfile(): Promise<{ organization: OrgProfile }> {
-		await mockDelay(300);
-		return { organization: { ...mockOrgProfile } };
+		const res = await fetch(`${BASE_URL}/organizations/me`, {
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to load organization");
+		return { organization: data.result };
 	},
 
 	async updateOrgProfile(
 		input: UpdateWidgetConfigInput,
 	): Promise<{ organization: OrgProfile }> {
-		await mockDelay(600);
 		if (!input.name.trim()) throw new Error("Organization name is required.");
 		if (!input.email.trim())
 			throw new Error("Organization email is required.");
-		mockOrgProfile = {
-			...mockOrgProfile,
-			name: input.name,
-			email: input.email,
-			widget_config: input.widget_config,
-			updated_at: new Date().toISOString(),
-		};
-		return { organization: { ...mockOrgProfile } };
+		const res = await fetch(`${BASE_URL}/organizations/me`, {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify({
+				name: input.name,
+				email: input.email,
+				widget_config: input.widget_config,
+			}),
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to update organization");
+		return { organization: data.result };
 	},
 	async getApiKeys(): Promise<ApiKey[]> {
 		const response = await fetch(`${BASE_URL}/dashboard/apiKey/keys`, {

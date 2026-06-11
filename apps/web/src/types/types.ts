@@ -9,6 +9,7 @@ export interface AuthUser {
 	orgName?: string;
 	onboarded: boolean;
 	hasActiveSubscription?: boolean;
+	currentPlanId?: string | null;
 }
 
 export enum Role {

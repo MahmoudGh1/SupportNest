@@ -26,7 +26,7 @@ function Hero() {
   })
 
   return (
-    <section className="relative overflow-hidden bg-white text-center pt-36 pb-[100px] px-[5%]">
+    <section className="relative overflow-hidden bg-[#0F0F0F] text-center pt-36 pb-[100px] px-[5%]">
       <div className="absolute pointer-events-none rounded-full" style={{ top: -120, left: "50%", transform: "translateX(-50%)", width: 800, height: 500, background: "radial-gradient(ellipse, rgba(83,74,183,0.07) 0%, transparent 70%)" }} />
       <div className="absolute pointer-events-none rounded-full" style={{ top: 60, left: "5%", width: 260, height: 260, background: "radial-gradient(circle, rgba(83,74,183,0.05) 0%, transparent 70%)" }} />
       <div className="absolute pointer-events-none rounded-full" style={{ top: 40, right: "5%", width: 220, height: 220, background: "radial-gradient(circle, rgba(175,169,236,0.07) 0%, transparent 70%)" }} />
@@ -36,19 +36,19 @@ function Hero() {
         <span className="text-[#534AB7] text-[13px] font-semibold">AI-Powered Customer Support Platform</span>
       </div>
 
-      <h1 style={{ ...anim(.1), fontSize: "clamp(2.4rem, 5.5vw, 4rem)" }} className="font-extrabold text-[#1a1830] leading-[1.1] tracking-[-0.03em] max-w-[780px] mx-auto mb-5 mt-0">
+      <h1 style={{ ...anim(.1), fontSize: "clamp(2.4rem, 5.5vw, 4rem)" }} className="font-extrabold text-white leading-[1.1] tracking-[-0.03em] max-w-[780px] mx-auto mb-5 mt-0">
         Resolve <span className="text-[#534AB7]">80% of tickets</span> instantly with AI agents
       </h1>
 
-      <p style={{ ...anim(.2), fontSize: "clamp(1rem, 1.8vw, 1.15rem)" }} className="text-[#64607a] leading-[1.75] max-w-[560px] mx-auto mb-11 mt-0">
+      <p style={{ ...anim(.2), fontSize: "clamp(1rem, 1.8vw, 1.15rem)" }} className="text-white/55 leading-[1.75] max-w-[560px] mx-auto mb-11 mt-0">
         SupportNest deploys a hierarchy of specialized AI agents that handle customer inquiries, automate workflows, and escalate complex issues — 24/7, with full context.
       </p>
 
       <div style={anim(.3)} className="flex gap-3 justify-center flex-wrap mb-16">
-        <Link href="/register" className="bg-[#534AB7] hover:bg-[#7F77DD] text-white text-[15px] font-semibold no-underline px-[30px] py-[13px] rounded-[10px] shadow-[0_4px_20px_rgba(83,74,183,0.35)] hover:shadow-[0_8px_28px_rgba(83,74,183,0.4)] inline-flex items-center gap-2 hover:-translate-y-0.5 transition-all duration-200">
+        <Link href="/pricing" className="bg-[#534AB7] hover:bg-[#7F77DD] text-white text-[15px] font-semibold no-underline px-[30px] py-[13px] rounded-[10px] shadow-[0_4px_20px_rgba(83,74,183,0.35)] hover:shadow-[0_8px_28px_rgba(83,74,183,0.4)] inline-flex items-center gap-2 hover:-translate-y-0.5 transition-all duration-200">
           Start Free Trial <i className="ti ti-arrow-right text-base" />
         </Link>
-        <a href="#pipeline" className="bg-white text-[#1a1830] hover:text-[#534AB7] text-[15px] font-semibold no-underline px-7 py-[13px] rounded-[10px] border-[1.5px] border-[#e8e6f0] hover:border-[#534AB7] inline-flex items-center gap-2 transition-all duration-200">
+        <a href="#pipeline" className="bg-transparent text-white hover:text-[#534AB7] text-[15px] font-semibold no-underline px-7 py-[13px] rounded-[10px] border-[1.5px] border-white/20 hover:border-[#534AB7] inline-flex items-center gap-2 transition-all duration-200">
           <i className="ti ti-player-play-filled text-[15px]" /> See How It Works
         </a>
       </div>
@@ -60,9 +60,9 @@ function Hero() {
           { val: "1.4s", label: "Avg AI response time"   },
           { val: "4.8★", label: "Average CSAT score"     },
         ].map((s, i) => (
-          <div key={s.label} className={`px-10 py-5 text-center ${i < 3 ? "border-r border-[#e8e6f0]" : ""}`}>
-            <div className="font-extrabold text-[#1a1830] tracking-[-0.03em]" style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)" }}>{s.val}</div>
-            <div className="text-[13px] text-[#64607a] mt-1 font-medium">{s.label}</div>
+          <div key={s.label} className={`px-10 py-5 text-center ${i < 3 ? "border-r border-white/10" : ""}`}>
+            <div className="font-extrabold text-white tracking-[-0.03em]" style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)" }}>{s.val}</div>
+            <div className="text-[13px] text-white/55 mt-1 font-medium">{s.label}</div>
           </div>
         ))}
       </div>
@@ -81,12 +81,12 @@ function Pipeline() {
   ]
 
   return (
-    <section id="pipeline" className="py-[90px] px-[5%] bg-white">
+    <section id="pipeline" className="py-[90px] px-[5%] bg-[#141414]">
       <div className="max-w-[1100px] mx-auto">
         <div className="text-center mb-14">
           <div className="inline-block bg-[#EEEDFE] text-[#534AB7] text-xs font-bold px-3.5 py-1 rounded-full tracking-[.08em] uppercase mb-4">How it works</div>
-          <h2 className="font-extrabold text-[#1a1830] tracking-[-0.025em] mb-3.5 mt-0" style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)" }}>The AI agent pipeline</h2>
-          <p className="text-base text-[#64607a] max-w-[520px] mx-auto m-0">Four layers of intelligence — each one smarter than the last. 80% of tickets never reach a human.</p>
+          <h2 className="font-extrabold text-white tracking-[-0.025em] mb-3.5 mt-0" style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)" }}>The AI agent pipeline</h2>
+          <p className="text-base text-white/55 max-w-[520px] mx-auto m-0">Four layers of intelligence — each one smarter than the last. 80% of tickets never reach a human.</p>
         </div>
         <div ref={ref} className="grid grid-cols-4 gap-4">
           {tiers.map((tier, i) => (
@@ -100,7 +100,7 @@ function Pipeline() {
               <div className="text-[15px] font-bold mb-2.5" style={{ color: tier.featured ? "#fff" : "#1a1830" }}>{tier.name}</div>
               <div className="text-[13px] leading-relaxed" style={{ color: tier.featured ? "rgba(255,255,255,0.7)" : "#64607a" }}>{tier.desc}</div>
               {i < tiers.length - 1 && (
-                <div className="absolute -right-5 top-1/2 -translate-y-1/2 z-10 w-6 h-6 bg-white border-[1.5px] border-[#e8e6f0] rounded-full flex items-center justify-center">
+                <div className="absolute -right-5 top-1/2 -translate-y-1/2 z-10 w-6 h-6 bg-[#141414] border-[1.5px] border-white/10 rounded-full flex items-center justify-center">
                   <i className="ti ti-chevron-right text-[13px] text-[#AFA9EC]" />
                 </div>
               )}
@@ -125,24 +125,24 @@ function Features() {
   ]
 
   return (
-    <section id="features" className="py-[90px] px-[5%] bg-[#f6f5fc]">
+    <section id="features" className="py-[90px] px-[5%] bg-[#0F0F0F]">
       <div className="max-w-[1100px] mx-auto">
         <div className="text-center mb-14">
           <div className="inline-block bg-[#EEEDFE] text-[#534AB7] text-xs font-bold px-3.5 py-1 rounded-full tracking-[.08em] uppercase mb-4">Everything included</div>
-          <h2 className="font-extrabold text-[#1a1830] tracking-[-0.025em] mb-3.5 mt-0" style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)" }}>Built for modern support teams</h2>
-          <p className="text-base text-[#64607a] max-w-[480px] mx-auto m-0">From AI pipeline to human inbox — the full support workflow in one place.</p>
+          <h2 className="font-extrabold text-white tracking-[-0.025em] mb-3.5 mt-0" style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)" }}>Built for modern support teams</h2>
+          <p className="text-base text-white/55 max-w-[480px] mx-auto m-0">From AI pipeline to human inbox — the full support workflow in one place.</p>
         </div>
         <div ref={ref} className="grid grid-cols-3 gap-4">
           {features.map((f, i) => (
-            <div key={f.title} className="bg-white rounded-2xl p-6 cursor-default"
+            <div key={f.title} className="bg-[#141414] rounded-2xl p-6 cursor-default"
               style={{ border: "1.5px solid #e8e6f0", opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(22px)", transition: `all .5s ease ${(i * .08).toFixed(2)}s` }}
               onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = `${f.color}50`; el.style.boxShadow = `0 4px 20px ${f.color}15`; el.style.transform = "translateY(-2px)" }}
               onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "#e8e6f0"; el.style.boxShadow = "none"; el.style.transform = "translateY(0)" }}>
               <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style={{ background: `${f.color}12` }}>
                 <i className={`ti ${f.icon} text-[22px]`} style={{ color: f.color }} />
               </div>
-              <div className="text-[15px] font-bold text-[#1a1830] mb-2">{f.title}</div>
-              <div className="text-[13px] text-[#64607a] leading-[1.65]">{f.desc}</div>
+              <div className="text-[15px] font-bold text-white mb-2">{f.title}</div>
+              <div className="text-[13px] text-white/55 leading-[1.65]">{f.desc}</div>
             </div>
           ))}
         </div>
@@ -161,25 +161,25 @@ function CustomerStories() {
   ]
 
   return (
-    <section id="testimonials" className="py-[90px] px-[5%] bg-white">
+    <section id="testimonials" className="py-[90px] px-[5%] bg-[#141414]">
       <div className="max-w-[1100px] mx-auto">
         <div className="text-center mb-13">
           <div className="inline-block bg-[#EEEDFE] text-[#534AB7] text-xs font-bold px-3.5 py-1 rounded-full tracking-[.08em] uppercase mb-4">Customer stories</div>
-          <h2 className="font-extrabold text-[#1a1830] tracking-[-0.025em] m-0" style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)" }}>Teams love SupportNest</h2>
+          <h2 className="font-extrabold text-white tracking-[-0.025em] m-0" style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)" }}>Teams love SupportNest</h2>
         </div>
         <div ref={ref} className="grid grid-cols-3 gap-4">
           {testimonials.map((t, i) => (
-            <div key={t.name} className="bg-[#f6f5fc] border-[1.5px] border-[#e8e6f0] rounded-2xl px-6 py-7"
+            <div key={t.name} className="bg-[#0F0F0F] border-[1.5px] border-white/10 rounded-2xl px-6 py-7"
               style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(22px)", transition: `all .5s ease ${(i * .12).toFixed(2)}s` }}>
               <div className="flex gap-[3px] mb-4">
                 {[...Array(5)].map((_, j) => <i key={j} className="ti ti-star-filled text-sm text-[#F59E0B]" />)}
               </div>
-              <p className="text-sm text-[#3d3a55] leading-[1.7] mt-0 mb-5 italic">&ldquo;{t.quote}&rdquo;</p>
+              <p className="text-sm text-white/70 leading-[1.7] mt-0 mb-5 italic">&ldquo;{t.quote}&rdquo;</p>
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-semibold text-white shrink-0" style={{ background: t.color }}>{t.initials}</div>
                 <div>
-                  <div className="text-[13px] font-bold text-[#1a1830]">{t.name}</div>
-                  <div className="text-xs text-[#64607a]">{t.role}</div>
+                  <div className="text-[13px] font-bold text-white">{t.name}</div>
+                  <div className="text-xs text-white/55">{t.role}</div>
                 </div>
               </div>
             </div>
@@ -201,18 +201,18 @@ function Pricing() {
   ]
 
   return (
-    <section id="pricing" className="py-[90px] px-[5%] bg-[#f6f5fc]">
+    <section id="pricing" className="py-[90px] px-[5%] bg-[#0F0F0F]">
       <div className="max-w-[1100px] mx-auto">
         <div className="text-center mb-12">
           <div className="inline-block bg-[#EEEDFE] text-[#534AB7] text-xs font-bold px-3.5 py-1 rounded-full tracking-[.08em] uppercase mb-4">Pricing</div>
-          <h2 className="font-extrabold text-[#1a1830] tracking-[-0.025em] mb-3 mt-0" style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)" }}>Simple, transparent pricing</h2>
-          <p className="text-base text-[#64607a] mb-7">Start free. No credit card required.</p>
-          <div className="inline-flex items-center gap-3 bg-white border-[1.5px] border-[#e8e6f0] rounded-full pl-4 pr-1.5 py-1.5">
-            <span className={`text-[13px] font-medium ${annual ? "text-[#64607a]" : "text-[#1a1830]"}`}>Monthly</span>
+          <h2 className="font-extrabold text-white tracking-[-0.025em] mb-3 mt-0" style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)" }}>Simple, transparent pricing</h2>
+          <p className="text-base text-white/55 mb-7">Start free. No credit card required.</p>
+          <div className="inline-flex items-center gap-3 bg-[#141414] border-[1.5px] border-white/10 rounded-full pl-4 pr-1.5 py-1.5">
+            <span className={`text-[13px] font-medium ${annual ? "text-white/55" : "text-white"}`}>Monthly</span>
             <button onClick={() => setAnnual(a => !a)} className="relative w-11 h-6 rounded-full border-none cursor-pointer transition-colors duration-200" style={{ background: annual ? "#534AB7" : "#ddd" }}>
-              <div className="absolute top-[3px] w-[18px] h-[18px] rounded-full bg-white shadow-sm transition-all duration-200" style={{ left: annual ? 23 : 3 }} />
+              <div className="absolute top-[3px] w-[18px] h-[18px] rounded-full bg-[#141414] shadow-sm transition-all duration-200" style={{ left: annual ? 23 : 3 }} />
             </button>
-            <span className={`text-[13px] font-medium ${annual ? "text-[#1a1830]" : "text-[#64607a]"}`}>Annual</span>
+            <span className={`text-[13px] font-medium ${annual ? "text-white" : "text-white/55"}`}>Annual</span>
             {annual && <span className="bg-[#1D9E75] text-white text-[10px] font-bold px-2.5 py-[3px] rounded-full">Save 25%</span>}
           </div>
         </div>
@@ -220,7 +220,7 @@ function Pricing() {
           {plans.map((plan, i) => (
             <div key={plan.name} className="relative rounded-[18px] p-8 overflow-hidden"
               style={{ background: plan.featured ? "#534AB7" : "#fff", border: `1.5px solid ${plan.featured ? "#534AB7" : "#e8e6f0"}`, boxShadow: plan.featured ? "0 20px 60px rgba(83,74,183,0.3)" : "0 2px 12px rgba(0,0,0,0.04)", opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(24px)", transition: `all .55s ease ${(i * .12).toFixed(2)}s` }}>
-              {plan.featured && <div className="absolute top-[18px] right-[18px] bg-white text-[#534AB7] text-[10px] font-bold px-2.5 py-[3px] rounded-full tracking-[.06em]">MOST POPULAR</div>}
+              {plan.featured && <div className="absolute top-[18px] right-[18px] bg-[#141414] text-[#534AB7] text-[10px] font-bold px-2.5 py-[3px] rounded-full tracking-[.06em]">MOST POPULAR</div>}
               <div className="text-[17px] font-extrabold mb-1.5" style={{ color: plan.featured ? "#fff" : "#1a1830" }}>{plan.name}</div>
               <div className="text-[13px] mb-6 leading-relaxed" style={{ color: plan.featured ? "rgba(255,255,255,0.7)" : "#64607a" }}>{plan.desc}</div>
               <div className="mb-6">
@@ -271,20 +271,20 @@ function About() {
   ]
 
   return (
-    <section id="about" className="py-[90px] px-[5%] bg-white">
+    <section id="about" className="py-[90px] px-[5%] bg-[#141414]">
       <div className="max-w-[1100px] mx-auto">
 
         {/* Split: story + stats */}
         <div className="grid gap-16 items-center mb-[72px]" style={{ gridTemplateColumns: "1fr 1fr" }}>
           <div ref={ref} style={{ opacity: visible ? 1 : 0, transform: visible ? "translateX(0)" : "translateX(-24px)", transition: "all .6s ease" }}>
             <div className="inline-block bg-[#EEEDFE] text-[#534AB7] text-xs font-bold px-3.5 py-1 rounded-full tracking-[.08em] uppercase mb-5">About SupportNest</div>
-            <h2 className="font-extrabold text-[#1a1830] tracking-[-0.025em] leading-[1.2] mt-0 mb-[18px]" style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.4rem)" }}>
+            <h2 className="font-extrabold text-white tracking-[-0.025em] leading-[1.2] mt-0 mb-[18px]" style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.4rem)" }}>
               Built by engineers who hated bad support
             </h2>
-            <p className="text-[15px] text-[#64607a] leading-[1.8] mt-0 mb-4">
+            <p className="text-[15px] text-white/55 leading-[1.8] mt-0 mb-4">
               SupportNest was born out of a frustration every SaaS founder knows: customer support is the #1 cost center, yet the tools haven't changed in a decade. Tickets pile up, agents burn out, and customers churn after one bad experience.
             </p>
-            <p className="text-[15px] text-[#64607a] leading-[1.8] m-0">
+            <p className="text-[15px] text-white/55 leading-[1.8] m-0">
               We built SupportNest to change that — a platform where AI handles the predictable, humans handle the unpredictable, and customers always get a fast, accurate answer.
             </p>
           </div>
@@ -306,16 +306,16 @@ function About() {
         </div>
 
         {/* Values */}
-        <h3 className="text-xl font-bold text-[#1a1830] text-center mb-8 tracking-tight">What we stand for</h3>
+        <h3 className="text-xl font-bold text-white text-center mb-8 tracking-tight">What we stand for</h3>
         <div className="grid grid-cols-4 gap-4">
           {values.map((v, i) => (
-            <div key={v.title} className="bg-[#f6f5fc] border-[1.5px] border-[#e8e6f0] rounded-2xl px-5 py-6"
+            <div key={v.title} className="bg-[#0F0F0F] border-[1.5px] border-white/10 rounded-2xl px-5 py-6"
               style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(20px)", transition: `all .5s ease ${(i * .1).toFixed(1)}s` }}>
               <div className="w-11 h-11 rounded-xl bg-[#EEEDFE] flex items-center justify-center mb-3.5">
                 <i className={`ti ${v.icon} text-[22px] text-[#534AB7]`} />
               </div>
-              <div className="text-sm font-bold text-[#1a1830] mb-2">{v.title}</div>
-              <div className="text-[13px] text-[#64607a] leading-[1.65]">{v.desc}</div>
+              <div className="text-sm font-bold text-white mb-2">{v.title}</div>
+              <div className="text-[13px] text-white/55 leading-[1.65]">{v.desc}</div>
             </div>
           ))}
         </div>
@@ -340,24 +340,24 @@ function Contact() {
     setTimeout(() => { setLoading(false); setSent(true) }, 1200)
   }
 
-  const inputCls = "w-full box-border px-3.5 py-2.5 text-sm border-[1.5px] border-[#e8e6f0] rounded-lg outline-none font-[inherit] text-[#1a1830] bg-white transition-colors duration-150 focus:border-[#534AB7]"
+  const inputCls = "w-full box-border px-3.5 py-2.5 text-sm border-[1.5px] border-white/10 rounded-lg outline-none font-[inherit] text-white bg-[#141414] transition-colors duration-150 focus:border-[#534AB7]"
 
   return (
-    <section id="contact" className="py-[90px] px-[5%] bg-[#f6f5fc]">
+    <section id="contact" className="py-[90px] px-[5%] bg-[#0F0F0F]">
       <div className="max-w-[1100px] mx-auto">
         <div className="text-center mb-13">
           <div className="inline-block bg-[#EEEDFE] text-[#534AB7] text-xs font-bold px-3.5 py-1 rounded-full tracking-[.08em] uppercase mb-4">Get in touch</div>
-          <h2 className="font-extrabold text-[#1a1830] tracking-[-0.025em] mb-3 mt-0" style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)" }}>We'd love to hear from you</h2>
-          <p className="text-base text-[#64607a]">Questions, demos, or custom enterprise plans — we reply within 24 hours.</p>
+          <h2 className="font-extrabold text-white tracking-[-0.025em] mb-3 mt-0" style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)" }}>We'd love to hear from you</h2>
+          <p className="text-base text-white/55">Questions, demos, or custom enterprise plans — we reply within 24 hours.</p>
         </div>
 
         <div ref={ref} className="grid gap-8" style={{ gridTemplateColumns: "1fr 1.6fr", opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(24px)", transition: "all .6s ease" }}>
 
           {/* Left: info */}
           <div className="flex flex-col gap-4">
-            <div className="bg-white border-[1.5px] border-[#e8e6f0] rounded-2xl p-7">
-              <h3 className="text-base font-bold text-[#1a1830] mt-0 mb-1.5">Talk to sales</h3>
-              <p className="text-[13px] text-[#64607a] leading-[1.7] mt-0 mb-5">Interested in SupportNest for your team? We'll walk you through a live demo and tailor a plan for your use case.</p>
+            <div className="bg-[#141414] border-[1.5px] border-white/10 rounded-2xl p-7">
+              <h3 className="text-base font-bold text-white mt-0 mb-1.5">Talk to sales</h3>
+              <p className="text-[13px] text-white/55 leading-[1.7] mt-0 mb-5">Interested in SupportNest for your team? We'll walk you through a live demo and tailor a plan for your use case.</p>
               <div className="flex flex-col gap-3.5">
                 {[
                   { icon: "ti-mail",           label: "Email us",  val: "hello@supportnest.ai", color: "#534AB7"  },
@@ -369,8 +369,8 @@ function Contact() {
                       <i className={`ti ${ch.icon} text-[18px]`} style={{ color: ch.color }} />
                     </div>
                     <div>
-                      <div className="text-[11px] text-[#64607a] font-medium">{ch.label}</div>
-                      <div className="text-[13px] font-semibold text-[#1a1830]">{ch.val}</div>
+                      <div className="text-[11px] text-white/55 font-medium">{ch.label}</div>
+                      <div className="text-[13px] font-semibold text-white">{ch.val}</div>
                     </div>
                   </div>
                 ))}
@@ -383,33 +383,33 @@ function Contact() {
           </div>
 
           {/* Right: form */}
-          <div className="bg-white border-[1.5px] border-[#e8e6f0] rounded-2xl px-7 py-8">
+          <div className="bg-[#141414] border-[1.5px] border-white/10 rounded-2xl px-7 py-8">
             {sent ? (
               <div className="text-center py-10">
                 <div className="w-14 h-14 rounded-full bg-[#E1F5EE] flex items-center justify-center mx-auto mb-4">
                   <i className="ti ti-check text-[26px] text-[#1D9E75]" />
                 </div>
-                <h3 className="text-lg font-bold text-[#1a1830] mb-2">Message sent!</h3>
-                <p className="text-sm text-[#64607a]">We'll get back to you within 24 hours.</p>
+                <h3 className="text-lg font-bold text-white mb-2">Message sent!</h3>
+                <p className="text-sm text-white/55">We'll get back to you within 24 hours.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
                 <div className="grid grid-cols-2 gap-3.5">
                   <div>
-                    <label className="block text-[13px] font-medium text-[#1a1830] mb-1.5">Your name *</label>
+                    <label className="block text-[13px] font-medium text-white mb-1.5">Your name *</label>
                     <input value={form.name} onChange={e => set("name")(e.target.value)} placeholder="Mohamed Rashad" className={inputCls} />
                   </div>
                   <div>
-                    <label className="block text-[13px] font-medium text-[#1a1830] mb-1.5">Work email *</label>
+                    <label className="block text-[13px] font-medium text-white mb-1.5">Work email *</label>
                     <input type="email" value={form.email} onChange={e => set("email")(e.target.value)} placeholder="you@company.com" className={inputCls} />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[13px] font-medium text-[#1a1830] mb-1.5">Company</label>
+                  <label className="block text-[13px] font-medium text-white mb-1.5">Company</label>
                   <input value={form.company} onChange={e => set("company")(e.target.value)} placeholder="Acme Corp" className={inputCls} />
                 </div>
                 <div>
-                  <label className="block text-[13px] font-medium text-[#1a1830] mb-1.5">Message *</label>
+                  <label className="block text-[13px] font-medium text-white mb-1.5">Message *</label>
                   <textarea value={form.message} onChange={e => set("message")(e.target.value)}
                     placeholder="Tell us about your team size, current support setup, and what you're hoping to solve..."
                     rows={4} className={`${inputCls} resize-y min-h-[100px]`} />
@@ -431,16 +431,16 @@ function Contact() {
 function CtaBanner() {
   const { ref, visible } = useInView()
   return (
-    <section className="py-20 px-[5%] bg-white">
+    <section className="py-20 px-[5%] bg-[#141414]">
       <div ref={ref} className="max-w-[900px] mx-auto rounded-3xl px-10 py-[60px] text-center relative overflow-hidden shadow-[0_24px_80px_rgba(83,74,183,0.35)]"
         style={{ background: "linear-gradient(135deg, #534AB7 0%, #4F46E5 100%)", opacity: visible ? 1 : 0, transform: visible ? "scale(1)" : "scale(0.97)", transition: "all .6s ease" }}>
-        <div className="absolute -top-20 -right-20 w-[300px] h-[300px] rounded-full bg-white/5 pointer-events-none" />
-        <div className="absolute -bottom-[60px] -left-[60px] w-[240px] h-[240px] rounded-full bg-white/5 pointer-events-none" />
+        <div className="absolute -top-20 -right-20 w-[300px] h-[300px] rounded-full bg-[#141414]/5 pointer-events-none" />
+        <div className="absolute -bottom-[60px] -left-[60px] w-[240px] h-[240px] rounded-full bg-[#141414]/5 pointer-events-none" />
         <div className="text-xs text-white/60 font-bold tracking-[.1em] uppercase mb-[18px]">Get started today</div>
         <h2 className="font-extrabold text-white tracking-[-0.025em] mt-0 mb-3.5" style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)" }}>Ready to resolve 80% of tickets instantly?</h2>
         <p className="text-base text-white/75 mb-9">No credit card required. Up and running in minutes.</p>
         <div className="flex gap-3 justify-center flex-wrap">
-          <Link href="/register" className="bg-white text-[#534AB7] text-[15px] font-bold no-underline px-[30px] py-[13px] rounded-[10px] hover:bg-[#EEEDFE] hover:-translate-y-0.5 transition-all duration-200">Start Free Trial</Link>
+          <Link href="/pricing" className="bg-white text-[#534AB7] text-[15px] font-bold no-underline px-[30px] py-[13px] rounded-[10px] hover:bg-[#EEEDFE] hover:-translate-y-0.5 transition-all duration-200">Start Free Trial</Link>
           <Link href="/login" className="bg-transparent text-white text-[15px] font-semibold no-underline px-7 py-[13px] rounded-[10px] border-[1.5px] border-white/35 hover:border-white/70 transition-all duration-200">Sign In</Link>
         </div>
       </div>
@@ -474,7 +474,7 @@ function Footer() {
             <p className="text-sm text-white/45 leading-[1.7] max-w-[260px] mt-0 mb-5">AI-powered customer support that resolves 80% of tickets instantly, 24/7.</p>
             <div className="flex gap-2.5">
               {["ti-brand-twitter", "ti-brand-linkedin", "ti-brand-github"].map(icon => (
-                <div key={icon} className="w-[34px] h-[34px] rounded-lg bg-white/[0.07] hover:bg-white/[0.15] flex items-center justify-center cursor-pointer transition-colors duration-150">
+                <div key={icon} className="w-[34px] h-[34px] rounded-lg bg-[#141414]/[0.07] hover:bg-[#141414]/[0.15] flex items-center justify-center cursor-pointer transition-colors duration-150">
                   <i className={`ti ${icon} text-base text-white/50`} />
                 </div>
               ))}

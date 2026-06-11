@@ -46,6 +46,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+html.dark body {
+  --color-bg: #0F0F0F;
+  --color-dark: #ffffff;
+  --color-body: rgba(255, 255, 255, 0.55);
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-bg-soft: #141414;
+  --color-bg-section: #161616;
+  background: #0F0F0F;
+  color: #ffffff;
+}
+
 /* ─── UTILITIES NOT IN TAILWIND CORE ───────────────────────────────────────── */
 @layer utilities {
   .scrollbar-hide {

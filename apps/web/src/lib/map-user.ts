@@ -8,6 +8,7 @@ export function mapApiUser(result: {
 	role: string;
 	organizationId?: string | null;
 	organizationName?: string | null;
+	currentPlanId?: string | null;
 	onboarded?: boolean;
 	hasActiveSubscription?: boolean;
 }): AuthUser {
@@ -19,6 +20,7 @@ export function mapApiUser(result: {
 		role: result.role as AuthUser["role"],
 		orgId: result.organizationId ?? null,
 		orgName: result.organizationName ?? undefined,
+		currentPlanId: result.currentPlanId ?? null,
 		onboarded: result.onboarded ?? Boolean(result.organizationId),
 		hasActiveSubscription: result.hasActiveSubscription ?? false,
 	};

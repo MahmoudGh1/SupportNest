@@ -9,11 +9,12 @@ import { hashApiKey } from "src/utils/crypto.utils.js";
 import * as jwt from "jsonwebtoken";
 
 export const registerService = async ({ businessName, email, password, firstName, lastName, planId }: RegisterInput) => {
+	const normalizedEmail = email.trim().toLowerCase();
 	const passwordHash = await hashPassword(password);
 	const widgetSecret = await generateSecret(32);
 	const orgSlug = slugify(businessName);
 
-	const existing = await prisma.user.findUnique({ where: { email } });
+	const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
 	if (existing) {
 		throw new AppError("Email already registered", 409);
 	}
@@ -23,13 +24,13 @@ export const registerService = async ({ businessName, email, password, firstName
 			data: {
 				name: businessName,
 				slug: orgSlug,
-				email,
+				email: normalizedEmail,
 				widgetSecret: widgetSecret,
 				isActive: true,
 				planId: planId,
 				users: {
 					create: {
-						email,
+						email: normalizedEmail,
 						passwordHash,
 						role: Role.ORG_ADMIN,
 						firstName,
@@ -120,6 +121,7 @@ export const userService = async (payloadToken: TokenPayload): Promise<userData>
 			role: user.role,
 			organizationId: user.organizationId,
 			organizationName: user.organization?.name ?? null,
+			currentPlanId: user.organization?.planId ?? null,
 			onboarded: Boolean(user.organizationId),
 			hasActiveSubscription: activeSubscription,
 		};

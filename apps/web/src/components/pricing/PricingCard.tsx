@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { useAuth } from "@/context/auth-context";
 
 interface Props {
   annual: boolean;
@@ -58,17 +59,30 @@ interface Plan {
   variant: "glass" | "white" | "dark-glass";
 }
 
+function formatFeatureItem(item: unknown): string {
+  if (typeof item === "string") return item;
+  if (item && typeof item === "object") {
+    const o = item as Record<string, unknown>;
+    if (typeof o.name === "string") return o.name;
+    if (typeof o.title === "string") return o.title;
+    if (typeof o.text === "string") return o.text;
+    if (typeof o.label === "string") return o.label;
+  }
+  return String(item);
+}
+
 function parseFeatures(features: string): string[] {
+  if (!features) return [];
   try {
     const parsed = JSON.parse(features) as unknown;
-    if (Array.isArray(parsed)) return parsed.map(String);
+    if (Array.isArray(parsed)) return parsed.map(formatFeatureItem);
     if (parsed && typeof parsed === "object") {
-      return Object.values(parsed as Record<string, unknown>).map(String);
+      return Object.values(parsed as Record<string, unknown>).map(formatFeatureItem);
     }
   } catch {
-    // fall through
+    return [features];
   }
-  return features ? [features] : [];
+  return [];
 }
 
 function mapDbPlanToCard(plan: {
@@ -117,13 +131,29 @@ function PlanCard({
   plan,
   annual,
   featured,
+  currentPlanId,
+  isSubscribed,
+  isLoggedIn,
 }: {
   plan: Plan;
   annual: boolean;
   featured: boolean;
+  currentPlanId?: string | null;
+  isSubscribed?: boolean;
+  isLoggedIn?: boolean;
 }) {
   const router = useRouter();
   const price = annual ? plan.annualPrice : plan.monthlyPrice;
+  const isCurrent = Boolean(isSubscribed && currentPlanId === plan.id);
+  const isEnterprise = plan.name.toLowerCase() === "enterprise";
+
+  const ctaLabel = isCurrent
+    ? "Your current plan"
+    : isLoggedIn && isSubscribed
+      ? "Upgrade your plan"
+      : isEnterprise
+        ? "Contact sales"
+        : plan.cta;
 
   const isWhite = plan.variant === "white";
 
@@ -145,12 +175,13 @@ function PlanCard({
 
   // ── Handle CTA click ───────────────────────────────────────────────────────
   function handleClick() {
-    if (plan.name === "Enterprise") {
+    if (isCurrent) return;
+
+    if ((isLoggedIn && isSubscribed) || isEnterprise) {
       router.push("/contact");
       return;
     }
 
-    // Store selected plan in sessionStorage
     sessionStorage.setItem(
       "selectedPlan",
       JSON.stringify({
@@ -162,8 +193,11 @@ function PlanCard({
       }),
     );
 
-    // Navigate to register
-    router.push("/register");
+    if (isLoggedIn) {
+      router.push(`/payment?planId=${plan.id}&annual=${annual}`);
+    } else {
+      router.push("/register");
+    }
   }
 
   return (
@@ -225,11 +259,12 @@ function PlanCard({
         {/* CTA button — replaced Link with button */}
         <button
           onClick={handleClick}
-          className={`w-full text-center rounded-full font-semibold border-none cursor-pointer transition-all duration-150 mb-8 ${
+          disabled={isCurrent}
+          className={`w-full text-center rounded-full font-semibold border-none transition-all duration-150 mb-8 ${
             featured ? "py-3 text-[14px]" : "py-2.5 text-[13px]"
-          } ${ctaCls}`}
+          } ${isCurrent ? "opacity-50 cursor-not-allowed" : "cursor-pointer"} ${ctaCls}`}
         >
-          {plan.cta}
+          {ctaLabel}
         </button>
 
         {/* Divider */}
@@ -255,6 +290,7 @@ function PlanCard({
 }
 
 export default function PricingCards({ annual }: Props) {
+  const { user } = useAuth();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -302,6 +338,9 @@ export default function PricingCards({ annual }: Props) {
             plan={plan}
             annual={annual}
             featured={index === Math.min(1, plans.length - 1)}
+            currentPlanId={user?.currentPlanId}
+            isSubscribed={user?.hasActiveSubscription}
+            isLoggedIn={Boolean(user)}
           />
         ))}
       </div>
