@@ -1,81 +1,59 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
-  previewFeatures = ["postgresqlExtensions"]
+  provider        = "prisma-client"
+  output          = "../generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
-  extensions = [vector]
+  provider   = "postgresql"
 }
 
 model Organization {
-  id           String   @id @default(uuid()) @db.Uuid
-  name         String
-  slug         String   @unique
-  email        String
-  widgetSecret String
-
-  widgetConfig Json     @default("{}")
-
-  planId       String   @db.Uuid
-  plan         Pricing  @relation(fields: [planId], references: [id])
-
-  isActive     Boolean  @default(true)
-
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  invitations Invitation[]
-
-  businessApiConfig  BusinessApiConfig?
-  toolDefinitions    ToolDefinition[]
-
-  users                  User[]
-  apiKeys                ApiKey[]
-  customers              Customer[]
-  conversations          Conversation[]
-  tickets                Ticket[]
-  knowledgeDocuments     KnowledgeDocument[]
-  documentChunks         DocumentChunk[]
-  csatRatings            CsatRating[]
-  conversationAnalytics  ConversationAnalytics[]
-  payments               Payment[]
+  id                    String                  @id @default(uuid()) @db.Uuid
+  name                  String
+  slug                  String                  @unique
+  email                 String
+  widgetSecret          String
+  widgetConfig          Json                    @default("{}")
+  planId                String                  @db.Uuid
+  isActive              Boolean                 @default(true)
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  apiKeys               ApiKey[]
+  businessApiConfig     BusinessApiConfig?
+  conversationAnalytics ConversationAnalytics[]
+  conversations         Conversation[]
+  csatRatings           CsatRating[]
+  customers             Customer[]
+  documentChunks        DocumentChunk[]
+  invitations           Invitation[]
+  knowledgeDocuments    KnowledgeDocument[]
+  plan                  Pricing                 @relation(fields: [planId], references: [id])
+  payments              Payment[]
+  reports               Report[]
+  tickets               Ticket[]
+  toolDefinitions       ToolDefinition[]
+  users                 User[]
 
   @@map("organizations")
 }
 
 model User {
-  id             String        @id @default(uuid()) @db.Uuid
-
-  organizationId String?       @db.Uuid
-  organization   Organization? @relation(fields: [organizationId], references: [id])
-
-  email          String        @unique
-  passwordHash   String
-
-  role           Role
-
-  firstName      String
-  lastName       String
-
-  isActive       Boolean       @default(true)
-
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-
-  sentInvitations Invitation[] @relation("SentInvitations")
-
-  assignedTickets Ticket[]
+  id                 String              @id @default(uuid()) @db.Uuid
+  organizationId     String?             @db.Uuid
+  email              String              @unique
+  passwordHash       String
+  role               Role
+  firstName          String
+  lastName           String
+  isActive           Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  sentInvitations    Invitation[]        @relation("SentInvitations")
   knowledgeDocuments KnowledgeDocument[]
+  assignedTickets    Ticket[]
+  organization       Organization?       @relation(fields: [organizationId], references: [id])
 
   @@index([organizationId])
-
   @@map("users")
 }
 
@@ -101,7 +79,6 @@ model BusinessApiConfig {
 
   @@map("business_api_configs")
 }
-
 
 model ToolDefinition {
   id             String            @id @default(uuid()) @db.Uuid
@@ -131,185 +108,131 @@ model ToolDefinition {
   @@map("tool_definitions")
 }
 
-
 model ApiKey {
-  id              String       @id @default(uuid()) @db.Uuid
-
-  organizationId  String       @db.Uuid
-  organization    Organization @relation(fields: [organizationId], references: [id])
-
-  keyHash         String @unique
-  keyPrefix       String
-
-  name            String
-
-  allowedOrigins  String[]
-
-  isActive        Boolean      @default(true)
-
-  lastUsedAt      DateTime?
-
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-
-  conversations   Conversation[]
+  id             String         @id @default(uuid()) @db.Uuid
+  organizationId String         @db.Uuid
+  keyHash        String         @unique
+  keyPrefix      String
+  name           String
+  allowedOrigins String[]
+  isActive       Boolean        @default(true)
+  lastUsedAt     DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  conversations  Conversation[]
 
   @@index([keyHash])
-
   @@map("api_keys")
 }
 
 model Customer {
-  id              String       @id @default(uuid()) @db.Uuid
-
-  organizationId  String       @db.Uuid
-  organization    Organization @relation(fields: [organizationId], references: [id])
-
-  externalId      String?
-  email           String?
-  name            String?
-
-  metadata        Json         @default("{}")
-
-  isAnonymous     Boolean      @default(true)
-
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-
-  conversations   Conversation[]
-  csatRatings     CsatRating[]
+  id             String         @id @default(uuid()) @db.Uuid
+  organizationId String         @db.Uuid
+  externalId     String?
+  email          String?
+  name           String?
+  metadata       Json           @default("{}")
+  isAnonymous    Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  conversations  Conversation[]
+  csatRatings    CsatRating[]
+  organization   Organization   @relation(fields: [organizationId], references: [id])
 
   @@unique([organizationId, externalId])
-
   @@index([organizationId])
-
   @@map("customers")
 }
 
 model Conversation {
-  id                  String               @id @default(uuid()) @db.Uuid
-
-  organizationId      String               @db.Uuid
-  organization        Organization         @relation(fields: [organizationId], references: [id])
-
-  customerId          String               @db.Uuid
-  customer            Customer             @relation(fields: [customerId], references: [id])
-
-  apiKeyId            String               @db.Uuid
-  apiKey              ApiKey               @relation(fields: [apiKeyId], references: [id])
-
-  conversationStatus  ConversationStatus
-
-  closedAt            DateTime?
-
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-
-  messages            Message[]
-  agentLogs           AgentLog[]
-  ticket              Ticket?
-  csatRating          CsatRating?
-  analytics           ConversationAnalytics?
+  id                 String                 @id @default(uuid()) @db.Uuid
+  organizationId     String                 @db.Uuid
+  customerId         String                 @db.Uuid
+  apiKeyId           String                 @db.Uuid
+  conversationStatus ConversationStatus
+  closedAt           DateTime?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  agentLogs          AgentLog[]
+  analytics          ConversationAnalytics?
+  apiKey             ApiKey                 @relation(fields: [apiKeyId], references: [id])
+  customer           Customer               @relation(fields: [customerId], references: [id])
+  organization       Organization           @relation(fields: [organizationId], references: [id])
+  csatRating         CsatRating?
+  messages           Message[]
+  reports            Report[]
+  ticket             Ticket?
 
   @@index([organizationId])
   @@index([customerId])
   @@index([conversationStatus])
-
   @@map("conversations")
 }
 
 model Message {
-  id              String       @id @default(uuid()) @db.Uuid
-
-  conversationId  String       @db.Uuid
-  conversation    Conversation @relation(fields: [conversationId], references: [id])
-
-  role            MessageRole
-
-  content         String
-
-  tier            MessageTier?
-
-  createdAt       DateTime     @default(now())
+  id             String       @id @default(uuid()) @db.Uuid
+  conversationId String       @db.Uuid
+  role           MessageRole
+  content        String
+  tier           MessageTier?
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
 
   @@index([conversationId])
-
   @@map("messages")
 }
 
 model AgentLog {
-  id                String       @id @default(uuid()) @db.Uuid
-
-  conversationId    String       @db.Uuid
-  conversation      Conversation @relation(fields: [conversationId], references: [id])
-
-  tier              AgentTier
-  action            AgentAction
-
-  input             String
-  output            String
-
-  confidenceScore   Float?
-
-  latencyMs         Int
-  tokensUsed        Int?
-
-  createdAt         DateTime     @default(now())
+  id              String       @id @default(uuid()) @db.Uuid
+  conversationId  String       @db.Uuid
+  tier            AgentTier
+  action          AgentAction
+  input           String
+  output          String
+  confidenceScore Float
+  latencyMs       Int
+  tokensUsed      Int
+  createdAt       DateTime     @default(now())
+  conversation    Conversation @relation(fields: [conversationId], references: [id])
 
   @@index([conversationId])
-
   @@map("agent_logs")
 }
 
 model Ticket {
-  id                String       @id @default(uuid()) @db.Uuid
-
-  conversationId    String       @unique @db.Uuid
-  conversation      Conversation @relation(fields: [conversationId], references: [id])
-
-  organizationId    String       @db.Uuid
-  organization      Organization @relation(fields: [organizationId], references: [id])
-
-  assignedToId      String?      @db.Uuid
-  assignedTo        User?        @relation(fields: [assignedToId], references: [id])
-
-  status            TicketStatus @default(OPEN)
-  priority          TicketPriority @default(MEDIUM)
-
-  resolutionNote    String?
-
-  resolvedAt        DateTime?
-
-  issueType          String?
-  issueDescription   String?
-  language           String?
-
-  escalationReason   String?
-  tiersVisited       AgentTier[]   // array of which tiers handled this
-  knowledgeResults   Json          @default("[]")  // what RAG found
-  agentAttempts      Int           @default(0)
-
-  customerMessage    String?       // the triggering message
-
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
+  id               String         @id @default(uuid()) @db.Uuid
+  conversationId   String         @unique @db.Uuid
+  organizationId   String         @db.Uuid
+  assignedToId     String?        @db.Uuid
+  status           TicketStatus   @default(OPEN)
+  priority         TicketPriority @default(MEDIUM)
+  resolutionNote   String?
+  resolvedAt       DateTime?
+  issueType        String?
+  issueDescription String?
+  language         String?
+  escalationReason String?
+  tiersVisited     AgentTier[]
+  knowledgeResults Json           @default("[]")
+  agentAttempts    Int            @default(0)
+  customerMessage  String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  assignedTo       User?          @relation(fields: [assignedToId], references: [id])
+  conversation     Conversation   @relation(fields: [conversationId], references: [id])
+  organization     Organization   @relation(fields: [organizationId], references: [id])
 
   @@index([organizationId])
   @@index([status])
-
   @@map("tickets")
 }
 
 model KnowledgeDocument {
-  id              String                  @id @default(uuid()) @db.Uuid
-
-  organizationId  String                  @db.Uuid
-  organization    Organization            @relation(fields: [organizationId], references: [id])
-
-  title           String
-
-  type            KnowledgeDocumentType
-
+  id                String                  @id @default(uuid()) @db.Uuid
+  organizationId    String                  @db.Uuid
+  title             String
+  type              KnowledgeDocumentType
   storagePath       String?
 
   status          KnowledgeDocumentStatus
@@ -332,170 +255,139 @@ model KnowledgeDocument {
 
   @@index([organizationId])
   @@index([status])
-
   @@map("knowledge_documents")
 }
 
 model DocumentChunk {
-  id              String              @id @default(uuid()) @db.Uuid
-
-  documentId      String              @db.Uuid
-  document        KnowledgeDocument   @relation(fields: [documentId], references: [id])
-
-  organizationId  String              @db.Uuid
-  organization    Organization        @relation(fields: [organizationId], references: [id])
-
-  content         String
-
-  embedding       Unsupported("vector(1536)")
-
-  chunkIndex      Int
-
-  metadata        Json                @default("{}")
-
-  createdAt       DateTime            @default(now())
+  id             String                @id @default(uuid()) @db.Uuid
+  documentId     String                @db.Uuid
+  organizationId String                @db.Uuid
+  content        String
+  embedding      Unsupported("vector")
+  chunkIndex     Int
+  metadata       Json                  @default("{}")
+  createdAt      DateTime              @default(now())
+  document       KnowledgeDocument     @relation(fields: [documentId], references: [id])
+  organization   Organization          @relation(fields: [organizationId], references: [id])
 
   @@index([documentId])
   @@index([organizationId])
-
   @@map("document_chunks")
 }
 
 model CsatRating {
-  id              String          @id @default(uuid()) @db.Uuid
-
-  conversationId  String          @unique @db.Uuid
-  conversation    Conversation    @relation(fields: [conversationId], references: [id])
-
-  organizationId  String          @db.Uuid
-  organization    Organization    @relation(fields: [organizationId], references: [id])
-
-  customerId      String          @db.Uuid
-  customer        Customer        @relation(fields: [customerId], references: [id])
-
-  score           Int
-
-  comment         String?
-
-  createdAt       DateTime        @default(now())
+  id             String       @id @default(uuid()) @db.Uuid
+  conversationId String       @unique @db.Uuid
+  organizationId String       @db.Uuid
+  customerId     String       @db.Uuid
+  score          Int
+  comment        String?
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  customer       Customer     @relation(fields: [customerId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
   @@index([organizationId])
-
   @@map("csat_ratings")
 }
 
 model ConversationAnalytics {
-  id                    String          @id @default(uuid()) @db.Uuid
-
-  conversationId        String          @unique @db.Uuid
-  conversation          Conversation    @relation(fields: [conversationId], references: [id])
-
-  organizationId        String          @db.Uuid
-  organization          Organization    @relation(fields: [organizationId], references: [id])
-
-  resolvedByTier        ResolutionTier
-
-  totalMessages         Int
-
-  firstResponseTimeMs   Int
-
-  resolutionTimeMs      Int
-
-  escalatedToTier2      Boolean         @default(false)
-
-  escalatedToHuman      Boolean         @default(false)
-
-  tokensUsed            Int
-
-  csatScore             Int?
-
-  inferredSentiment     Sentiment?
-
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt
+  id                  String         @id @default(uuid()) @db.Uuid
+  conversationId      String         @unique @db.Uuid
+  organizationId      String         @db.Uuid
+  resolvedByTier      ResolutionTier
+  totalMessages       Int
+  firstResponseTimeMs Int
+  resolutionTimeMs    Int
+  escalatedToTier2    Boolean        @default(false)
+  escalatedToHuman    Boolean        @default(false)
+  tokensUsed          Int
+  csatScore           Int?
+  inferredSentiment   Sentiment?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  conversation        Conversation   @relation(fields: [conversationId], references: [id])
+  organization        Organization   @relation(fields: [organizationId], references: [id])
 
   @@index([organizationId])
-
   @@map("conversation_analytics")
 }
 
 model Pricing {
-  id                     String          @id @default(uuid()) @db.Uuid
-
-  name                   String
-
-  priceMonthly           Decimal         @db.Decimal(10, 2)
-
-  maxConversations       Int?
-
-  maxAgents              Int?
-
-  maxKnowledgeDocuments  Int?
-
-  features               Json            @default("{}")
-
-  isActive               Boolean         @default(true)
-
-  createdAt              DateTime        @default(now())
-  updatedAt              DateTime        @updatedAt
-
-  organizations          Organization[]
-  payments               Payment[]
+  id                    String         @id @default(uuid()) @db.Uuid
+  name                  String
+  priceMonthly          Decimal        @db.Decimal(10, 2)
+  maxConversations      Int?
+  maxAgents             Int?
+  maxKnowledgeDocuments Int?
+  features              Json           @default("{}")
+  isActive              Boolean        @default(true)
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  organizations         Organization[]
+  payments              Payment[]
 
   @@map("pricing")
 }
 
 model Payment {
   id                 String        @id @default(uuid()) @db.Uuid
-
   organizationId     String        @db.Uuid
-  organization       Organization  @relation(fields: [organizationId], references: [id])
-
   pricingId          String        @db.Uuid
-  pricing            Pricing       @relation(fields: [pricingId], references: [id])
-
   amount             Decimal       @db.Decimal(10, 2)
-
   currency           String
-
   status             PaymentStatus
-
   paymentProvider    String
-
   providerPaymentId  String        @unique
-
   billingPeriodStart DateTime
   billingPeriodEnd   DateTime
-
   createdAt          DateTime      @default(now())
+  organization       Organization  @relation(fields: [organizationId], references: [id])
+  pricing            Pricing       @relation(fields: [pricingId], references: [id])
 
   @@index([organizationId])
-
   @@map("payments")
 }
 
 model Invitation {
   id             String           @id @default(uuid()) @db.Uuid
   organizationId String           @db.Uuid
-  organization   Organization     @relation(fields: [organizationId], references: [id])
-
   email          String
   token          String           @unique
   role           Role             @default(SUPPORT_AGENT)
-
   status         InvitationStatus @default(PENDING)
   expiresAt      DateTime
   acceptedAt     DateTime?
-
   invitedById    String           @db.Uuid
-  invitedBy      User             @relation("SentInvitations", fields: [invitedById], references: [id])
-
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
+  invitedBy      User             @relation("SentInvitations", fields: [invitedById], references: [id])
+  organization   Organization     @relation(fields: [organizationId], references: [id])
 
   @@index([token])
   @@index([organizationId])
   @@map("invitations")
+}
+
+model Report {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  conversationId String       @db.Uuid
+  summary        String
+  issueType      String
+  resolution     String
+  language       String
+  sentiment      String
+  tiersVisited   AgentTier[]
+  wasEscalated   Boolean      @default(false)
+  resolvedByAi   Boolean      @default(true)
+  tokensUsed     Int          @default(0)
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+  @@map("reports")
 }
 
 enum Role {

@@ -1,6 +1,3 @@
--- CreateExtension
-CREATE EXTENSION IF NOT EXISTS "vector";
-
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('SUPER_ADMIN', 'ORG_ADMIN', 'SUPPORT_AGENT');
 
@@ -91,6 +88,7 @@ CREATE TABLE "business_api_configs" (
     "headerName" TEXT,
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
     "lastVerifiedAt" TIMESTAMP(3),
+    "testEndpoint" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -106,6 +104,7 @@ CREATE TABLE "tool_definitions" (
     "description" TEXT NOT NULL,
     "method" "HttpMethod" NOT NULL,
     "path" TEXT NOT NULL,
+    "documentId" UUID,
     "parameters" JSONB NOT NULL,
     "responseSchema" JSONB NOT NULL,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
@@ -180,9 +179,9 @@ CREATE TABLE "agent_logs" (
     "action" "AgentAction" NOT NULL,
     "input" TEXT NOT NULL,
     "output" TEXT NOT NULL,
-    "confidenceScore" DOUBLE PRECISION,
+    "confidenceScore" DOUBLE PRECISION NOT NULL,
     "latencyMs" INTEGER NOT NULL,
-    "tokensUsed" INTEGER,
+    "tokensUsed" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "agent_logs_pkey" PRIMARY KEY ("id")
@@ -220,6 +219,9 @@ CREATE TABLE "knowledge_documents" (
     "type" "KnowledgeDocumentType" NOT NULL,
     "storagePath" TEXT,
     "status" "KnowledgeDocumentStatus" NOT NULL,
+    "toolCount" INTEGER NOT NULL DEFAULT 0,
+    "activeToolCount" INTEGER NOT NULL DEFAULT 0,
+    "disabledToolCount" INTEGER NOT NULL DEFAULT 0,
     "metadata" JSONB NOT NULL DEFAULT '{}',
     "createdById" UUID NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -234,7 +236,7 @@ CREATE TABLE "document_chunks" (
     "documentId" UUID NOT NULL,
     "organizationId" UUID NOT NULL,
     "content" TEXT NOT NULL,
-    "embedding" vector(1536) NOT NULL,
+    "embedding" vector NOT NULL,
     "chunkIndex" INTEGER NOT NULL,
     "metadata" JSONB NOT NULL DEFAULT '{}',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -323,6 +325,25 @@ CREATE TABLE "invitations" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "invitations_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "reports" (
+    "id" UUID NOT NULL,
+    "organizationId" UUID NOT NULL,
+    "conversationId" UUID NOT NULL,
+    "summary" TEXT NOT NULL,
+    "issueType" TEXT NOT NULL,
+    "resolution" TEXT NOT NULL,
+    "language" TEXT NOT NULL,
+    "sentiment" TEXT NOT NULL,
+    "tiersVisited" "AgentTier"[],
+    "wasEscalated" BOOLEAN NOT NULL DEFAULT false,
+    "resolvedByAi" BOOLEAN NOT NULL DEFAULT true,
+    "tokensUsed" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "reports_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -415,6 +436,9 @@ CREATE INDEX "invitations_token_idx" ON "invitations"("token");
 -- CreateIndex
 CREATE INDEX "invitations_organizationId_idx" ON "invitations"("organizationId");
 
+-- CreateIndex
+CREATE INDEX "reports_organizationId_idx" ON "reports"("organizationId");
+
 -- AddForeignKey
 ALTER TABLE "organizations" ADD CONSTRAINT "organizations_planId_fkey" FOREIGN KEY ("planId") REFERENCES "pricing"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -425,10 +449,13 @@ ALTER TABLE "users" ADD CONSTRAINT "users_organizationId_fkey" FOREIGN KEY ("org
 ALTER TABLE "business_api_configs" ADD CONSTRAINT "business_api_configs_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tool_definitions" ADD CONSTRAINT "tool_definitions_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "tool_definitions" ADD CONSTRAINT "tool_definitions_apiConfigId_fkey" FOREIGN KEY ("apiConfigId") REFERENCES "business_api_configs"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tool_definitions" ADD CONSTRAINT "tool_definitions_apiConfigId_fkey" FOREIGN KEY ("apiConfigId") REFERENCES "business_api_configs"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "tool_definitions" ADD CONSTRAINT "tool_definitions_documentId_fkey" FOREIGN KEY ("documentId") REFERENCES "knowledge_documents"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tool_definitions" ADD CONSTRAINT "tool_definitions_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "api_keys" ADD CONSTRAINT "api_keys_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -437,13 +464,13 @@ ALTER TABLE "api_keys" ADD CONSTRAINT "api_keys_organizationId_fkey" FOREIGN KEY
 ALTER TABLE "customers" ADD CONSTRAINT "customers_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "conversations" ADD CONSTRAINT "conversations_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "conversations" ADD CONSTRAINT "conversations_apiKeyId_fkey" FOREIGN KEY ("apiKeyId") REFERENCES "api_keys"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "conversations" ADD CONSTRAINT "conversations_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "customers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "conversations" ADD CONSTRAINT "conversations_apiKeyId_fkey" FOREIGN KEY ("apiKeyId") REFERENCES "api_keys"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "conversations" ADD CONSTRAINT "conversations_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "messages" ADD CONSTRAINT "messages_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "conversations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -452,19 +479,19 @@ ALTER TABLE "messages" ADD CONSTRAINT "messages_conversationId_fkey" FOREIGN KEY
 ALTER TABLE "agent_logs" ADD CONSTRAINT "agent_logs_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "conversations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "tickets" ADD CONSTRAINT "tickets_assignedToId_fkey" FOREIGN KEY ("assignedToId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "tickets" ADD CONSTRAINT "tickets_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "conversations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "tickets" ADD CONSTRAINT "tickets_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tickets" ADD CONSTRAINT "tickets_assignedToId_fkey" FOREIGN KEY ("assignedToId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "knowledge_documents" ADD CONSTRAINT "knowledge_documents_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "knowledge_documents" ADD CONSTRAINT "knowledge_documents_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "knowledge_documents" ADD CONSTRAINT "knowledge_documents_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "document_chunks" ADD CONSTRAINT "document_chunks_documentId_fkey" FOREIGN KEY ("documentId") REFERENCES "knowledge_documents"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -476,10 +503,10 @@ ALTER TABLE "document_chunks" ADD CONSTRAINT "document_chunks_organizationId_fke
 ALTER TABLE "csat_ratings" ADD CONSTRAINT "csat_ratings_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "conversations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "csat_ratings" ADD CONSTRAINT "csat_ratings_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "csat_ratings" ADD CONSTRAINT "csat_ratings_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "customers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "csat_ratings" ADD CONSTRAINT "csat_ratings_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "customers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "csat_ratings" ADD CONSTRAINT "csat_ratings_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "conversation_analytics" ADD CONSTRAINT "conversation_analytics_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "conversations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -494,7 +521,13 @@ ALTER TABLE "payments" ADD CONSTRAINT "payments_organizationId_fkey" FOREIGN KEY
 ALTER TABLE "payments" ADD CONSTRAINT "payments_pricingId_fkey" FOREIGN KEY ("pricingId") REFERENCES "pricing"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "invitations" ADD CONSTRAINT "invitations_invitedById_fkey" FOREIGN KEY ("invitedById") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "invitations" ADD CONSTRAINT "invitations_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "invitations" ADD CONSTRAINT "invitations_invitedById_fkey" FOREIGN KEY ("invitedById") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "reports" ADD CONSTRAINT "reports_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "conversations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "reports" ADD CONSTRAINT "reports_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
