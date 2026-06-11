@@ -71,7 +71,6 @@ export const registerService = async ({
 			},
 		};
 	} catch (err) {
-		console.log(err);
 		throw new AppError("Transaction Failed", 500);
 	}
 };
@@ -112,7 +111,6 @@ export const userService = async (
 				lastName: true,
 				role: true,
 				organizationId: true,
-				onboarded: true,
 			},
 		});
 
