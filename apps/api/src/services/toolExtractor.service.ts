@@ -24,7 +24,6 @@ interface ToolParameter {
 }
 
 export async function extractToolsFromDocument(documentId: string, organizationId: string, fileUrlOrSwaggerUrl: string, documentType: string): Promise<void> {
-	// 1. Get the verified API config for this org — required before extraction
 	const apiConfig = await prisma.businessApiConfig.findUnique({
 		where: { organizationId },
 	});
@@ -205,8 +204,6 @@ Example:
 
 
 async function saveTools(tools: ExtractedTool[], documentId: string, organizationId: string, apiConfigId: string): Promise<void> {
-	// Delete any previously extracted tools for this document
-	// so re-processing the same doc doesn't create duplicates
 	await prisma.toolDefinition.deleteMany({
 		where: { documentId },
 	});
