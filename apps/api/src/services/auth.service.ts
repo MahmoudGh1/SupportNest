@@ -54,7 +54,6 @@ export const registerService = async ({ businessName, email, password, firstName
 			},
 		};
 	} catch (err) {
-		console.log(err);
 		throw new AppError("Transaction Failed", 500);
 	}
 };
@@ -89,7 +88,6 @@ export const userService = async (payloadToken: TokenPayload): Promise<userData>
 				lastName: true,
 				role: true,
 				organizationId: true,
-				onboarded: true,
 			},
 		});
 
