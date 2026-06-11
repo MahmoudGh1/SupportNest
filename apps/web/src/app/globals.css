@@ -1,15 +1,11 @@
 @import "tailwindcss";
 
-/* ─── BRAND TOKENS ─────────────────────────────────────────────────────────── */
 @theme inline {
-  /* Brand purple */
   --color-brand:        #534AB7;
   --color-brand-light:  #7F77DD;
   --color-brand-mid:    #AFA9EC;
   --color-brand-faint:  #EEEDFE;
   --color-brand-dark:   #3C3489;
-
-  /* Neutrals */
   --color-dark:         #1a1830;
   --color-dark-mid:     #3d3a55;
   --color-body:         #64607a;
@@ -17,8 +13,6 @@
   --color-bg:           #ffffff;
   --color-bg-soft:      #fafafa;
   --color-bg-section:   #f6f5fc;
-
-  /* Semantic */
   --color-success:      #1D9E75;
   --color-success-bg:   #E1F5EE;
   --color-warning:      #F59E0B;
@@ -26,38 +20,76 @@
   --color-danger:       #EF4444;
   --color-danger-bg:    #FCEBEB;
   --color-info:         #4F46E5;
-
-  /* Sidebar */
   --color-sidebar:      #1a1830;
-
-  /* Fonts */
   --font-sans: 'Sora', system-ui, sans-serif;
 }
 
-/* ─── BASE ──────────────────────────────────────────────────────────────────── */
+:root {
+  --page-bg: #ffffff;
+  --page-text: #1a1830;
+  --page-muted: #64607a;
+  --surface: #ffffff;
+  --surface-elevated: #f6f5fc;
+  --nav-bg: rgba(255, 255, 255, 0.95);
+  --nav-border: rgba(0, 0, 0, 0.09);
+  --nav-link: rgba(0, 0, 0, 0.45);
+  --nav-link-hover: #0d0d0d;
+  --control-bg: rgba(255, 255, 255, 0.92);
+  --control-border: rgba(0, 0, 0, 0.1);
+  --btn-primary-bg: #111111;
+  --btn-primary-text: #ffffff;
+  --card-border: #e8e6f0;
+  --input-focus: rgba(83, 74, 183, 0.5);
+  --label-muted: rgba(26, 24, 48, 0.65);
+  --danger-bg: rgba(226, 75, 74, 0.1);
+  --sidebar-bg: #1a1830;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-text: rgba(255, 255, 255, 0.65);
+  --sidebar-text-active: #ffffff;
+}
+
+html.dark {
+  --page-bg: #0f0f0f;
+  --page-text: #ffffff;
+  --page-muted: rgba(255, 255, 255, 0.55);
+  --surface: #141414;
+  --surface-elevated: #161616;
+  --nav-bg: #161616;
+  --nav-border: rgba(255, 255, 255, 0.1);
+  --nav-link: rgba(255, 255, 255, 0.5);
+  --nav-link-hover: #ffffff;
+  --control-bg: rgba(22, 22, 22, 0.92);
+  --control-border: rgba(255, 255, 255, 0.12);
+  --btn-primary-bg: #ffffff;
+  --btn-primary-text: #111111;
+  --card-border: rgba(255, 255, 255, 0.1);
+  --input-focus: rgba(175, 169, 236, 0.6);
+  --label-muted: rgba(255, 255, 255, 0.7);
+  --danger-bg: rgba(226, 75, 74, 0.12);
+  --sidebar-bg: #0a0a0a;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-text: rgba(255, 255, 255, 0.65);
+  --sidebar-text-active: #ffffff;
+  --color-bg: #0f0f0f;
+  --color-dark: #ffffff;
+  --color-body: rgba(255, 255, 255, 0.55);
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-bg-soft: #141414;
+  --color-bg-section: #161616;
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
   font-family: var(--font-sans);
-  background: var(--color-bg);
-  color: var(--color-dark);
+  background: var(--page-bg);
+  color: var(--page-text);
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-html.dark body {
-  --color-bg: #0F0F0F;
-  --color-dark: #ffffff;
-  --color-body: rgba(255, 255, 255, 0.55);
-  --color-border: rgba(255, 255, 255, 0.1);
-  --color-bg-soft: #141414;
-  --color-bg-section: #161616;
-  background: #0F0F0F;
-  color: #ffffff;
-}
-
-/* ─── UTILITIES NOT IN TAILWIND CORE ───────────────────────────────────────── */
 @layer utilities {
   .scrollbar-hide {
     scrollbar-width: none;
@@ -66,17 +98,19 @@ html.dark body {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+  .sn-page {
+    background: var(--page-bg);
+    color: var(--page-text);
+  }
+  .sn-surface {
+    background: var(--surface);
+    border-color: var(--card-border);
+  }
+  .sn-muted {
+    color: var(--page-muted);
+  }
 }
 
-/* ─── ANIMATIONS ────────────────────────────────────────────────────────────── */
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes pulse-dot {
-  0%, 100% { opacity: .3; transform: scale(1); }
-  50%       { opacity: 1; transform: scale(1.3); }
 }

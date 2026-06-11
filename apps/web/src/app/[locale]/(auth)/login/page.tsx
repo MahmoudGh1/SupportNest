@@ -3,26 +3,28 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
+import { useLingui } from "@lingui/react/macro";
 
 const T = {
-	darkBg: "#0F0F0F",
-	darkPanel: "#161616",
-	darkSurface: "#1E1E1E",
-	darkBorder: "rgba(255,255,255,0.08)",
-	white: "#FFFFFF",
-	gray500: "#888888",
-	gray600: "#666666",
-	inputBg: "#1E1E1E",
-	inputBorder: "rgba(255,255,255,0.12)",
-	inputFocus: "rgba(255,255,255,0.35)",
+	darkBg: "var(--page-bg)",
+	darkPanel: "var(--surface-elevated)",
+	darkSurface: "var(--surface)",
+	darkBorder: "var(--card-border)",
+	white: "var(--page-text)",
+	gray500: "var(--page-muted)",
+	gray600: "var(--page-muted)",
+	inputBg: "var(--surface)",
+	inputBorder: "var(--card-border)",
+	inputFocus: "var(--input-focus)",
 	violet: "#534AB7",
 	violetLight: "#AFA9EC",
 	danger: "#E24B4A",
-	dangerBg: "rgba(226,75,74,0.12)",
+	dangerBg: "var(--danger-bg)",
 	radius: "10px",
 	radiusSm: "8px",
 	radiusLg: "14px",
 	font: "'Sora', system-ui, sans-serif",
+	labelMuted: "var(--label-muted)",
 } as const;
 
 const testimonial = {
@@ -70,7 +72,7 @@ function FormField({
 						style={{
 							fontSize: 13,
 							fontWeight: 500,
-							color: "rgba(255,255,255,0.7)",
+							color: T.labelMuted,
 						}}
 					>
 						{label}
@@ -138,6 +140,7 @@ function FormField({
 function FormPanel() {
 	const { login } = useAuth();
 	const router = useRouter();
+	const { t } = useLingui();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [showPass, setShowPass] = useState(false);
@@ -147,9 +150,9 @@ function FormPanel() {
 
 	const validate = () => {
 		const errs: Record<string, string> = {};
-		if (!email) errs.email = "Email is required.";
-		else if (!/\S+@\S+\.\S+/.test(email)) errs.email = "Enter a valid email.";
-		if (!password) errs.password = "Password is required.";
+		if (!email) errs.email = t`Email is required.`;
+		else if (!/\S+@\S+\.\S+/.test(email)) errs.email = t`Enter a valid email.`;
+		if (!password) errs.password = t`Password is required.`;
 		return errs;
 	};
 
@@ -168,7 +171,7 @@ function FormPanel() {
 			// it gives me error
 			router.push("/dashboard");
 		} catch (e: any) {
-			setError(e.message ?? "Invalid email or password.");
+			setError(e.message ?? t`Invalid email or password.`);
 		} finally {
 			setLoading(false);
 		}
@@ -230,7 +233,7 @@ function FormPanel() {
 						textAlign: "center",
 					}}
 				>
-					Welcome Back
+					{t`Welcome Back`}
 				</h1>
 				<p
 					style={{
@@ -240,7 +243,7 @@ function FormPanel() {
 						margin: "0 0 36px",
 					}}
 				>
-					Sign in to your account
+					{t`Sign in to your account`}
 				</p>
 
 				<div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -289,13 +292,13 @@ function FormPanel() {
 								d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"
 							/>
 						</svg>
-						Continue with Google
+						{t`Continue with Google`}
 					</button>
 
 					{/* Divider */}
 					<div style={{ display: "flex", alignItems: "center", gap: 12 }}>
 						<div style={{ flex: 1, height: 1, background: T.darkBorder }} />
-						<span style={{ fontSize: 12, color: T.gray600 }}>or</span>
+						<span style={{ fontSize: 12, color: T.gray600 }}>{t`or`}</span>
 						<div style={{ flex: 1, height: 1, background: T.darkBorder }} />
 					</div>
 
@@ -323,7 +326,7 @@ function FormPanel() {
 					)}
 
 					<FormField
-						label="Email"
+						label={t`Email`}
 						type="email"
 						value={email}
 						onChange={setEmail}
@@ -333,7 +336,7 @@ function FormPanel() {
 					/>
 
 					<FormField
-						label="Password"
+						label={t`Password`}
 						type={showPass ? "text" : "password"}
 						value={password}
 						onChange={setPassword}
@@ -352,7 +355,7 @@ function FormPanel() {
 									padding: 0,
 								}}
 							>
-								Forgot your password?
+								{t`Forgot your password?`}
 							</button>
 						}
 						rightEl={
@@ -408,10 +411,10 @@ function FormPanel() {
 										animation: "spin 0.8s linear infinite",
 									}}
 								/>{" "}
-								Signing in…
+								{t`Signing in…`}
 							</>
 						) : (
-							"Sign in"
+							t`Sign in`
 						)}
 					</button>
 
@@ -424,7 +427,7 @@ function FormPanel() {
 							margin: 0,
 						}}
 					>
-						Don't have an account?{" "}
+						{t`Don't have an account?`}{" "}
 						<button
 							onClick={() => router.push("/register")}
 							style={{
@@ -438,7 +441,7 @@ function FormPanel() {
 								padding: 0,
 							}}
 						>
-							Sign Up
+							{t`Sign Up`}
 						</button>
 					</p>
 				</div>
@@ -617,6 +620,8 @@ export default function LoginPage() {
 					height: "100vh",
 					fontFamily: T.font,
 					overflow: "hidden",
+					background: "var(--page-bg)",
+					color: "var(--page-text)",
 				}}
 			>
 				<FormPanel />

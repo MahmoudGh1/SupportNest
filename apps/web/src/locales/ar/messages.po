@@ -31,18 +31,23 @@ msgstr "↓ تحسن بمقدار 0.2 ثانية"
 
 #. placeholder {0}: processing > 1 ? "s" : ""
 #: src/features/knowledgebase/ProcessingNotice.tsx:29
-#~ msgid "<0>{processing}</0> document{0} being processed by the AI pipeline. This "
-#~ "page updates automatically."
-#~ msgstr "<0>{processing}</0> من المستندات يتم معالجتها حاليًا بواسطة مسار الذكاء "
-#~ "الاصطناعي. تتحدث هذه الصفحة تلقائيًا."
+msgid "<0>{processing}</0> document{0} being processed by the AI pipeline. This "
+"page updates automatically."
+msgstr "<0>{processing}</0> من المستندات يتم معالجتها حاليًا بواسطة مسار الذكاء "
+"الاصطناعي. تتحدث هذه الصفحة تلقائيًا."
+
+#: src/components/Navbar.tsx:56
+msgid "About"
+msgstr "من نحن"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:142
+#: src/components/ui/index.tsx:236
 msgid "Active"
 msgstr "نشط"
 
 #: src/features/knowledgebase/DocumentList.tsx:73
-#~ msgid "Added"
-#~ msgstr "تاريخ الإضافة"
+msgid "Added"
+msgstr "تاريخ الإضافة"
 
 #: src/components/sidebar.tsx:199
 msgid "AI Mode"
@@ -52,10 +57,18 @@ msgstr "وضع ال AI"
 msgid "AI Resolution Rate"
 msgstr "معدل الحلول بالذكاء الاصطناعي"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:17
+#: src/components/landingPage/Hero.tsx:37
+msgid "AI-Powered Customer Support Platform"
+msgstr "منصة دعم العملاء المدعومة بالذكاء الاصطناعي"
+
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:18
 #: src/components/sidebar.tsx:26
 msgid "Analytics"
 msgstr "التحليلات"
+
+#: src/components/pricing/PricingHero.tsx:54
+msgid "Annual"
+msgstr "سنوي"
 
 #: src/components/sidebar.tsx:27
 #~ msgid "API & Widget"
@@ -69,11 +82,32 @@ msgstr "لمحة عامة"
 msgid "Avg Response Time"
 msgstr "متوسط وقت الاستجابة"
 
+#: src/components/landingPage/Features.tsx:66
+msgid "Built for modern support teams"
+msgstr "مصممة لفرق الدعم الحديثة"
+
+#: src/components/AppControls.tsx:25
+msgid "Change language"
+msgstr "تغيير اللغة"
+
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:144
+#: src/components/ui/index.tsx:248
 msgid "Closed"
 msgstr "مغلق"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:13
+#: src/components/Navbar.tsx:59
+msgid "Contact"
+msgstr "تواصل معنا"
+
+#: src/components/pricing/PricingCard.tsx:157
+msgid "Contact sales"
+msgstr "تواصل مع المبيعات"
+
+#: src/app/[locale]/(auth)/login/page.tsx:295
+msgid "Continue with Google"
+msgstr "المتابعة مع Google"
+
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:14
 #: src/components/sidebar.tsx:18
 msgid "Conversations"
 msgstr "المحادثات"
@@ -86,34 +120,74 @@ msgstr "مؤشر رضا العملاء (CSAT)"
 msgid "Customer"
 msgstr "العميل"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:44
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:45
+#: src/components/Navbar.tsx:65
 msgid "Dashboard"
 msgstr "لوحة القيادة"
 
 #: src/features/knowledgebase/DocumentList.tsx:69
-#~ msgid "Document"
-#~ msgstr "المستند"
+msgid "Document"
+msgstr "المستند"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:210
-#~ msgid "Document Title"
-#~ msgstr "عنوان المستند"
+msgid "Document Title"
+msgstr "عنوان المستند"
 
 #: src/features/knowledgebase/Header.tsx:38
-#~ msgid "Documents your AI pipeline uses to answer customer questions."
-#~ msgstr "المستندات التي يستخدمها مسار الذكاء الاصطناعي للإجابة على أسئلة "
-#~ "العملاء."
+msgid "Documents your AI pipeline uses to answer customer questions."
+msgstr "المستندات التي يستخدمها مسار الذكاء الاصطناعي للإجابة على أسئلة "
+"العملاء."
+
+#: src/app/[locale]/(auth)/login/page.tsx:430
+msgid "Don't have an account?"
+msgstr "ليس لديك حساب؟"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:190
-#~ msgid "Drop PDF here or click to browse"
-#~ msgstr "أفلت ملف الـ PDF هنا أو انقر للتصفح"
+msgid "Drop PDF here or click to browse"
+msgstr "أفلت ملف الـ PDF هنا أو انقر للتصفح"
+
+#: src/app/[locale]/(auth)/login/page.tsx:329
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+#: src/app/[locale]/(auth)/login/page.tsx:153
+msgid "Email is required."
+msgstr "البريد الإلكتروني مطلوب."
+
+#: src/app/[locale]/(auth)/login/page.tsx:154
+msgid "Enter a valid email."
+msgstr "أدخل بريدًا إلكترونيًا صالحًا."
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:143
+#: src/components/ui/index.tsx:242
 msgid "Escalated"
 msgstr "مُصعَّد"
 
+#: src/components/landingPage/Features.tsx:57
+msgid "Everything included"
+msgstr "كل ما تحتاجه"
+
 #: src/features/knowledgebase/Header.tsx:19
-#~ msgid "Failed"
-#~ msgstr "فشلت"
+msgid "Failed"
+msgstr "فشلت"
+
+#: src/app/[locale]/(auth)/login/page.tsx:358
+msgid "Forgot your password?"
+msgstr "نسيت كلمة المرور؟"
+
+#: src/components/landingPage/Features.tsx:69
+msgid "From AI pipeline to human inbox — the full support workflow in one "
+"place."
+msgstr "من مسار الذكاء الاصطناعي إلى صندوق الوارد البشري — سير عمل الدعم الكامل "
+"في مكان واحد."
+
+#: src/components/Navbar.tsx:92
+msgid "Get Started"
+msgstr "ابدأ الآن"
+
+#: src/components/pricing/PricingCard.tsx:158
+msgid "Get started →"
+msgstr "ابدأ الآن ←"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:138
 msgid "Human"
@@ -123,49 +197,93 @@ msgstr "بشري"
 msgid "Human Agent"
 msgstr "وكيل بشري"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:16
+#: src/components/landingPage/Hero.tsx:47
+msgid "instantly with AI agents"
+msgstr "فورًا بوكلاء الذكاء الاصطناعي"
+
+#: src/app/[locale]/(auth)/login/page.tsx:174
+msgid "Invalid email or password."
+msgstr "البريد الإلكتروني أو كلمة المرور غير صحيحة."
+
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:17
 #: src/components/sidebar.tsx:22
+#: src/features/knowledgebase/Header.tsx:35
 msgid "Knowledge Base"
 msgstr "قاعدة المعرفة"
 
+#: src/components/pricing/PricingCard.tsx:321
+msgid "Loading plans…"
+msgstr "جاري تحميل الخطط…"
+
+#: src/components/Navbar.tsx:78
+msgid "Log in"
+msgstr "تسجيل الدخول"
+
+#: src/components/Navbar.tsx:72
 #: src/components/sidebar.tsx:270
 #: src/components/sidebar.tsx:290
+#: src/components/topbar.tsx:113
 msgid "Logout"
 msgstr "تسجيل خروج"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:105
-#~ msgid "Max 20 MB · PDF only"
-#~ msgstr "الحد الأقصى 20 ميجابايت · ملفات PDF فقط"
+msgid "Max 20 MB · PDF only"
+msgstr "الحد الأقصى 20 ميجابايت · ملفات PDF فقط"
+
+#: src/components/pricing/PricingHero.tsx:44
+msgid "Monthly"
+msgstr "شهري"
 
 #: src/features/knowledgebase/DocumentList.tsx:42
-#~ msgid "No documents yet"
-#~ msgstr "لا توجد مستندات بعد"
+msgid "No documents yet"
+msgstr "لا توجد مستندات بعد"
+
+#: src/components/landingPage/Hero.tsx:46
+msgid "of tickets"
+msgstr "من التذاكر"
+
+#: src/app/[locale]/(auth)/login/page.tsx:301
+msgid "or"
+msgstr "أو"
 
 #: src/components/sidebar.tsx:11
 msgid "Org Admin"
 msgstr "مدير المؤسسة"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:12
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:13
 #: src/components/sidebar.tsx:17
 msgid "Overview"
 msgstr "نظرة عامة"
 
+#: src/app/[locale]/(auth)/login/page.tsx:339
+msgid "Password"
+msgstr "كلمة المرور"
+
+#: src/app/[locale]/(auth)/login/page.tsx:155
+msgid "Password is required."
+msgstr "كلمة المرور مطلوبة."
+
 #: src/features/knowledgebase/UploadPdfPanel.tsx:193
-#~ msgid "PDF files up to 20 MB"
-#~ msgstr "ملفات PDF بحجم يصل إلى 20 ميجابايت"
+msgid "PDF files up to 20 MB"
+msgstr "ملفات PDF بحجم يصل إلى 20 ميجابايت"
+
+#: src/components/Navbar.tsx:53
+#: src/components/pricing/PricingHero.tsx:17
+msgid "Pricing"
+msgstr "الأسعار"
 
 #: src/features/knowledgebase/Header.tsx:18
-#~ msgid "Processing"
-#~ msgstr "قيد المعالجة"
+msgid "Processing"
+msgstr "قيد المعالجة"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:19
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:20
 #: src/components/sidebar.tsx:29
 msgid "Profile"
 msgstr "الملف الشخصى"
 
 #: src/features/knowledgebase/Header.tsx:17
-#~ msgid "Ready"
-#~ msgstr "جاهزة"
+msgid "Ready"
+msgstr "جاهزة"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:244
 msgid "Recent Conversations"
@@ -175,20 +293,65 @@ msgstr "المحادثات الأخيرة"
 #~ msgid "Resolution rates CSAT trends response times and tier breakdowns."
 #~ msgstr "معدلات الحلول، اتجاهات رضا العملاء، أوقات الاستجابة، وتصنيفات الفئات."
 
-#: src/features/knowledgebase/DocumentFilter.tsx:27
-#~ msgid "Search documents..."
-#~ msgstr "البحث في المستندات..."
+#: src/components/landingPage/Hero.tsx:45
+msgid "Resolve"
+msgstr "حلّ"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:18
+#: src/features/knowledgebase/DocumentFilter.tsx:27
+msgid "Search documents..."
+msgstr "البحث في المستندات..."
+
+#: src/components/landingPage/Hero.tsx:74
+msgid "See How It Works"
+msgstr "شاهد كيف يعمل"
+
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:19
 #: src/components/sidebar.tsx:28
 msgid "Settings"
 msgstr "الاعدادات"
 
+#: src/app/[locale]/(auth)/login/page.tsx:417
+msgid "Sign in"
+msgstr "تسجيل الدخول"
+
+#: src/app/[locale]/(auth)/login/page.tsx:246
+msgid "Sign in to your account"
+msgstr "سجّل الدخول إلى حسابك"
+
+#: src/app/[locale]/(auth)/login/page.tsx:444
+msgid "Sign Up"
+msgstr "إنشاء حساب"
+
+#: src/app/[locale]/(auth)/login/page.tsx:414
+msgid "Signing in…"
+msgstr "جاري تسجيل الدخول…"
+
+#: src/components/pricing/PricingHero.tsx:23
+msgid "Simple, honest pricing."
+msgstr "أسعار بسيطة وشفافة."
+
+#: src/app/[locale]/(marketing)/page.tsx:53
+msgid "Simple, transparent pricing"
+msgstr "أسعار بسيطة وشفافة"
+
 #: src/features/knowledgebase/DocumentList.tsx:72
-#~ msgid "Size / Info"
-#~ msgstr "الحجم / معلومات"
+msgid "Size / Info"
+msgstr "الحجم / معلومات"
+
+#: src/components/pricing/PricingHero.tsx:26
+msgid "Start for free. Upgrade when you need more."
+msgstr "ابدأ مجانًا. ترقّ عندما تحتاج المزيد."
+
+#: src/components/landingPage/Hero.tsx:66
+msgid "Start Free Trial"
+msgstr "ابدأ تجربة مجانية"
+
+#: src/app/[locale]/(marketing)/page.tsx:59
+msgid "Start free. No credit card required."
+msgstr "ابدأ مجانًا. لا يلزم بطاقة ائتمان."
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:251
+#: src/features/knowledgebase/DocumentList.tsx:71
 msgid "Status"
 msgstr "الحالة"
 
@@ -200,12 +363,20 @@ msgstr "المسؤول العام"
 msgid "Support Agent"
 msgstr "وكيل الدعم"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:14
+#: src/components/landingPage/Hero.tsx:54
+msgid "SupportNest deploys a hierarchy of specialized AI agents that handle "
+"customer inquiries, automate workflows, and escalate complex issues — "
+"24/7, with full context."
+msgstr "ينشر SupportNest تسلسلًا هرميًا من وكلاء الذكاء الاصطناعي المتخصصين "
+"لمعالجة استفسارات العملاء، وأتمتة سير العمل، وتصعيد القضايا المعقدة — "
+"على مدار الساعة، مع سياق كامل."
+
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:15
 #: src/components/sidebar.tsx:25
 msgid "Team"
 msgstr "الفريق"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:15
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:16
 #: src/components/sidebar.tsx:19
 msgid "Tickets"
 msgstr "التذاكر"
@@ -234,30 +405,50 @@ msgstr "الفئة 2 — ذكاء اصطناعي معقد"
 msgid "Time"
 msgstr "الوقت"
 
+#: src/components/AppControls.tsx:38
+msgid "Toggle theme"
+msgstr "تبديل المظهر"
+
 #: src/features/knowledgebase/Header.tsx:16
-#~ msgid "Total"
-#~ msgstr "الإجمالي"
+msgid "Total"
+msgstr "الإجمالي"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:197
 msgid "Total Conversations"
 msgstr "إجمالي المحادثات"
 
 #: src/features/knowledgebase/DocumentList.tsx:70
-#~ msgid "Type"
-#~ msgstr "النوع"
+msgid "Type"
+msgstr "النوع"
+
+#: src/components/pricing/PricingCard.tsx:155
+msgid "Upgrade your plan"
+msgstr "ترقية خطتك"
 
 #: src/features/knowledgebase/DocumentList.tsx:45
-#~ msgid "Upload a PDF or add a FAQ URL above to get started."
-#~ msgstr "قم بتحميل ملف PDF أو أضف رابطًا للأسئلة الشائعة أعلاه للبدء."
+msgid "Upload a PDF or add a FAQ URL above to get started."
+msgstr "قم بتحميل ملف PDF أو أضف رابطًا للأسئلة الشائعة أعلاه للبدء."
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:102
 #: src/features/knowledgebase/UploadPdfPanel.tsx:291
-#~ msgid "Upload PDF"
-#~ msgstr "تحميل ملف PDF"
+msgid "Upload PDF"
+msgstr "تحميل ملف PDF"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:283
-#~ msgid "Uploading…"
-#~ msgstr "جاري التحميل..."
+msgid "Uploading…"
+msgstr "جاري التحميل..."
+
+#: src/app/[locale]/(marketing)/page.tsx:71
+msgid "View plans"
+msgstr "عرض الخطط"
+
+#: src/app/[locale]/(auth)/login/page.tsx:236
+msgid "Welcome Back"
+msgstr "مرحبًا بعودتك"
+
+#: src/components/pricing/PricingCard.tsx:153
+msgid "Your current plan"
+msgstr "خطتك الحالية"
 
 #: src/components/sidebar.tsx:111
 msgid "Your workspace"

@@ -7,7 +7,7 @@ export default function CtaBanner() {
   const { ref, visible } = useInView()
 
   return (
-    <section className="py-20 px-[5%] bg-white">
+    <section className="py-20 px-[5%]" style={{ background: "var(--page-bg)" }}>
       <div
         ref={ref}
         className="max-w-[900px] mx-auto rounded-3xl px-10 py-[60px] text-center relative overflow-hidden shadow-[0_24px_80px_rgba(83,74,183,0.35)]"

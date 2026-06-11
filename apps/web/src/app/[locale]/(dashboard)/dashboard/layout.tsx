@@ -72,7 +72,7 @@ export default function DashboardLayout({
 						pageTitle={title}
 						onToggleSidebar={() => setCollapsed((c) => !c)}
 					/>
-					<div style={{ flex: 1, overflow: "auto", background: "#fafafa" }}>
+					<div style={{ flex: 1, overflow: "auto", background: "var(--color-bg-soft)" }}>
 						{children}
 					</div>
 				</div>

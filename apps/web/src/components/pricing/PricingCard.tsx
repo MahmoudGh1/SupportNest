@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/auth-context";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 interface Props {
   annual: boolean;
@@ -143,35 +144,36 @@ function PlanCard({
   isLoggedIn?: boolean;
 }) {
   const router = useRouter();
+  const { t } = useLingui();
   const price = annual ? plan.annualPrice : plan.monthlyPrice;
   const isCurrent = Boolean(isSubscribed && currentPlanId === plan.id);
   const isEnterprise = plan.name.toLowerCase() === "enterprise";
 
   const ctaLabel = isCurrent
-    ? "Your current plan"
+    ? t`Your current plan`
     : isLoggedIn && isSubscribed
-      ? "Upgrade your plan"
+      ? t`Upgrade your plan`
       : isEnterprise
-        ? "Contact sales"
-        : plan.cta;
+        ? t`Contact sales`
+        : t`Get started →`;
 
   const isWhite = plan.variant === "white";
 
-  const labelColor = isWhite ? "text-white/50" : "text-black/40";
-  const priceColor = isWhite ? "text-white" : "text-[#0d0d0d]";
-  const unitColor = isWhite ? "text-white/40" : "text-black/30";
-  const sublineColor = isWhite ? "text-white/40" : "text-black/30";
-  const featureColor = isWhite ? "text-white/70" : "text-black/55";
+  const labelColor = isWhite ? "text-white/50" : "sn-muted";
+  const priceColor = isWhite ? "text-white" : "text-[var(--page-text)]";
+  const unitColor = isWhite ? "text-white/40" : "sn-muted";
+  const sublineColor = isWhite ? "text-white/40" : "sn-muted";
+  const featureColor = isWhite ? "text-white/70" : "sn-muted";
 
   const ctaCls = isWhite
     ? "bg-white text-[#111] hover:bg-white/90"
-    : "bg-[#111] text-white hover:bg-black";
+    : "bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] hover:opacity-90";
 
   const wrapperCls = featured
-    ? "rounded-[22px] shadow-[0_4px_32px_rgba(0,0,0,0.13)] ring-1 ring-black/10"
+    ? "rounded-[22px] shadow-[0_4px_32px_rgba(0,0,0,0.13)] ring-1 ring-black/10 dark:ring-white/10"
     : "rounded-2xl shadow-sm";
 
-  const cardBg = isWhite ? "bg-[#111]" : "bg-white border border-black/[0.08]";
+  const cardBg = isWhite ? "bg-[#111]" : "sn-surface border";
 
   // ── Handle CTA click ───────────────────────────────────────────────────────
   function handleClick() {
@@ -269,14 +271,14 @@ function PlanCard({
 
         {/* Divider */}
         <div
-          className={`w-full h-px mb-6 ${isWhite ? "bg-white/10" : "bg-black/[0.07]"}`}
+          className={`w-full h-px mb-6 ${isWhite ? "bg-white/10" : "bg-[var(--card-border)]"}`}
         />
 
         {/* Features */}
         <div className="flex flex-col gap-3 mt-2">
-          {plan.features.map((f) => (
+          {plan.features.map((f, i) => (
             <div
-              key={f}
+              key={i}
               className={`flex items-start gap-2.5 ${featured ? "text-[13.5px]" : "text-[13px]"} ${featureColor}`}
             >
               {isWhite ? <CheckLight /> : <CheckDark />}
@@ -315,8 +317,8 @@ export default function PricingCards({ annual }: Props) {
 
   if (loading) {
     return (
-      <div className="max-w-260 mx-auto px-4 py-16 text-center text-black/40 text-sm">
-        Loading plans…
+      <div className="max-w-260 mx-auto px-4 py-16 text-center sn-muted text-sm">
+        <Trans>Loading plans…</Trans>
       </div>
     );
   }

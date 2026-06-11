@@ -31,18 +31,23 @@ msgstr "↓ 0.2s improvement"
 
 #. placeholder {0}: processing > 1 ? "s" : ""
 #: src/features/knowledgebase/ProcessingNotice.tsx:29
-#~ msgid "<0>{processing}</0> document{0} being processed by the AI pipeline. This "
-#~ "page updates automatically."
-#~ msgstr "<0>{processing}</0> document{0} being processed by the AI pipeline. "
-#~ "This page updates automatically."
+msgid "<0>{processing}</0> document{0} being processed by the AI pipeline. This "
+"page updates automatically."
+msgstr "<0>{processing}</0> document{0} being processed by the AI pipeline. "
+"This page updates automatically."
+
+#: src/components/Navbar.tsx:56
+msgid "About"
+msgstr "About"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:142
+#: src/components/ui/index.tsx:236
 msgid "Active"
 msgstr "Active"
 
 #: src/features/knowledgebase/DocumentList.tsx:73
-#~ msgid "Added"
-#~ msgstr "Added"
+msgid "Added"
+msgstr "Added"
 
 #: src/components/sidebar.tsx:199
 msgid "AI Mode"
@@ -52,10 +57,18 @@ msgstr "AI Mode"
 msgid "AI Resolution Rate"
 msgstr "AI Resolution Rate"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:17
+#: src/components/landingPage/Hero.tsx:37
+msgid "AI-Powered Customer Support Platform"
+msgstr "AI-Powered Customer Support Platform"
+
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:18
 #: src/components/sidebar.tsx:26
 msgid "Analytics"
 msgstr "Analytics"
+
+#: src/components/pricing/PricingHero.tsx:54
+msgid "Annual"
+msgstr "Annual"
 
 #: src/components/sidebar.tsx:27
 #~ msgid "API & Widget"
@@ -69,11 +82,32 @@ msgstr "At a glance"
 msgid "Avg Response Time"
 msgstr "Avg Response Time"
 
+#: src/components/landingPage/Features.tsx:66
+msgid "Built for modern support teams"
+msgstr "Built for modern support teams"
+
+#: src/components/AppControls.tsx:25
+msgid "Change language"
+msgstr "Change language"
+
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:144
+#: src/components/ui/index.tsx:248
 msgid "Closed"
 msgstr "Closed"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:13
+#: src/components/Navbar.tsx:59
+msgid "Contact"
+msgstr "Contact"
+
+#: src/components/pricing/PricingCard.tsx:157
+msgid "Contact sales"
+msgstr "Contact sales"
+
+#: src/app/[locale]/(auth)/login/page.tsx:295
+msgid "Continue with Google"
+msgstr "Continue with Google"
+
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:14
 #: src/components/sidebar.tsx:18
 msgid "Conversations"
 msgstr "Conversations"
@@ -86,33 +120,73 @@ msgstr "CSAT Score"
 msgid "Customer"
 msgstr "Customer"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:44
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:45
+#: src/components/Navbar.tsx:65
 msgid "Dashboard"
 msgstr "Dashboard"
 
 #: src/features/knowledgebase/DocumentList.tsx:69
-#~ msgid "Document"
-#~ msgstr "Document"
+msgid "Document"
+msgstr "Document"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:210
-#~ msgid "Document Title"
-#~ msgstr "Document Title"
+msgid "Document Title"
+msgstr "Document Title"
 
 #: src/features/knowledgebase/Header.tsx:38
-#~ msgid "Documents your AI pipeline uses to answer customer questions."
-#~ msgstr "Documents your AI pipeline uses to answer customer questions."
+msgid "Documents your AI pipeline uses to answer customer questions."
+msgstr "Documents your AI pipeline uses to answer customer questions."
+
+#: src/app/[locale]/(auth)/login/page.tsx:430
+msgid "Don't have an account?"
+msgstr "Don't have an account?"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:190
-#~ msgid "Drop PDF here or click to browse"
-#~ msgstr "Drop PDF here or click to browse"
+msgid "Drop PDF here or click to browse"
+msgstr "Drop PDF here or click to browse"
+
+#: src/app/[locale]/(auth)/login/page.tsx:329
+msgid "Email"
+msgstr "Email"
+
+#: src/app/[locale]/(auth)/login/page.tsx:153
+msgid "Email is required."
+msgstr "Email is required."
+
+#: src/app/[locale]/(auth)/login/page.tsx:154
+msgid "Enter a valid email."
+msgstr "Enter a valid email."
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:143
+#: src/components/ui/index.tsx:242
 msgid "Escalated"
 msgstr "Escalated"
 
+#: src/components/landingPage/Features.tsx:57
+msgid "Everything included"
+msgstr "Everything included"
+
 #: src/features/knowledgebase/Header.tsx:19
-#~ msgid "Failed"
-#~ msgstr "Failed"
+msgid "Failed"
+msgstr "Failed"
+
+#: src/app/[locale]/(auth)/login/page.tsx:358
+msgid "Forgot your password?"
+msgstr "Forgot your password?"
+
+#: src/components/landingPage/Features.tsx:69
+msgid "From AI pipeline to human inbox — the full support workflow in one "
+"place."
+msgstr "From AI pipeline to human inbox — the full support workflow in one "
+"place."
+
+#: src/components/Navbar.tsx:92
+msgid "Get Started"
+msgstr "Get Started"
+
+#: src/components/pricing/PricingCard.tsx:158
+msgid "Get started →"
+msgstr "Get started →"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:138
 msgid "Human"
@@ -122,49 +196,93 @@ msgstr "Human"
 msgid "Human Agent"
 msgstr "Human Agent"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:16
+#: src/components/landingPage/Hero.tsx:47
+msgid "instantly with AI agents"
+msgstr "instantly with AI agents"
+
+#: src/app/[locale]/(auth)/login/page.tsx:174
+msgid "Invalid email or password."
+msgstr "Invalid email or password."
+
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:17
 #: src/components/sidebar.tsx:22
+#: src/features/knowledgebase/Header.tsx:35
 msgid "Knowledge Base"
 msgstr "Knowledge Base"
 
+#: src/components/pricing/PricingCard.tsx:321
+msgid "Loading plans…"
+msgstr "Loading plans…"
+
+#: src/components/Navbar.tsx:78
+msgid "Log in"
+msgstr "Log in"
+
+#: src/components/Navbar.tsx:72
 #: src/components/sidebar.tsx:270
 #: src/components/sidebar.tsx:290
+#: src/components/topbar.tsx:113
 msgid "Logout"
 msgstr "Logout"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:105
-#~ msgid "Max 20 MB · PDF only"
-#~ msgstr "Max 20 MB · PDF only"
+msgid "Max 20 MB · PDF only"
+msgstr "Max 20 MB · PDF only"
+
+#: src/components/pricing/PricingHero.tsx:44
+msgid "Monthly"
+msgstr "Monthly"
 
 #: src/features/knowledgebase/DocumentList.tsx:42
-#~ msgid "No documents yet"
-#~ msgstr "No documents yet"
+msgid "No documents yet"
+msgstr "No documents yet"
+
+#: src/components/landingPage/Hero.tsx:46
+msgid "of tickets"
+msgstr "of tickets"
+
+#: src/app/[locale]/(auth)/login/page.tsx:301
+msgid "or"
+msgstr "or"
 
 #: src/components/sidebar.tsx:11
 msgid "Org Admin"
 msgstr "Org Admin"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:12
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:13
 #: src/components/sidebar.tsx:17
 msgid "Overview"
 msgstr "Overview"
 
+#: src/app/[locale]/(auth)/login/page.tsx:339
+msgid "Password"
+msgstr "Password"
+
+#: src/app/[locale]/(auth)/login/page.tsx:155
+msgid "Password is required."
+msgstr "Password is required."
+
 #: src/features/knowledgebase/UploadPdfPanel.tsx:193
-#~ msgid "PDF files up to 20 MB"
-#~ msgstr "PDF files up to 20 MB"
+msgid "PDF files up to 20 MB"
+msgstr "PDF files up to 20 MB"
+
+#: src/components/Navbar.tsx:53
+#: src/components/pricing/PricingHero.tsx:17
+msgid "Pricing"
+msgstr "Pricing"
 
 #: src/features/knowledgebase/Header.tsx:18
-#~ msgid "Processing"
-#~ msgstr "Processing"
+msgid "Processing"
+msgstr "Processing"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:19
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:20
 #: src/components/sidebar.tsx:29
 msgid "Profile"
 msgstr "Profile"
 
 #: src/features/knowledgebase/Header.tsx:17
-#~ msgid "Ready"
-#~ msgstr "Ready"
+msgid "Ready"
+msgstr "Ready"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:244
 msgid "Recent Conversations"
@@ -174,20 +292,65 @@ msgstr "Recent Conversations"
 #~ msgid "Resolution rates CSAT trends response times and tier breakdowns."
 #~ msgstr "Resolution rates CSAT trends response times and tier breakdowns."
 
-#: src/features/knowledgebase/DocumentFilter.tsx:27
-#~ msgid "Search documents..."
-#~ msgstr "Search documents..."
+#: src/components/landingPage/Hero.tsx:45
+msgid "Resolve"
+msgstr "Resolve"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:18
+#: src/features/knowledgebase/DocumentFilter.tsx:27
+msgid "Search documents..."
+msgstr "Search documents..."
+
+#: src/components/landingPage/Hero.tsx:74
+msgid "See How It Works"
+msgstr "See How It Works"
+
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:19
 #: src/components/sidebar.tsx:28
 msgid "Settings"
 msgstr "Settings"
 
+#: src/app/[locale]/(auth)/login/page.tsx:417
+msgid "Sign in"
+msgstr "Sign in"
+
+#: src/app/[locale]/(auth)/login/page.tsx:246
+msgid "Sign in to your account"
+msgstr "Sign in to your account"
+
+#: src/app/[locale]/(auth)/login/page.tsx:444
+msgid "Sign Up"
+msgstr "Sign Up"
+
+#: src/app/[locale]/(auth)/login/page.tsx:414
+msgid "Signing in…"
+msgstr "Signing in…"
+
+#: src/components/pricing/PricingHero.tsx:23
+msgid "Simple, honest pricing."
+msgstr "Simple, honest pricing."
+
+#: src/app/[locale]/(marketing)/page.tsx:53
+msgid "Simple, transparent pricing"
+msgstr "Simple, transparent pricing"
+
 #: src/features/knowledgebase/DocumentList.tsx:72
-#~ msgid "Size / Info"
-#~ msgstr "Size / Info"
+msgid "Size / Info"
+msgstr "Size / Info"
+
+#: src/components/pricing/PricingHero.tsx:26
+msgid "Start for free. Upgrade when you need more."
+msgstr "Start for free. Upgrade when you need more."
+
+#: src/components/landingPage/Hero.tsx:66
+msgid "Start Free Trial"
+msgstr "Start Free Trial"
+
+#: src/app/[locale]/(marketing)/page.tsx:59
+msgid "Start free. No credit card required."
+msgstr "Start free. No credit card required."
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:251
+#: src/features/knowledgebase/DocumentList.tsx:71
 msgid "Status"
 msgstr "Status"
 
@@ -199,12 +362,20 @@ msgstr "Super Admin"
 msgid "Support Agent"
 msgstr "Support Agent"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:14
+#: src/components/landingPage/Hero.tsx:54
+msgid "SupportNest deploys a hierarchy of specialized AI agents that handle "
+"customer inquiries, automate workflows, and escalate complex issues — "
+"24/7, with full context."
+msgstr "SupportNest deploys a hierarchy of specialized AI agents that handle "
+"customer inquiries, automate workflows, and escalate complex issues — "
+"24/7, with full context."
+
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:15
 #: src/components/sidebar.tsx:25
 msgid "Team"
 msgstr "Team"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:15
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:16
 #: src/components/sidebar.tsx:19
 msgid "Tickets"
 msgstr "Tickets"
@@ -233,30 +404,50 @@ msgstr "Tier 2 — AI Complex"
 msgid "Time"
 msgstr "Time"
 
+#: src/components/AppControls.tsx:38
+msgid "Toggle theme"
+msgstr "Toggle theme"
+
 #: src/features/knowledgebase/Header.tsx:16
-#~ msgid "Total"
-#~ msgstr "Total"
+msgid "Total"
+msgstr "Total"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:197
 msgid "Total Conversations"
 msgstr "Total Conversations"
 
 #: src/features/knowledgebase/DocumentList.tsx:70
-#~ msgid "Type"
-#~ msgstr "Type"
+msgid "Type"
+msgstr "Type"
+
+#: src/components/pricing/PricingCard.tsx:155
+msgid "Upgrade your plan"
+msgstr "Upgrade your plan"
 
 #: src/features/knowledgebase/DocumentList.tsx:45
-#~ msgid "Upload a PDF or add a FAQ URL above to get started."
-#~ msgstr "Upload a PDF or add a FAQ URL above to get started."
+msgid "Upload a PDF or add a FAQ URL above to get started."
+msgstr "Upload a PDF or add a FAQ URL above to get started."
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:102
 #: src/features/knowledgebase/UploadPdfPanel.tsx:291
-#~ msgid "Upload PDF"
-#~ msgstr "Upload PDF"
+msgid "Upload PDF"
+msgstr "Upload PDF"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:283
-#~ msgid "Uploading…"
-#~ msgstr "Uploading…"
+msgid "Uploading…"
+msgstr "Uploading…"
+
+#: src/app/[locale]/(marketing)/page.tsx:71
+msgid "View plans"
+msgstr "View plans"
+
+#: src/app/[locale]/(auth)/login/page.tsx:236
+msgid "Welcome Back"
+msgstr "Welcome Back"
+
+#: src/components/pricing/PricingCard.tsx:153
+msgid "Your current plan"
+msgstr "Your current plan"
 
 #: src/components/sidebar.tsx:111
 msgid "Your workspace"

@@ -36,7 +36,7 @@ export default function About() {
   const { ref, visible } = useInView()
 
   return (
-    <section id="about" className="py-[90px] px-[5%] bg-white">
+    <section id="about" className="py-[90px] px-[5%]" style={{ background: "var(--page-bg)" }}>
       <div className="max-w-[1100px] mx-auto">
 
         {/* Story + stats split */}

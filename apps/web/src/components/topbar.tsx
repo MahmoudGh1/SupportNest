@@ -1,9 +1,9 @@
 "use client";
 
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { S } from "@/components/ui";
 import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
+import { useLingui } from "@lingui/react/macro";
 
 interface TopbarProps {
 	pageTitle: string;
@@ -13,6 +13,7 @@ interface TopbarProps {
 export function Topbar({ pageTitle, onToggleSidebar }: TopbarProps) {
 	const { user, logout } = useAuth();
 	const router = useRouter();
+	const { t } = useLingui();
 	const initials = user
 		? `${user.firstName?.[0]}${user.lastName?.[0]}`.toUpperCase()
 		: "U";
@@ -28,9 +29,10 @@ export function Topbar({ pageTitle, onToggleSidebar }: TopbarProps) {
 	return (
 		<div
 			style={{
-				background: "#fff",
-				borderBottom: `0.5px solid ${S.border}`,
+				background: "var(--surface)",
+				borderBottom: "0.5px solid var(--card-border)",
 				padding: "0 1.5rem",
+				paddingInlineEnd: "7rem",
 				height: 56,
 				display: "flex",
 				alignItems: "center",
@@ -53,7 +55,7 @@ export function Topbar({ pageTitle, onToggleSidebar }: TopbarProps) {
 				>
 					<i className="ti ti-menu-2" style={{ fontSize: 19 }} />
 				</button>
-				<span style={{ fontSize: 15, fontWeight: 600, color: S.dark }}>
+				<span style={{ fontSize: 15, fontWeight: 600, color: "var(--page-text)" }}>
 					{pageTitle}
 				</span>
 			</div>
@@ -67,7 +69,7 @@ export function Topbar({ pageTitle, onToggleSidebar }: TopbarProps) {
 						lineHeight: 1.3,
 					}}
 				>
-					<span style={{ fontSize: 13, fontWeight: 600, color: S.dark }}>
+					<span style={{ fontSize: 13, fontWeight: 600, color: "var(--page-text)" }}>
 						{displayName}
 					</span>
 					{user?.orgName && (
@@ -99,7 +101,7 @@ export function Topbar({ pageTitle, onToggleSidebar }: TopbarProps) {
 					onClick={handleLogout}
 					style={{
 						background: "none",
-						border: `1px solid ${S.border}`,
+						border: "1px solid var(--card-border)",
 						borderRadius: 8,
 						padding: "6px 12px",
 						fontSize: 12,
@@ -108,10 +110,8 @@ export function Topbar({ pageTitle, onToggleSidebar }: TopbarProps) {
 						cursor: "pointer",
 					}}
 				>
-					Logout
+					{t`Logout`}
 				</button>
-
-				<LanguageSwitcher />
 			</div>
 		</div>
 	);

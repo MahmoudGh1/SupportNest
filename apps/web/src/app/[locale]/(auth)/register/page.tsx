@@ -7,15 +7,15 @@ import { useAuth } from "@/context/auth-context";
 import { api } from "@/lib/api";
 
 const T = {
-	white: "#FFFFFF",
+	white: "var(--page-text)",
 	violet: "#534AB7",
 	violetHover: "#6259D0",
-	darkBg: "#141414",
-	darkSurface: "#1E1E1E",
-	darkBorder: "rgba(255,255,255,0.08)",
-	darkBorder2: "rgba(255,255,255,0.12)",
-	gray300: "rgba(255,255,255,0.55)",
-	gray500: "rgba(255,255,255,0.30)",
+	darkBg: "var(--page-bg)",
+	darkSurface: "var(--surface)",
+	darkBorder: "var(--card-border)",
+	darkBorder2: "var(--card-border)",
+	gray300: "var(--page-muted)",
+	gray500: "var(--page-muted)",
 	errorText: "#f87171",
 	radius: "10px",
 	font: "'Sora', system-ui, sans-serif",
@@ -59,7 +59,7 @@ const EMPTY: RegistrationData = {
 
 export default function RegisterPage() {
 	const router = useRouter();
-	const { login } = useAuth();
+	const { refreshUser } = useAuth();
 	const [form, setForm] = useState<RegistrationData>(EMPTY);
 	const [errors, setErrors] = useState<Partial<RegistrationData>>({});
 	const [submitError, setSubmitError] = useState("");
@@ -129,7 +129,6 @@ export default function RegisterPage() {
 				planId,
 			});
 
-			await login(form.email, form.password);
 			sessionStorage.setItem("registrationData", JSON.stringify(form));
 			router.push(`/payment?planId=${planId}&annual=${annual}`);
 		} catch (err) {

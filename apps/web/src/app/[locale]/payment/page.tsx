@@ -528,7 +528,7 @@ function PaymentPageContent() {
 
   if (plansLoading) {
     return (
-      <div className="min-h-screen bg-[#fafafa] flex items-center justify-center">
+      <div className="min-h-screen sn-page flex items-center justify-center">
         <div className="text-[#64607a] text-sm">Loading your plan…</div>
       </div>
     )
@@ -536,7 +536,7 @@ function PaymentPageContent() {
 
   if (plansError || !dbPlan) {
     return (
-      <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center gap-4 px-4">
+      <div className="min-h-screen sn-page flex flex-col items-center justify-center gap-4 px-4">
         <p className="text-[#64607a] text-sm text-center">{plansError ?? "Plan not found."}</p>
         <Link href="/pricing" className="text-[#534AB7] text-sm font-medium no-underline">
           ← Back to pricing
@@ -573,9 +573,9 @@ function PaymentPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fafafa] flex flex-col">
+    <div className="min-h-screen sn-page flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b border-[#e8e6f0] h-14 px-6 flex items-center justify-between shrink-0">
+      <header className="sn-surface border-b border-[var(--card-border)] h-14 px-6 flex items-center justify-between shrink-0">
         <Link href="/" className="flex items-center gap-2 no-underline">
           <div className="w-7 h-7 bg-[#534AB7] rounded-lg flex items-center justify-center">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -593,7 +593,7 @@ function PaymentPageContent() {
         <div className="w-full max-w-[960px] grid gap-6" style={{ gridTemplateColumns: "1fr 380px" }}>
 
           {/* ── Left: payment form ──────────────────────── */}
-          <div className="bg-white rounded-2xl border border-[#e8e6f0] p-7">
+          <div className="sn-surface rounded-2xl border border-[var(--card-border)] p-7">
 
             {step === "processing" && <ProcessingScreen />}
             {step === "success"    && <SuccessScreen plan={plan.name} method={method!} />}
@@ -616,7 +616,7 @@ function PaymentPageContent() {
                     <div className="grid grid-cols-1 gap-3">
                       {METHODS.map(m => (
                         <button key={m.id} onClick={() => { setMethod(m.id); setStep("details") }}
-                          className="flex items-center gap-4 p-4 rounded-xl border-[1.5px] border-[#e8e6f0] hover:border-[#534AB7] hover:bg-[#EEEDFE]/30 transition-all cursor-pointer bg-white text-left font-[inherit]">
+                          className="flex items-center gap-4 p-4 rounded-xl border-[1.5px] border-[var(--card-border)] hover:border-[#534AB7] hover:bg-[#EEEDFE]/30 transition-all cursor-pointer sn-surface text-left font-[inherit]">
                           <div className="shrink-0">{m.logo}</div>
                           <div className="flex-1 min-w-0">
                             <div className="text-[14px] font-semibold text-[#1a1830]">{m.label}</div>
@@ -659,7 +659,7 @@ function PaymentPageContent() {
 
           {/* ── Right: order summary ────────────────────── */}
           <div className="flex flex-col gap-4">
-            <div className="bg-white rounded-2xl border border-[#e8e6f0] p-6">
+            <div className="sn-surface rounded-2xl border border-[var(--card-border)] p-6">
               <h3 className="text-[14px] font-bold text-[#1a1830] mb-4">Order summary</h3>
               <div className="flex items-center gap-3 mb-5 pb-5 border-b border-[#e8e6f0]">
                 <div className="w-10 h-10 rounded-xl bg-[#EEEDFE] flex items-center justify-center shrink-0">
@@ -698,7 +698,7 @@ function PaymentPageContent() {
             </div>
 
             {/* What's included */}
-            <div className="bg-white rounded-2xl border border-[#e8e6f0] p-5">
+            <div className="sn-surface rounded-2xl border border-[var(--card-border)] p-5">
               <div className="text-[12px] font-bold text-[#888] uppercase tracking-wider mb-3">What's included</div>
               {[
                 "AI Router + Tier 1 + Tier 2 agents",

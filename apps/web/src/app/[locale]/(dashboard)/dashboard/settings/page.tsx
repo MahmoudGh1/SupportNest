@@ -246,7 +246,7 @@ function ProfileTab({ user }: { user: UserProfile }) {
 		setPwForm((f) => ({ ...f, [k]: v }));
 
 	const initials =
-		`${form.first_name[0] ?? ""}${form.last_name[0] ?? ""}`.toUpperCase();
+		`${form.first_name?.[0] ?? ""}${form.last_name?.[0] ?? ""}`.toUpperCase();
 
 	const roleLabel: Record<string, string> = {
 		org_admin: "Admin",
@@ -850,9 +850,9 @@ function OrgTab({ org }: { org: OrgProfile }) {
 								}}
 								onFocus={(e) => (e.target.style.borderColor = S.purple)}
 								onBlur={(e) =>
-									(e.target.style.borderColor = errors.title
-										? "#E24B4A"
-										: S.border)
+								(e.target.style.borderColor = errors.title
+									? "#E24B4A"
+									: S.border)
 								}
 							/>
 							{errors.title && (
@@ -910,9 +910,9 @@ function OrgTab({ org }: { org: OrgProfile }) {
 								}}
 								onFocus={(e) => (e.target.style.borderColor = S.purple)}
 								onBlur={(e) =>
-									(e.target.style.borderColor = errors.greeting
-										? "#E24B4A"
-										: S.border)
+								(e.target.style.borderColor = errors.greeting
+									? "#E24B4A"
+									: S.border)
 								}
 							/>
 							{errors.greeting && (
