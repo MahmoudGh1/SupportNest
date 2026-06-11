@@ -92,6 +92,8 @@ model BusinessApiConfig {
   isVerified     Boolean      @default(false)  // did they pass our config test?
   lastVerifiedAt DateTime?
 
+  testEndpoint   String?
+
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -113,6 +115,9 @@ model ToolDefinition {
   description    String       // what this tool does — the agent reads this to decide when to call it
   method         HttpMethod   // GET, POST, PUT, DELETE
   path           String       // e.g. "/orders/{orderId}"
+
+  documentId String? @db.Uuid
+  document   KnowledgeDocument? @relation(fields: [documentId], references: [id])
 
   parameters     Json         // { name, type, required, location: "path"|"query"|"body", description }[]
   responseSchema Json         // what the response looks like so agent can parse it
@@ -308,6 +313,12 @@ model KnowledgeDocument {
   storagePath       String?
 
   status          KnowledgeDocumentStatus
+
+  toolDefinitions ToolDefinition[]
+
+  toolCount        Int   @default(0)
+  activeToolCount  Int   @default(0)
+  disabledToolCount Int  @default(0)
 
   metadata        Json                    @default("{}")
 

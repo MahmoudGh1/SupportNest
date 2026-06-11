@@ -24,6 +24,7 @@ import invitationRouter from "./routes/invitation.routes.js";
 import businessApiConfigRouter from "./routes/businessApiConfig.routes.js";
 import ticketRouter from "./routes/ticket.routes.js";
 import userRouter from "./routes/user.routes.js";
+import knowledgeRouter from "./routes/knowledge.routes.js"
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -41,11 +42,8 @@ app.use(
 
 app.use(
 	cors({
-		// Dynamically sets the header to match whoever is making the request
 		origin: function (origin, callback) {
-			// Allow requests with no origin (like mobile apps, curl, or postman)
 			if (!origin) return callback(null, true);
-
 			callback(null, true);
 		},
 		credentials: true,
@@ -61,6 +59,7 @@ app.use(express.static(publicDir));
 app.use(rateLimit);
 app.get("/health", (_, res) => res.json({ ok: true }));
 
+app.use("/api/v1", knowledgeRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/rag", ragRouter);
