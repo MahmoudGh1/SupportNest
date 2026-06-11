@@ -3,11 +3,7 @@ import { verifyAccessToken } from "../utils/jwt.util.js";
 import type { AuthenticatedRequest } from "../types/auth.types.js";
 import { AuthError } from "../utils/appError.js";
 
-export function authMiddleware(
-	req: AuthenticatedRequest,
-	_res: Response,
-	next: NextFunction,
-): void {
+export function authMiddleware(req: AuthenticatedRequest, _res: Response, next: NextFunction): void {
 	const cookieToken = req.cookies["accessToken"];
 
 	if (!cookieToken) {
