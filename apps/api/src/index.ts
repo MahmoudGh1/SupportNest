@@ -80,6 +80,9 @@ app.use("/api/v1/invitations", invitationRouter);
 app.use("/api/v1/tickets", ticketRouter);
 
 app.use("/api/v1/tier2", tier2Router);
+
+app.use("/api/v1/admindashboard", AdminRoutes);
+
 app.use(notFoundHandler);
 
 app.use(errorHandler);
