@@ -479,7 +479,7 @@ export default function PaymentPage() {
   return (
     <div className="min-h-screen bg-[#fafafa] flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b border-[#e8e6f0] h-14 px-6 flex items-center justify-between shrink-0">
+      {/* <header className="bg-white border-b border-[#e8e6f0] h-14 px-6 flex items-center justify-between shrink-0">
         <Link href="/" className="flex items-center gap-2 no-underline">
           <div className="w-7 h-7 bg-[#534AB7] rounded-lg flex items-center justify-center">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -491,10 +491,10 @@ export default function PaymentPage() {
         <div className="flex items-center gap-1.5 text-[12px] text-[#888]">
           <span>🔒</span> Secure checkout
         </div>
-      </header>
+      </header> */}
 
-      <div className="flex-1 flex items-start justify-center py-10 px-4">
-        <div className="w-full max-w-[960px] grid gap-6" style={{ gridTemplateColumns: "1fr 380px" }}>
+      <div className="flex-1 flex items-start justify-center">
+        <div className="w-full max-w-[960px] grid gap-6" >
 
           {/* ── Left: payment form ──────────────────────── */}
           <div className="bg-white rounded-2xl border border-[#e8e6f0] p-7">
