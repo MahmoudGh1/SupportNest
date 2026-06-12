@@ -46,8 +46,8 @@ export default function UploadPdfPanel({
 			setError("Please enter a document title.");
 			return;
 		}
-		if (file.size > 20 * 1024 * 1024) {
-			setError("File must be under 20 MB.");
+		if (file.size > 5 * 1024 * 1024) {
+			setError("File must be under 5 MB.");
 			return;
 		}
 		setError("");
@@ -67,7 +67,7 @@ export default function UploadPdfPanel({
 	return (
 		<div
 			style={{
-				background: "#fff",
+				background: "var(--surface)",
 				border: `0.5px solid ${S.border}`,
 				borderRadius: 12,
 				padding: "1.25rem",
@@ -102,7 +102,7 @@ export default function UploadPdfPanel({
 						<Trans>Upload PDF</Trans>
 					</div>
 					<div style={{ fontSize: 11, color: S.textMuted }}>
-						<Trans>Max 20 MB · PDF only</Trans>
+						<Trans>Max 5 MB · PDF only</Trans>
 					</div>
 				</div>
 			</div>
@@ -122,7 +122,7 @@ export default function UploadPdfPanel({
 					padding: "1.25rem",
 					textAlign: "center",
 					cursor: "pointer",
-					background: dragging ? S.purpleBg : file ? S.greenBg : "#fafafa",
+					background: dragging ? S.purpleBg : file ? S.greenBg : S.bg,
 					transition: "all .15s",
 					marginBottom: 12,
 				}}
@@ -190,7 +190,7 @@ export default function UploadPdfPanel({
 							<Trans>Drop PDF here or click to browse</Trans>
 						</div>
 						<div style={{ fontSize: 11, color: S.textMuted, marginTop: 4 }}>
-							<Trans>PDF files up to 20 MB</Trans>
+							<Trans>PDF files up to 5 MB</Trans>
 						</div>
 					</>
 				)}

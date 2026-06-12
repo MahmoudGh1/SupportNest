@@ -60,7 +60,7 @@ export function Sidebar({
 			style={{
 				width: collapsed ? 64 : 220,
 				minWidth: collapsed ? 64 : 220,
-				background: S.dark,
+				background: "var(--sidebar-bg)",
 				display: "flex",
 				flexDirection: "column",
 				transition: "width .2s, min-width .2s",
@@ -74,7 +74,7 @@ export function Sidebar({
 					alignItems: "center",
 					gap: 10,
 					padding: "1.25rem 1rem 1rem",
-					borderBottom: "0.5px solid rgba(255,255,255,0.08)",
+					borderBottom: "0.5px solid var(--sidebar-border)",
 					minWidth: 0,
 				}}
 			>

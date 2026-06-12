@@ -1,74 +1,98 @@
 "use client";
-import { useState, useEffect } from "react";
-import Link from "next/link";
 
-const NAV_LINKS: [string, string][] = [
-  ["Pricing", "/pricing"],
-  ["About", "#about"],
-  ["Contact", "/contact"],
-  ["Log in", "/login"],
-];
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/auth-context";
+import { useLingui } from "@lingui/react/macro";
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
+	const { user, loading, logout } = useAuth();
+	const router = useRouter();
+	const { t } = useLingui();
 
-  useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 30);
-    window.addEventListener("scroll", fn);
-    return () => window.removeEventListener("scroll", fn);
-  }, []);
+	async function handleLogout() {
+		await logout();
+		router.push("/");
+	}
 
-  return (
-    <div className="fixed top-0 left-0 right-0 z-100 flex justify-center pt-4 px-4">
-      <nav
-        className={`
-          flex items-center gap-6 px-3 py-2 rounded-full
-          bg-white border border-black/9
-          transition-all duration-300
-          ${
-            scrolled
-              ? "shadow-[0_8px_32px_rgba(0,0,0,0.10)]"
-              : "shadow-[0_2px_12px_rgba(0,0,0,0.06)]"
-          }
-        `}
-      >
-        {/* Logo */}
-        <a href="#" className="flex items-center gap-2 no-underline pl-1 pr-2">
-          <div className="relative w-6 h-5 shrink-0">
-            <div className="absolute left-0 top-0 w-3.5 h-3.5 rounded-sm bg-[#111] opacity-90" />
-            <div className="absolute left-1.75 top-1.25 w-3.5 h-3.5 rounded-sm bg-[#111] opacity-40" />
-          </div>
-          <span className="text-[#0d0d0d] text-[15px] font-semibold tracking-tight">
-            SupportNest
-          </span>
-        </a>
+	const linkCls =
+		"text-[14px] font-medium no-underline transition-colors px-1 hover:opacity-100 opacity-70";
 
-        {/* Divider */}
-        <div className="w-px h-4 bg-black/10 shrink-0" />
+	return (
+		<div className="fixed top-0 left-0 right-0 z-[100] flex justify-center pt-4 px-4 pointer-events-none">
+			<nav
+				className="pointer-events-auto flex items-center gap-5 px-3 py-2 rounded-full border shadow-md backdrop-blur-md"
+				style={{
+					background: "var(--nav-bg)",
+					borderColor: "var(--nav-border)",
+					color: "var(--page-text)",
+				}}
+			>
+				<Link href="/" className="flex items-center gap-2 no-underline pl-1 pr-2">
+					<div className="relative w-6 h-5 shrink-0">
+						<div
+							className="absolute left-0 top-0 w-3.5 h-3.5 rounded-sm opacity-90"
+							style={{ background: "var(--page-text)" }}
+						/>
+						<div
+							className="absolute left-1.75 top-1.25 w-3.5 h-3.5 rounded-sm opacity-40"
+							style={{ background: "var(--page-text)" }}
+						/>
+					</div>
+					<span className="text-[15px] font-semibold tracking-tight">
+						SupportNest
+					</span>
+				</Link>
 
-        {/* Nav links */}
-        {NAV_LINKS.map(([label, href]) => (
-          <Link
-            key={label}
-            href={href}
-            className="text-black/45 hover:text-black text-[14px] font-medium no-underline transition-colors duration-150 px-1"
-          >
-            {label}
-          </Link>
-        ))}
+				<div
+					className="w-px h-4 shrink-0"
+					style={{ background: "var(--nav-border)" }}
+				/>
 
-        {/* CTA pill */}
-        <Link
-          href="/pricing"
-          className="
-            bg-[#111] hover:bg-black text-white text-[14px] font-semibold
-            no-underline px-5 py-1.75 rounded-full ml-1 shrink-0
-            transition-all duration-150 hover:scale-[1.02] active:scale-[0.98]
-          "
-        >
-          Get Started
-        </Link>
-      </nav>
-    </div>
-  );
+				<Link href="/pricing" className={linkCls}>
+					{t`Pricing`}
+				</Link>
+				<Link href="/about" className={linkCls}>
+					{t`About`}
+				</Link>
+				<Link href="/contact" className={linkCls}>
+					{t`Contact`}
+				</Link>
+
+				{!loading && user ? (
+					<>
+						<Link href="/dashboard" className={linkCls}>
+							{t`Dashboard`}
+						</Link>
+						<button
+							type="button"
+							onClick={handleLogout}
+							className={`${linkCls} bg-transparent border-none cursor-pointer`}
+						>
+							{t`Logout`}
+						</button>
+					</>
+				) : (
+					!loading && (
+						<Link href="/login" className={linkCls}>
+							{t`Log in`}
+						</Link>
+					)
+				)}
+
+				{!loading && !user && (
+					<Link
+						href="/pricing"
+						className="text-[14px] font-semibold no-underline px-5 py-1.75 rounded-full ml-1 shrink-0"
+						style={{
+							background: "var(--btn-primary-bg)",
+							color: "var(--btn-primary-text)",
+						}}
+					>
+						{t`Get Started`}
+					</Link>
+				)}
+			</nav>
+		</div>
+	);
 }

@@ -64,6 +64,23 @@ interface CreateIntentionInput {
   };
 }
 
+async function assertNoActiveSubscription(organizationId: string) {
+  const active = await prisma.payment.findFirst({
+    where: {
+      organizationId,
+      status: PaymentStatus.SUCCEEDED,
+      billingPeriodEnd: { gt: new Date() },
+    },
+  });
+
+  if (active) {
+    throw new AppError(
+      "You already have an active subscription for this billing period",
+      409,
+    );
+  }
+}
+
 export const createPaymentIntentionService = async ({
   organizationId,
   pricingId,
@@ -77,6 +94,8 @@ export const createPaymentIntentionService = async ({
   });
 
   if (!org) throw new AppError("Organization not found", 404);
+
+  await assertNoActiveSubscription(organizationId);
 
   // 2. Verify plan exists
   const pricing = await prisma.pricing.findFirst({
@@ -236,6 +255,63 @@ export const handleWebhookService = async (body: any, hmacHeader: string) => {
 };
 
 // ─── Get Payment History ───────────────────────────────────────────────────────
+
+interface CompleteCheckoutInput {
+  organizationId: string;
+  pricingId: string;
+  amount: number;
+  currency: string;
+  isAnnual: boolean;
+}
+
+export const completeCheckoutService = async ({
+  organizationId,
+  pricingId,
+  amount,
+  currency,
+  isAnnual,
+}: CompleteCheckoutInput) => {
+  await assertNoActiveSubscription(organizationId);
+
+  const pricing = await prisma.pricing.findFirst({
+    where: { id: pricingId, isActive: true },
+  });
+  if (!pricing) throw new AppError("Pricing plan not found", 404);
+
+  const periodDays = isAnnual ? 365 : 30;
+  const now = new Date();
+  const billingPeriodEnd = new Date(
+    now.getTime() + periodDays * 24 * 60 * 60 * 1000,
+  );
+
+  const payment = await prisma.$transaction(async (tx) => {
+    const created = await tx.payment.create({
+      data: {
+        organizationId,
+        pricingId,
+        amount,
+        currency,
+        status: PaymentStatus.SUCCEEDED,
+        paymentProvider: "checkout",
+        providerPaymentId: `checkout_${organizationId}_${Date.now()}`,
+        billingPeriodStart: now,
+        billingPeriodEnd,
+      },
+    });
+
+    await tx.organization.update({
+      where: { id: organizationId },
+      data: { planId: pricingId },
+    });
+
+    return created;
+  });
+
+  return {
+    paymentId: payment.id,
+    billingPeriodEnd: payment.billingPeriodEnd,
+  };
+};
 
 export const getPaymentHistoryService = async (
   organizationId: string,

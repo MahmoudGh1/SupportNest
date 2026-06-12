@@ -9,6 +9,8 @@ export interface AuthUser {
 	orgName?: string;
 	token?: string;
 	onboarded: boolean;
+	hasActiveSubscription?: boolean;
+	currentPlanId?: string | null;
 }
 
 export enum Role {
@@ -21,6 +23,16 @@ export interface LoginResponse {
 	user: AuthUser;
 }
 
+export interface PricingPlan {
+	id: string;
+	name: string;
+	priceMonthly: number;
+	maxConversations: number;
+	maxAgents: number;
+	maxKnowledgeDocuments: number;
+	features: string;
+}
+
 export interface OrgSetupData {
 	name: string;
 	industry: string;
@@ -31,6 +43,7 @@ export interface OrgSetupData {
 export interface WidgetConfig {
 	color: string; // hex — widget primary color
 	greeting: string; // first message shown to customer
+	title?: string;
 	position: "bottom-left" | "bottom-right";
 }
 
@@ -131,12 +144,13 @@ export interface GetKnowledgeDocsResponse {
 
 export interface ApiKey {
 	id: string;
+	name: string;
 	key_prefix: string;
-	key_hash: string;
 	allowed_origins: string[];
 	is_active: boolean;
 	last_used_at: string | null;
 	created_at: string;
+	raw_key?: string;
 }
 
 export interface CreateApiKeyInput {

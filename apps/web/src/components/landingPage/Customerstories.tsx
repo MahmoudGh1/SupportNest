@@ -30,7 +30,7 @@ export default function CustomerStories() {
   const { ref, visible } = useInView()
 
   return (
-    <section id="testimonials" className="py-[90px] px-[5%] bg-white">
+    <section id="testimonials" className="py-[90px] px-[5%]" style={{ background: "var(--page-bg)" }}>
       <div className="max-w-[1100px] mx-auto">
         {/* Heading */}
         <div className="text-center mb-13">

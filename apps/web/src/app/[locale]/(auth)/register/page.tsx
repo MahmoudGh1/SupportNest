@@ -1,29 +1,34 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-	PaymentStep,
-	type RegistrationData,
-} from "@/components/auth/PaymentStep";
-import { StepIndicator } from "@/components/auth/StepIndicator";
+import { api } from "@/lib/api";
 
-// ── Design tokens ─────────────────────────────────────────────────────────────
 const T = {
-	white: "#FFFFFF",
+	white: "var(--page-text)",
 	violet: "#534AB7",
 	violetHover: "#6259D0",
-	darkBg: "#141414",
-	darkSurface: "#1E1E1E",
-	darkBorder: "rgba(255,255,255,0.08)",
-	darkBorder2: "rgba(255,255,255,0.12)",
-	gray300: "rgba(255,255,255,0.55)",
-	gray500: "rgba(255,255,255,0.30)",
+	darkBg: "var(--page-bg)",
+	darkSurface: "var(--surface)",
+	darkBorder: "var(--card-border)",
+	gray300: "var(--page-muted)",
+	gray500: "var(--page-muted)",
 	errorText: "#f87171",
 	radius: "10px",
-	radiusLg: "14px",
 	font: "'Sora', system-ui, sans-serif",
 } as const;
+
+interface RegistrationData {
+	firstName: string;
+	lastName: string;
+	email: string;
+	password: string;
+	confirmPassword: string;
+	businessName: string;
+	industry: string;
+	size: string;
+}
 
 const INDUSTRIES = [
 	"Technology",
@@ -39,7 +44,6 @@ const INDUSTRIES = [
 ];
 const SIZES = ["1–10", "11–50", "51–200", "201–500", "500+"];
 
-// ── Initial form state ────────────────────────────────────────────────────────
 const EMPTY: RegistrationData = {
 	firstName: "",
 	lastName: "",
@@ -49,16 +53,15 @@ const EMPTY: RegistrationData = {
 	businessName: "",
 	industry: "",
 	size: "",
-	phone: "",
 };
 
 export default function RegisterPage() {
 	const router = useRouter();
-	const [step, setStep] = useState<1 | 2>(1);
 	const [form, setForm] = useState<RegistrationData>(EMPTY);
 	const [errors, setErrors] = useState<Partial<RegistrationData>>({});
+	const [submitError, setSubmitError] = useState("");
+	const [submitting, setSubmitting] = useState(false);
 
-	// ── Helpers ───────────────────────────────────────────────────────────────
 	function field(key: keyof RegistrationData) {
 		return {
 			value: form[key],
@@ -73,7 +76,6 @@ export default function RegisterPage() {
 		if (!form.lastName.trim()) e.lastName = "Required";
 		if (!form.email.trim()) e.email = "Required";
 		else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Enter a valid email";
-		if (!form.phone.trim()) e.phone = "Required";
 		if (!form.password) e.password = "Required";
 		else if (form.password.length < 8) e.password = "At least 8 characters";
 		if (form.password !== form.confirmPassword)
@@ -85,16 +87,70 @@ export default function RegisterPage() {
 		return Object.keys(e).length === 0;
 	}
 
-	function handleNext() {
-		if (validate()) setStep(2);
+	async function handleContinueToPayment() {
+		if (!validate()) return;
+
+		const stored = sessionStorage.getItem("selectedPlan");
+		if (!stored) {
+			setSubmitError("No plan selected. Please choose a plan on the pricing page first.");
+			return;
+		}
+
+		let planId = "";
+		let annual = false;
+		try {
+			const plan = JSON.parse(stored) as { id?: string; annual?: boolean };
+			planId = plan.id ?? "";
+			annual = Boolean(plan.annual);
+		} catch {
+			setSubmitError("Invalid plan data. Please go back and select a plan again.");
+			return;
+		}
+
+		if (!planId) {
+			setSubmitError("No plan selected.");
+			return;
+		}
+
+		setSubmitError("");
+		setSubmitting(true);
+
+		try {
+			await api.register({
+				email: form.email,
+				password: form.password,
+				firstName: form.firstName,
+				lastName: form.lastName,
+				businessName: form.businessName,
+				planId,
+			});
+
+			// Store only what the payment page needs for billing display
+			sessionStorage.setItem("registrationData", JSON.stringify({
+				firstName: form.firstName,
+				lastName: form.lastName,
+				email: form.email,
+			}));
+			sessionStorage.setItem("pendingAuth", JSON.stringify({
+				email: form.email,
+				password: form.password,
+			}));
+			sessionStorage.setItem("pendingPaymentId", "pending-" + Date.now());
+
+			router.push(`/payment?planId=${planId}&annual=${annual}`);
+		} catch (err) {
+			setSubmitError(
+				err instanceof Error ? err.message : "Registration failed. Please try again."
+			);
+			setSubmitting(false);
+		}
 	}
 
-	// ── Shared input style ────────────────────────────────────────────────────
 	const inputStyle: React.CSSProperties = {
 		width: "100%",
 		padding: "11px 14px",
 		background: T.darkSurface,
-		border: `1.5px solid ${T.darkBorder2}`,
+		border: `1.5px solid ${T.darkBorder}`,
 		borderRadius: T.radius,
 		color: T.white,
 		fontSize: 14,
@@ -118,7 +174,6 @@ export default function RegisterPage() {
 		marginTop: 4,
 	};
 
-	// ── Render ────────────────────────────────────────────────────────────────
 	return (
 		<div
 			style={{
@@ -132,21 +187,84 @@ export default function RegisterPage() {
 			}}
 		>
 			<div style={{ width: "100%", maxWidth: 500 }}>
-				{/* Logo / wordmark */}
 				<div style={{ textAlign: "center", marginBottom: 32 }}>
-					<span
+					<Link
+						href="/"
 						style={{
 							fontSize: 22,
 							fontWeight: 700,
 							color: T.white,
 							letterSpacing: "-0.02em",
+							textDecoration: "none",
 						}}
 					>
 						SupportNest
-					</span>
+					</Link>
 				</div>
 
-				{/* Heading */}
+				{/* Progress indicator */}
+				<div
+					style={{
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+						gap: 8,
+						marginBottom: 28,
+					}}
+				>
+					{["Your details", "Payment"].map((label, i) => (
+						<div
+							key={label}
+							style={{ display: "flex", alignItems: "center", gap: 8 }}
+						>
+							<div
+								style={{
+									display: "flex",
+									alignItems: "center",
+									gap: 6,
+									opacity: i === 0 ? 1 : 0.4,
+								}}
+							>
+								<div
+									style={{
+										width: 22,
+										height: 22,
+										borderRadius: "50%",
+										background: i === 0 ? T.violet : "transparent",
+										border: `2px solid ${i === 0 ? T.violet : T.darkBorder}`,
+										display: "flex",
+										alignItems: "center",
+										justifyContent: "center",
+										fontSize: 11,
+										fontWeight: 700,
+										color: i === 0 ? "#fff" : T.gray500,
+									}}
+								>
+									{i + 1}
+								</div>
+								<span
+									style={{
+										fontSize: 12,
+										fontWeight: i === 0 ? 600 : 400,
+										color: i === 0 ? T.white : T.gray500,
+									}}
+								>
+									{label}
+								</span>
+							</div>
+							{i < 1 && (
+								<div
+									style={{
+										width: 24,
+										height: 1,
+										background: T.darkBorder,
+									}}
+								/>
+							)}
+						</div>
+					))}
+				</div>
+
 				<h1
 					style={{
 						fontSize: 26,
@@ -156,7 +274,7 @@ export default function RegisterPage() {
 						textAlign: "center",
 					}}
 				>
-					{step === 1 ? "Create your account" : "Complete your order"}
+					Create your account
 				</h1>
 				<p
 					style={{
@@ -166,248 +284,200 @@ export default function RegisterPage() {
 						margin: "0 0 32px",
 					}}
 				>
-					{step === 1
-						? "Tell us about you and your business."
-						: "Review your plan and pay securely."}
+					Tell us about you and your business.
 				</p>
 
-				<StepIndicator current={step} />
-
-				{/* ── Step 1 ── Account + Business details ─────────────────── */}
-				{step === 1 && (
-					<div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-						{/* Name row */}
-						<div
-							style={{
-								display: "grid",
-								gridTemplateColumns: "1fr 1fr",
-								gap: 12,
-							}}
-						>
-							<div>
-								<label style={labelStyle}>First name</label>
-								<input
-									style={inputStyle}
-									placeholder="Jane"
-									{...field("firstName")}
-								/>
-								{errors.firstName && (
-									<p style={errorStyle}>{errors.firstName}</p>
-								)}
-							</div>
-							<div>
-								<label style={labelStyle}>Last name</label>
-								<input
-									style={inputStyle}
-									placeholder="Smith"
-									{...field("lastName")}
-								/>
-								{errors.lastName && (
-									<p style={errorStyle}>{errors.lastName}</p>
-								)}
-							</div>
-						</div>
-
-						{/* Email */}
+				<div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+					<div
+						style={{
+							display: "grid",
+							gridTemplateColumns: "1fr 1fr",
+							gap: 12,
+						}}
+					>
 						<div>
-							<label style={labelStyle}>Work email</label>
+							<label style={labelStyle}>First name</label>
+							<input style={inputStyle} placeholder="Jane" {...field("firstName")} />
+							{errors.firstName && <p style={errorStyle}>{errors.firstName}</p>}
+						</div>
+						<div>
+							<label style={labelStyle}>Last name</label>
+							<input style={inputStyle} placeholder="Smith" {...field("lastName")} />
+							{errors.lastName && <p style={errorStyle}>{errors.lastName}</p>}
+						</div>
+					</div>
+
+					<div>
+						<label style={labelStyle}>Work email</label>
+						<input
+							style={inputStyle}
+							type="email"
+							placeholder="jane@company.com"
+							{...field("email")}
+						/>
+						{errors.email && <p style={errorStyle}>{errors.email}</p>}
+					</div>
+
+					<div
+						style={{
+							display: "grid",
+							gridTemplateColumns: "1fr 1fr",
+							gap: 12,
+						}}
+					>
+						<div>
+							<label style={labelStyle}>Password</label>
 							<input
 								style={inputStyle}
-								type="email"
-								placeholder="jane@company.com"
-								{...field("email")}
+								type="password"
+								placeholder="Min. 8 characters"
+								{...field("password")}
 							/>
-							{errors.email && <p style={errorStyle}>{errors.email}</p>}
+							{errors.password && <p style={errorStyle}>{errors.password}</p>}
 						</div>
-
-						{/* Phone */}
 						<div>
-							<label style={labelStyle}>Phone number</label>
+							<label style={labelStyle}>Confirm password</label>
 							<input
 								style={inputStyle}
-								type="tel"
-								placeholder="+20 10 0000 0000"
-								{...field("phone")}
+								type="password"
+								placeholder="Repeat password"
+								{...field("confirmPassword")}
 							/>
-							{errors.phone && <p style={errorStyle}>{errors.phone}</p>}
-						</div>
-
-						{/* Password row */}
-						<div
-							style={{
-								display: "grid",
-								gridTemplateColumns: "1fr 1fr",
-								gap: 12,
-							}}
-						>
-							<div>
-								<label style={labelStyle}>Password</label>
-								<input
-									style={inputStyle}
-									type="password"
-									placeholder="Min. 8 characters"
-									{...field("password")}
-								/>
-								{errors.password && (
-									<p style={errorStyle}>{errors.password}</p>
-								)}
-							</div>
-							<div>
-								<label style={labelStyle}>Confirm password</label>
-								<input
-									style={inputStyle}
-									type="password"
-									placeholder="Repeat password"
-									{...field("confirmPassword")}
-								/>
-								{errors.confirmPassword && (
-									<p style={errorStyle}>{errors.confirmPassword}</p>
-								)}
-							</div>
-						</div>
-
-						{/* Divider */}
-						<div
-							style={{
-								display: "flex",
-								alignItems: "center",
-								gap: 12,
-								margin: "4px 0",
-							}}
-						>
-							<div style={{ flex: 1, height: 1, background: T.darkBorder }} />
-							<span style={{ fontSize: 12, color: T.gray500 }}>
-								Business details
-							</span>
-							<div style={{ flex: 1, height: 1, background: T.darkBorder }} />
-						</div>
-
-						{/* Business name */}
-						<div>
-							<label style={labelStyle}>Business name</label>
-							<input
-								style={inputStyle}
-								placeholder="Acme Corp"
-								{...field("businessName")}
-							/>
-							{errors.businessName && (
-								<p style={errorStyle}>{errors.businessName}</p>
+							{errors.confirmPassword && (
+								<p style={errorStyle}>{errors.confirmPassword}</p>
 							)}
 						</div>
+					</div>
 
-						{/* Industry + Size */}
-						<div
-							style={{
-								display: "grid",
-								gridTemplateColumns: "1fr 1fr",
-								gap: 12,
-							}}
-						>
-							<div>
-								<label style={labelStyle}>Industry</label>
-								<select
-									style={{ ...inputStyle, appearance: "none" }}
-									{...field("industry")}
-								>
-									<option value="">Select…</option>
-									{INDUSTRIES.map((i) => (
-										<option
-											key={i}
-											value={i}
-										>
-											{i}
-										</option>
-									))}
-								</select>
-								{errors.industry && (
-									<p style={errorStyle}>{errors.industry}</p>
-								)}
-							</div>
-							<div>
-								<label style={labelStyle}>Company size</label>
-								<select
-									style={{ ...inputStyle, appearance: "none" }}
-									{...field("size")}
-								>
-									<option value="">Select…</option>
-									{SIZES.map((s) => (
-										<option
-											key={s}
-											value={s}
-										>
-											{s} employees
-										</option>
-									))}
-								</select>
-								{errors.size && <p style={errorStyle}>{errors.size}</p>}
-							</div>
+					<div
+						style={{
+							display: "flex",
+							alignItems: "center",
+							gap: 12,
+							margin: "4px 0",
+						}}
+					>
+						<div style={{ flex: 1, height: 1, background: T.darkBorder }} />
+						<span style={{ fontSize: 12, color: T.gray500 }}>Business details</span>
+						<div style={{ flex: 1, height: 1, background: T.darkBorder }} />
+					</div>
+
+					<div>
+						<label style={labelStyle}>Business name</label>
+						<input
+							style={inputStyle}
+							placeholder="Acme Corp"
+							{...field("businessName")}
+						/>
+						{errors.businessName && <p style={errorStyle}>{errors.businessName}</p>}
+					</div>
+
+					<div
+						style={{
+							display: "grid",
+							gridTemplateColumns: "1fr 1fr",
+							gap: 12,
+						}}
+					>
+						<div>
+							<label style={labelStyle}>Industry</label>
+							<select
+								style={{ ...inputStyle, appearance: "none" }}
+								{...field("industry")}
+							>
+								<option value="">Select…</option>
+								{INDUSTRIES.map((i) => (
+									<option key={i} value={i}>
+										{i}
+									</option>
+								))}
+							</select>
+							{errors.industry && <p style={errorStyle}>{errors.industry}</p>}
 						</div>
+						<div>
+							<label style={labelStyle}>Company size</label>
+							<select
+								style={{ ...inputStyle, appearance: "none" }}
+								{...field("size")}
+							>
+								<option value="">Select…</option>
+								{SIZES.map((s) => (
+									<option key={s} value={s}>
+										{s} employees
+									</option>
+								))}
+							</select>
+							{errors.size && <p style={errorStyle}>{errors.size}</p>}
+						</div>
+					</div>
 
-						{/* Next button */}
-						<button
-							onClick={handleNext}
-							style={{
-								width: "100%",
-								padding: "13px",
-								background: T.violet,
-								color: T.white,
-								border: "none",
-								borderRadius: T.radius,
-								fontSize: 15,
-								fontWeight: 600,
-								fontFamily: T.font,
-								cursor: "pointer",
-								marginTop: 4,
-								display: "flex",
-								alignItems: "center",
-								justifyContent: "center",
-								gap: 8,
-								transition: "background .15s",
-							}}
-							onMouseEnter={(e) =>
-								(e.currentTarget.style.background = T.violetHover)
-							}
-							onMouseLeave={(e) =>
-								(e.currentTarget.style.background = T.violet)
-							}
-						>
-							Continue to Payment
-							<i
-								className="ti ti-arrow-right"
-								style={{ fontSize: 16 }}
-							/>
-						</button>
-
+					{submitError && (
 						<p
 							style={{
-								textAlign: "center",
 								fontSize: 13,
-								color: T.gray500,
+								color: T.errorText,
+								textAlign: "center",
 								margin: 0,
 							}}
 						>
-							Already have an account?{" "}
-							<a
-								href="/login"
-								style={{
-									color: T.violet,
-									textDecoration: "none",
-									fontWeight: 500,
-								}}
-							>
-								Sign in
-							</a>
+							{submitError}
 						</p>
-					</div>
-				)}
+					)}
 
-				{/* ── Step 2 ── Payment ─────────────────────────────────────── */}
-				{step === 2 && (
-					<PaymentStep
-						registrationData={form}
-						onBack={() => setStep(1)}
-					/>
-				)}
+					<button
+						type="button"
+						onClick={handleContinueToPayment}
+						disabled={submitting}
+						style={{
+							width: "100%",
+							padding: "13px",
+							background: submitting ? "rgba(83,74,183,0.5)" : T.violet,
+							color: T.white,
+							border: "none",
+							borderRadius: T.radius,
+							fontSize: 15,
+							fontWeight: 600,
+							fontFamily: T.font,
+							cursor: submitting ? "not-allowed" : "pointer",
+							marginTop: 4,
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							gap: 8,
+							transition: "background .15s",
+						}}
+						onMouseEnter={(e) => {
+							if (!submitting)
+								(e.currentTarget as HTMLElement).style.background = T.violetHover;
+						}}
+						onMouseLeave={(e) => {
+							if (!submitting)
+								(e.currentTarget as HTMLElement).style.background = T.violet;
+						}}
+					>
+						{submitting ? "Creating your account…" : "Continue to Payment"}
+						{!submitting && (
+							<i className="ti ti-arrow-right" style={{ fontSize: 16 }} />
+						)}
+					</button>
+
+					<p
+						style={{
+							textAlign: "center",
+							fontSize: 13,
+							color: T.gray500,
+							margin: 0,
+						}}
+					>
+						Already have an account?{" "}
+						<Link
+							href="/login"
+							style={{ color: T.violet, textDecoration: "none", fontWeight: 500 }}
+						>
+							Sign in
+						</Link>
+					</p>
+				</div>
 			</div>
 		</div>
 	);

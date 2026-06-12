@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { localePath, stripLocale, type AppLocale } from "@/lib/routes";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -31,7 +32,7 @@ export default function DashboardLayout({
 	const router = useRouter();
 	const [collapsed, setCollapsed] = useState(false);
 
-	const pathnameWithoutLocale = pathname.replace(`/${locale}`, "");
+	const { pathname: pathnameWithoutLocale } = stripLocale(pathname);
 	// Map pathname → sidebar page key
 	const currentPage =
 		pathnameWithoutLocale.replace("/dashboard", "").replace("/", "") ||
@@ -39,7 +40,7 @@ export default function DashboardLayout({
 
 	const handleNavigate = (page: string) => {
 		const path = page === "dashboard" ? "/dashboard" : `/dashboard/${page}`;
-		router.push(`/${locale}${path}`);
+		router.push(localePath(path, locale as AppLocale));
 	};
 
 	const title = getPageMeta()[pathnameWithoutLocale] ?? t`Dashboard`;
@@ -72,7 +73,7 @@ export default function DashboardLayout({
 						pageTitle={title}
 						onToggleSidebar={() => setCollapsed((c) => !c)}
 					/>
-					<div style={{ flex: 1, overflow: "auto", background: "#fafafa" }}>
+					<div style={{ flex: 1, overflow: "auto", background: "var(--color-bg-soft)" }}>
 						{children}
 					</div>
 				</div>

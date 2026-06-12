@@ -9,6 +9,7 @@ import { PrismaClientKnownRequestError } from "generated/prisma/internal/prismaN
 import { buildFilter, buildPagination, type QueryParams } from "src/utils/filterBuilder.js";
 import type { KnowledgeDocumentType } from "generated/prisma/enums.js";
 
+<<<<<<< HEAD
 export const uploadDocument: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
 		const userId = req.user?.sub;
@@ -40,6 +41,13 @@ export const uploadDocument: RequestHandler = asyncHandler(
 				createdById: userId as string,
 			},
 		});
+=======
+export const uploadDocument: RequestHandler = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+	const userId = req.user?.sub;
+	const { orgId } = req.params;
+	const { title, type } = req.body;
+	const file = req.file; // Buffer from multer memoryStorage
+>>>>>>> origin/LocalFixes
 
 	if (!file) throw new AppError("No file provided", 400);
 
