@@ -3,11 +3,12 @@
 import { S } from "@/components/ui";
 import { useAuth } from "@/context/auth-context";
 import { msg, t } from "@lingui/core/macro";
+import type { MessageDescriptor } from "@lingui/core";
 import { i18n } from "@lingui/core";
 import { Trans } from "@lingui/react/macro";
 import { Role } from "@/types/types";
 
-export const ROLE_TRANSLATIONS: Record<Role, any> = {
+export const ROLE_TRANSLATIONS: Record<Role, MessageDescriptor> = {
 	ORG_ADMIN: msg`Org Admin`,
 	SUPPORT_AGENT: msg`Support Agent`,
 	SUPER_ADMIN: msg`Super Admin`,
@@ -24,6 +25,12 @@ const navItems = [
 	},
 	{ icon: "users", label: msg`Team`, page: "team" },
 	{ icon: "chart-bar", label: msg`Analytics`, page: "analytics" },
+	{
+		icon: "building-skyscraper",
+		label: msg`Admin`,
+		page: "admin",
+		superAdminOnly: true,
+	},
 	// { icon: "code", label: msg({ message: "API & Widget" }), page: "api" },
 	{ icon: "settings", label: msg`Settings`, page: "settings" },
 	{ icon: "plug", label: msg`API Tools`, page: "tools" },
@@ -41,12 +48,13 @@ export function Sidebar({
 	currentPage,
 	onNavigate,
 	collapsed,
-	onToggle,
+	onToggle: _onToggle,
 }: SidebarProps) {
 	const { user, logout } = useAuth();
 	const initials = user
 		? `${user.firstName?.[0]}${user.lastName?.[0]}`.toUpperCase()
 		: "U";
+	const isSuperAdmin = String(user?.role).toUpperCase() === Role.SUPER_ADMIN;
 
 	return (
 		<div
@@ -125,52 +133,54 @@ export function Sidebar({
 					gap: 2,
 				}}
 			>
-				{navItems.map((item) => {
-						const isActive = currentPage === item.page;
-						return (
-							<button
-								key={item.page}
-								onClick={() => onNavigate(item.page)}
-								title={collapsed ? i18n._(item.label) : ""}
-								style={{
-									display: "flex",
-									alignItems: "center",
-									gap: 10,
-									padding: collapsed ? "9px 14px" : "8px 10px",
-									borderRadius: 8,
-									cursor: "pointer",
-									border: "none",
-									background: isActive ? "var(--color-brand)" : "transparent",
-									color: isActive ? "#fff" : "var(--sidebar-text)",
-									fontSize: 13,
-									fontFamily: "inherit",
-									transition: "all .15s",
-									whiteSpace: "nowrap",
-									justifyContent: collapsed ? "center" : "flex-start",
-								}}
-								onMouseEnter={(e) => {
-									if (!isActive) {
-										const el = e.currentTarget as HTMLElement;
-										el.style.background = "rgba(255,255,255,0.06)";
-										el.style.color = "var(--sidebar-text-active)";
-									}
-								}}
-								onMouseLeave={(e) => {
-									if (!isActive) {
-										const el = e.currentTarget as HTMLElement;
-										el.style.background = "transparent";
-										el.style.color = "var(--sidebar-text)";
-									}
-								}}
-							>
-								<i
-									className={`ti ti-${item.icon}`}
-									style={{ fontSize: 17, flexShrink: 0 }}
-								/>
-								{!collapsed && <span>{i18n._(item.label)}</span>}
-							</button>
-						);
-					})}
+				{navItems
+					.filter((item) => !item.superAdminOnly || isSuperAdmin)
+					.map((item) => {
+					const isActive = currentPage === item.page;
+					return (
+						<button
+							key={item.page}
+							onClick={() => onNavigate(item.page)}
+							title={collapsed ? i18n._(item.label) : ""}
+							style={{
+								display: "flex",
+								alignItems: "center",
+								gap: 10,
+								padding: collapsed ? "9px 14px" : "8px 10px",
+								borderRadius: 8,
+								cursor: "pointer",
+								border: "none",
+								background: isActive ? S.purple : "transparent",
+								color: isActive ? "#fff" : "rgba(255,255,255,0.5)",
+								fontSize: 13,
+								fontFamily: "inherit",
+								transition: "all .15s",
+								whiteSpace: "nowrap",
+								justifyContent: collapsed ? "center" : "flex-start",
+							}}
+							onMouseEnter={(e) => {
+								if (!isActive) {
+									const el = e.currentTarget as HTMLElement;
+									el.style.background = "rgba(255,255,255,0.06)";
+									el.style.color = "rgba(255,255,255,0.85)";
+								}
+							}}
+							onMouseLeave={(e) => {
+								if (!isActive) {
+									const el = e.currentTarget as HTMLElement;
+									el.style.background = "transparent";
+									el.style.color = "rgba(255,255,255,0.5)";
+								}
+							}}
+						>
+							<i
+								className={`ti ti-${item.icon}`}
+								style={{ fontSize: 17, flexShrink: 0 }}
+							/>
+							{!collapsed && <span>{i18n._(item.label)}</span>}
+						</button>
+					);
+				})}
 			</div>
 
 			{/* AI Mode button */}

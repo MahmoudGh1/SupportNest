@@ -29,8 +29,7 @@ import { swaggerUi, swaggerSpec } from "./docs/swagger.js";
 import knowledgeRouter from "./routes/knowledge.routes.js";
 import tier2Router from "./routes/tier2.routes.js";
 import reportRouter from "./routes/reporter.routes.js";
-import AdminRoutes from "./routes/admin-dashboard.routes.js";
-
+import tier2Router from "./routes/tier2.routes.js";
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -63,7 +62,7 @@ app.use(morgan("dev"));
 const publicDir = path.resolve(process.cwd(), "public");
 // console.log("[static] serving from:", publicDir);
 app.use(express.static(publicDir));
-// app.use(rateLimit);
+app.use(rateLimit);
 app.get("/health", (_, res) => res.json({ ok: true }));
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/v1/auth", authRouter);

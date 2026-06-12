@@ -66,9 +66,8 @@ export default function Pipeline() {
               key={tier.name}
               className="relative rounded-2xl px-5 py-7 text-center"
               style={{
-                background:   tier.featured ? "var(--color-brand)" : "var(--surface)",
-                color: tier.featured ? "white" : "var(--page-text)",
-                border:       `1.5px solid ${tier.featured ? "var(--color-brand)" : "var(--card-border)"}`,
+                background:   tier.featured ? "#534AB7" : "var(--surface)",
+                border:       `1.5px solid ${tier.featured ? "#534AB7" : "var(--card-border)"}`,
                 boxShadow:    tier.featured ? "0 12px 40px rgba(83,74,183,0.25)" : "none",
               }}
             >

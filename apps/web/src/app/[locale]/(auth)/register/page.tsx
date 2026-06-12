@@ -4,36 +4,19 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import {
-  PaymentStep,
-  type RegistrationData,
-} from "@/components/auth/PaymentStep";
-import { StepIndicator } from "@/components/auth/StepIndicator";
 
 const T = {
-	text: "var(--page-text)",
+	white: "var(--page-text)",
 	violet: "#534AB7",
-	violetHover: "#7F77DD",
-	bg: "var(--page-bg)",
-	surface: "var(--surface)",
-	border: "var(--card-border)",
-	muted: "var(--page-muted)",
-	errorText: "#E24B4A",
+	violetHover: "#6259D0",
+	darkBg: "var(--page-bg)",
+	darkSurface: "var(--surface)",
+	darkBorder: "var(--card-border)",
+	gray300: "var(--page-muted)",
+	gray500: "var(--page-muted)",
+	errorText: "#f87171",
 	radius: "10px",
 	font: "'Sora', system-ui, sans-serif",
-  white: "#FFFFFF",
-  violet: "#534AB7",
-  violetHover: "#6259D0",
-  darkBg: "#141414",
-  darkSurface: "#1E1E1E",
-  darkBorder: "rgba(255,255,255,0.08)",
-  darkBorder2: "rgba(255,255,255,0.12)",
-  gray300: "rgba(255,255,255,0.55)",
-  gray500: "rgba(255,255,255,0.30)",
-  errorText: "#f87171",
-  radius: "10px",
-  radiusLg: "14px",
-  font: "'Sora', system-ui, sans-serif",
 } as const;
 
 interface RegistrationData {
@@ -48,16 +31,16 @@ interface RegistrationData {
 }
 
 const INDUSTRIES = [
-  "Technology",
-  "Healthcare",
-  "Finance",
-  "Retail & E-commerce",
-  "Education",
-  "Real Estate",
-  "Hospitality",
-  "Manufacturing",
-  "Media & Entertainment",
-  "Other",
+	"Technology",
+	"Healthcare",
+	"Finance",
+	"Retail & E-commerce",
+	"Education",
+	"Real Estate",
+	"Hospitality",
+	"Manufacturing",
+	"Media & Entertainment",
+	"Other",
 ];
 const SIZES = ["1–10", "11–50", "51–200", "201–500", "500+"];
 
@@ -142,6 +125,7 @@ export default function RegisterPage() {
 				planId,
 			});
 
+			// Store only what the payment page needs for billing display
 			sessionStorage.setItem("registrationData", JSON.stringify({
 				firstName: form.firstName,
 				lastName: form.lastName,
@@ -162,17 +146,13 @@ export default function RegisterPage() {
 		}
 	}
 
-	// Input uses page-text color so it always contrasts the surface background.
-	// colorScheme mirrors the page theme so browser-native select option lists
-	// render correctly in both dark and light mode.
 	const inputStyle: React.CSSProperties = {
 		width: "100%",
 		padding: "11px 14px",
-		background: T.surface,
-		border: `1.5px solid ${T.border}`,
+		background: T.darkSurface,
+		border: `1.5px solid ${T.darkBorder}`,
 		borderRadius: T.radius,
-		color: T.text,
-		colorScheme: "inherit" as React.CSSProperties["colorScheme"],
+		color: T.white,
 		fontSize: 14,
 		fontFamily: T.font,
 		outline: "none",
@@ -183,7 +163,7 @@ export default function RegisterPage() {
 	const labelStyle: React.CSSProperties = {
 		fontSize: 13,
 		fontWeight: 500,
-		color: T.muted,
+		color: T.gray300,
 		marginBottom: 6,
 		display: "block",
 	};
@@ -192,364 +172,313 @@ export default function RegisterPage() {
 		fontSize: 12,
 		color: T.errorText,
 		marginTop: 4,
-		margin: "4px 0 0",
-	};
-
-	// Two-column grid that collapses to one column on narrow screens
-	const twoColGrid: React.CSSProperties = {
-		display: "grid",
-		gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-		gap: 12,
 	};
 
 	return (
-		<>
-			{/*
-			  * Scoped styles for things inline styles can't do:
-			  *   - input::placeholder colour
-			  *   - select option background/colour (inherits colorScheme above but
-			  *     some browsers need an explicit rule)
-			  *   - focus ring using the brand violet
-			  */}
-			<style>{`
-				.sn-input::placeholder {
-					color: var(--page-muted);
-					opacity: 1;
-				}
-				.sn-input:focus {
-					border-color: #534AB7 !important;
-					box-shadow: 0 0 0 3px rgba(83,74,183,0.18);
-				}
-				.sn-select option {
-					background: var(--surface);
-					color: var(--page-text);
-				}
-				@media (max-width: 420px) {
-					.sn-page-pad { padding: 24px 12px !important; }
-					.sn-card       { padding: 0 !important; }
-					.sn-title      { font-size: 22px !important; }
-				}
-			`}</style>
+		<div
+			style={{
+				minHeight: "100vh",
+				background: T.darkBg,
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+				fontFamily: T.font,
+				padding: "40px 16px",
+			}}
+		>
+			<div style={{ width: "100%", maxWidth: 500 }}>
+				<div style={{ textAlign: "center", marginBottom: 32 }}>
+					<Link
+						href="/"
+						style={{
+							fontSize: 22,
+							fontWeight: 700,
+							color: T.white,
+							letterSpacing: "-0.02em",
+							textDecoration: "none",
+						}}
+					>
+						SupportNest
+					</Link>
+				</div>
 
-			<div
-				className="sn-page-pad"
-				style={{
-					minHeight: "100vh",
-					background: T.bg,
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					fontFamily: T.font,
-					padding: "40px 16px",
-				}}
-			>
-				<div className="sn-card" style={{ width: "100%", maxWidth: 500 }}>
-					{/* Logo */}
-					<div style={{ textAlign: "center", marginBottom: 32 }}>
-						<Link
-							href="/"
-							style={{
-								fontSize: 22,
-								fontWeight: 700,
-								color: T.text,
-								letterSpacing: "-0.02em",
-								textDecoration: "none",
-							}}
+				{/* Progress indicator */}
+				<div
+					style={{
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+						gap: 8,
+						marginBottom: 28,
+					}}
+				>
+					{["Your details", "Payment"].map((label, i) => (
+						<div
+							key={label}
+							style={{ display: "flex", alignItems: "center", gap: 8 }}
 						>
-							SupportNest
-						</Link>
+							<div
+								style={{
+									display: "flex",
+									alignItems: "center",
+									gap: 6,
+									opacity: i === 0 ? 1 : 0.4,
+								}}
+							>
+								<div
+									style={{
+										width: 22,
+										height: 22,
+										borderRadius: "50%",
+										background: i === 0 ? T.violet : "transparent",
+										border: `2px solid ${i === 0 ? T.violet : T.darkBorder}`,
+										display: "flex",
+										alignItems: "center",
+										justifyContent: "center",
+										fontSize: 11,
+										fontWeight: 700,
+										color: i === 0 ? "#fff" : T.gray500,
+									}}
+								>
+									{i + 1}
+								</div>
+								<span
+									style={{
+										fontSize: 12,
+										fontWeight: i === 0 ? 600 : 400,
+										color: i === 0 ? T.white : T.gray500,
+									}}
+								>
+									{label}
+								</span>
+							</div>
+							{i < 1 && (
+								<div
+									style={{
+										width: 24,
+										height: 1,
+										background: T.darkBorder,
+									}}
+								/>
+							)}
+						</div>
+					))}
+				</div>
+
+				<h1
+					style={{
+						fontSize: 26,
+						fontWeight: 700,
+						color: T.white,
+						margin: "0 0 6px",
+						textAlign: "center",
+					}}
+				>
+					Create your account
+				</h1>
+				<p
+					style={{
+						fontSize: 14,
+						color: T.gray500,
+						textAlign: "center",
+						margin: "0 0 32px",
+					}}
+				>
+					Tell us about you and your business.
+				</p>
+
+				<div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+					<div
+						style={{
+							display: "grid",
+							gridTemplateColumns: "1fr 1fr",
+							gap: 12,
+						}}
+					>
+						<div>
+							<label style={labelStyle}>First name</label>
+							<input style={inputStyle} placeholder="Jane" {...field("firstName")} />
+							{errors.firstName && <p style={errorStyle}>{errors.firstName}</p>}
+						</div>
+						<div>
+							<label style={labelStyle}>Last name</label>
+							<input style={inputStyle} placeholder="Smith" {...field("lastName")} />
+							{errors.lastName && <p style={errorStyle}>{errors.lastName}</p>}
+						</div>
 					</div>
 
-					{/* Progress indicator */}
+					<div>
+						<label style={labelStyle}>Work email</label>
+						<input
+							style={inputStyle}
+							type="email"
+							placeholder="jane@company.com"
+							{...field("email")}
+						/>
+						{errors.email && <p style={errorStyle}>{errors.email}</p>}
+					</div>
+
+					<div
+						style={{
+							display: "grid",
+							gridTemplateColumns: "1fr 1fr",
+							gap: 12,
+						}}
+					>
+						<div>
+							<label style={labelStyle}>Password</label>
+							<input
+								style={inputStyle}
+								type="password"
+								placeholder="Min. 8 characters"
+								{...field("password")}
+							/>
+							{errors.password && <p style={errorStyle}>{errors.password}</p>}
+						</div>
+						<div>
+							<label style={labelStyle}>Confirm password</label>
+							<input
+								style={inputStyle}
+								type="password"
+								placeholder="Repeat password"
+								{...field("confirmPassword")}
+							/>
+							{errors.confirmPassword && (
+								<p style={errorStyle}>{errors.confirmPassword}</p>
+							)}
+						</div>
+					</div>
+
 					<div
 						style={{
 							display: "flex",
 							alignItems: "center",
-							justifyContent: "center",
-							gap: 8,
-							marginBottom: 28,
+							gap: 12,
+							margin: "4px 0",
 						}}
 					>
-						{["Your details", "Payment"].map((label, i) => {
-							const active = i === 0;
-							return (
-								<div
-									key={label}
-									style={{ display: "flex", alignItems: "center", gap: 8 }}
-								>
-									<div
-										style={{
-											display: "flex",
-											alignItems: "center",
-											gap: 6,
-											// Inactive step: lower opacity so it reads as "upcoming"
-											opacity: active ? 1 : 0.45,
-										}}
-									>
-										<div
-											style={{
-												width: 22,
-												height: 22,
-												borderRadius: "50%",
-												// Active: filled violet. Inactive: transparent with border.
-												background: active ? T.violet : "transparent",
-												border: `2px solid ${active ? T.violet : T.border}`,
-												display: "flex",
-												alignItems: "center",
-												justifyContent: "center",
-												fontSize: 11,
-												fontWeight: 700,
-												// Always white on violet; on transparent use page-text so it
-												// stays readable in both light and dark mode.
-												color: active ? "#ffffff" : T.text,
-											}}
-										>
-											{i + 1}
-										</div>
-										<span
-											style={{
-												fontSize: 12,
-												fontWeight: active ? 600 : 400,
-												color: active ? T.text : T.muted,
-											}}
-										>
-											{label}
-										</span>
-									</div>
-									{i < 1 && (
-										<div
-											style={{ width: 24, height: 1, background: T.border }}
-										/>
-									)}
-								</div>
-							);
-						})}
+						<div style={{ flex: 1, height: 1, background: T.darkBorder }} />
+						<span style={{ fontSize: 12, color: T.gray500 }}>Business details</span>
+						<div style={{ flex: 1, height: 1, background: T.darkBorder }} />
 					</div>
 
-					<h1
-						className="sn-title"
+					<div>
+						<label style={labelStyle}>Business name</label>
+						<input
+							style={inputStyle}
+							placeholder="Acme Corp"
+							{...field("businessName")}
+						/>
+						{errors.businessName && <p style={errorStyle}>{errors.businessName}</p>}
+					</div>
+
+					<div
 						style={{
-							fontSize: 26,
-							fontWeight: 700,
-							color: T.text,
-							margin: "0 0 6px",
-							textAlign: "center",
+							display: "grid",
+							gridTemplateColumns: "1fr 1fr",
+							gap: 12,
 						}}
 					>
-						Create your account
-					</h1>
-					<p
-						style={{
-							fontSize: 14,
-							color: T.muted,
-							textAlign: "center",
-							margin: "0 0 32px",
-						}}
-					>
-						Tell us about you and your business.
-					</p>
-
-					<div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-						{/* Name row */}
-						<div style={twoColGrid}>
-							<div>
-								<label style={labelStyle}>First name</label>
-								<input
-									className="sn-input"
-									style={inputStyle}
-									placeholder="Jane"
-									{...field("firstName")}
-								/>
-								{errors.firstName && <p style={errorStyle}>{errors.firstName}</p>}
-							</div>
-							<div>
-								<label style={labelStyle}>Last name</label>
-								<input
-									className="sn-input"
-									style={inputStyle}
-									placeholder="Smith"
-									{...field("lastName")}
-								/>
-								{errors.lastName && <p style={errorStyle}>{errors.lastName}</p>}
-							</div>
-						</div>
-
-						{/* Email */}
 						<div>
-							<label style={labelStyle}>Work email</label>
-							<input
-								className="sn-input"
-								style={inputStyle}
-								type="email"
-								placeholder="jane@company.com"
-								{...field("email")}
-							/>
-							{errors.email && <p style={errorStyle}>{errors.email}</p>}
-						</div>
-
-						{/* Password row */}
-						<div style={twoColGrid}>
-							<div>
-								<label style={labelStyle}>Password</label>
-								<input
-									className="sn-input"
-									style={inputStyle}
-									type="password"
-									placeholder="Min. 8 characters"
-									{...field("password")}
-								/>
-								{errors.password && <p style={errorStyle}>{errors.password}</p>}
-							</div>
-							<div>
-								<label style={labelStyle}>Confirm password</label>
-								<input
-									className="sn-input"
-									style={inputStyle}
-									type="password"
-									placeholder="Repeat password"
-									{...field("confirmPassword")}
-								/>
-								{errors.confirmPassword && (
-									<p style={errorStyle}>{errors.confirmPassword}</p>
-								)}
-							</div>
-						</div>
-
-						{/* Section divider */}
-						<div
-							style={{
-								display: "flex",
-								alignItems: "center",
-								gap: 12,
-								margin: "4px 0",
-							}}
-						>
-							<div style={{ flex: 1, height: 1, background: T.border }} />
-							<span style={{ fontSize: 12, color: T.muted }}>Business details</span>
-							<div style={{ flex: 1, height: 1, background: T.border }} />
-						</div>
-
-						{/* Business name */}
-						<div>
-							<label style={labelStyle}>Business name</label>
-							<input
-								className="sn-input"
-								style={inputStyle}
-								placeholder="Acme Corp"
-								{...field("businessName")}
-							/>
-							{errors.businessName && (
-								<p style={errorStyle}>{errors.businessName}</p>
-							)}
-						</div>
-
-						{/* Industry + size row */}
-						<div style={twoColGrid}>
-							<div>
-								<label style={labelStyle}>Industry</label>
-								<select
-									className="sn-input sn-select"
-									style={{ ...inputStyle, appearance: "none" }}
-									{...field("industry")}
-								>
-									<option value="">Select…</option>
-									{INDUSTRIES.map((ind) => (
-										<option key={ind} value={ind}>
-											{ind}
-										</option>
-									))}
-								</select>
-								{errors.industry && <p style={errorStyle}>{errors.industry}</p>}
-							</div>
-							<div>
-								<label style={labelStyle}>Company size</label>
-								<select
-									className="sn-input sn-select"
-									style={{ ...inputStyle, appearance: "none" }}
-									{...field("size")}
-								>
-									<option value="">Select…</option>
-									{SIZES.map((s) => (
-										<option key={s} value={s}>
-											{s} employees
-										</option>
-									))}
-								</select>
-								{errors.size && <p style={errorStyle}>{errors.size}</p>}
-							</div>
-						</div>
-
-						{/* Submit error */}
-						{submitError && (
-							<p
-								style={{
-									fontSize: 13,
-									color: T.errorText,
-									textAlign: "center",
-									margin: 0,
-								}}
+							<label style={labelStyle}>Industry</label>
+							<select
+								style={{ ...inputStyle, appearance: "none" }}
+								{...field("industry")}
 							>
-								{submitError}
-							</p>
-						)}
+								<option value="">Select…</option>
+								{INDUSTRIES.map((i) => (
+									<option key={i} value={i}>
+										{i}
+									</option>
+								))}
+							</select>
+							{errors.industry && <p style={errorStyle}>{errors.industry}</p>}
+						</div>
+						<div>
+							<label style={labelStyle}>Company size</label>
+							<select
+								style={{ ...inputStyle, appearance: "none" }}
+								{...field("size")}
+							>
+								<option value="">Select…</option>
+								{SIZES.map((s) => (
+									<option key={s} value={s}>
+										{s} employees
+									</option>
+								))}
+							</select>
+							{errors.size && <p style={errorStyle}>{errors.size}</p>}
+						</div>
+					</div>
 
-						{/* CTA button — always white text regardless of mode */}
-						<button
-							type="button"
-							onClick={handleContinueToPayment}
-							disabled={submitting}
-							style={{
-								width: "100%",
-								padding: "13px",
-								background: submitting ? "rgba(83,74,183,0.5)" : T.violet,
-								color: "#ffffff",
-								border: "none",
-								borderRadius: T.radius,
-								fontSize: 15,
-								fontWeight: 600,
-								fontFamily: T.font,
-								cursor: submitting ? "not-allowed" : "pointer",
-								marginTop: 4,
-								display: "flex",
-								alignItems: "center",
-								justifyContent: "center",
-								gap: 8,
-								transition: "background .15s",
-							}}
-							onMouseEnter={(e) => {
-								if (!submitting)
-									(e.currentTarget as HTMLElement).style.background = T.violetHover;
-							}}
-							onMouseLeave={(e) => {
-								if (!submitting)
-									(e.currentTarget as HTMLElement).style.background = T.violet;
-							}}
-						>
-							{submitting ? "Creating your account…" : "Continue to Payment"}
-							{!submitting && (
-								<i className="ti ti-arrow-right" style={{ fontSize: 16 }} />
-							)}
-						</button>
-
+					{submitError && (
 						<p
 							style={{
-								textAlign: "center",
 								fontSize: 13,
-								color: T.muted,
+								color: T.errorText,
+								textAlign: "center",
 								margin: 0,
 							}}
 						>
-							Already have an account?{" "}
-							<Link
-								href="/login"
-								style={{ color: T.violet, textDecoration: "none", fontWeight: 500 }}
-							>
-								Sign in
-							</Link>
+							{submitError}
 						</p>
-					</div>
+					)}
+
+					<button
+						type="button"
+						onClick={handleContinueToPayment}
+						disabled={submitting}
+						style={{
+							width: "100%",
+							padding: "13px",
+							background: submitting ? "rgba(83,74,183,0.5)" : T.violet,
+							color: T.white,
+							border: "none",
+							borderRadius: T.radius,
+							fontSize: 15,
+							fontWeight: 600,
+							fontFamily: T.font,
+							cursor: submitting ? "not-allowed" : "pointer",
+							marginTop: 4,
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							gap: 8,
+							transition: "background .15s",
+						}}
+						onMouseEnter={(e) => {
+							if (!submitting)
+								(e.currentTarget as HTMLElement).style.background = T.violetHover;
+						}}
+						onMouseLeave={(e) => {
+							if (!submitting)
+								(e.currentTarget as HTMLElement).style.background = T.violet;
+						}}
+					>
+						{submitting ? "Creating your account…" : "Continue to Payment"}
+						{!submitting && (
+							<i className="ti ti-arrow-right" style={{ fontSize: 16 }} />
+						)}
+					</button>
+
+					<p
+						style={{
+							textAlign: "center",
+							fontSize: 13,
+							color: T.gray500,
+							margin: 0,
+						}}
+					>
+						Already have an account?{" "}
+						<Link
+							href="/login"
+							style={{ color: T.violet, textDecoration: "none", fontWeight: 500 }}
+						>
+							Sign in
+						</Link>
+					</p>
 				</div>
 			</div>
-		</>
+		</div>
 	);
 }

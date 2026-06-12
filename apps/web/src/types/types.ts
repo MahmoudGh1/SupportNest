@@ -7,6 +7,7 @@ export interface AuthUser {
 	role: Role;
 	orgId: string | null;
 	orgName?: string;
+	token?: string;
 	onboarded: boolean;
 	hasActiveSubscription?: boolean;
 	currentPlanId?: string | null;
@@ -168,4 +169,70 @@ export interface ApiKey {
 
 export interface CreateApiKeyInput {
 	allowedOrigins: string[];
+}
+
+export interface AdminTierBreakdown {
+	router_received: number;
+	tier1_resolved: number;
+	tier1_resolve_rate: number;
+	tier2_resolved: number;
+	tier2_resolve_rate: number;
+	human_escalated: number;
+	human_escalation_rate: number;
+	unresolved: number;
+	avg_tier1_latency_ms: number;
+	avg_tier2_latency_ms: number;
+	total_tokens_used: number;
+}
+
+export interface AdminOverview {
+	total_organizations: number;
+	active_organizations: number;
+	suspended_organizations: number;
+	total_users: number;
+	total_conversations: number;
+	active_conversations: number;
+	total_tickets: number;
+	open_tickets: number;
+	escalated_tickets: number;
+	overall_ai_resolution_rate: number;
+	avg_csat_score: number;
+	tier_breakdown: AdminTierBreakdown;
+}
+
+export interface AdminPlan {
+	id: string;
+	name: string;
+	price_monthly: number;
+}
+
+export interface AdminOrganizationStats {
+	total_users: number;
+	total_conversations: number;
+	active_conversations: number;
+	total_tickets: number;
+	open_tickets: number;
+	escalated_tickets: number;
+	resolved_tickets: number;
+}
+
+export interface AdminOrganization {
+	id: string;
+	name: string;
+	slug: string;
+	email: string;
+	is_active: boolean;
+	plan: AdminPlan | null;
+	created_at: string;
+	stats: AdminOrganizationStats;
+}
+
+export interface AdminOrganizationsResponse {
+	data: AdminOrganization[];
+	meta: {
+		total: number;
+		page: number;
+		limit: number;
+		total_pages: number;
+	};
 }
