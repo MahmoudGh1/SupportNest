@@ -65,8 +65,7 @@ export async function getApiConfigService(organizationId: string) {
 			isVerified: true,
 			lastVerifiedAt: true,
 			createdAt: true,
-			updatedAt: true,
-			// authValue intentionally excluded
+			updatedAt: true
 		},
 	});
 

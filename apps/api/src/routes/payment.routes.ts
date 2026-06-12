@@ -1,5 +1,6 @@
 import express, { Router } from "express";
 import {
+  completeCheckoutController,
   createPaymentIntentionController,
   getPaymentHistoryController,
   handleWebhookController,
@@ -15,6 +16,7 @@ router.use(authMiddleware);
 
 // role org_admin ==> requireRole('org_admin')
 router.post("/create-intention", createPaymentIntentionController);
+router.post("/complete", completeCheckoutController);
 router.get("/history", getPaymentHistoryController);
 
 export default router;

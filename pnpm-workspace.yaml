@@ -17,5 +17,6 @@ allowBuilds:
   '@prisma/client': false
   '@parcel/watcher': true
   '@swc/core': true
+  '@scarf/scarf': true
 
 preferWorkspacePackages: true
