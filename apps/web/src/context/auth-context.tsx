@@ -18,6 +18,7 @@ interface AuthState {
 	user: AuthUser | null;
 	loading: boolean;
 	login: (email: string, password: string) => Promise<AuthUser>;
+	loginWithGoogle: (idToken: string) => Promise<AuthUser>;
 	logout: () => Promise<void>;
 	refreshUser: () => Promise<AuthUser | null>;
 }
@@ -92,6 +93,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		};
 	}, [user?.id]);
 
+	const loginWithGoogle = useCallback(async (idToken: string) => {
+		await api.loginWithGoogle(idToken);
+		const current = await api.getMe();
+		setUser(current);
+		saveSession(current);
+		return current;
+	}, []);
+
 	const login = useCallback(async (email: string, password: string) => {
 		await api.login(email, password);
 		const current = await api.getMe();
@@ -107,7 +116,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	}, []);
 
 	return (
-		<AuthCtx.Provider value={{ user, loading, login, logout, refreshUser }}>
+		<AuthCtx.Provider value={{ user, loading, login, loginWithGoogle, logout, refreshUser }}>
 			{children}
 		</AuthCtx.Provider>
 	);

@@ -25,6 +25,7 @@ import businessApiConfigRouter from "./routes/businessApiConfig.routes.js";
 import ticketRouter from "./routes/ticket.routes.js";
 import userRouter from "./routes/user.routes.js";
 import pricingRouter from "./routes/pricing.routes.js";
+import { swaggerUi, swaggerSpec } from "./docs/swagger.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -55,10 +56,9 @@ app.use(morgan("dev"));
 const publicDir = path.resolve(process.cwd(), "public");
 // console.log("[static] serving from:", publicDir);
 app.use(express.static(publicDir));
-
 app.use(rateLimit);
 app.get("/health", (_, res) => res.json({ ok: true }));
-
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/rag", ragRouter);

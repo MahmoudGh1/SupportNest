@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/auth-context";
 import { api } from "@/lib/api";
 
 const T = {
@@ -13,7 +12,6 @@ const T = {
 	darkBg: "var(--page-bg)",
 	darkSurface: "var(--surface)",
 	darkBorder: "var(--card-border)",
-	darkBorder2: "var(--card-border)",
 	gray300: "var(--page-muted)",
 	gray500: "var(--page-muted)",
 	errorText: "#f87171",
@@ -59,7 +57,6 @@ const EMPTY: RegistrationData = {
 
 export default function RegisterPage() {
 	const router = useRouter();
-	const { refreshUser } = useAuth();
 	const [form, setForm] = useState<RegistrationData>(EMPTY);
 	const [errors, setErrors] = useState<Partial<RegistrationData>>({});
 	const [submitError, setSubmitError] = useState("");
@@ -94,25 +91,24 @@ export default function RegisterPage() {
 		if (!validate()) return;
 
 		const stored = sessionStorage.getItem("selectedPlan");
+		if (!stored) {
+			setSubmitError("No plan selected. Please choose a plan on the pricing page first.");
+			return;
+		}
+
 		let planId = "";
 		let annual = false;
-
-		if (stored) {
-			try {
-				const plan = JSON.parse(stored) as {
-					id?: string;
-					annual?: boolean;
-				};
-				planId = plan.id ?? "";
-				annual = Boolean(plan.annual);
-			} catch {
-				setSubmitError("Invalid plan selection. Please choose a plan again.");
-				return;
-			}
+		try {
+			const plan = JSON.parse(stored) as { id?: string; annual?: boolean };
+			planId = plan.id ?? "";
+			annual = Boolean(plan.annual);
+		} catch {
+			setSubmitError("Invalid plan data. Please go back and select a plan again.");
+			return;
 		}
 
 		if (!planId) {
-			setSubmitError("No plan selected. Please choose a plan on the pricing page first.");
+			setSubmitError("No plan selected.");
 			return;
 		}
 
@@ -129,13 +125,23 @@ export default function RegisterPage() {
 				planId,
 			});
 
-			sessionStorage.setItem("registrationData", JSON.stringify(form));
+			// Store only what the payment page needs for billing display
+			sessionStorage.setItem("registrationData", JSON.stringify({
+				firstName: form.firstName,
+				lastName: form.lastName,
+				email: form.email,
+			}));
+			sessionStorage.setItem("pendingAuth", JSON.stringify({
+				email: form.email,
+				password: form.password,
+			}));
+			sessionStorage.setItem("pendingPaymentId", "pending-" + Date.now());
+
 			router.push(`/payment?planId=${planId}&annual=${annual}`);
 		} catch (err) {
 			setSubmitError(
-				err instanceof Error ? err.message : "Registration failed. Please try again.",
+				err instanceof Error ? err.message : "Registration failed. Please try again."
 			);
-		} finally {
 			setSubmitting(false);
 		}
 	}
@@ -144,7 +150,7 @@ export default function RegisterPage() {
 		width: "100%",
 		padding: "11px 14px",
 		background: T.darkSurface,
-		border: `1.5px solid ${T.darkBorder2}`,
+		border: `1.5px solid ${T.darkBorder}`,
 		borderRadius: T.radius,
 		color: T.white,
 		fontSize: 14,
@@ -196,6 +202,69 @@ export default function RegisterPage() {
 					</Link>
 				</div>
 
+				{/* Progress indicator */}
+				<div
+					style={{
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+						gap: 8,
+						marginBottom: 28,
+					}}
+				>
+					{["Your details", "Payment"].map((label, i) => (
+						<div
+							key={label}
+							style={{ display: "flex", alignItems: "center", gap: 8 }}
+						>
+							<div
+								style={{
+									display: "flex",
+									alignItems: "center",
+									gap: 6,
+									opacity: i === 0 ? 1 : 0.4,
+								}}
+							>
+								<div
+									style={{
+										width: 22,
+										height: 22,
+										borderRadius: "50%",
+										background: i === 0 ? T.violet : "transparent",
+										border: `2px solid ${i === 0 ? T.violet : T.darkBorder}`,
+										display: "flex",
+										alignItems: "center",
+										justifyContent: "center",
+										fontSize: 11,
+										fontWeight: 700,
+										color: i === 0 ? "#fff" : T.gray500,
+									}}
+								>
+									{i + 1}
+								</div>
+								<span
+									style={{
+										fontSize: 12,
+										fontWeight: i === 0 ? 600 : 400,
+										color: i === 0 ? T.white : T.gray500,
+									}}
+								>
+									{label}
+								</span>
+							</div>
+							{i < 1 && (
+								<div
+									style={{
+										width: 24,
+										height: 1,
+										background: T.darkBorder,
+									}}
+								/>
+							)}
+						</div>
+					))}
+				</div>
+
 				<h1
 					style={{
 						fontSize: 26,
@@ -228,25 +297,13 @@ export default function RegisterPage() {
 					>
 						<div>
 							<label style={labelStyle}>First name</label>
-							<input
-								style={inputStyle}
-								placeholder="Jane"
-								{...field("firstName")}
-							/>
-							{errors.firstName && (
-								<p style={errorStyle}>{errors.firstName}</p>
-							)}
+							<input style={inputStyle} placeholder="Jane" {...field("firstName")} />
+							{errors.firstName && <p style={errorStyle}>{errors.firstName}</p>}
 						</div>
 						<div>
 							<label style={labelStyle}>Last name</label>
-							<input
-								style={inputStyle}
-								placeholder="Smith"
-								{...field("lastName")}
-							/>
-							{errors.lastName && (
-								<p style={errorStyle}>{errors.lastName}</p>
-							)}
+							<input style={inputStyle} placeholder="Smith" {...field("lastName")} />
+							{errors.lastName && <p style={errorStyle}>{errors.lastName}</p>}
 						</div>
 					</div>
 
@@ -276,9 +333,7 @@ export default function RegisterPage() {
 								placeholder="Min. 8 characters"
 								{...field("password")}
 							/>
-							{errors.password && (
-								<p style={errorStyle}>{errors.password}</p>
-							)}
+							{errors.password && <p style={errorStyle}>{errors.password}</p>}
 						</div>
 						<div>
 							<label style={labelStyle}>Confirm password</label>
@@ -303,9 +358,7 @@ export default function RegisterPage() {
 						}}
 					>
 						<div style={{ flex: 1, height: 1, background: T.darkBorder }} />
-						<span style={{ fontSize: 12, color: T.gray500 }}>
-							Business details
-						</span>
+						<span style={{ fontSize: 12, color: T.gray500 }}>Business details</span>
 						<div style={{ flex: 1, height: 1, background: T.darkBorder }} />
 					</div>
 
@@ -316,9 +369,7 @@ export default function RegisterPage() {
 							placeholder="Acme Corp"
 							{...field("businessName")}
 						/>
-						{errors.businessName && (
-							<p style={errorStyle}>{errors.businessName}</p>
-						)}
+						{errors.businessName && <p style={errorStyle}>{errors.businessName}</p>}
 					</div>
 
 					<div
@@ -341,9 +392,7 @@ export default function RegisterPage() {
 									</option>
 								))}
 							</select>
-							{errors.industry && (
-								<p style={errorStyle}>{errors.industry}</p>
-							)}
+							{errors.industry && <p style={errorStyle}>{errors.industry}</p>}
 						</div>
 						<div>
 							<label style={labelStyle}>Company size</label>
@@ -382,14 +431,14 @@ export default function RegisterPage() {
 						style={{
 							width: "100%",
 							padding: "13px",
-							background: T.violet,
+							background: submitting ? "rgba(83,74,183,0.5)" : T.violet,
 							color: T.white,
 							border: "none",
 							borderRadius: T.radius,
 							fontSize: 15,
 							fontWeight: 600,
 							fontFamily: T.font,
-							cursor: "pointer",
+							cursor: submitting ? "not-allowed" : "pointer",
 							marginTop: 4,
 							display: "flex",
 							alignItems: "center",
@@ -397,14 +446,16 @@ export default function RegisterPage() {
 							gap: 8,
 							transition: "background .15s",
 						}}
-						onMouseEnter={(e) =>
-							(e.currentTarget.style.background = T.violetHover)
-						}
-						onMouseLeave={(e) =>
-							(e.currentTarget.style.background = T.violet)
-						}
+						onMouseEnter={(e) => {
+							if (!submitting)
+								(e.currentTarget as HTMLElement).style.background = T.violetHover;
+						}}
+						onMouseLeave={(e) => {
+							if (!submitting)
+								(e.currentTarget as HTMLElement).style.background = T.violet;
+						}}
 					>
-						{submitting ? "Creating account…" : "Continue to Payment"}
+						{submitting ? "Creating your account…" : "Continue to Payment"}
 						{!submitting && (
 							<i className="ti ti-arrow-right" style={{ fontSize: 16 }} />
 						)}
@@ -421,11 +472,7 @@ export default function RegisterPage() {
 						Already have an account?{" "}
 						<Link
 							href="/login"
-							style={{
-								color: T.violet,
-								textDecoration: "none",
-								fontWeight: 500,
-							}}
+							style={{ color: T.violet, textDecoration: "none", fontWeight: 500 }}
 						>
 							Sign in
 						</Link>

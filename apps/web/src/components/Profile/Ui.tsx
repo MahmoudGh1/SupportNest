@@ -14,7 +14,7 @@ export function Section({
   return (
     <div
       style={{
-        background: "#fff",
+        background: "var(--surface)",
         borderRadius: 12,
         border: `0.5px solid ${S.border}`,
         padding: "1.5rem",

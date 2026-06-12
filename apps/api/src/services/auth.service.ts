@@ -7,6 +7,7 @@ import { comparePassword, generateSecret, hashPassword } from "src/utils/passwor
 import apiKey from "src/utils/apiKey.utils.js";
 import { hashApiKey } from "src/utils/crypto.utils.js";
 import * as jwt from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
 
 export const registerService = async ({ businessName, email, password, firstName, lastName, planId }: RegisterInput) => {
 	const normalizedEmail = email.trim().toLowerCase();
@@ -59,9 +60,105 @@ export const registerService = async ({ businessName, email, password, firstName
 	}
 };
 
+interface RegisterPaidInput extends RegisterInput {
+	amount: number;
+	currency: string;
+	isAnnual: boolean;
+}
+
+export const registerPaidService = async ({ businessName, email, password, firstName, lastName, planId, amount, currency, isAnnual }: RegisterPaidInput): Promise<OraganizationDataDTO> => {
+	const normalizedEmail = email.trim().toLowerCase();
+	const passwordHash = await hashPassword(password);
+	const widgetSecret = await generateSecret(32);
+	const orgSlug = slugify(businessName);
+
+	const existing = await prisma.user.findUnique({
+		where: { email: normalizedEmail },
+	});
+	if (existing) {
+		throw new AppError("Email already registered", 409);
+	}
+
+	const pricing = await prisma.pricing.findFirst({
+		where: { id: planId, isActive: true },
+		select: { id: true },
+	});
+	if (!pricing) {
+		throw new AppError("Pricing plan not found", 404);
+	}
+
+	const periodDays = isAnnual ? 365 : 30;
+	const billingPeriodStart = new Date();
+	const billingPeriodEnd = new Date(billingPeriodStart.getTime() + periodDays * 24 * 60 * 60 * 1000);
+
+	try {
+		const createdUser = await prisma.$transaction(async (tx) => {
+			const organization = await tx.organization.create({
+				data: {
+					name: businessName,
+					slug: orgSlug,
+					email: normalizedEmail,
+					widgetSecret,
+					isActive: true,
+					planId,
+				},
+				select: {
+					id: true,
+				},
+			});
+
+			const user = await tx.user.create({
+				data: {
+					organizationId: organization.id,
+					email: normalizedEmail,
+					passwordHash,
+					role: Role.ORG_ADMIN,
+					firstName,
+					lastName,
+					isActive: true,
+				},
+				select: {
+					id: true,
+					email: true,
+					role: true,
+					organizationId: true,
+					firstName: true,
+					lastName: true,
+					isActive: true,
+					createdAt: true,
+					updatedAt: true,
+				},
+			});
+
+			await tx.payment.create({
+				data: {
+					organizationId: organization.id,
+					pricingId: planId,
+					amount,
+					currency,
+					status: PaymentStatus.SUCCEEDED,
+					paymentProvider: "checkout",
+					providerPaymentId: `checkout_${organization.id}_${Date.now()}`,
+					billingPeriodStart,
+					billingPeriodEnd,
+				},
+			});
+
+			return user;
+		});
+
+		return createdUser;
+	} catch (err) {
+		throw new AppError("Transaction Failed", 500);
+	}
+};
+
 export const loginService = async ({ email, password }: LoginInput): Promise<OraganizationDataDTO> => {
 	try {
-		const user = await prisma.user.findUnique({ where: { email } });
+		const normalizedEmail = email.trim().toLowerCase();
+		const user = await prisma.user.findUnique({
+			where: { email: normalizedEmail },
+		});
 		if (!user) {
 			throw new AppError("Wrong Email or Password", 401);
 		}
@@ -78,9 +175,7 @@ export const loginService = async ({ email, password }: LoginInput): Promise<Ora
 	}
 };
 
-export async function hasActiveSubscription(
-	organizationId: string | null,
-): Promise<boolean> {
+export async function hasActiveSubscription(organizationId: string | null): Promise<boolean> {
 	if (!organizationId) return false;
 	const active = await prisma.payment.findFirst({
 		where: {
@@ -103,7 +198,7 @@ export const userService = async (payloadToken: TokenPayload): Promise<userData>
 				lastName: true,
 				role: true,
 				organizationId: true,
-				organization: { select: { name: true } },
+				organization: { select: { name: true, planId: true } },
 			},
 		});
 
@@ -182,3 +277,26 @@ export async function verifyCustomerJWT(token: string, organizationId: string) {
 		return null;
 	}
 }
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+export async function verifyGoogleToken(idToken: string) {
+	const ticket = await googleClient.verifyIdToken({
+		idToken,
+		audience: process.env.GOOGLE_CLIENT_ID,
+	});
+	const payload = ticket.getPayload();
+	if (!payload || !payload.email) {
+		throw new AppError("Invalid Google token", 401);
+	}
+	return { email: payload.email.trim().toLowerCase(), name: payload.name };
+}
+
+export const loginWithGoogleService = async (email: string): Promise<OraganizationDataDTO> => {
+	const user = await prisma.user.findUnique({ where: { email } });
+	if (!user) {
+		throw new AppError("Wrong Email or Password", 401);
+	}
+	const { passwordHash: _password, ...dataDTO } = user;
+	return dataDTO;
+};

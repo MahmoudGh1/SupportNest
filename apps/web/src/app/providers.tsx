@@ -9,8 +9,10 @@ import { LocaleContext } from "@/context/local-context";
 import { usePathname, useRouter } from "next/navigation";
 import { localePath, stripLocale, type AppLocale } from "@/lib/routes";
 import { AppShell } from "@/components/AppShell";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 export type Locale = "en" | "ar";
+console.log("Client ID:", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
 
 const catalogs = { en: enMessages, ar: arMessages } as const;
 
@@ -39,10 +41,12 @@ export function Providers({
 	}, [locale]);
 
 	return (
-		<I18nProvider i18n={i18n}>
-			<LocaleContext.Provider value={{ locale, setLocale }}>
-				<AppShell>{children}</AppShell>
-			</LocaleContext.Provider>
-		</I18nProvider>
+		<GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
+			<I18nProvider i18n={i18n}>
+				<LocaleContext.Provider value={{ locale, setLocale }}>
+					<AppShell>{children}</AppShell>
+				</LocaleContext.Provider>
+			</I18nProvider>
+		</GoogleOAuthProvider>
 	);
 }

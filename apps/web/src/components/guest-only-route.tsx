@@ -7,36 +7,25 @@ import { PageLoader } from "@/components/ui";
 
 /** Redirect authenticated users away from login/register. */
 export function GuestAuthRoute({ children }: { children: React.ReactNode }) {
-	const { user, loading } = useAuth();
-	const router = useRouter();
+    const { user, loading } = useAuth();
+    const router = useRouter();
 
-	useEffect(() => {
-		if (loading) return;
-		if (user) router.replace("/dashboard");
-	}, [user, loading, router]);
+    useEffect(() => {
+        if (loading) return;
+        if (user && !sessionStorage.getItem("pendingPaymentId")) {
+            router.replace("/dashboard");
+        }
+    }, [user, loading, router]);
 
-	if (loading) return <PageLoader />;
-	if (user) return null;
-	return <>{children}</>;
+    if (loading) return <PageLoader />;
+    if (user && !sessionStorage.getItem("pendingPaymentId")) return null;
+    return <>{children}</>;
 }
 
-/** Payment: require login; block if subscription already active. */
+/** Payment: allow guests and subscribed users to view checkout states. */
 export function PaymentRoute({ children }: { children: React.ReactNode }) {
-	const { user, loading } = useAuth();
-	const router = useRouter();
-
-	useEffect(() => {
-		if (loading) return;
-		if (!user) {
-			router.replace("/login");
-			return;
-		}
-		if (user.hasActiveSubscription) {
-			router.replace("/");
-		}
-	}, [user, loading, router]);
+	const { loading } = useAuth();
 
 	if (loading) return <PageLoader />;
-	if (!user || user.hasActiveSubscription) return null;
 	return <>{children}</>;
 }

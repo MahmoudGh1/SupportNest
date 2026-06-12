@@ -46,36 +46,44 @@
   --sidebar-border: rgba(255, 255, 255, 0.08);
   --sidebar-text: rgba(255, 255, 255, 0.65);
   --sidebar-text-active: #ffffff;
+  --color-brand-faint: #eeedfe;
+  --color-success-bg: #e1f5ee;
+  --color-warning-bg: #faeeda;
+  --color-danger-bg: #fcebeb;
 }
 
 html.dark {
-  --page-bg: #0f0f0f;
+  --page-bg: #11111a;
   --page-text: #ffffff;
   --page-muted: rgba(255, 255, 255, 0.55);
-  --surface: #141414;
-  --surface-elevated: #161616;
-  --nav-bg: #161616;
+  --surface: #1a1830;
+  --surface-elevated: #252240;
+  --nav-bg: rgba(26, 24, 48, 0.95);
   --nav-border: rgba(255, 255, 255, 0.1);
   --nav-link: rgba(255, 255, 255, 0.5);
   --nav-link-hover: #ffffff;
-  --control-bg: rgba(22, 22, 22, 0.92);
+  --control-bg: rgba(26, 24, 48, 0.92);
   --control-border: rgba(255, 255, 255, 0.12);
-  --btn-primary-bg: #ffffff;
-  --btn-primary-text: #111111;
+  --btn-primary-bg: #534AB7;
+  --btn-primary-text: #ffffff;
   --card-border: rgba(255, 255, 255, 0.1);
   --input-focus: rgba(175, 169, 236, 0.6);
   --label-muted: rgba(255, 255, 255, 0.7);
   --danger-bg: rgba(226, 75, 74, 0.12);
-  --sidebar-bg: #0a0a0a;
+  --sidebar-bg: #1a1830;
   --sidebar-border: rgba(255, 255, 255, 0.08);
   --sidebar-text: rgba(255, 255, 255, 0.65);
   --sidebar-text-active: #ffffff;
-  --color-bg: #0f0f0f;
+  --color-bg: #11111a;
   --color-dark: #ffffff;
   --color-body: rgba(255, 255, 255, 0.55);
   --color-border: rgba(255, 255, 255, 0.1);
-  --color-bg-soft: #141414;
-  --color-bg-section: #161616;
+  --color-bg-soft: #1a1830;
+  --color-bg-section: #252240;
+  --color-brand-faint: rgba(83, 74, 183, 0.18);
+  --color-success-bg: rgba(29, 158, 117, 0.18);
+  --color-warning-bg: rgba(245, 158, 11, 0.16);
+  --color-danger-bg: rgba(239, 68, 68, 0.16);
 }
 
 * {

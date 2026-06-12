@@ -10,7 +10,6 @@ import {
 	UpdateWidgetConfigInput,
 } from "@/types/types";
 import { S } from "@/components/ui";
-import { updateWidgetConfig } from "@/app/[locale]/apis/widget_config";
 import { api } from "@/lib/api";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -648,16 +647,22 @@ function OrgTab({ org }: { org: OrgProfile }) {
 		setErrors({});
 		setLoading(true);
 		try {
-			// Save org profile + widget config in parallel
-			await Promise.all([
-				// api.updateOrgProfile({ name, email }),
-				updateWidgetConfig({
-					title: widget.title, // ← map your fields
+			const [orgResult, widgetResult] = await Promise.all([
+				api.updateOrgProfile({ name, email }),
+				api.updateWidgetConfig({
+					title: widget.title ?? "Support",
 					greetingMessage: widget.greeting,
 					accentColor: widget.color,
 					placeholder: "Type a message...",
 				}),
 			]);
+			const merged = {
+				...orgResult.organization,
+				widget_config: widgetResult.organization.widget_config,
+			};
+			setName(merged.name);
+			setEmail(merged.email);
+			setWidget(merged.widget_config);
 			setToast("Organization settings saved.");
 		} catch (err: any) {
 			setToast("Error: " + err.message);
@@ -1133,18 +1138,16 @@ function OrgTab({ org }: { org: OrgProfile }) {
 }
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
-type Tab = "profile" | "organization";
+type Tab = "organization";
 
 export default function SettingsPage() {
-	const [tab, setTab] = useState<Tab>("profile");
-	const [user, setUser] = useState<UserProfile | null>(null);
+	const [tab, setTab] = useState<Tab>("organization");
 	const [org, setOrg] = useState<OrgProfile | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		Promise.all([api.getUserProfile(), api.getOrgProfile()])
-			.then(([u, o]) => {
-				setUser(u.user);
+		api.getOrgProfile()
+			.then((o) => {
 				setOrg(o.organization);
 			})
 			.finally(() => setLoading(false));
@@ -1171,7 +1174,6 @@ export default function SettingsPage() {
 	}
 
 	const tabs: { key: Tab; label: string; icon: string }[] = [
-		{ key: "profile", label: "Profile", icon: "user" },
 		{ key: "organization", label: "Organization", icon: "building" },
 	];
 
@@ -1196,7 +1198,7 @@ export default function SettingsPage() {
 						Settings
 					</h1>
 					<p style={{ fontSize: 13, color: S.textMuted, margin: 0 }}>
-						Manage your profile, security, and widget configuration.
+						Manage your organization details and widget configuration.
 					</p>
 				</div>
 
@@ -1251,7 +1253,6 @@ export default function SettingsPage() {
 					style={{ animation: "fadeIn .2s ease" }}
 					key={tab}
 				>
-					{tab === "profile" && user && <ProfileTab user={user} />}
 					{tab === "organization" && org && <OrgTab org={org} />}
 				</div>
 			</div>

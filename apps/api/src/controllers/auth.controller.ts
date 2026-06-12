@@ -1,17 +1,12 @@
 import type { Request, Response } from "express";
-import { loginService, registerService, userService } from "src/services/auth.service.js";
+import { loginService, registerPaidService, registerService, userService } from "src/services/auth.service.js";
 import type { AuthenticatedRequest, TokenPayload } from "src/types/auth.types.js";
 import { generateTokenPair, verifyRefreshToken } from "src/utils/jwt.util.js";
 import AppError from "src/utils/appError.js";
-import {
-	accessCookieOptions,
-	refreshCookieOptions,
-} from "src/utils/cookies.util.js";
+import { accessCookieOptions, refreshCookieOptions } from "src/utils/cookies.util.js";
+import { loginWithGoogleService, verifyGoogleToken } from "src/services/auth.service.js";
 
-function setAuthCookies(
-	res: Response,
-	tokenPayload: TokenPayload,
-) {
+function setAuthCookies(res: Response, tokenPayload: TokenPayload) {
 	const { accessToken, refreshToken } = generateTokenPair(tokenPayload);
 
 	res.cookie("accessToken", accessToken, accessCookieOptions);
@@ -23,12 +18,7 @@ function clearAuthCookies(res: Response) {
 	res.clearCookie("refreshToken");
 }
 
-function toTokenPayload(user: {
-	id: string;
-	email: string;
-	role: string;
-	organizationId: string | null;
-}): TokenPayload {
+function toTokenPayload(user: { id: string; email: string; role: string; organizationId: string | null }): TokenPayload {
 	return {
 		sub: user.id,
 		email: user.email,
@@ -36,6 +26,38 @@ function toTokenPayload(user: {
 		organizationId: user.organizationId,
 	};
 }
+
+export const GoogleLoginController = async (req: Request, res: Response) => {
+	try {
+		const { idToken } = req.body;
+		if (!idToken) {
+			return res.status(400).json({ error: "Missing Google token" });
+		}
+
+		const { email } = await verifyGoogleToken(idToken);
+		const result = await loginWithGoogleService(email);
+
+		const tokenPayload = toTokenPayload(result);
+		const profile = await userService(tokenPayload);
+
+		if (!profile.hasActiveSubscription && profile.role == "ORG_ADMIN") {
+			clearAuthCookies(res);
+			return res.status(403).json({
+				error: "Your account does not have an active subscription. Please complete payment first.",
+			});
+		}
+
+		setAuthCookies(res, tokenPayload);
+
+		return res.status(200).json({ result: profile });
+	} catch (error: unknown) {
+		if (error instanceof AppError) {
+			return res.status(error.statusCode).json({ error: error.message });
+		}
+		console.error("[GoogleLoginController]", error);
+		return res.status(500).json({ error: "Internal server error" });
+	}
+};
 
 export const RegisterController = async (req: Request, res: Response) => {
 	try {
@@ -54,12 +76,51 @@ export const RegisterController = async (req: Request, res: Response) => {
 			planId,
 		});
 
+		const user = await loginService({ email, password });
+		const tokenPayload = toTokenPayload(user);
+		setAuthCookies(res, tokenPayload);
+
 		return res.status(201).json(result);
 	} catch (error: unknown) {
 		if (error instanceof AppError) {
 			return res.status(error.statusCode).json({ error: error.message });
 		}
 		console.error("[RegisterController]", error);
+		return res.status(500).json({ error: "Internal server error" });
+	}
+};
+
+export const RegisterPaidController = async (req: Request, res: Response) => {
+	try {
+		const { businessName, email, password, firstName, lastName, planId, amount, currency, isAnnual } = req.body;
+
+		if (!businessName || !email || !password || !planId || amount == null) {
+			return res.status(400).json({ error: "Missing required fields" });
+		}
+
+		const user = await registerPaidService({
+			businessName,
+			email,
+			password,
+			firstName,
+			lastName,
+			planId,
+			amount: Number(amount),
+			currency: currency || "EGP",
+			isAnnual: Boolean(isAnnual),
+		});
+
+		const tokenPayload = toTokenPayload(user);
+		setAuthCookies(res, tokenPayload);
+
+		const profile = await userService(tokenPayload);
+
+		return res.status(201).json({ result: profile });
+	} catch (error: unknown) {
+		if (error instanceof AppError) {
+			return res.status(error.statusCode).json({ error: error.message });
+		}
+		console.error("[RegisterPaidController]", error);
 		return res.status(500).json({ error: "Internal server error" });
 	}
 };
@@ -78,9 +139,16 @@ export const LoginController = async (req: Request, res: Response) => {
 			return res.status(401).json({ message: "Invalid credentials" });
 		}
 
-		setAuthCookies(res, toTokenPayload(result));
+		const tokenPayload = toTokenPayload(result);
+		const profile = await userService(tokenPayload);
+		if (!profile.hasActiveSubscription && profile.role == "ORG_ADMIN") {
+			clearAuthCookies(res);
+			return res.status(403).json({
+				error: "Your account does not have an active subscription. Please complete payment first.",
+			});
+		}
 
-		const profile = await userService(toTokenPayload(result));
+		setAuthCookies(res, tokenPayload);
 
 		return res.status(200).json({ result: profile });
 	} catch (error: unknown) {
