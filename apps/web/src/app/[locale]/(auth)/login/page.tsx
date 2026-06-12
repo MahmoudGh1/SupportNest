@@ -96,7 +96,7 @@ function FormField({
 						padding: rightEl ? "12px 44px 12px 14px" : "12px 14px",
 						fontSize: 14,
 						fontFamily: T.font,
-						color: T.white,
+						color: T.text,
 						background: T.inputBg,
 						border: `1.5px solid ${error ? T.danger : focused ? T.inputFocus : T.inputBorder}`,
 						borderRadius: T.radius,
@@ -182,18 +182,8 @@ function FormPanel() {
 
 	return (
 		<div
+			className="login-form-panel"
 			onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-			style={{
-				width: "45%",
-				background: T.darkPanel,
-				display: "flex",
-				flexDirection: "column",
-				alignItems: "center",
-				justifyContent: "center",
-				padding: "60px 64px",
-				minHeight: "100vh",
-				borderRight: `1px solid ${T.darkBorder}`,
-			}}
 		>
 			<div style={{ width: "100%", maxWidth: 380 }}>
 				{/* Logo mark */}
@@ -230,7 +220,7 @@ function FormPanel() {
 					style={{
 						fontSize: 30,
 						fontWeight: 700,
-						color: T.white,
+						color: T.text,
 						margin: "0 0 8px",
 						letterSpacing: "-0.8px",
 						textAlign: "center",
@@ -241,7 +231,7 @@ function FormPanel() {
 				<p
 					style={{
 						fontSize: 14,
-						color: T.gray500,
+						color: T.muted,
 						textAlign: "center",
 						margin: "0 0 36px",
 					}}
@@ -337,7 +327,7 @@ function FormPanel() {
 									background: "none",
 									border: "none",
 									cursor: "pointer",
-									color: T.gray500,
+									color: T.muted,
 									padding: 0,
 									display: "flex",
 								}}
@@ -358,7 +348,7 @@ function FormPanel() {
 							width: "100%",
 							padding: "13px",
 							background: T.violet,
-							color: T.white,
+							color: "#fff",
 							border: "none",
 							borderRadius: T.radius,
 							fontSize: 14,
@@ -395,13 +385,13 @@ function FormPanel() {
 						style={{
 							textAlign: "center",
 							fontSize: 13,
-							color: T.gray500,
+							color: T.muted,
 							margin: 0,
 						}}
 					>
 						{t`Don't have an account?`}{" "}
 						<button
-							onClick={() => router.push("/register")}
+							onClick={() => router.push("/pricing")}
 							style={{
 								background: "none",
 								border: "none",
@@ -423,9 +413,10 @@ function FormPanel() {
 					style={{
 						textAlign: "center",
 						fontSize: 11,
-						color: "rgba(255,255,255,0.2)",
+						color: T.muted,
 						marginTop: 48,
 						lineHeight: 1.6,
+						opacity: 0.6,
 					}}
 				>
 					By continuing, you agree to SupportNest{" "}
@@ -433,11 +424,12 @@ function FormPanel() {
 						style={{
 							background: "none",
 							border: "none",
-							color: "rgba(255,255,255,0.35)",
+							color: T.muted,
 							fontSize: 11,
 							cursor: "pointer",
 							fontFamily: T.font,
 							padding: 0,
+							textDecoration: "underline",
 						}}
 					>
 						Terms of Service
@@ -447,11 +439,12 @@ function FormPanel() {
 						style={{
 							background: "none",
 							border: "none",
-							color: "rgba(255,255,255,0.35)",
+							color: T.muted,
 							fontSize: 11,
 							cursor: "pointer",
 							fontFamily: T.font,
 							padding: 0,
+							textDecoration: "underline",
 						}}
 					>
 						Privacy Policy
@@ -465,18 +458,7 @@ function FormPanel() {
 
 function BrandPanel() {
 	return (
-		<div
-			style={{
-				flex: 1,
-				background: T.darkBg,
-				display: "flex",
-				flexDirection: "column",
-				alignItems: "center",
-				justifyContent: "center",
-				padding: "60px 64px",
-				minHeight: "100vh",
-			}}
-		>
+		<div className="login-brand-panel">
 			<div
 				style={{
 					display: "flex",
@@ -490,12 +472,14 @@ function BrandPanel() {
 					style={{
 						fontSize: 42,
 						fontWeight: 700,
-						color: T.white,
+						color: T.text,
 						margin: "0 0 12px",
 						letterSpacing: "-1.2px",
 					}}
 				>
-					SupportNest
+					<Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
+						SupportNest
+					</Link>
 				</h1>
 
 				<p
@@ -535,7 +519,7 @@ function BrandPanel() {
 					<p
 						style={{
 							fontSize: 15,
-							color: "rgba(255,255,255,0.78)",
+							color: T.text,
 							lineHeight: 1.75,
 							margin: "0 0 24px",
 						}}
@@ -562,13 +546,13 @@ function BrandPanel() {
 							{testimonial.name.charAt(0)}
 						</div>
 						<div>
-							<div style={{ fontSize: 13, fontWeight: 600, color: T.white }}>
+							<div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>
 								{testimonial.name}
 							</div>
 							<div
 								style={{
 									fontSize: 12,
-									color: "rgba(255,255,255,0.35)",
+									color: T.muted,
 									marginTop: 2,
 								}}
 							>

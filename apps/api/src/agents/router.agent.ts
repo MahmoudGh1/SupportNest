@@ -18,28 +18,32 @@ import { writeAgentLog } from "src/utils/agentLog.util.js";
 import { Router } from "express";
 import { askTier1Agent } from "src/agents/tier1.agent.js";
 import { askTier2Agent } from "src/agents/tier2.agent.js";
-import validateAgentAction from "src/utils/validateAgentAction.js";
+import {
+	validateReviewDecision,
+	validateRoutingDecision,
+} from "src/utils/validateAgentAction.js";
 
 // helper - call the llm and parse the json response
 async function callRouterLLM(
 	prompt: string,
 ): Promise<{ parsed: any; tokensUsed: number }> {
 	const response = await fastModel.invoke([{ role: "user", content: prompt }]);
+
 	const rawText =
 		typeof response.content === "string"
 			? response.content
 			: Array.isArray(response.content)
 				? response.content.map((c: any) => c.text ?? "").join("")
 				: "";
+
 	const cleanedText = rawText.replace(/```json\s*|```/g, "").trim();
+
 	try {
 		return {
 			parsed: JSON.parse(cleanedText),
 			tokensUsed: (response.usage_metadata as any)?.total_tokens ?? 0,
 		};
 	} catch (error) {
-		// console.log(cleanedText);
-		// console.log("-----");
 		throw new Error(`Model returned invalid JSON:\n${cleanedText}`);
 	}
 }
@@ -89,19 +93,12 @@ export async function runRouter(
 	// --- phase 1: routing decision
 
 	const routingPrompt = buildRoutingPrompt(latestMessage, conversationHistory);
-	console.log("start");
+
 	const routingStart = Date.now();
+
 	const { parsed: routingResult, tokensUsed: routingTokens } =
 		await callRouterLLM(routingPrompt);
-	// console.log(
-	// 	"Routing decision raw result:",
-	// 	JSON.stringify(routingResult, null, 2),
-	// );
-	// console.log(
-	// 	"Routing decision raw result:",
-	// 	JSON.stringify(routingResult, null, 2),
-	// );
-
+	console.log(routingResult);
 	const routingLatency = Date.now() - routingStart;
 	const routingDecision = routingResult.routingDecision as
 		| Exclude<AgentTier, "ROUTER">
@@ -109,10 +106,12 @@ export async function runRouter(
 	// console.log("Routing decision value:", routingDecision);
 
 	// Log the routing decision
+	const validatedRoutingDecision = validateRoutingDecision(routingDecision);
+	console.log(validateRoutingDecision);
 	await writeAgentLog({
 		conversationId,
 		tier: AgentTier.ROUTER,
-		action: `Routing to : ${routingDecision}`,
+		action: validatedRoutingDecision as AgentAction,
 		input: latestMessage,
 		output: routingResult.routingReason,
 		latencyMs: routingLatency,
@@ -120,7 +119,7 @@ export async function runRouter(
 	});
 
 	// Short-circuit - go straight to human, no tier involved
-	if (routingDecision === "HUMAN") {
+	if (validatedRoutingDecision === "ESCALATED_TO_HUMAN") {
 		return {
 			finalResponse:
 				"I am connecting you with a human agent who will assist you shortly.",
@@ -129,6 +128,7 @@ export async function runRouter(
 		};
 	}
 
+	console.log(validatedRoutingDecision);
 	// -- phase 2: tier call + review loop
 
 	let currentTier = routingDecision as Exclude<
@@ -136,14 +136,24 @@ export async function runRouter(
 		"HUMAN"
 	>;
 	const MAX_ATTEMPTS = 3; // tier0 -> tier1 -> tier2 -> human
-
 	for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
 		// Call the current tier
-		console.log(context);
+
 		const tierStart = Date.now();
 		const tierResponse: TierResponse = await callTier(currentTier, context);
+
+		// short-circuit: customer needs to authenticate first
+		if ((tierResponse as any).loginUrl) {
+			return {
+				finalResponse: tierResponse.responseText,
+				resolvedByTier: ResolutionTier.HUMAN,
+				approved: true,
+				loginUrl: tierResponse.loginUrl as string | null,
+			};
+		}
+
 		const tierLatency = Date.now() - tierStart;
-		console.log(tierResponse.responseText);
+
 		// -- phase 3: Review Decision
 
 		const reviewPrompt = buildReviewPrompt(
@@ -151,21 +161,30 @@ export async function runRouter(
 			tierResponse.responseText,
 			currentTier,
 		);
+
 		const reviewStart = Date.now();
+
 		const { parsed: reviewResult, tokensUsed: reviewTokens } =
 			await callRouterLLM(reviewPrompt);
 
+		console.log(reviewResult);
+
 		const reviewLatency = Date.now() - reviewStart;
+
 		const verdict = reviewResult.reviewVerdict as "approved" | "rejected";
 
+		const reviewDecision =
+			verdict === "approved"
+				? AgentAction.RESOLVED
+				: AgentAction.REJECTED_OUTPUT;
+
 		// Log the review decision
+		const validatedReviewDecision = validateReviewDecision(reviewDecision);
+
 		await writeAgentLog({
 			conversationId,
 			tier: AgentTier.ROUTER,
-			action:
-				verdict === "approved"
-					? AgentAction.RESOLVED
-					: AgentAction.REJECTED_OUTPUT,
+			action: validatedReviewDecision as AgentAction,
 			input: tierResponse.responseText,
 			output: reviewResult.reviewReason,
 			confidenceScore: tierResponse.agentLog.confidenceScore,
@@ -204,12 +223,17 @@ export async function runRouter(
 				approved: true,
 			};
 		}
+		const escalationActionMap = {
+			TIER1: AgentAction.ESCALATED_TO_TIER1,
+			TIER2: AgentAction.ESCALATED_TO_TIER2,
+			HUMAN: AgentAction.ESCALATED_TO_HUMAN,
+		};
 
 		// Log the escalation to next tier
 		await writeAgentLog({
 			conversationId,
 			tier: AgentTier.ROUTER,
-			action: `ESCALATED_TO_${next}` as any,
+			action: escalationActionMap[next] as AgentAction,
 			input: latestMessage,
 			output: `Escalating from ${currentTier} to ${next}. Rejection reason: ${reviewResult.reviewReason}`,
 			latencyMs: 0,

@@ -8,7 +8,7 @@ import { t } from "@lingui/core/macro";
 // ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
 export const S = {
 	purple: "#534AB7",
-	purpleLight: "#AFA9EC",
+	purpleLight: "#7F77DD",
 	purpleDark: "#3C3489",
 	dark: "var(--page-text)",
 	darkMid: "var(--surface-elevated)",
@@ -99,10 +99,10 @@ export function Input({
 								? "10px 44px 10px 12px"
 								: "10px 12px",
 						fontSize: 14,
-						border: `1.5px solid ${error ? "#E24B4A" : focused ? S.purple : S.border}`,
+						border: `1.5px solid ${error ? S.danger : focused ? S.purple : S.border}`,
 						borderRadius: 8,
 						outline: "none",
-						background: "#fff",
+						background: "var(--surface)",
 						color: S.dark,
 						transition: "border-color .15s",
 						fontFamily: "inherit",

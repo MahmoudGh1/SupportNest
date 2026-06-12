@@ -41,9 +41,14 @@ export const updateWidgetConfigService = async (
 ) => {
 	// Validate accent color format if provided
 	if (widgetConfig.accentColor) {
-		const isValidHex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(widgetConfig.accentColor);
+		const isValidHex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(
+			widgetConfig.accentColor,
+		);
 		if (!isValidHex) {
-			throw new AppError("accentColor must be a valid hex color e.g. #6366f1", 400);
+			throw new AppError(
+				"accentColor must be a valid hex color e.g. #6366f1",
+				400,
+			);
 		}
 	}
 

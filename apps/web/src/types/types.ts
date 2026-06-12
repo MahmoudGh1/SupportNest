@@ -142,6 +142,20 @@ export interface GetKnowledgeDocsResponse {
 	data: { documents: KnowledgeDocument[] };
 }
 
+export interface DeleteAccountInput {
+	organizationSlug: string;
+}
+
+export interface DeleteAccountResponse {
+	success: boolean;
+	message: string;
+}
+
+export interface DeleteAccountInput {
+	fullName: string;
+	organizationName: string;
+}
+
 export interface ApiKey {
 	id: string;
 	name: string;

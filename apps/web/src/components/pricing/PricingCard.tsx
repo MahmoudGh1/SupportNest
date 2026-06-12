@@ -348,7 +348,7 @@ export default function PricingCards({ annual }: Props) {
       </div>
 
       {annual && (
-        <p className="text-center text-black/25 text-[12px] mt-6">
+        <p className="text-center text-[#534AB7] text-[12px] mt-6">
           Annual billing saves up to{" "}
           <span className="text-emerald-500/70 font-semibold">20%</span>{" "}
           compared to monthly.

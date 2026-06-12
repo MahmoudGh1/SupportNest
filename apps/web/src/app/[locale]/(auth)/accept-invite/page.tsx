@@ -305,6 +305,69 @@ function BrandPanel() {
 export default function AcceptInvitePage() {
     return (
         <>
+            <style>{`
+                @keyframes spin { to { transform: rotate(360deg); } }
+                * { box-sizing: border-box; }
+
+                .invite-layout {
+                    display: flex;
+                    min-height: 100vh;
+                    font-family: 'Sora', system-ui, sans-serif;
+                    background: var(--page-bg);
+                    color: var(--page-text);
+                }
+
+                .invite-form-panel {
+                    width: 45%;
+                    background: var(--surface-elevated);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 60px 64px;
+                    min-height: 100vh;
+                    border-right: 1px solid var(--card-border);
+                }
+
+                .invite-brand-panel {
+                    flex: 1;
+                    background: var(--page-bg);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 60px 64px;
+                    min-height: 100vh;
+                }
+
+                /* Tablet */
+                @media (max-width: 900px) {
+                    .invite-form-panel {
+                        width: 55%;
+                        padding: 48px 40px;
+                    }
+                    .invite-brand-panel {
+                        padding: 48px 32px;
+                    }
+                }
+
+                /* Mobile */
+                @media (max-width: 640px) {
+                    .invite-layout {
+                        flex-direction: column;
+                    }
+                    .invite-form-panel {
+                        width: 100%;
+                        min-height: 100vh;
+                        padding: 48px 24px;
+                        border-right: none;
+                    }
+                    .invite-brand-panel {
+                        display: none;
+                    }
+                }
+            `}</style>
+            <div className="invite-layout">
             <style>{`@keyframes spin { to { transform: rotate(360deg); } } * { box-sizing: border-box; }`}</style>
             <div style={{ display: "flex", height: "100vh", fontFamily: T.font, overflow: "hidden", background: "var(--page-bg)", color: "var(--page-text)" }}>
                 <FormPanel />
@@ -312,4 +375,5 @@ export default function AcceptInvitePage() {
             </div>
         </>
     );
+}
 }

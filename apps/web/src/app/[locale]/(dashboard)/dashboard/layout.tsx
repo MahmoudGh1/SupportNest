@@ -15,6 +15,7 @@ export const getPageMeta = (): Record<string, string> => ({
 	"/dashboard/team": t`Team`,
 	"/dashboard/tickets": t`Tickets`,
 	"/dashboard/knowledge": t`Knowledge Base`,
+	"/dashboard/tools": t`API Tools`,
 	"/dashboard/analytics": t`Analytics`,
 	"/dashboard/admin": t`Admin`,
 	"/dashboard/settings": t`Settings`,

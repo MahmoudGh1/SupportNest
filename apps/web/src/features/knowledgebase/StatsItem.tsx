@@ -7,8 +7,8 @@ const StatsItem = ({ label, value, color }: StatsItemProps) => {
 			key={label}
 			style={{
 				textAlign: "center",
-				background: "#fff",
-				border: `0.5px solid ${S.border}`,
+				background: "var(--surface)",
+				border: `0.5px solid var(--card-border)`,
 				borderRadius: 10,
 				padding: "8px 14px",
 			}}
@@ -19,7 +19,7 @@ const StatsItem = ({ label, value, color }: StatsItemProps) => {
 			<div
 				style={{
 					fontSize: 10,
-					color: S.textMuted,
+					color: "var(--page-muted)",
 					textTransform: "uppercase",
 					letterSpacing: ".05em",
 				}}
