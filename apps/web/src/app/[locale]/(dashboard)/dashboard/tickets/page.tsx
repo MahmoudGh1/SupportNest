@@ -46,7 +46,15 @@ interface Meta {
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
+function normalizeApiBaseUrl(rawBaseUrl?: string) {
+	const fallback = "http://localhost:3001/api/v1";
+	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");
+	return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
+}
+
+const BASE = normalizeApiBaseUrl(
+	process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE,
+);
 
 const PRIORITY_LABEL: Record<TicketPriority, string> = {
 	HIGH: "High",

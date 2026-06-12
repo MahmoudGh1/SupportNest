@@ -1,33 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
+import { defaultLocale, locales } from "@/lib/routes";
 
-const PUBLIC = ["/login", "/register"];
-const ONBOARD = "/setup";
-
-const defaultLocale = "en"; // your default
-const locales = ["en", "ar"]; // all supported
+function pathnameHasLocale(pathname: string) {
+	return locales.some(
+		(locale) =>
+			pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`,
+	);
+}
 
 export function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
-	// Check if the pathname already has a locale
-	const hasLocale = locales.some(
-		(locale) =>
-			pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`,
-	);
-
-	if (!hasLocale) {
-		// Redirect / → /en  (or /ar etc.)
-		return NextResponse.redirect(
-			new URL(`/${defaultLocale}${pathname}`, request.url),
-		);
+	if (pathnameHasLocale(pathname)) {
+		// Hide default locale in the browser URL
+		if (pathname === `/${defaultLocale}`) {
+			return NextResponse.redirect(new URL("/", request.url));
+		}
+		if (pathname.startsWith(`/${defaultLocale}/`)) {
+			const cleanPath =
+				pathname.slice(`/${defaultLocale}`.length) || "/";
+			return NextResponse.redirect(new URL(cleanPath, request.url));
+		}
+		return NextResponse.next();
 	}
 
-	// // We use sessionStorage (client-side only), so middleware just handles
-	// // the root redirect. Client-side ProtectedRoute handles the rest.
-	// if (pathname === "/") {
-	// 	return NextResponse.redirect(new URL("/login", request.url));
-	// }
-	// return NextResponse.next();
+	// Internally serve default-locale routes without changing the visible URL
+	const url = request.nextUrl.clone();
+	url.pathname = `/${defaultLocale}${pathname === "/" ? "" : pathname}`;
+	return NextResponse.rewrite(url);
 }
 
 export const config = {

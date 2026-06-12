@@ -38,10 +38,10 @@ const TIERS = [
 ]
 
 export default function Pipeline() {
-  const { ref, visible } = useInView()
+  const { ref } = useInView()
 
   return (
-    <section id="pipeline" className="py-[90px] px-[5%] bg-white">
+    <section id="pipeline" className="py-[90px] px-[5%]" style={{ background: "var(--page-bg)" }}>
       <div className="max-w-[1100px] mx-auto">
         {/* Heading */}
         <div className="text-center mb-14">
@@ -66,12 +66,9 @@ export default function Pipeline() {
               key={tier.name}
               className="relative rounded-2xl px-5 py-7 text-center"
               style={{
-                background:   tier.featured ? "#534AB7" : "#fff",
-                border:       `1.5px solid ${tier.featured ? "#534AB7" : "#e8e6f0"}`,
-                boxShadow:    tier.featured ? "0 12px 40px rgba(83,74,183,0.25)" : "0 2px 8px rgba(0,0,0,0.04)",
-                opacity:      visible ? 1 : 0,
-                transform:    visible ? "translateY(0)" : "translateY(28px)",
-                transition:   `all .55s ease ${(i * 0.1).toFixed(1)}s`,
+                background:   tier.featured ? "#534AB7" : "var(--surface)",
+                border:       `1.5px solid ${tier.featured ? "#534AB7" : "var(--card-border)"}`,
+                boxShadow:    tier.featured ? "0 12px 40px rgba(83,74,183,0.25)" : "none",
               }}
             >
               {tier.featured && (

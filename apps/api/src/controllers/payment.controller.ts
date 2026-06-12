@@ -1,10 +1,12 @@
 import type { Request, Response } from "express";
 import {
+	completeCheckoutService,
 	createPaymentIntentionService,
 	getPaymentHistoryService,
 	handleWebhookService,
 } from "src/services/payment.service.js";
 import type { AuthenticatedRequest } from "src/types/auth.types.js";
+import AppError from "src/utils/appError.js";
 
 export const createPaymentIntentionController = async (
 	req: AuthenticatedRequest,
@@ -27,9 +29,39 @@ export const createPaymentIntentionController = async (
 		});
 
 		return res.status(201).json(result);
-	} catch (error: any) {
-		if (error.status)
-			return res.status(error.status).json({ error: error.message });
+	} catch (error: unknown) {
+		if (error instanceof AppError) {
+			return res.status(error.statusCode).json({ error: error.message });
+		}
+		return res.status(500).json({ error: "Internal server error" });
+	}
+};
+
+export const completeCheckoutController = async (
+	req: AuthenticatedRequest,
+	res: Response,
+) => {
+	try {
+		const organizationId = req.user?.organizationId;
+		const { pricingId, amount, currency, isAnnual } = req.body;
+
+		if (!organizationId || !pricingId || amount == null) {
+			return res.status(400).json({ error: "Missing required fields" });
+		}
+
+		const result = await completeCheckoutService({
+			organizationId,
+			pricingId,
+			amount: Number(amount),
+			currency: currency || "EGP",
+			isAnnual: Boolean(isAnnual),
+		});
+
+		return res.status(200).json(result);
+	} catch (error: unknown) {
+		if (error instanceof AppError) {
+			return res.status(error.statusCode).json({ error: error.message });
+		}
 		return res.status(500).json({ error: "Internal server error" });
 	}
 };
@@ -58,9 +90,10 @@ export const getPaymentHistoryController = async (
 		const organizationId = req.user?.organizationId;
 		const payments = await getPaymentHistoryService(organizationId as string);
 		return res.status(200).json(payments);
-	} catch (error: any) {
-		if (error.status)
-			return res.status(error.status).json({ error: error.message });
+	} catch (error: unknown) {
+		if (error instanceof AppError) {
+			return res.status(error.statusCode).json({ error: error.message });
+		}
 		return res.status(500).json({ error: "Internal server error" });
 	}
 };
