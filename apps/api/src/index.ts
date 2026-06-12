@@ -26,6 +26,10 @@ import ticketRouter from "./routes/ticket.routes.js";
 import userRouter from "./routes/user.routes.js";
 import pricingRouter from "./routes/pricing.routes.js";
 import { swaggerUi, swaggerSpec } from "./docs/swagger.js";
+import knowledgeRouter from "./routes/knowledge.routes.js";
+import tier2Router from "./routes/tier2.routes.js";
+import reportRouter from "./routes/reporter.routes.js";
+import AdminRoutes from "./routes/admin-dashboard.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -43,8 +47,11 @@ app.use(
 
 app.use(
 	cors({
+		// Dynamically sets the header to match whoever is making the request
 		origin: function (origin, callback) {
+			// Allow requests with no origin (like mobile apps, curl, or postman)
 			if (!origin) return callback(null, true);
+
 			callback(null, true);
 		},
 		credentials: true,
@@ -66,6 +73,7 @@ app.use("/api/v1/dashboard/apikey", ApiKeyRouter);
 app.use("/api/v1/widget", WidgetRouter);
 app.use("/api/v1/organizations/api-config", businessApiConfigRouter);
 app.use("/api/v1/organizations", OrganizationRoutes);
+app.use("/api/v1/reports", reportRouter);
 
 app.use("/api/v1/widget/conversations", conversationsRoutes);
 
@@ -73,6 +81,10 @@ app.use("/api/v1/payments", paymentRoutes);
 app.use("/api/v1/pricing", pricingRouter);
 app.use("/api/v1/invitations", invitationRouter);
 app.use("/api/v1/tickets", ticketRouter);
+
+app.use("/api/v1/tier2", tier2Router);
+
+app.use("/api/v1/admindashboard", AdminRoutes);
 
 app.use(notFoundHandler);
 

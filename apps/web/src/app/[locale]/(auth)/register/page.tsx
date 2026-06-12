@@ -4,6 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import {
+  PaymentStep,
+  type RegistrationData,
+} from "@/components/auth/PaymentStep";
+import { StepIndicator } from "@/components/auth/StepIndicator";
 
 const T = {
 	text: "var(--page-text)",
@@ -16,6 +21,19 @@ const T = {
 	errorText: "#E24B4A",
 	radius: "10px",
 	font: "'Sora', system-ui, sans-serif",
+  white: "#FFFFFF",
+  violet: "#534AB7",
+  violetHover: "#6259D0",
+  darkBg: "#141414",
+  darkSurface: "#1E1E1E",
+  darkBorder: "rgba(255,255,255,0.08)",
+  darkBorder2: "rgba(255,255,255,0.12)",
+  gray300: "rgba(255,255,255,0.55)",
+  gray500: "rgba(255,255,255,0.30)",
+  errorText: "#f87171",
+  radius: "10px",
+  radiusLg: "14px",
+  font: "'Sora', system-ui, sans-serif",
 } as const;
 
 interface RegistrationData {
@@ -30,16 +48,16 @@ interface RegistrationData {
 }
 
 const INDUSTRIES = [
-	"Technology",
-	"Healthcare",
-	"Finance",
-	"Retail & E-commerce",
-	"Education",
-	"Real Estate",
-	"Hospitality",
-	"Manufacturing",
-	"Media & Entertainment",
-	"Other",
+  "Technology",
+  "Healthcare",
+  "Finance",
+  "Retail & E-commerce",
+  "Education",
+  "Real Estate",
+  "Hospitality",
+  "Manufacturing",
+  "Media & Entertainment",
+  "Other",
 ];
 const SIZES = ["1–10", "11–50", "51–200", "201–500", "500+"];
 

@@ -4,6 +4,7 @@ import prisma from "src/config/prisma.js";
 import AppError from "src/utils/appError.js";
 import asyncHandler from "src/utils/asyncHandler.js";
 
+// Get all reports for an organization
 export const getReportsController: RequestHandler = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
 	const organizationId = req.user?.organizationId;
 	if (!organizationId) throw new AppError("Unauthorized", 401);
@@ -30,6 +31,7 @@ export const getReportsController: RequestHandler = asyncHandler(async (req: Aut
 	res.status(200).json({ reports });
 });
 
+// Get a single report
 export const getReportByIdController: RequestHandler = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
 	const organizationId = req.user?.organizationId;
 	const { id } = req.params;
