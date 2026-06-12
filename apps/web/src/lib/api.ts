@@ -251,14 +251,11 @@ export const api = {
 		formData.append("title", input.title);
 		formData.append("type", "PDF");
 
-		const response = await fetch(
-			`${BASE_URL}/organizations/${user.orgId}/knowledge`,
-			{
-				method: "POST",
-				body: formData,
-				credentials: "include",
-			},
-		);
+		const response = await fetch(`${BASE_URL}/knowledge`, {
+			method: "POST",
+			body: formData,
+			credentials: "include",
+		});
 
 		if (!response.ok) {
 			const error = await response.json().catch(() => ({}));
@@ -273,14 +270,11 @@ export const api = {
 		if (!user) throw new Error("User not found");
 
 		try {
-			const response = await fetch(
-				`${BASE_URL}/organizations/${user.orgId}/knowledge/${id}`,
-				{
-					method: "DELETE",
-					headers: { "Content-Type": "application/json" },
-					credentials: "include",
-				},
-			);
+			const response = await fetch(`${BASE_URL}/knowledge/${id}`, {
+				method: "DELETE",
+				headers: { "Content-Type": "application/json" },
+				credentials: "include",
+			});
 
 			const data = await response.json();
 			if (!response.ok)
