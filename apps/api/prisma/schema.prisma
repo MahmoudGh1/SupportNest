@@ -1,10 +1,10 @@
 generator client {
-  provider        = "prisma-client"
-  output          = "../generated/prisma"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
-  provider   = "postgresql"
+  provider = "postgresql"
 }
 
 model Organization {
@@ -58,51 +58,40 @@ model User {
 }
 
 model BusinessApiConfig {
-  id             String       @id @default(uuid()) @db.Uuid
-  organizationId String       @unique @db.Uuid
-  organization   Organization @relation(fields: [organizationId], references: [id])
-
-  baseUrl        String       // e.g. "https://api.theirbusiness.com"
-  authType       ApiAuthType  // API_KEY, BEARER, BASIC
-  authValue      String       // encrypted token/key they provide
-  headerName     String?      // e.g. "x-api-key" if authType is API_KEY
-
-  isVerified     Boolean      @default(false)  // did they pass our config test?
-  lastVerifiedAt DateTime?
-
-  testEndpoint   String?
-
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
+  id              String           @id @default(uuid()) @db.Uuid
+  organizationId  String           @unique @db.Uuid
+  baseUrl         String
+  authType        ApiAuthType
+  authValue       String
+  headerName      String?
+  isVerified      Boolean          @default(false)
+  lastVerifiedAt  DateTime?
+  testEndpoint    String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  organization    Organization     @relation(fields: [organizationId], references: [id])
   toolDefinitions ToolDefinition[]
 
   @@map("business_api_configs")
 }
 
 model ToolDefinition {
-  id             String            @id @default(uuid()) @db.Uuid
-  organizationId String            @db.Uuid
-  organization   Organization      @relation(fields: [organizationId], references: [id])
-
-  apiConfigId    String            @db.Uuid
-  apiConfig      BusinessApiConfig @relation(fields: [apiConfigId], references: [id])
-
-  name           String       // e.g. "getOrderById"
-  description    String       // what this tool does — the agent reads this to decide when to call it
-  method         HttpMethod   // GET, POST, PUT, DELETE
-  path           String       // e.g. "/orders/{orderId}"
-
-  documentId String? @db.Uuid
-  document   KnowledgeDocument? @relation(fields: [documentId], references: [id])
-
-  parameters     Json         // { name, type, required, location: "path"|"query"|"body", description }[]
-  responseSchema Json         // what the response looks like so agent can parse it
-
-  isActive       Boolean      @default(true)
-
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id                  String             @id @default(uuid()) @db.Uuid
+  organizationId      String             @db.Uuid
+  apiConfigId         String             @db.Uuid
+  name                String
+  description         String
+  method              HttpMethod
+  path                String
+  documentId          String?            @db.Uuid
+  parameters          Json
+  responseSchema      Json
+  isActive            Boolean            @default(true)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  apiConfig           BusinessApiConfig  @relation(fields: [apiConfigId], references: [id])
+  knowledge_documents KnowledgeDocument? @relation(fields: [documentId], references: [id])
+  organization        Organization       @relation(fields: [organizationId], references: [id])
 
   @@index([organizationId])
   @@map("tool_definitions")
@@ -234,24 +223,18 @@ model KnowledgeDocument {
   title             String
   type              KnowledgeDocumentType
   storagePath       String?
-
-  status          KnowledgeDocumentStatus
-
-  toolDefinitions ToolDefinition[]
-
-  toolCount        Int   @default(0)
-  activeToolCount  Int   @default(0)
-  disabledToolCount Int  @default(0)
-
-  metadata        Json                    @default("{}")
-
-  createdById     String                  @db.Uuid
-  createdBy       User                    @relation(fields: [createdById], references: [id])
-
-  createdAt       DateTime                @default(now())
-  updatedAt       DateTime                @updatedAt
-
-  chunks          DocumentChunk[]
+  status            KnowledgeDocumentStatus
+  toolCount         Int                     @default(0)
+  activeToolCount   Int                     @default(0)
+  disabledToolCount Int                     @default(0)
+  metadata          Json                    @default("{}")
+  createdById       String                  @db.Uuid
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  chunks            DocumentChunk[]
+  createdBy         User                    @relation(fields: [createdById], references: [id])
+  organization      Organization            @relation(fields: [organizationId], references: [id])
+  tool_definitions  ToolDefinition[]
 
   @@index([organizationId])
   @@index([status])
@@ -263,7 +246,7 @@ model DocumentChunk {
   documentId     String                @db.Uuid
   organizationId String                @db.Uuid
   content        String
-  embedding      Unsupported("vector")
+  embedding      Unsupported("vector(1536)")
   chunkIndex     Int
   metadata       Json                  @default("{}")
   createdAt      DateTime              @default(now())
@@ -417,6 +400,7 @@ enum AgentTier {
 
 enum AgentAction {
   RESOLVED
+  ESCALATED_TO_TIER0
   ESCALATED_TO_TIER1
   ESCALATED_TO_TIER2
   ESCALATED_TO_HUMAN

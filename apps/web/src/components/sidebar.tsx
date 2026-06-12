@@ -3,11 +3,12 @@
 import { S } from "@/components/ui";
 import { useAuth } from "@/context/auth-context";
 import { msg, t } from "@lingui/core/macro";
+import type { MessageDescriptor } from "@lingui/core";
 import { i18n } from "@lingui/core";
 import { Trans } from "@lingui/react/macro";
 import { Role } from "@/types/types";
 
-export const ROLE_TRANSLATIONS: Record<Role, any> = {
+export const ROLE_TRANSLATIONS: Record<Role, MessageDescriptor> = {
 	ORG_ADMIN: msg`Org Admin`,
 	SUPPORT_AGENT: msg`Support Agent`,
 	SUPER_ADMIN: msg`Super Admin`,
@@ -24,6 +25,12 @@ const navItems = [
 	},
 	{ icon: "users", label: msg`Team`, page: "team" },
 	{ icon: "chart-bar", label: msg`Analytics`, page: "analytics" },
+	{
+		icon: "building-skyscraper",
+		label: msg`Admin`,
+		page: "admin",
+		superAdminOnly: true,
+	},
 	// { icon: "code", label: msg({ message: "API & Widget" }), page: "api" },
 	{ icon: "settings", label: msg`Settings`, page: "settings" },
 	{ icon: "user-circle", label: msg`Profile`, page: "profile" },
@@ -40,12 +47,13 @@ export function Sidebar({
 	currentPage,
 	onNavigate,
 	collapsed,
-	onToggle,
+	onToggle: _onToggle,
 }: SidebarProps) {
 	const { user, logout } = useAuth();
 	const initials = user
 		? `${user.firstName?.[0]}${user.lastName?.[0]}`.toUpperCase()
 		: "U";
+	const isSuperAdmin = String(user?.role).toUpperCase() === Role.SUPER_ADMIN;
 
 	return (
 		<div
@@ -124,7 +132,9 @@ export function Sidebar({
 					gap: 2,
 				}}
 			>
-				{navItems.map((item) => {
+				{navItems
+					.filter((item) => !item.superAdminOnly || isSuperAdmin)
+					.map((item) => {
 					const isActive = currentPage === item.page;
 					return (
 						<button

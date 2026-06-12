@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
 import { ProtectedRoute } from "@/components/protected-route";
-import { msg, t } from "@lingui/core/macro";
+import { t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 
 export const getPageMeta = (): Record<string, string> => ({
@@ -15,6 +15,7 @@ export const getPageMeta = (): Record<string, string> => ({
 	"/dashboard/tickets": t`Tickets`,
 	"/dashboard/knowledge": t`Knowledge Base`,
 	"/dashboard/analytics": t`Analytics`,
+	"/dashboard/admin": t`Admin`,
 	"/dashboard/settings": t`Settings`,
 	"/dashboard/profile": t`Profile`,
 });

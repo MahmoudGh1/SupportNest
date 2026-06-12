@@ -8,7 +8,6 @@ import {
 	AuthUser,
 	DashboardStats,
 	GetKnowledgeDocsResponse,
-	getKnowledgeDocsResponse,
 	KnowledgeDocument,
 	LoginResponse,
 	OrgProfile,
@@ -16,28 +15,14 @@ import {
 	UpdatePasswordInput,
 	UpdateProfileInput,
 	UpdateWidgetConfigInput,
-	UploadFaqInput,
 	UploadPdfInput,
 	UserProfile,
 	ApiKey,
-	CreateApiKeyInput,
+	AdminOrganizationsResponse,
+	AdminOverview,
 } from "@/types/types";
 
 const mockDelay = (ms = 600) => new Promise((r) => setTimeout(r, ms));
-
-const mockUsers = [
-	{
-		id: "u1",
-		email: "admin@acme.com",
-		password: "password",
-		firstName: "Mohamed",
-		lastName: "Rashad",
-		role: "org_admin",
-		orgId: "org1",
-		orgName: "Acme Corp",
-		onboarded: true,
-	},
-];
 
 // ─── KB MOCK DATA STORE ───────────────────────────────────────────────────────
 // Mutable in-memory store — simulates the database for this session
@@ -59,7 +44,7 @@ let mockOrgProfile: OrgProfile = {
 	updated_at: "2024-01-15T10:00:00Z",
 };
 
-let mockUserProfile: UserProfile = {
+const mockUserProfile: UserProfile = {
 	id: "u1",
 	email: "admin@acme.com",
 	first_name: "Mohamed",
@@ -73,6 +58,26 @@ let mockUserProfile: UserProfile = {
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
 const BASE_URL =
 	process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
+
+async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
+	const session = getSession();
+	const response = await fetch(`${BASE_URL}/admin${path}`, {
+		...init,
+		credentials: "include",
+		headers: {
+			"Content-Type": "application/json",
+			...(session?.token ? { Authorization: `Bearer ${session.token}` } : {}),
+			...init?.headers,
+		},
+	});
+	const data = await response.json().catch(() => ({}));
+	if (!response.ok) {
+		throw new Error(
+			data?.error?.message ?? data?.message ?? "Admin request failed",
+		);
+	}
+	return data as T;
+}
 
 export const api = {
 	async login(email: string, password: string): Promise<LoginResponse> {
@@ -206,12 +211,32 @@ export const api = {
 		};
 	},
 
+	async getAdminOverview(): Promise<AdminOverview> {
+		return adminFetch<AdminOverview>("/overview");
+	},
+
+	async getAdminOrganizations(params?: {
+		search?: string;
+		is_active?: boolean | "";
+		page?: number;
+		limit?: number;
+	}): Promise<AdminOrganizationsResponse> {
+		const query = new URLSearchParams();
+		if (params?.search) query.set("search", params.search);
+		if (params?.is_active !== undefined && params.is_active !== "") {
+			query.set("is_active", String(params.is_active));
+		}
+		if (params?.page) query.set("page", String(params.page));
+		if (params?.limit) query.set("limit", String(params.limit));
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminOrganizationsResponse>(`/organizations${suffix}`);
+	},
+
 	// ─── KNOWLEDGE BASE ─────────────────────────────────────────────────────────
 
 	async getKnowledgeDocs(
-		filterState: any,
+		filterState: Record<string, unknown>,
 	): Promise<GetKnowledgeDocsResponse | null> {
-		const session = getSession();
 		const user = getSession();
 		// const user = session?.user;
 		if (!user) {
@@ -234,8 +259,8 @@ export const api = {
 			if (!response.ok) throw new Error(response.statusText);
 
 			return response.json();
-		} catch (error: any) {
-			console.log(error.message);
+		} catch (error) {
+			console.log(error instanceof Error ? error.message : "Unknown error");
 			return null;
 		}
 	},
