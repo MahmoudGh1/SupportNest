@@ -1,5 +1,5 @@
-import bcrypt from 'bcrypt';
-import prisma from 'src/config/prisma.js';
+import bcrypt from "bcrypt";
+import prisma from "src/config/prisma.js";
 
 const BCRYPT_ROUNDS = 12;
 
@@ -19,9 +19,21 @@ interface UpdateUserBody {
   is_active?: boolean;
 }
 
+const roleMap: Record<string, string> = {
+  support_agent: "SUPPORT_AGENT",
+  org_admin: "ORG_ADMIN",
+  super_admin: "SUPER_ADMIN",
+};
+
 export async function listUsersForOrg(
   orgId: string,
-  opts: { page: number; limit: number; skip: number; role?: string; is_active?: boolean },
+  opts: {
+    page: number;
+    limit: number;
+    skip: number;
+    role?: string;
+    is_active?: boolean;
+  },
 ) {
   const where = {
     organizationId: orgId,
@@ -34,7 +46,7 @@ export async function listUsersForOrg(
       where,
       skip: opts.skip,
       take: opts.limit,
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: "asc" },
       select: {
         id: true,
         email: true,
@@ -45,7 +57,7 @@ export async function listUsersForOrg(
         createdAt: true,
         updatedAt: true,
         // cast to any to avoid TypeScript complaining about generated count select types
-        _count: ({ select: { tickets: true } } as any),
+        _count: { select: { assignedTickets: true } } as any,
       },
     }),
     prisma.user.count({ where }),
@@ -62,14 +74,14 @@ export async function listUsersForOrg(
       createdAt: u.createdAt.toISOString(),
       updatedAt: u.updatedAt.toISOString(),
       // _count may not exist on the inferred type; use optional chaining and fallback
-      assignedTicketsCount: (u as any)?._count?.tickets ?? 0,
+      assignedTicketsCount: (u as any)?._count?.assignedTickets ?? 0,
     })),
     total,
   };
 }
 
 export async function getUserById(userId: string, orgId?: string) {
-  const user = await prisma.user.findFirst({
+  const user = (await prisma.user.findFirst({
     where: {
       id: userId,
       ...(orgId ? { organizationId: orgId } : {}),
@@ -84,21 +96,21 @@ export async function getUserById(userId: string, orgId?: string) {
       organizationId: true,
       createdAt: true,
       updatedAt: true,
-      tickets: {
+      assignedTickets: {
         select: {
           id: true,
           status: true,
           priority: true,
           createdAt: true,
         },
-        where: { status: { in: ['OPEN', 'IN_PROGRESS'] } },
-        orderBy: { createdAt: 'desc' },
+        where: { status: { in: ["OPEN", "IN_PROGRESS"] } },
+        orderBy: { createdAt: "desc" },
         take: 10,
       },
       // cast to any to avoid TypeScript complaining about generated count select types
-      _count: ({ select: { tickets: true } } as any),
+      _count: { select: { assignedTickets: true } } as any,
     },
-  }) as any;
+  })) as any;
 
   if (!user) return null;
 
@@ -112,19 +124,23 @@ export async function getUserById(userId: string, orgId?: string) {
     organizationId: user.organizationId,
     createdAt: user.createdAt.toISOString(),
     updatedAt: user.updatedAt.toISOString(),
-    assignedTicketsCount: user._count?.tickets ?? 0,
-    openTickets: user.tickets,
+    assignedTicketsCount: user._count?.assignedTickets ?? 0,
+    openTickets: user.assignedTickets,
   };
 }
 
 export async function createUser(body: CreateUserBody) {
   // Check org exists
-  const org = await prisma.organization.findUnique({ where: { id: body.organization_id } });
-  if (!org) return { error: 'ORGANIZATION_NOT_FOUND' };
+  const org = await prisma.organization.findUnique({
+    where: { id: body.organization_id },
+  });
+  if (!org) return { error: "ORGANIZATION_NOT_FOUND" };
 
   // Check email uniqueness
-  const existing = await prisma.user.findUnique({ where: { email: body.email } });
-  if (existing) return { error: 'EMAIL_ALREADY_EXISTS' };
+  const existing = await prisma.user.findUnique({
+    where: { email: body.email },
+  });
+  if (existing) return { error: "EMAIL_ALREADY_EXISTS" };
 
   const passwordHash = await bcrypt.hash(body.password, BCRYPT_ROUNDS);
 
@@ -134,7 +150,7 @@ export async function createUser(body: CreateUserBody) {
       passwordHash,
       firstName: body.first_name,
       lastName: body.last_name,
-      role: body.role as any,
+      role: roleMap[body.role] as any,
       organizationId: body.organization_id,
       isActive: true,
     },
@@ -153,23 +169,27 @@ export async function createUser(body: CreateUserBody) {
   return { data: { ...user, created_at: user.createdAt.toISOString() } };
 }
 
-export async function updateUser(userId: string, body: UpdateUserBody, orgId?: string) {
+export async function updateUser(
+  userId: string,
+  body: UpdateUserBody,
+  orgId?: string,
+) {
   const existing = await prisma.user.findFirst({
     where: {
       id: userId,
       ...(orgId ? { organizationId: orgId } : {}),
-      role: { not: 'SUPER_ADMIN' }, // super admins cannot be modified through this endpoint
+      role: { not: "SUPER_ADMIN" }, // super admins cannot be modified through this endpoint
     },
   });
 
-  if (!existing) return { error: 'USER_NOT_FOUND' };
+  if (!existing) return { error: "USER_NOT_FOUND" };
 
   const user = await prisma.user.update({
     where: { id: userId },
     data: {
       ...(body.first_name !== undefined ? { firstName: body.first_name } : {}),
       ...(body.last_name !== undefined ? { lastName: body.last_name } : {}),
-      ...(body.role !== undefined ? { role: body.role as any } : {}),
+      ...(body.role !== undefined ? { role: roleMap[body.role] as any } : {}),
       ...(body.is_active !== undefined ? { isActive: body.is_active } : {}),
     },
     select: {
@@ -191,24 +211,41 @@ export async function deleteUser(userId: string, orgId?: string) {
   const existing = await prisma.user.findFirst({
     where: {
       id: userId,
-      ...(orgId ? { organization_id: orgId } : {}),
-      role: { not: 'SUPER_ADMIN' },
+      ...(orgId ? { organizationId: orgId } : {}),
+      role: { not: "SUPER_ADMIN" },
     },
   });
 
-  if (!existing) return { error: 'USER_NOT_FOUND' };
+  if (!existing) return { error: "USER_NOT_FOUND" };
 
-  // Soft-delete: set is_active = false and unassign their tickets
-  await prisma.$transaction([
-    prisma.user.update({
-      where: { id: userId },
-      data: { isActive: false },
-    }),
-    prisma.ticket.updateMany({
-      where: { assigned_to: userId, status: { in: ['OPEN', 'IN_PROGRESS'] } },
-      data: { assigned_to: null },
-    }),
-  ]);
+  // // Soft-delete: set is_active = false and unassign their tickets
+  // await prisma.$transaction([
+  //   prisma.user.update({
+  //     where: { id: userId },
+  //     data: { isActive: false }, // only user fields here
+  //   }),
+  //   prisma.ticket.updateMany({
+  //     where: {
+  //       assignedToId: userId, // check your schema for exact field name
+  //       status: { in: ["OPEN", "IN_PROGRESS"] },
+  //     },
+  //     data: { assignedToId: null }, // only ticket fields here
+  //   }),
+  // ]);
+
+  //delete user
+  await prisma.ticket.updateMany({
+    where: {
+      assignedToId: userId,
+      status: { in: ["OPEN", "IN_PROGRESS"] },
+    },
+    data: { assignedToId: null },
+  });
+
+  // Then hard delete the user
+  await prisma.user.delete({
+    where: { id: userId },
+  });
 
   return { data: { success: true } };
 }

@@ -93,6 +93,8 @@ export async function createOrgUser(
   const orgId = getStringParam(req.params.orgId);
   const { email, password, first_name, last_name, role } = req.body;
 
+  console.log(email, password, first_name, last_name, role);
+
   if (!orgId) {
     badRequest(res, "Organization id is required.");
     return;
