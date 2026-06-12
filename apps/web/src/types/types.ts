@@ -136,9 +136,23 @@ export interface DashboardStats {
 }
 
 export interface GetKnowledgeDocsResponse {
-	success: Boolean;
+	success: boolean;
 	message: string;
 	data: { documents: KnowledgeDocument[] };
+}
+
+export interface DeleteAccountInput {
+	organizationSlug: string;
+}
+
+export interface DeleteAccountResponse {
+	success: boolean;
+	message: string;
+}
+
+export interface DeleteAccountInput {
+	fullName: string;
+	organizationName: string;
 }
 
 export interface ApiKey {

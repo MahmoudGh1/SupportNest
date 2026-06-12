@@ -56,7 +56,7 @@ app.use(morgan("dev"));
 const publicDir = path.resolve(process.cwd(), "public");
 // console.log("[static] serving from:", publicDir);
 app.use(express.static(publicDir));
-app.use(rateLimit);
+// app.use(rateLimit);
 app.get("/health", (_, res) => res.json({ ok: true }));
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/v1/auth", authRouter);
@@ -64,10 +64,10 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/rag", ragRouter);
 app.use("/api/v1/dashboard/apikey", ApiKeyRouter);
 app.use("/api/v1/widget", WidgetRouter);
+app.use("/api/v1/organizations/api-config", businessApiConfigRouter);
 app.use("/api/v1/organizations", OrganizationRoutes);
 
 app.use("/api/v1/widget/conversations", conversationsRoutes);
-app.use("/api/v1/organizations/api-config", businessApiConfigRouter);
 
 app.use("/api/v1/payments", paymentRoutes);
 app.use("/api/v1/pricing", pricingRouter);

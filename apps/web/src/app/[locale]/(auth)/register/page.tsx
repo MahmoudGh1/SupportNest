@@ -8,13 +8,13 @@ import { api } from "@/lib/api";
 const T = {
 	white: "var(--page-text)",
 	violet: "#534AB7",
-	violetHover: "#6259D0",
+	violetHover: "#7F77DD",
 	darkBg: "var(--page-bg)",
 	darkSurface: "var(--surface)",
 	darkBorder: "var(--card-border)",
 	gray300: "var(--page-muted)",
 	gray500: "var(--page-muted)",
-	errorText: "#f87171",
+	errorText: "#E24B4A",
 	radius: "10px",
 	font: "'Sora', system-ui, sans-serif",
 } as const;
@@ -149,7 +149,7 @@ export default function RegisterPage() {
 	const inputStyle: React.CSSProperties = {
 		width: "100%",
 		padding: "11px 14px",
-		background: T.darkSurface,
+		background: "var(--surface)",
 		border: `1.5px solid ${T.darkBorder}`,
 		borderRadius: T.radius,
 		color: T.white,

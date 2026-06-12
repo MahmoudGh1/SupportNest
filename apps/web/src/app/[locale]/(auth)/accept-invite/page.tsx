@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 
 const T = {
     darkBg: "var(--page-bg)",
@@ -277,7 +278,9 @@ function BrandPanel() {
         <div style={{ flex: 1, background: T.darkBg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 64px", minHeight: "100vh" }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", maxWidth: 440 }}>
                 <h1 style={{ fontSize: 42, fontWeight: 700, color: T.white, margin: "0 0 12px", letterSpacing: "-1.2px" }}>
-                    SupportNest
+                    <Link href="/">
+						SupportNest
+					</Link>
                 </h1>
                 <p style={{ fontSize: 13, color: T.violetLight, fontWeight: 500, margin: "0 0 48px", lineHeight: 1.5 }}>
                     AI Powered Multi-Agent Customer Support Platform
@@ -293,7 +296,7 @@ function BrandPanel() {
                         </div>
                         <div>
                             <div style={{ fontSize: 13, fontWeight: 600, color: T.white }}>Mahmoud Al-Rashidi</div>
-                            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.35)", marginTop: 2 }}>Head of Support, Maqsam</div>
+                            <div style={{ fontSize: 12, color: "#534AB7", marginTop: 2 }}>Head of Support, Maqsam</div>
                         </div>
                     </div>
                 </div>

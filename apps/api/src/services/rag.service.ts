@@ -22,7 +22,6 @@ export async function askTier0Agent(question: string, organizationId: string, co
     ORDER BY embedding <=> ${vectorLiteral}::vector
     LIMIT 5
   `;
-	console.log("[RAG] chunks found:", chunks.length, "for org:", organizationId);
 
 	if (chunks.length === 0) {
 		return buildResponse("Oh. about that thing. maybe you are talking about something else we don't have.", AgentAction.NO_MATCH, 0, 0);

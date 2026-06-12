@@ -147,7 +147,6 @@ export const sendMessage: RequestHandler = asyncHandler(async (req: Authenticate
 	});
 
 	const aiResponse = await askTier0Agent(customerMessage.content, conversation.organizationId, conversation.id, conversationHistory);
-	console.log(aiResponse);
 	const aiMessage = await prisma.message.create({
 		data: {
 			conversationId: conversation.id,

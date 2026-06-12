@@ -26,7 +26,6 @@ export async function createReport(input: ReporterInput): Promise<void> {
 	const { conversationId, organizationId, conversationHistory, tiersVisited, wasEscalated, resolvedByAi, tokensUsed } = input;
 
 	if (!conversationHistory || conversationHistory.length === 0) {
-		console.log("[Reporter] No history to report for conversation:", conversationId);
 		return;
 	}
 
@@ -48,7 +47,6 @@ export async function createReport(input: ReporterInput): Promise<void> {
 		},
 	});
 
-	console.log("[Reporter] Report created for conversation:", conversationId);
 }
 
 async function generateReportData(conversationHistory: MemoryMessage[]): Promise<ReportData> {

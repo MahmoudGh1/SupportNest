@@ -84,7 +84,7 @@ export function Topbar({ pageTitle, onToggleSidebar }: TopbarProps) {
 						width: 34,
 						height: 34,
 						borderRadius: "50%",
-						background: S.purple,
+						background: "var(--color-brand)",
 						display: "flex",
 						alignItems: "center",
 						justifyContent: "center",

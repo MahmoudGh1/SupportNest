@@ -18,7 +18,6 @@ export async function createTicket(
 	next: NextFunction,
 ): Promise<void> {
 	try {
-		console.log("req.user =", req.user);
 		const orgId = (req.user as any).organizationId;
 		const { conversationId, priority } = req.body as CreateTicketBody;
 

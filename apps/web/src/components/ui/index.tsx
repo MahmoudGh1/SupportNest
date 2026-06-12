@@ -8,7 +8,7 @@ import { t } from "@lingui/core/macro";
 // ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
 export const S = {
 	purple: "#534AB7",
-	purpleLight: "#AFA9EC",
+	purpleLight: "#7F77DD",
 	purpleDark: "#3C3489",
 	dark: "var(--page-text)",
 	darkMid: "var(--surface-elevated)",
@@ -19,11 +19,15 @@ export const S = {
 	textSecondary: "var(--label-muted)",
 	green: "#1D9E75",
 	greenBg: "var(--color-success-bg)",
+	greenBgRgb: "var(--color-success-bg-rgb)",
 	amber: "#854F0B",
 	amberBg: "var(--color-warning-bg)",
+	amberBgRgb: "var(--color-warning-bg-rgb)",
 	purpleBg: "var(--color-brand-faint)",
-	danger: "#A32D2D",
+	purpleBgRgb: "var(--color-brand-faint)",
+	danger: "#E24B4A",
 	dangerBg: "var(--color-danger-bg)",
+	dangerBgRgb: "var(--color-danger-bg-rgb)",
 };
 
 // ─── INPUT ────────────────────────────────────────────────────────────────────
@@ -95,10 +99,10 @@ export function Input({
 								? "10px 44px 10px 12px"
 								: "10px 12px",
 						fontSize: 14,
-						border: `1.5px solid ${error ? "#E24B4A" : focused ? S.purple : S.border}`,
+						border: `1.5px solid ${error ? S.danger : focused ? S.purple : S.border}`,
 						borderRadius: 8,
 						outline: "none",
-						background: "#fff",
+						background: "var(--surface)",
 						color: S.dark,
 						transition: "border-color .15s",
 						fontFamily: "inherit",

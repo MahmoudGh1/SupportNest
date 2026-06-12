@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { useLingui } from "@lingui/react/macro";
 import { GoogleLogin } from "@react-oauth/google";
+import Link from "next/link";
 
 const T = {
 	darkBg: "var(--page-bg)",
@@ -18,7 +19,7 @@ const T = {
 	inputBorder: "var(--card-border)",
 	inputFocus: "var(--input-focus)",
 	violet: "#534AB7",
-	violetLight: "#AFA9EC",
+	violetLight: "#7F77DD",
 	danger: "#E24B4A",
 	dangerBg: "var(--danger-bg)",
 	radius: "10px",
@@ -399,7 +400,7 @@ function FormPanel() {
 					>
 						{t`Don't have an account?`}{" "}
 						<button
-							onClick={() => router.push("/register")}
+							onClick={() => router.push("/pricing")}
 							style={{
 								background: "none",
 								border: "none",
@@ -493,7 +494,9 @@ function BrandPanel() {
 						letterSpacing: "-1.2px",
 					}}
 				>
-					SupportNest
+					<Link href="/">
+						SupportNest
+					</Link>
 				</h1>
 
 				<p
@@ -533,7 +536,7 @@ function BrandPanel() {
 					<p
 						style={{
 							fontSize: 15,
-							color: "rgba(255,255,255,0.78)",
+							color: "#534AB7",
 							lineHeight: 1.75,
 							margin: "0 0 24px",
 						}}
@@ -566,7 +569,7 @@ function BrandPanel() {
 							<div
 								style={{
 									fontSize: 12,
-									color: "rgba(255,255,255,0.35)",
+									color: "#534AB7",
 									marginTop: 2,
 								}}
 							>

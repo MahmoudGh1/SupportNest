@@ -41,7 +41,6 @@ export async function sendInvitationService(organizationId: string, invitedById:
 	});
 
 	const token = generateInviteToken();
-    console.log(token)
 	await prisma.invitation.create({
 		data: {
 			organizationId,

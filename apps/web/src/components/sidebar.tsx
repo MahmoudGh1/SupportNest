@@ -26,6 +26,7 @@ const navItems = [
 	{ icon: "chart-bar", label: msg`Analytics`, page: "analytics" },
 	// { icon: "code", label: msg({ message: "API & Widget" }), page: "api" },
 	{ icon: "settings", label: msg`Settings`, page: "settings" },
+	{ icon: "plug", label: msg`API Tools`, page: "tools" },
 	{ icon: "user-circle", label: msg`Profile`, page: "profile" },
 ];
 
@@ -74,7 +75,7 @@ export function Sidebar({
 					style={{
 						width: 32,
 						height: 32,
-						background: S.purple,
+						background: "var(--color-brand)",
 						borderRadius: 8,
 						display: "flex",
 						alignItems: "center",
@@ -91,7 +92,7 @@ export function Sidebar({
 					<div style={{ minWidth: 0 }}>
 						<div
 							style={{
-								color: "#fff",
+								color: "var(--page-text)",
 								fontSize: 13,
 								fontWeight: 600,
 								whiteSpace: "nowrap",
@@ -101,7 +102,7 @@ export function Sidebar({
 						</div>
 						<div
 							style={{
-								color: "rgba(255,255,255,0.35)",
+								color: "var(--sidebar-text)",
 								fontSize: 10,
 								whiteSpace: "nowrap",
 								overflow: "hidden",
@@ -125,51 +126,51 @@ export function Sidebar({
 				}}
 			>
 				{navItems.map((item) => {
-					const isActive = currentPage === item.page;
-					return (
-						<button
-							key={item.page}
-							onClick={() => onNavigate(item.page)}
-							title={collapsed ? i18n._(item.label) : ""}
-							style={{
-								display: "flex",
-								alignItems: "center",
-								gap: 10,
-								padding: collapsed ? "9px 14px" : "8px 10px",
-								borderRadius: 8,
-								cursor: "pointer",
-								border: "none",
-								background: isActive ? S.purple : "transparent",
-								color: isActive ? "#fff" : "rgba(255,255,255,0.5)",
-								fontSize: 13,
-								fontFamily: "inherit",
-								transition: "all .15s",
-								whiteSpace: "nowrap",
-								justifyContent: collapsed ? "center" : "flex-start",
-							}}
-							onMouseEnter={(e) => {
-								if (!isActive) {
-									const el = e.currentTarget as HTMLElement;
-									el.style.background = "rgba(255,255,255,0.06)";
-									el.style.color = "rgba(255,255,255,0.85)";
-								}
-							}}
-							onMouseLeave={(e) => {
-								if (!isActive) {
-									const el = e.currentTarget as HTMLElement;
-									el.style.background = "transparent";
-									el.style.color = "rgba(255,255,255,0.5)";
-								}
-							}}
-						>
-							<i
-								className={`ti ti-${item.icon}`}
-								style={{ fontSize: 17, flexShrink: 0 }}
-							/>
-							{!collapsed && <span>{i18n._(item.label)}</span>}
-						</button>
-					);
-				})}
+						const isActive = currentPage === item.page;
+						return (
+							<button
+								key={item.page}
+								onClick={() => onNavigate(item.page)}
+								title={collapsed ? i18n._(item.label) : ""}
+								style={{
+									display: "flex",
+									alignItems: "center",
+									gap: 10,
+									padding: collapsed ? "9px 14px" : "8px 10px",
+									borderRadius: 8,
+									cursor: "pointer",
+									border: "none",
+									background: isActive ? "var(--color-brand)" : "transparent",
+									color: isActive ? "#fff" : "var(--sidebar-text)",
+									fontSize: 13,
+									fontFamily: "inherit",
+									transition: "all .15s",
+									whiteSpace: "nowrap",
+									justifyContent: collapsed ? "center" : "flex-start",
+								}}
+								onMouseEnter={(e) => {
+									if (!isActive) {
+										const el = e.currentTarget as HTMLElement;
+										el.style.background = "rgba(255,255,255,0.06)";
+										el.style.color = "var(--sidebar-text-active)";
+									}
+								}}
+								onMouseLeave={(e) => {
+									if (!isActive) {
+										const el = e.currentTarget as HTMLElement;
+										el.style.background = "transparent";
+										el.style.color = "var(--sidebar-text)";
+									}
+								}}
+							>
+								<i
+									className={`ti ti-${item.icon}`}
+									style={{ fontSize: 17, flexShrink: 0 }}
+								/>
+								{!collapsed && <span>{i18n._(item.label)}</span>}
+							</button>
+						);
+					})}
 			</div>
 
 			{/* AI Mode button */}
@@ -178,7 +179,7 @@ export function Sidebar({
 					<button
 						style={{
 							width: "100%",
-							background: S.purple,
+							background: "var(--color-brand)",
 							border: "none",
 							borderRadius: 8,
 							color: "#fff",
@@ -226,7 +227,7 @@ export function Sidebar({
 								width: 28,
 								height: 28,
 								borderRadius: "50%",
-								background: S.purple,
+								background: "var(--color-brand)",
 								display: "flex",
 								alignItems: "center",
 								justifyContent: "center",
@@ -243,7 +244,7 @@ export function Sidebar({
 								style={{
 									fontSize: 12,
 									fontWeight: 500,
-									color: "rgba(255,255,255,0.85)",
+									color: "var(--sidebar-text-active)",
 									whiteSpace: "nowrap",
 									overflow: "hidden",
 									textOverflow: "ellipsis",
@@ -254,7 +255,7 @@ export function Sidebar({
 							<div
 								style={{
 									fontSize: 10,
-									color: "rgba(255,255,255,0.35)",
+									color: "var(--sidebar-text)",
 									whiteSpace: "nowrap",
 									overflow: "hidden",
 									textOverflow: "ellipsis",
@@ -277,7 +278,7 @@ export function Sidebar({
 						cursor: "pointer",
 						border: "none",
 						background: "transparent",
-						color: "rgba(255,255,255,0.35)",
+						color: "var(--sidebar-text)",
 						fontFamily: "inherit",
 						fontSize: 12,
 						justifyContent: collapsed ? "center" : "flex-start",

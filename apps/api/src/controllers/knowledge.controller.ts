@@ -33,7 +33,6 @@ export const uploadDocument: RequestHandler = asyncHandler(async (req: Authentic
 		`supportnest/${orgId}/knowledge`, // folder
 		`${Date.now()}-${title}`, // public_id
 	);
-	console.log(storagePath);
 
 	// 2. Save document record in Postgres via Prisma
 	const doc = await prisma.knowledgeDocument.create({
