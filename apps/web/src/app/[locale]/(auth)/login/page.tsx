@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { useLingui } from "@lingui/react/macro";
 import { GoogleLogin } from "@react-oauth/google";
+import Link from "next/link";
 
 const T = {
 	darkBg: "var(--page-bg)",
@@ -475,7 +476,10 @@ function BrandPanel() {
 						letterSpacing: "-1.2px",
 					}}
 				>
-					<Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
+					<Link
+						href="/"
+						style={{ color: "inherit", textDecoration: "none" }}
+					>
 						SupportNest
 					</Link>
 				</h1>
@@ -576,6 +580,8 @@ export default function LoginPage() {
 					overflow: "hidden",
 					background: "var(--page-bg)",
 					color: "var(--page-text)",
+					justifyContent: "center",
+					gap: "2rem",
 				}}
 			>
 				<FormPanel />
