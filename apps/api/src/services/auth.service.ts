@@ -19,16 +19,6 @@ import { hashApiKey } from "src/utils/crypto.utils.js";
 import * as jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 
-<<<<<<< HEAD
-export const registerService = async ({
-	businessName,
-	email,
-	password,
-	firstName,
-	lastName,
-	planId,
-}: RegisterInput) => {
-=======
 export const registerService = async ({ businessName, email, password, firstName, lastName, planId }: RegisterInput) => {
 	const normalizedEmail = email.trim().toLowerCase();
 >>>>>>> origin/LocalFixes

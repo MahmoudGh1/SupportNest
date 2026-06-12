@@ -1,59 +1,6 @@
 import { getSession } from "@/lib/auth";
-<<<<<<< HEAD
-import {
-	AuthUser,
-	DashboardStats,
-	GetKnowledgeDocsResponse,
-	KnowledgeDocument,
-	LoginResponse,
-	OrgProfile,
-	OrgSetupData,
-	UpdatePasswordInput,
-	UpdateProfileInput,
-	UpdateWidgetConfigInput,
-	UploadPdfInput,
-	UserProfile,
-	ApiKey,
-	AdminOrganizationsResponse,
-	AdminOverview,
-} from "@/types/types";
-
-const mockDelay = (ms = 600) => new Promise((r) => setTimeout(r, ms));
-
-// ─── KB MOCK DATA STORE ───────────────────────────────────────────────────────
-// Mutable in-memory store — simulates the database for this session
-
-// ─── SETTINGS MOCK DATA ───────────────────────────────────────────────────────
-let mockOrgProfile: OrgProfile = {
-	id: "org1",
-	name: "Acme Corp",
-	slug: "acme-corp",
-	email: "support@acme.com",
-	widget_config: {
-		color: "#534AB7",
-		greeting: "Hi! How can we help you today?",
-		position: "bottom-right",
-	},
-	plan_id: "plan_starter",
-	is_active: true,
-	created_at: "2024-01-15T10:00:00Z",
-	updated_at: "2024-01-15T10:00:00Z",
-};
-
-const mockUserProfile: UserProfile = {
-	id: "u1",
-	email: "admin@acme.com",
-	first_name: "Mohamed",
-	last_name: "Rashad",
-	role: "org_admin",
-	organization_id: "org1",
-	is_active: true,
-	created_at: "2024-01-15T10:00:00Z",
-};
-=======
 import { mapApiUser } from "@/lib/map-user";
-import { AuthUser, DashboardStats, GetKnowledgeDocsResponse, KnowledgeDocument, LoginResponse, PricingPlan, OrgProfile, OrgSetupData, UpdatePasswordInput, UpdateProfileInput, UploadPdfInput, UserProfile, ApiKey } from "@/types/types";
->>>>>>> origin/LocalFixes
+import { AuthUser, DashboardStats, GetKnowledgeDocsResponse, KnowledgeDocument, LoginResponse, PricingPlan, OrgProfile, OrgSetupData, UpdatePasswordInput, UpdateProfileInput, UploadPdfInput, UserProfile, ApiKey, AdminOverview, AdminOrganizationsResponse } from "@/types/types";
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
 function normalizeApiBaseUrl(rawBaseUrl?: string) {
@@ -273,13 +220,7 @@ export const api = {
 
 	// ─── KNOWLEDGE BASE ─────────────────────────────────────────────────────────
 
-<<<<<<< HEAD
-	async getKnowledgeDocs(
-		filterState: Record<string, unknown>,
-	): Promise<GetKnowledgeDocsResponse | null> {
-=======
 	async getKnowledgeDocs(filterState: Record<string, string | number | undefined | null>): Promise<GetKnowledgeDocsResponse | null> {
->>>>>>> origin/LocalFixes
 		const user = getSession();
 		if (!user) {
 			throw new Error("User not found");
@@ -297,13 +238,8 @@ export const api = {
 			if (!response.ok) throw new Error(response.statusText);
 
 			return response.json();
-<<<<<<< HEAD
-		} catch (error) {
-			console.log(error instanceof Error ? error.message : "Unknown error");
-=======
 		} catch (error: unknown) {
 			console.log(getErrorMessage(error));
->>>>>>> origin/LocalFixes
 			return null;
 		}
 	},
