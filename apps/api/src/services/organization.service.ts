@@ -3,7 +3,10 @@ import AppError from "src/utils/appError.js";
 
 // ─── Get My Organization
 
-export const getMyOrgService = async (organizationId: string) => {
+export const getMyOrgService = async (organizationId: string | null) => {
+	if (!organizationId) {
+		throw new AppError("No organization associated with this account", 400);
+	}
 	const org = await prisma.organization.findUnique({
 		where: { id: organizationId, isActive: true },
 		select: {

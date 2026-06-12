@@ -4,6 +4,8 @@ import { parseDateRange, round2, safeAvg } from '../../utils/helpers.js';
 
 type TierStats = {
   router_received: number;
+  tier0_resolved: number;
+  tier0_resolve_rate: number;
   tier1_resolved: number;
   tier1_resolve_rate: number;
   tier2_resolved: number;
@@ -153,14 +155,15 @@ async function buildTierStats(
     ...(dateFilter ? { createdAt: dateFilter } : {}),
   };
 
-  const [tier1Count, tier2Count, humanCount, unresolvedCount] = await Promise.all([
+  const [tier0Count, tier1Count, tier2Count, humanCount, unresolvedCount] = await Promise.all([
+    prisma.conversationAnalytics.count({ where: { ...analyticsWhere, resolvedByTier: 'TIER0' } }),
     prisma.conversationAnalytics.count({ where: { ...analyticsWhere, resolvedByTier: 'TIER1' } }),
     prisma.conversationAnalytics.count({ where: { ...analyticsWhere, resolvedByTier: 'TIER2' } }),
     prisma.conversationAnalytics.count({ where: { ...analyticsWhere, resolvedByTier: 'HUMAN' } }),
     prisma.conversationAnalytics.count({ where: { ...analyticsWhere, resolvedByTier: 'UNRESOLVED' } }),
   ]);
 
-  const routerReceived = tier1Count + tier2Count + humanCount + unresolvedCount;
+  const routerReceived = tier0Count + tier1Count + tier2Count + humanCount + unresolvedCount;
 
   const tier1Logs = await prisma.agentLog.aggregate({
     where: { ...baseWhere, tier: 'TIER1' },
@@ -186,6 +189,8 @@ async function buildTierStats(
 
   return {
     router_received: routerReceived,
+    tier0_resolved: tier0Count,
+    tier0_resolve_rate: routerReceived > 0 ? round2((tier0Count / routerReceived) * 100) : 0,
     tier1_resolved: tier1Count,
     tier1_resolve_rate: routerReceived > 0 ? round2((tier1Count / routerReceived) * 100) : 0,
     tier2_resolved: tier2Count,

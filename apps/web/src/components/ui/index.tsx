@@ -14,6 +14,7 @@ export const S = {
 	darkMid: "var(--surface-elevated)",
 	white: "#ffffff",
 	bg: "var(--surface-elevated)",
+	bgSoft: "var(--color-bg-soft)",
 	border: "var(--card-border)",
 	textMuted: "var(--page-muted)",
 	textSecondary: "var(--label-muted)",
@@ -22,6 +23,9 @@ export const S = {
 	amber: "#854F0B",
 	amberBg: "var(--color-warning-bg)",
 	purpleBg: "var(--color-brand-faint)",
+	purpleFaint: "var(--color-brand-faint)",
+	info: "var(--color-info)",
+	infoBg: "#EEF2FF",
 	danger: "#A32D2D",
 	dangerBg: "var(--color-danger-bg)",
 };

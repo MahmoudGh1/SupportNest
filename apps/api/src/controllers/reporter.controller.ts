@@ -30,10 +30,7 @@ export const getReportsController: RequestHandler = asyncHandler(async (req: Aut
 	res.status(200).json({ reports });
 });
 
-<<<<<<< HEAD
 // Get a single report
-=======
->>>>>>> origin/LocalFixes
 export const getReportByIdController: RequestHandler = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
 	const organizationId = req.user?.organizationId;
 	const { id } = req.params;
