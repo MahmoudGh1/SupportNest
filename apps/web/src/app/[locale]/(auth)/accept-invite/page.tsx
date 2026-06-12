@@ -9,14 +9,13 @@ const T = {
     darkPanel: "var(--surface-elevated)",
     darkSurface: "var(--surface)",
     darkBorder: "var(--card-border)",
-    white: "var(--page-text)",
-    gray500: "var(--page-muted)",
-    gray600: "var(--page-muted)",
+    text: "var(--page-text)",
+    muted: "var(--page-muted)",
     inputBg: "var(--surface)",
     inputBorder: "var(--card-border)",
     inputFocus: "var(--input-focus)",
-    violet: "#534AB7",
-    violetLight: "#AFA9EC",
+    violet: "var(--brand-violet, #534AB7)",
+    violetLight: "var(--brand-violet-light, #AFA9EC)",
     danger: "#E24B4A",
     dangerBg: "var(--danger-bg)",
     radius: "10px",
@@ -60,7 +59,7 @@ function FormField({ label, type = "text", value, onChange, placeholder, error, 
                         padding: rightEl ? "12px 44px 12px 14px" : "12px 14px",
                         fontSize: 14,
                         fontFamily: T.font,
-                        color: T.white,
+                        color: T.text,
                         background: T.inputBg,
                         border: `1.5px solid ${error ? T.danger : focused ? T.inputFocus : T.inputBorder}`,
                         borderRadius: T.radius,
@@ -157,10 +156,10 @@ function FormPanel() {
 
     if (pageLoading) {
         return (
-            <div style={{ width: "45%", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: T.darkPanel, borderRight: `1px solid ${T.darkBorder}` }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+            <div className="invite-form-panel">
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
                     <i className="ti ti-loader-2" style={{ fontSize: 28, color: T.violet, animation: "spin 0.8s linear infinite" }} />
-                    <p style={{ color: T.gray500, fontSize: 14, margin: 0 }}>Verifying invitation…</p>
+                    <p style={{ color: T.muted, fontSize: 14, margin: 0 }}>Verifying invitation…</p>
                 </div>
             </div>
         );
@@ -168,12 +167,12 @@ function FormPanel() {
 
     if (tokenError) {
         return (
-            <div style={{ width: "45%", minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, background: T.darkPanel, borderRight: `1px solid ${T.darkBorder}`, padding: "60px 64px" }}>
+            <div className="invite-form-panel" style={{ gap: 16 }}>
                 <div style={{ width: 56, height: 56, background: "rgba(226,75,74,0.12)", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <i className="ti ti-alert-circle" style={{ fontSize: 26, color: T.danger }} />
                 </div>
-                <h2 style={{ fontSize: 22, fontWeight: 700, color: T.white, margin: 0 }}>Invalid Invitation</h2>
-                <p style={{ fontSize: 14, color: T.gray500, margin: 0, textAlign: "center" }}>{tokenError}</p>
+                <h2 style={{ fontSize: 22, fontWeight: 700, color: T.text, margin: 0 }}>Invalid Invitation</h2>
+                <p style={{ fontSize: 14, color: T.muted, margin: 0, textAlign: "center" }}>{tokenError}</p>
                 <button
                     onClick={() => router.push("/login")}
                     style={{ marginTop: 8, padding: "12px 28px", background: T.violet, color: "#fff", border: "none", borderRadius: T.radius, fontSize: 14, fontWeight: 600, fontFamily: T.font, cursor: "pointer" }}
@@ -186,8 +185,8 @@ function FormPanel() {
 
     return (
         <div
+            className="invite-form-panel"
             onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            style={{ width: "45%", background: T.darkPanel, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 64px", minHeight: "100vh", borderRight: `1px solid ${T.darkBorder}` }}
         >
             <div style={{ width: "100%", maxWidth: 380 }}>
                 {/* Logo */}
@@ -198,11 +197,11 @@ function FormPanel() {
                 </div>
 
                 {/* Heading */}
-                <h1 style={{ fontSize: 30, fontWeight: 700, color: T.white, margin: "0 0 8px", letterSpacing: "-0.8px", textAlign: "center" }}>
+                <h1 style={{ fontSize: 30, fontWeight: 700, color: T.text, margin: "0 0 8px", letterSpacing: "-0.8px", textAlign: "center" }}>
                     Accept Invitation
                 </h1>
-                <p style={{ fontSize: 14, color: T.gray500, textAlign: "center", margin: "0 0 4px" }}>
-                    You've been invited to join <strong style={{ color: T.white }}>{orgName}</strong>
+                <p style={{ fontSize: 14, color: T.muted, textAlign: "center", margin: "0 0 4px" }}>
+                    You've been invited to join <strong style={{ color: T.text }}>{orgName}</strong>
                 </p>
                 <p style={{ fontSize: 13, color: T.violetLight, textAlign: "center", margin: "0 0 32px" }}>
                     {email}
@@ -231,7 +230,7 @@ function FormPanel() {
                         placeholder="Min. 8 characters"
                         error={errors.password}
                         rightEl={
-                            <button onClick={() => setShowPass((p) => !p)} style={{ background: "none", border: "none", cursor: "pointer", color: T.gray500, padding: 0, display: "flex" }}>
+                            <button onClick={() => setShowPass((p) => !p)} style={{ background: "none", border: "none", cursor: "pointer", color: T.muted, padding: 0, display: "flex" }}>
                                 <i className={`ti ti-eye${showPass ? "-off" : ""}`} style={{ fontSize: 17 }} />
                             </button>
                         }
@@ -245,7 +244,7 @@ function FormPanel() {
                         placeholder="Repeat password"
                         error={errors.confirmPassword}
                         rightEl={
-                            <button onClick={() => setShowConfirm((p) => !p)} style={{ background: "none", border: "none", cursor: "pointer", color: T.gray500, padding: 0, display: "flex" }}>
+                            <button onClick={() => setShowConfirm((p) => !p)} style={{ background: "none", border: "none", cursor: "pointer", color: T.muted, padding: 0, display: "flex" }}>
                                 <i className={`ti ti-eye${showConfirm ? "-off" : ""}`} style={{ fontSize: 17 }} />
                             </button>
                         }
@@ -254,14 +253,14 @@ function FormPanel() {
                     <button
                         onClick={handleSubmit}
                         disabled={submitting}
-                        style={{ width: "100%", padding: "13px", background: T.violet, color: T.white, border: "none", borderRadius: T.radius, fontSize: 14, fontWeight: 600, fontFamily: T.font, cursor: submitting ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 4, opacity: submitting ? 0.7 : 1, transition: "opacity .15s" }}
+                        style={{ width: "100%", padding: "13px", background: T.violet, color: "#fff", border: "none", borderRadius: T.radius, fontSize: 14, fontWeight: 600, fontFamily: T.font, cursor: submitting ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 4, opacity: submitting ? 0.7 : 1, transition: "opacity .15s" }}
                     >
                         {submitting ? (
                             <><i className="ti ti-loader-2" style={{ fontSize: 16, animation: "spin 0.8s linear infinite" }} /> Creating account…</>
                         ) : "Create account & join team"}
                     </button>
 
-                    <p style={{ textAlign: "center", fontSize: 13, color: T.gray500, margin: 0 }}>
+                    <p style={{ textAlign: "center", fontSize: 13, color: T.muted, margin: 0 }}>
                         Already have an account?{" "}
                         <button onClick={() => router.push("/login")} style={{ background: "none", border: "none", color: T.violetLight, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: T.font, padding: 0 }}>
                             Sign in
@@ -275,19 +274,19 @@ function FormPanel() {
 
 function BrandPanel() {
     return (
-        <div style={{ flex: 1, background: T.darkBg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 64px", minHeight: "100vh" }}>
+        <div className="invite-brand-panel">
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", maxWidth: 440 }}>
-                <h1 style={{ fontSize: 42, fontWeight: 700, color: T.white, margin: "0 0 12px", letterSpacing: "-1.2px" }}>
-                    <Link href="/">
-						SupportNest
-					</Link>
+                <h1 style={{ fontSize: 42, fontWeight: 700, color: T.text, margin: "0 0 12px", letterSpacing: "-1.2px" }}>
+                    <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
+                        SupportNest
+                    </Link>
                 </h1>
                 <p style={{ fontSize: 13, color: T.violetLight, fontWeight: 500, margin: "0 0 48px", lineHeight: 1.5 }}>
                     AI Powered Multi-Agent Customer Support Platform
                 </p>
                 <div style={{ background: T.darkSurface, border: `1px solid ${T.darkBorder}`, borderRadius: T.radiusLg, padding: "28px", textAlign: "left", width: "100%" }}>
                     <div style={{ fontSize: 36, lineHeight: 1, color: T.violet, fontFamily: "Georgia, serif", marginBottom: 16 }}>"</div>
-                    <p style={{ fontSize: 15, color: "rgba(255,255,255,0.78)", lineHeight: 1.75, margin: "0 0 24px" }}>
+                    <p style={{ fontSize: 15, color: T.text, lineHeight: 1.75, margin: "0 0 24px" }}>
                         SupportNest is a game changer. Their AI handles our customers and only escalates what truly needs a human. Our team finally has time to breathe.
                     </p>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -295,8 +294,8 @@ function BrandPanel() {
                             M
                         </div>
                         <div>
-                            <div style={{ fontSize: 13, fontWeight: 600, color: T.white }}>Mahmoud Al-Rashidi</div>
-                            <div style={{ fontSize: 12, color: "#534AB7", marginTop: 2 }}>Head of Support, Maqsam</div>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Mahmoud Al-Rashidi</div>
+                            <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>Head of Support, Maqsam</div>
                         </div>
                     </div>
                 </div>
@@ -308,8 +307,69 @@ function BrandPanel() {
 export default function AcceptInvitePage() {
     return (
         <>
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } } * { box-sizing: border-box; }`}</style>
-            <div style={{ display: "flex", height: "100vh", fontFamily: T.font, overflow: "hidden", background: "var(--page-bg)", color: "var(--page-text)" }}>
+            <style>{`
+                @keyframes spin { to { transform: rotate(360deg); } }
+                * { box-sizing: border-box; }
+
+                .invite-layout {
+                    display: flex;
+                    min-height: 100vh;
+                    font-family: 'Sora', system-ui, sans-serif;
+                    background: var(--page-bg);
+                    color: var(--page-text);
+                }
+
+                .invite-form-panel {
+                    width: 45%;
+                    background: var(--surface-elevated);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 60px 64px;
+                    min-height: 100vh;
+                    border-right: 1px solid var(--card-border);
+                }
+
+                .invite-brand-panel {
+                    flex: 1;
+                    background: var(--page-bg);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 60px 64px;
+                    min-height: 100vh;
+                }
+
+                /* Tablet */
+                @media (max-width: 900px) {
+                    .invite-form-panel {
+                        width: 55%;
+                        padding: 48px 40px;
+                    }
+                    .invite-brand-panel {
+                        padding: 48px 32px;
+                    }
+                }
+
+                /* Mobile */
+                @media (max-width: 640px) {
+                    .invite-layout {
+                        flex-direction: column;
+                    }
+                    .invite-form-panel {
+                        width: 100%;
+                        min-height: 100vh;
+                        padding: 48px 24px;
+                        border-right: none;
+                    }
+                    .invite-brand-panel {
+                        display: none;
+                    }
+                }
+            `}</style>
+            <div className="invite-layout">
                 <FormPanel />
                 <BrandPanel />
             </div>

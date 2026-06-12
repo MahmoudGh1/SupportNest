@@ -12,14 +12,13 @@ const T = {
 	darkPanel: "var(--surface-elevated)",
 	darkSurface: "var(--surface)",
 	darkBorder: "var(--card-border)",
-	white: "var(--page-text)",
-	gray500: "var(--page-muted)",
-	gray600: "var(--page-muted)",
+	text: "var(--page-text)",
+	muted: "var(--page-muted)",
 	inputBg: "var(--surface)",
 	inputBorder: "var(--card-border)",
 	inputFocus: "var(--input-focus)",
-	violet: "#534AB7",
-	violetLight: "#7F77DD",
+	violet: "var(--brand-violet, #534AB7)",
+	violetLight: "var(--brand-violet-light, #7F77DD)",
 	danger: "#E24B4A",
 	dangerBg: "var(--danger-bg)",
 	radius: "10px",
@@ -97,7 +96,7 @@ function FormField({
 						padding: rightEl ? "12px 44px 12px 14px" : "12px 14px",
 						fontSize: 14,
 						fontFamily: T.font,
-						color: T.white,
+						color: T.text,
 						background: T.inputBg,
 						border: `1.5px solid ${error ? T.danger : focused ? T.inputFocus : T.inputBorder}`,
 						borderRadius: T.radius,
@@ -181,18 +180,8 @@ function FormPanel() {
 
 	return (
 		<div
+			className="login-form-panel"
 			onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-			style={{
-				width: "45%",
-				background: T.darkPanel,
-				display: "flex",
-				flexDirection: "column",
-				alignItems: "center",
-				justifyContent: "center",
-				padding: "60px 64px",
-				minHeight: "100vh",
-				borderRight: `1px solid ${T.darkBorder}`,
-			}}
 		>
 			<div style={{ width: "100%", maxWidth: 380 }}>
 				{/* Logo mark */}
@@ -229,7 +218,7 @@ function FormPanel() {
 					style={{
 						fontSize: 30,
 						fontWeight: 700,
-						color: T.white,
+						color: T.text,
 						margin: "0 0 8px",
 						letterSpacing: "-0.8px",
 						textAlign: "center",
@@ -240,7 +229,7 @@ function FormPanel() {
 				<p
 					style={{
 						fontSize: 14,
-						color: T.gray500,
+						color: T.muted,
 						textAlign: "center",
 						margin: "0 0 36px",
 					}}
@@ -249,7 +238,7 @@ function FormPanel() {
 				</p>
 
 				<div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-					{/* Google — disabled */}
+					{/* Google */}
 					<GoogleLogin
 						onSuccess={async (credentialResponse) => {
 							setError("");
@@ -269,7 +258,7 @@ function FormPanel() {
 					{/* Divider */}
 					<div style={{ display: "flex", alignItems: "center", gap: 12 }}>
 						<div style={{ flex: 1, height: 1, background: T.darkBorder }} />
-						<span style={{ fontSize: 12, color: T.gray600 }}>{t`or`}</span>
+						<span style={{ fontSize: 12, color: T.muted }}>{t`or`}</span>
 						<div style={{ flex: 1, height: 1, background: T.darkBorder }} />
 					</div>
 
@@ -336,7 +325,7 @@ function FormPanel() {
 									background: "none",
 									border: "none",
 									cursor: "pointer",
-									color: T.gray500,
+									color: T.muted,
 									padding: 0,
 									display: "flex",
 								}}
@@ -357,7 +346,7 @@ function FormPanel() {
 							width: "100%",
 							padding: "13px",
 							background: T.violet,
-							color: T.white,
+							color: "#fff",
 							border: "none",
 							borderRadius: T.radius,
 							fontSize: 14,
@@ -394,7 +383,7 @@ function FormPanel() {
 						style={{
 							textAlign: "center",
 							fontSize: 13,
-							color: T.gray500,
+							color: T.muted,
 							margin: 0,
 						}}
 					>
@@ -422,9 +411,10 @@ function FormPanel() {
 					style={{
 						textAlign: "center",
 						fontSize: 11,
-						color: "rgba(255,255,255,0.2)",
+						color: T.muted,
 						marginTop: 48,
 						lineHeight: 1.6,
+						opacity: 0.6,
 					}}
 				>
 					By continuing, you agree to SupportNest{" "}
@@ -432,11 +422,12 @@ function FormPanel() {
 						style={{
 							background: "none",
 							border: "none",
-							color: "rgba(255,255,255,0.35)",
+							color: T.muted,
 							fontSize: 11,
 							cursor: "pointer",
 							fontFamily: T.font,
 							padding: 0,
+							textDecoration: "underline",
 						}}
 					>
 						Terms of Service
@@ -446,11 +437,12 @@ function FormPanel() {
 						style={{
 							background: "none",
 							border: "none",
-							color: "rgba(255,255,255,0.35)",
+							color: T.muted,
 							fontSize: 11,
 							cursor: "pointer",
 							fontFamily: T.font,
 							padding: 0,
+							textDecoration: "underline",
 						}}
 					>
 						Privacy Policy
@@ -464,18 +456,7 @@ function FormPanel() {
 
 function BrandPanel() {
 	return (
-		<div
-			style={{
-				flex: 1,
-				background: T.darkBg,
-				display: "flex",
-				flexDirection: "column",
-				alignItems: "center",
-				justifyContent: "center",
-				padding: "60px 64px",
-				minHeight: "100vh",
-			}}
-		>
+		<div className="login-brand-panel">
 			<div
 				style={{
 					display: "flex",
@@ -489,12 +470,12 @@ function BrandPanel() {
 					style={{
 						fontSize: 42,
 						fontWeight: 700,
-						color: T.white,
+						color: T.text,
 						margin: "0 0 12px",
 						letterSpacing: "-1.2px",
 					}}
 				>
-					<Link href="/">
+					<Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
 						SupportNest
 					</Link>
 				</h1>
@@ -536,7 +517,7 @@ function BrandPanel() {
 					<p
 						style={{
 							fontSize: 15,
-							color: "#534AB7",
+							color: T.text,
 							lineHeight: 1.75,
 							margin: "0 0 24px",
 						}}
@@ -563,13 +544,13 @@ function BrandPanel() {
 							{testimonial.name.charAt(0)}
 						</div>
 						<div>
-							<div style={{ fontSize: 13, fontWeight: 600, color: T.white }}>
+							<div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>
 								{testimonial.name}
 							</div>
 							<div
 								style={{
 									fontSize: 12,
-									color: "#534AB7",
+									color: T.muted,
 									marginTop: 2,
 								}}
 							>
@@ -586,17 +567,69 @@ function BrandPanel() {
 export default function LoginPage() {
 	return (
 		<>
-			<style>{`@keyframes spin { to { transform: rotate(360deg); } } * { box-sizing: border-box; }`}</style>
-			<div
-				style={{
-					display: "flex",
-					height: "100vh",
-					fontFamily: T.font,
-					overflow: "hidden",
-					background: "var(--page-bg)",
-					color: "var(--page-text)",
-				}}
-			>
+			<style>{`
+				@keyframes spin { to { transform: rotate(360deg); } }
+				* { box-sizing: border-box; }
+
+				.login-layout {
+					display: flex;
+					min-height: 100vh;
+					font-family: 'Sora', system-ui, sans-serif;
+					background: var(--page-bg);
+					color: var(--page-text);
+				}
+
+				.login-form-panel {
+					width: 45%;
+					background: var(--surface-elevated);
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					justify-content: center;
+					padding: 60px 64px;
+					min-height: 100vh;
+					border-right: 1px solid var(--card-border);
+				}
+
+				.login-brand-panel {
+					flex: 1;
+					background: var(--page-bg);
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					justify-content: center;
+					padding: 60px 64px;
+					min-height: 100vh;
+				}
+
+				/* Tablet */
+				@media (max-width: 900px) {
+					.login-form-panel {
+						width: 55%;
+						padding: 48px 40px;
+					}
+					.login-brand-panel {
+						padding: 48px 32px;
+					}
+				}
+
+				/* Mobile — stack vertically, brand panel hidden */
+				@media (max-width: 640px) {
+					.login-layout {
+						flex-direction: column;
+					}
+					.login-form-panel {
+						width: 100%;
+						min-height: 100vh;
+						padding: 48px 24px;
+						border-right: none;
+					}
+					.login-brand-panel {
+						display: none;
+					}
+				}
+			`}</style>
+			<div className="login-layout">
 				<FormPanel />
 				<BrandPanel />
 			</div>
