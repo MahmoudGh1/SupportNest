@@ -2,6 +2,7 @@ import type {
 	AgentAction,
 	AgentTier,
 	MessageTier,
+	ResolutionTier,
 } from "generated/prisma/enums.js";
 
 // what tier to route to, and the router's reasoning
@@ -28,6 +29,7 @@ export type RouterLLMOutput = {
 export type TierResponse = {
 	tier: MessageTier;
 	responseText: string;
+	loginUrl?: string | null;
 	agentLog: {
 		confidenceScore: number; // 0.0 - 1.0
 		tokensUsed?: number;
@@ -46,6 +48,7 @@ export type ConversationMessage = {
 export type PipelineContext = {
 	conversationId: string;
 	organizationId: string;
+	customerId: string;
 	latestMessage: string;
 	conversationHistory: ConversationMessage[];
 };
@@ -53,15 +56,16 @@ export type PipelineContext = {
 // What the router returns after the full cycle (routing + tier call + review)
 export type RouterOutput = {
 	finalResponse: string;
-	resolvedByTier: Exclude<AgentTier, "ROUTER"> | "HUMAN";
+	resolvedByTier: Exclude<AgentTier, "ROUTER"> | ResolutionTier;
 	approved: boolean;
+	loginUrl?: string | null;
 };
 
 // What gets written to agent_logs — maps directly to your Prisma schema
 export type AgentLogEntry = {
 	conversationId: string;
 	tier: AgentTier;
-	action: string;
+	action: AgentAction;
 	input: string;
 	output: string;
 	confidenceScore?: number;

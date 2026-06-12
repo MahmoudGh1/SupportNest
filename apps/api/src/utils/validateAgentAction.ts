@@ -1,27 +1,29 @@
-// Define your allowed actions as a constant for easy access
-const ALLOWED_ACTIONS = [
-	"RESOLVED",
+const TIER_ACTIONS = [
+	"ESCALATED_TO_TIER0",
 	"ESCALATED_TO_TIER1",
 	"ESCALATED_TO_TIER2",
 	"ESCALATED_TO_HUMAN",
-	"REJECTED_OUTPUT",
-	"NO_MATCH",
 ] as const;
 
-type AgentAction = (typeof ALLOWED_ACTIONS)[number];
+const REVIEW_ACTIONS = ["RESOLVED", "REJECTED_OUTPUT"] as const;
 
-export default function validateAgentAction(decision: string): AgentAction {
-	const formattedAction = `ESCALATED_TO_${decision}` as any;
+type TierAction = (typeof TIER_ACTIONS)[number];
+type ReviewAction = (typeof REVIEW_ACTIONS)[number];
 
-	// Check if it exists in your allowed list
-	if (ALLOWED_ACTIONS.includes(formattedAction)) {
-		return formattedAction;
-	}
-
-	// Fallback: If the LLM gives you something invalid (like TIER0),
-	// log it as NO_MATCH or another safe default
+export function validateRoutingDecision(decision: string): TierAction {
+	const formatted = `ESCALATED_TO_${decision.toUpperCase()}` as any;
+	if (TIER_ACTIONS.includes(formatted)) return formatted;
 	console.warn(
-		`Unexpected routing decision from LLM: ${decision}. Defaulting to NO_MATCH.`,
+		`Unexpected routing decision from LLM: ${decision}. Defaulting to ESCALATED_TO_HUMAN.`,
 	);
-	return "NO_MATCH";
+	return "ESCALATED_TO_HUMAN";
+}
+
+export function validateReviewDecision(verdict: string): ReviewAction {
+	const formatted = verdict.toUpperCase() as any;
+	if (REVIEW_ACTIONS.includes(formatted)) return formatted;
+	console.warn(
+		`Unexpected review verdict from LLM: ${verdict}. Defaulting to REJECTED_OUTPUT.`,
+	);
+	return "REJECTED_OUTPUT";
 }
