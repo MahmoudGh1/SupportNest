@@ -163,8 +163,8 @@ export async function askTier0Agent({
 		.join("\n\n");
 
 	const historyMessages = conversationHistory.flatMap((msg): BaseMessage[] => {
-		if (msg.role === "customer") return [new HumanMessage(msg.content)];
-		if (msg.role === "ai") return [new AIMessage(msg.content)];
+		if (msg.role === "CUSTOMER") return [new HumanMessage(msg.content)];
+		if (msg.role === "AI") return [new AIMessage(msg.content)];
 		return [];
 	});
 

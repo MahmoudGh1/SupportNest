@@ -3,8 +3,8 @@ import type { PipelineContext } from "../types/agent.types.js";
 
 async function test() {
 	const context: PipelineContext = {
-		conversationId: "66378af2-6f83-444f-907a-b0d39cb15563", // put a real one from your DB
-		organizationId: "e11a17f2-dd8f-4a43-b515-9537c799ce47", // put a real one from your DB
+		conversationId: "01d6c5da-c2c2-48f6-a937-18d368f38e92", // put a real one from your DB
+		organizationId: "85d6389a-bc26-4e1c-8c05-68f8b61d8241", // put a real one from your DB
 		latestMessage: "Can I modify or cancel my order after it has been placed?",
 		conversationHistory: [],
 	};

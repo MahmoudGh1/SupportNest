@@ -34,6 +34,7 @@ export const registerService = async ({
 	if (existing) {
 		throw new AppError("Email already registered", 409);
 	}
+	console.log(businessName, email, password, firstName, lastName, planId);
 
 	try {
 		const org = await prisma.organization.create({
@@ -71,6 +72,7 @@ export const registerService = async ({
 			},
 		};
 	} catch (err) {
+		console.log(err);
 		throw new AppError("Transaction Failed", 500);
 	}
 };

@@ -17,12 +17,12 @@ import type {
 import { runRouter } from "src/agents/router.agent.js";
 
 export async function handleMessageSend(
-	ws: WebSocket,
+	ws: any,
 	payload: { conversationId: string; content: string },
 ) {
 	const { content } = payload;
-	const { conversationId, organizationId } = ws.meta!;
-
+	const { conversationId, organizationId, customerId, apiKeyId } = ws.meta!;
+	console.log(ws.meta);
 	await prisma.message.create({
 		data: {
 			conversationId,
@@ -57,6 +57,7 @@ export async function handleMessageSend(
 	// Build PipelineContext for the router
 	console.log(organizationId);
 	const context: PipelineContext = {
+		customerId,
 		conversationId,
 		organizationId,
 		latestMessage: content,
@@ -81,23 +82,39 @@ export async function handleMessageSend(
 
 	// If human escalation - create a ticket
 	if (routerOutput.resolvedByTier === "HUMAN") {
-		await prisma.ticket.create({
-			data: {
-				conversationId,
-				organizationId: conversation.organizationId,
-				status: "OPEN",
-				priority: "MEDIUM",
-			},
+		const existingTicket = await prisma.ticket.findUnique({
+			where: { conversationId },
 		});
 
-		await prisma.conversation.update({
-			where: { id: conversationId },
-			data: { conversationStatus: "ESCALATED" },
-		});
+		if (!existingTicket) {
+			await prisma.ticket.create({
+				data: {
+					conversationId,
+					organizationId: conversation.organizationId,
+					status: "OPEN",
+					priority: "MEDIUM",
+				},
+			});
+
+			await prisma.conversation.update({
+				where: { id: conversationId },
+				data: { conversationStatus: "ESCALATED" },
+			});
+		}
 	}
 
 	// append both messages to redis history
 	await appendToMemory(conversationId, content, routerOutput.finalResponse);
+
+	const messagePayload: any = {
+		role: "AI",
+		content: routerOutput.finalResponse,
+	};
+
+	if (routerOutput.loginUrl) {
+		messagePayload.loginUrl = routerOutput.loginUrl;
+		messagePayload.type = "auth_required"; // widget can render a login button
+	}
 
 	ws.send(
 		JSON.stringify({
@@ -105,8 +122,7 @@ export async function handleMessageSend(
 			payload: {
 				message: {
 					conversationId,
-					role: "AI",
-					content: routerOutput.finalResponse,
+					...messagePayload,
 					tier:
 						routerOutput.resolvedByTier === "HUMAN"
 							? null
