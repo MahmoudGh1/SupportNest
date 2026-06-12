@@ -21,13 +21,13 @@ const fieldStyle = (
 	boxSizing: "border-box",
 	height: 40,
 	padding: "0 12px",
-	border: `1.5px solid ${error ? "#E24B4A" : focused ? S.purple : S.border}`,
+	border: `1.5px solid ${error ? S.danger : focused ? S.purple : S.border}`,
 	borderRadius: 8,
 	fontSize: 13,
 	fontFamily: "inherit",
 	color: S.dark,
 	outline: "none",
-	background: "#fafafa",
+	background: "var(--surface)",
 	transition: "border-color .15s",
 });
 

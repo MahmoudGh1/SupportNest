@@ -15,10 +15,13 @@
   --color-bg-section:   #f6f5fc;
   --color-success:      #1D9E75;
   --color-success-bg:   #E1F5EE;
+  --color-success-bg-rgb: rgba(29, 158, 117, 0.18);
   --color-warning:      #F59E0B;
   --color-warning-bg:   #FAEEDA;
+  --color-warning-bg-rgb: rgba(245, 158, 11, 0.16);
   --color-danger:       #EF4444;
   --color-danger-bg:    #FCEBEB;
+  --color-danger-bg-rgb: rgba(239, 68, 68, 0.16);
   --color-info:         #4F46E5;
   --color-sidebar:      #1a1830;
   --font-sans: 'Sora', system-ui, sans-serif;

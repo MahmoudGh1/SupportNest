@@ -182,7 +182,7 @@ function CellValue({ val, variant }: { val: Cell; variant: ColVariant }) {
 export default function PricingTable() {
   return (
     <div className="max-w-260 mx-auto px-4 mt-20 mb-24">
-      <h2 className="text-[#0d0d0d] text-2xl font-bold text-center mb-10 tracking-tight">
+      <h2 className="text-[#534AB7] text-2xl font-bold text-center mb-10 tracking-tight">
         Compare plans
       </h2>
 

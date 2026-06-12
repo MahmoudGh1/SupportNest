@@ -107,6 +107,29 @@ export const getActiveToolsForOrg: RequestHandler = asyncHandler(
 			orderBy: { createdAt: "asc" },
 		});
 
-		res.status(200).json({ tools });
-	},
-);
+	res.status(200).json({ tools });
+});
+
+export const getAllToolsForOrg: RequestHandler = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+	const organizationId = req.user?.organizationId;
+
+	const tools = await prisma.toolDefinition.findMany({
+		where: { organizationId },
+		orderBy: [{ isActive: "desc" }, { createdAt: "asc" }],
+		select: {
+			id: true,
+			name: true,
+			description: true,
+			method: true,
+			path: true,
+			isActive: true,
+			createdAt: true,
+			document: {
+				select: { title: true, type: true },
+			},
+		},
+	});
+
+	res.status(200).json({ tools });
+});
+

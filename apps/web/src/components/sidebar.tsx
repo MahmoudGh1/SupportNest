@@ -33,6 +33,7 @@ const navItems = [
 	},
 	// { icon: "code", label: msg({ message: "API & Widget" }), page: "api" },
 	{ icon: "settings", label: msg`Settings`, page: "settings" },
+	{ icon: "plug", label: msg`API Tools`, page: "tools" },
 	{ icon: "user-circle", label: msg`Profile`, page: "profile" },
 ];
 
@@ -82,7 +83,7 @@ export function Sidebar({
 					style={{
 						width: 32,
 						height: 32,
-						background: S.purple,
+						background: "var(--color-brand)",
 						borderRadius: 8,
 						display: "flex",
 						alignItems: "center",
@@ -99,7 +100,7 @@ export function Sidebar({
 					<div style={{ minWidth: 0 }}>
 						<div
 							style={{
-								color: "#fff",
+								color: "var(--page-text)",
 								fontSize: 13,
 								fontWeight: 600,
 								whiteSpace: "nowrap",
@@ -109,7 +110,7 @@ export function Sidebar({
 						</div>
 						<div
 							style={{
-								color: "rgba(255,255,255,0.35)",
+								color: "var(--sidebar-text)",
 								fontSize: 10,
 								whiteSpace: "nowrap",
 								overflow: "hidden",
@@ -188,7 +189,7 @@ export function Sidebar({
 					<button
 						style={{
 							width: "100%",
-							background: S.purple,
+							background: "var(--color-brand)",
 							border: "none",
 							borderRadius: 8,
 							color: "#fff",
@@ -236,7 +237,7 @@ export function Sidebar({
 								width: 28,
 								height: 28,
 								borderRadius: "50%",
-								background: S.purple,
+								background: "var(--color-brand)",
 								display: "flex",
 								alignItems: "center",
 								justifyContent: "center",
@@ -253,7 +254,7 @@ export function Sidebar({
 								style={{
 									fontSize: 12,
 									fontWeight: 500,
-									color: "rgba(255,255,255,0.85)",
+									color: "var(--sidebar-text-active)",
 									whiteSpace: "nowrap",
 									overflow: "hidden",
 									textOverflow: "ellipsis",
@@ -264,7 +265,7 @@ export function Sidebar({
 							<div
 								style={{
 									fontSize: 10,
-									color: "rgba(255,255,255,0.35)",
+									color: "var(--sidebar-text)",
 									whiteSpace: "nowrap",
 									overflow: "hidden",
 									textOverflow: "ellipsis",
@@ -287,7 +288,7 @@ export function Sidebar({
 						cursor: "pointer",
 						border: "none",
 						background: "transparent",
-						color: "rgba(255,255,255,0.35)",
+						color: "var(--sidebar-text)",
 						fontFamily: "inherit",
 						fontSize: 12,
 						justifyContent: collapsed ? "center" : "flex-start",

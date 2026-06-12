@@ -8,26 +8,25 @@ export default function StatusBadge({ status }: { status: DocStatus }) {
 		{ bg: string; color: string; label: string; icon: string }
 	> = {
 		READY: {
-			bg: S.greenBg,
-			color: S.green,
+			bg: "var(--color-success-bg)",
+			color: "var(--color-success)",
 			label: "Ready",
 			icon: "circle-check",
 		},
 		PROCESSING: {
-			bg: "#EEF2FF",
-			color: "#4F46E5",
+			bg: "var(--color-brand-faint)",
+			color: "var(--color-brand)",
 			label: "Processing",
 			icon: "loader-2",
 		},
 		FAILED: {
-			bg: S.dangerBg,
-			color: S.danger,
+			bg: "var(--color-danger-bg)",
+			color: "var(--color-danger)",
 			label: "Failed",
 			icon: "alert-circle",
 		},
 	};
 	const s = map[status];
-	console.log(s);
 	return (
 		<span
 			style={{

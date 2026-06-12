@@ -3,11 +3,18 @@ import { DocType } from "@/types/types";
 
 // ─── TYPE BADGE ───────────────────────────────────────────────────────────────
 export default function TypeBadge({ type }: { type: DocType }) {
-	const map: Record<DocType, { bg: string; color: string; icon: string }> = {
-		PDF: { bg: "#FEF3C7", color: "#92400E", icon: "file-type-pdf" },
-		FAQ: { bg: S.purpleBg, color: S.purple, icon: "link" },
+	const map: Record<string, { bg: string; color: string; icon: string }> = {
+		PDF: { bg: "var(--color-warning-bg)", color: "var(--color-warning)", icon: "file-type-pdf" },
+		FAQ: { bg: "var(--color-brand-faint)", color: "var(--color-brand)", icon: "link" },
+		SWAGGER: { bg: "var(--color-info)", color: "var(--color-info)", icon: "bolt" },
+		OPENAPI: { bg: "var(--color-info)", color: "var(--color-info)", icon: "bolt" },
 	};
-	const s = map[type];
+
+	const fallback = { bg: "var(--surface)", color: "var(--page-text)", icon: "file-text" };
+
+	const normalizedType = (type ?? "").toUpperCase();
+	const s = map[normalizedType] || fallback;
+
 	return (
 		<span
 			style={{
@@ -26,7 +33,7 @@ export default function TypeBadge({ type }: { type: DocType }) {
 				className={`ti ti-${s.icon}`}
 				style={{ fontSize: 12 }}
 			/>
-			{type.toUpperCase()}
+			{normalizedType}
 		</span>
 	);
 }

@@ -12,7 +12,6 @@ export const knowledgeWorker = new Worker(
 	async (job) => {
 		const { documentId, fileUrl, orgId } = job.data;
 
-		console.log(`Processing document ${documentId} for org ${orgId}`);
 
 		const document = await prisma.knowledgeDocument.findUnique({
 			where: { id: documentId },
@@ -40,13 +39,11 @@ export const knowledgeWorker = new Worker(
 				});
 			}
 		} catch (error) {
-			console.log("[Worker] ingestDocument failed for ${documentId}:", error);
 			throw error;
 		}
 	},
 	{ connection: redis as any },
 );
-console.log("Worker started and listening...");
 
 knowledgeWorker.on("completed", (job) => {
 	console.log(`Document ${job.id} processed successfully`);

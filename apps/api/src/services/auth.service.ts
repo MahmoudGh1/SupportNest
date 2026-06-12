@@ -19,19 +19,8 @@ import { hashApiKey } from "src/utils/crypto.utils.js";
 import * as jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 
-<<<<<<< HEAD
-export const registerService = async ({
-	businessName,
-	email,
-	password,
-	firstName,
-	lastName,
-	planId,
-}: RegisterInput) => {
-=======
 export const registerService = async ({ businessName, email, password, firstName, lastName, planId }: RegisterInput) => {
 	const normalizedEmail = email.trim().toLowerCase();
->>>>>>> origin/LocalFixes
 	const passwordHash = await hashPassword(password);
 	const widgetSecret = await generateSecret(32);
 	const orgSlug = slugify(businessName);
@@ -83,12 +72,6 @@ export const registerService = async ({ businessName, email, password, firstName
 	}
 };
 
-<<<<<<< HEAD
-export const loginService = async ({
-	email,
-	password,
-}: LoginInput): Promise<OraganizationDataDTO> => {
-=======
 interface RegisterPaidInput extends RegisterInput {
 	amount: number;
 	currency: string;
@@ -183,7 +166,6 @@ export const registerPaidService = async ({ businessName, email, password, first
 };
 
 export const loginService = async ({ email, password }: LoginInput): Promise<OraganizationDataDTO> => {
->>>>>>> origin/LocalFixes
 	try {
 		const normalizedEmail = email.trim().toLowerCase();
 		const user = await prisma.user.findUnique({
@@ -206,11 +188,6 @@ export const loginService = async ({ email, password }: LoginInput): Promise<Ora
 	}
 };
 
-<<<<<<< HEAD
-export const userService = async (
-	payloadToken: TokenPayload,
-): Promise<userData> => {
-=======
 export async function hasActiveSubscription(organizationId: string | null): Promise<boolean> {
 	if (!organizationId) return false;
 	const active = await prisma.payment.findFirst({
@@ -224,7 +201,6 @@ export async function hasActiveSubscription(organizationId: string | null): Prom
 }
 
 export const userService = async (payloadToken: TokenPayload): Promise<userData> => {
->>>>>>> origin/LocalFixes
 	try {
 		const user = await prisma.user.findUnique({
 			where: { id: payloadToken.sub },
