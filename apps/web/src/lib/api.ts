@@ -65,7 +65,7 @@ function normalizeApiKey(input: ApiRecord): ApiKey {
 
 async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
 	const session = getSession();
-	const response = await fetch(`${BASE_URL}/admin${path}`, {
+	const response = await fetch(`${BASE_URL}/admindashboard${path}`, {
 		...init,
 		credentials: "include",
 		headers: {
@@ -216,6 +216,227 @@ export const api = {
 		if (params?.limit) query.set("limit", String(params.limit));
 		const suffix = query.toString() ? `?${query.toString()}` : "";
 		return adminFetch<AdminOrganizationsResponse>(`/organizations${suffix}`);
+	},
+
+	async getAdminOrganization(orgId: string): Promise<AdminOrganizationDetail> {
+		return adminFetch<AdminOrganizationDetail>(`/organizations/${orgId}`);
+	},
+
+	async createAdminOrganization(data: {
+		name: string;
+		email: string;
+		slug: string;
+		plan_id?: string;
+		widget_config?: Partial<WidgetConfig>;
+	}): Promise<AdminOrganization> {
+		return adminFetch<AdminOrganization>("/organizations", {
+			method: "POST",
+			body: JSON.stringify(data),
+		});
+	},
+
+	async updateAdminOrganization(
+		orgId: string,
+		data: Partial<{
+			name: string;
+			email: string;
+			is_active: boolean;
+			plan_id: string;
+			widget_config: Partial<WidgetConfig>;
+		}>,
+	): Promise<AdminOrganization> {
+		return adminFetch<AdminOrganization>(`/organizations/${orgId}`, {
+			method: "PATCH",
+			body: JSON.stringify(data),
+		});
+	},
+
+	async suspendAdminOrganization(orgId: string): Promise<void> {
+		return adminFetch<void>(`/organizations/${orgId}/suspend`, {
+			method: "PATCH",
+		});
+	},
+
+	async activateAdminOrganization(orgId: string): Promise<void> {
+		return adminFetch<void>(`/organizations/${orgId}/activate`, {
+			method: "PATCH",
+		});
+	},
+
+	async getAdminGlobalTierStats(params?: {
+		from?: string;
+		to?: string;
+	}): Promise<AdminTierStats> {
+		const query = new URLSearchParams();
+		if (params?.from) query.set("from", params.from);
+		if (params?.to) query.set("to", params.to);
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminTierStats>(`/tier-stats${suffix}`);
+	},
+
+	async getAdminGlobalEscalations(params?: {
+		priority?: string;
+		status?: string;
+		from?: string;
+		to?: string;
+		page?: number;
+		limit?: number;
+	}): Promise<AdminEscalationsResponse> {
+		const query = new URLSearchParams();
+		if (params?.priority) query.set("priority", params.priority);
+		if (params?.status) query.set("status", params.status);
+		if (params?.from) query.set("from", params.from);
+		if (params?.to) query.set("to", params.to);
+		if (params?.page) query.set("page", String(params.page));
+		if (params?.limit) query.set("limit", String(params.limit));
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminEscalationsResponse>(`/escalations${suffix}`);
+	},
+
+	async getAdminOrgTierStats(
+		orgId: string,
+		params?: { from?: string; to?: string },
+	): Promise<AdminTierStats> {
+		const query = new URLSearchParams();
+		if (params?.from) query.set("from", params.from);
+		if (params?.to) query.set("to", params.to);
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminTierStats>(
+			`/organizations/${orgId}/tier-stats${suffix}`,
+		);
+	},
+
+	async getAdminOrgConversationStats(
+		orgId: string,
+		params?: { from?: string; to?: string },
+	): Promise<AdminConversationStats> {
+		const query = new URLSearchParams();
+		if (params?.from) query.set("from", params.from);
+		if (params?.to) query.set("to", params.to);
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminConversationStats>(
+			`/organizations/${orgId}/conversation-stats${suffix}`,
+		);
+	},
+
+	async getAdminOrgTicketStats(
+		orgId: string,
+		params?: { from?: string; to?: string },
+	): Promise<AdminTicketStats> {
+		const query = new URLSearchParams();
+		if (params?.from) query.set("from", params.from);
+		if (params?.to) query.set("to", params.to);
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminTicketStats>(
+			`/organizations/${orgId}/ticket-stats${suffix}`,
+		);
+	},
+
+	async getAdminOrgCsat(
+		orgId: string,
+		params?: { from?: string; to?: string },
+	): Promise<AdminCsatStats> {
+		const query = new URLSearchParams();
+		if (params?.from) query.set("from", params.from);
+		if (params?.to) query.set("to", params.to);
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminCsatStats>(`/organizations/${orgId}/csat${suffix}`);
+	},
+
+	async getAdminOrgEscalations(
+		orgId: string,
+		params?: { from?: string; to?: string; page?: number; limit?: number },
+	): Promise<AdminEscalationsResponse> {
+		const query = new URLSearchParams();
+		if (params?.from) query.set("from", params.from);
+		if (params?.to) query.set("to", params.to);
+		if (params?.page) query.set("page", String(params.page));
+		if (params?.limit) query.set("limit", String(params.limit));
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminEscalationsResponse>(
+			`/organizations/${orgId}/escalations${suffix}`,
+		);
+	},
+
+	async getAdminAllUsers(params?: {
+		role?: string;
+		is_active?: boolean;
+		search?: string;
+		page?: number;
+		limit?: number;
+	}): Promise<AdminUsersResponse> {
+		const query = new URLSearchParams();
+		if (params?.role) query.set("role", params.role);
+		if (params?.is_active !== undefined)
+			query.set("is_active", String(params.is_active));
+		if (params?.search) query.set("search", params.search);
+		if (params?.page) query.set("page", String(params.page));
+		if (params?.limit) query.set("limit", String(params.limit));
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminUsersResponse>(`/users${suffix}`);
+	},
+
+	async getAdminOrgUsers(
+		orgId: string,
+		params?: {
+			role?: string;
+			is_active?: boolean;
+			page?: number;
+			limit?: number;
+		},
+	): Promise<AdminUsersResponse> {
+		const query = new URLSearchParams();
+		if (params?.role) query.set("role", params.role);
+		if (params?.is_active !== undefined)
+			query.set("is_active", String(params.is_active));
+		if (params?.page) query.set("page", String(params.page));
+		if (params?.limit) query.set("limit", String(params.limit));
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminUsersResponse>(
+			`/organizations/${orgId}/users${suffix}`,
+		);
+	},
+
+	async getAdminOrgUser(orgId: string, userId: string): Promise<AdminUser> {
+		return adminFetch<AdminUser>(`/organizations/${orgId}/users/${userId}`);
+	},
+
+	async createAdminOrgUser(
+		orgId: string,
+		data: {
+			email: string;
+			password?: string;
+			first_name: string;
+			last_name: string;
+			role: string;
+		},
+	): Promise<AdminUser> {
+		return adminFetch<AdminUser>(`/organizations/${orgId}/users`, {
+			method: "POST",
+			body: JSON.stringify(data),
+		});
+	},
+
+	async updateAdminOrgUser(
+		orgId: string,
+		userId: string,
+		data: Partial<{
+			first_name: string;
+			last_name: string;
+			role: string;
+			is_active: boolean;
+		}>,
+	): Promise<AdminUser> {
+		return adminFetch<AdminUser>(`/organizations/${orgId}/users/${userId}`, {
+			method: "PATCH",
+			body: JSON.stringify(data),
+		});
+	},
+
+	async removeAdminOrgUser(orgId: string, userId: string): Promise<void> {
+		return adminFetch<void>(`/organizations/${orgId}/users/${userId}`, {
+			method: "DELETE",
+		});
 	},
 
 	// ─── KNOWLEDGE BASE ─────────────────────────────────────────────────────────

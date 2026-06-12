@@ -11,6 +11,7 @@ import {
 } from "@/types/types";
 import { S } from "@/components/ui";
 import { api } from "@/lib/api";
+import { useAuth } from "@/context/auth-context";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 const fieldStyle = (
@@ -1141,17 +1142,25 @@ function OrgTab({ org }: { org: OrgProfile }) {
 type Tab = "organization";
 
 export default function SettingsPage() {
+	const { user } = useAuth();
 	const [tab, setTab] = useState<Tab>("organization");
 	const [org, setOrg] = useState<OrgProfile | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
+		if (user?.role === "super_admin") {
+			setLoading(false);
+			return;
+		}
 		api.getOrgProfile()
 			.then((o) => {
 				setOrg(o.organization);
 			})
+			.catch((err) => {
+				console.error("Failed to load org profile:", err);
+			})
 			.finally(() => setLoading(false));
-	}, []);
+	}, [user]);
 
 	if (loading) {
 		return (

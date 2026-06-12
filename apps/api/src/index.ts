@@ -30,6 +30,7 @@ import knowledgeRouter from "./routes/knowledge.routes.js";
 import tier2Router from "./routes/tier2.routes.js";
 import reportRouter from "./routes/reporter.routes.js";
 import tier2Router from "./routes/tier2.routes.js";
+import AdminRoutes from "./routes/admin-dashboard.routes.js";
 const app = express();
 const PORT = process.env.PORT || 3001;
 

@@ -134,7 +134,14 @@ export function Sidebar({
 				}}
 			>
 				{navItems
-					.filter((item) => !item.superAdminOnly || isSuperAdmin)
+					.filter((item) => {
+						if (isSuperAdmin) {
+							// For Super Admin, only show Admin, Settings, and Profile
+							return ["admin", "settings", "profile"].includes(item.page);
+						}
+						// For others, show everything EXCEPT Admin
+						return !item.superAdminOnly;
+					})
 					.map((item) => {
 					const isActive = currentPage === item.page;
 					return (
