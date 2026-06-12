@@ -98,7 +98,7 @@ export async function runRouter(
 
 	const { parsed: routingResult, tokensUsed: routingTokens } =
 		await callRouterLLM(routingPrompt);
-
+	console.log(routingResult);
 	const routingLatency = Date.now() - routingStart;
 	const routingDecision = routingResult.routingDecision as
 		| Exclude<AgentTier, "ROUTER">
@@ -107,7 +107,7 @@ export async function runRouter(
 
 	// Log the routing decision
 	const validatedRoutingDecision = validateRoutingDecision(routingDecision);
-
+	console.log(validateRoutingDecision);
 	await writeAgentLog({
 		conversationId,
 		tier: AgentTier.ROUTER,
@@ -128,6 +128,7 @@ export async function runRouter(
 		};
 	}
 
+	console.log(validatedRoutingDecision);
 	// -- phase 2: tier call + review loop
 
 	let currentTier = routingDecision as Exclude<
@@ -135,7 +136,6 @@ export async function runRouter(
 		"HUMAN"
 	>;
 	const MAX_ATTEMPTS = 3; // tier0 -> tier1 -> tier2 -> human
-
 	for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
 		// Call the current tier
 
@@ -166,6 +166,8 @@ export async function runRouter(
 
 		const { parsed: reviewResult, tokensUsed: reviewTokens } =
 			await callRouterLLM(reviewPrompt);
+
+		console.log(reviewResult);
 
 		const reviewLatency = Date.now() - reviewStart;
 
