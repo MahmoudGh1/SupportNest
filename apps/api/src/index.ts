@@ -30,7 +30,6 @@ import knowledgeRouter from "./routes/knowledge.routes.js";
 import tier2Router from "./routes/tier2.routes.js";
 import reportRouter from "./routes/reporter.routes.js";
 import AdminRoutes from "./routes/admin-dashboard.routes.js"
-import crypto from "crypto";
 
 
 const app = express();

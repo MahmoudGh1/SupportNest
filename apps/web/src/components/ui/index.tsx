@@ -14,6 +14,7 @@ export const S = {
 	darkMid: "var(--surface-elevated)",
 	white: "#ffffff",
 	bg: "var(--surface-elevated)",
+	bgSoft: "var(--color-bg-soft)",
 	border: "var(--card-border)",
 	textMuted: "var(--page-muted)",
 	textSecondary: "var(--label-muted)",
