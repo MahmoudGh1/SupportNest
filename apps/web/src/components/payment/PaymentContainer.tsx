@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3201/api/v1";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "api-production-e60c.up.railway.app/api/v1";
 const PAYMOB_PUBLIC_KEY = process.env.NEXT_PUBLIC_PAYMOB_KEY ?? "egy_pk_test_24gr1hEc6j0YheiEeIh2oailmkBszFKX";
 
 // ── Design tokens (matches registration dark theme) ──────────────────────────

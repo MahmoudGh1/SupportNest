@@ -24,7 +24,7 @@ const T = {
     labelMuted: "var(--label-muted)",
 } as const;
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "api-production-e60c.up.railway.app/api/v1";
 
 interface FieldProps {
     label: string;
