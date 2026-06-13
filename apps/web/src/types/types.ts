@@ -7,7 +7,6 @@ export interface AuthUser {
 	role: Role;
 	orgId: string | null;
 	orgName?: string;
-	token?: string;
 	onboarded: boolean;
 	hasActiveSubscription?: boolean;
 	currentPlanId?: string | null;
@@ -17,6 +16,35 @@ export enum Role {
 	SUPER_ADMIN = "SUPER_ADMIN",
 	ORG_ADMIN = "ORG_ADMIN",
 	SUPPORT_AGENT = "SUPPORT_AGENT",
+}
+
+export interface AdminTierBreakdown {
+	router_received: number;
+	tier1_resolved: number;
+	tier1_resolve_rate: number;
+	tier2_resolved: number;
+	tier2_resolve_rate: number;
+	human_escalated: number;
+	human_escalation_rate: number;
+	unresolved: number;
+	avg_tier1_latency_ms: number;
+	avg_tier2_latency_ms: number;
+	total_tokens_used: number;
+}
+
+export interface AdminOverview {
+	total_organizations: number;
+	active_organizations: number;
+	suspended_organizations: number;
+	total_users: number;
+	total_conversations: number;
+	active_conversations: number;
+	total_tickets: number;
+	open_tickets: number;
+	escalated_tickets: number;
+	overall_ai_resolution_rate: number;
+	avg_csat_score: number;
+	tier_breakdown: AdminTierBreakdown;
 }
 
 export interface LoginResponse {

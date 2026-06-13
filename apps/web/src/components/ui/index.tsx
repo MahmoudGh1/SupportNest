@@ -19,11 +19,15 @@ export const S = {
 	textSecondary: "var(--label-muted)",
 	green: "#1D9E75",
 	greenBg: "var(--color-success-bg)",
+	greenBgRgb: "var(--color-success-bg-rgb)",
 	amber: "#854F0B",
 	amberBg: "var(--color-warning-bg)",
+	amberBgRgb: "var(--color-warning-bg-rgb)",
 	purpleBg: "var(--color-brand-faint)",
-	danger: "#A32D2D",
+	purpleBgRgb: "var(--color-brand-faint)",
+	danger: "#E24B4A",
 	dangerBg: "var(--color-danger-bg)",
+	dangerBgRgb: "var(--color-danger-bg-rgb)",
 };
 
 // ─── INPUT ────────────────────────────────────────────────────────────────────

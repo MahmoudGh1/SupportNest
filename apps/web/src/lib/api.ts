@@ -76,9 +76,7 @@ async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
 	});
 	const data = await response.json().catch(() => ({}));
 	if (!response.ok) {
-		throw new Error(
-			data?.error?.message ?? data?.message ?? "Admin request failed",
-		);
+		throw new Error(data?.error?.message ?? data?.message ?? "Admin request failed");
 	}
 	return data as T;
 }
@@ -186,27 +184,11 @@ export const api = {
 		throw new Error("Organization setup is not available.");
 	},
 
-	async getDashboardStats(): Promise<DashboardStats> {
-		return {
-			totalConversations: 0,
-			aiResolutionRate: 0,
-			avgResponseTime: "—",
-			csatScore: 0,
-			recentConversations: [],
-			resolutionByTier: { tier1: 0, tier2: 0, human: 0 },
-		};
-	},
-
 	async getAdminOverview(): Promise<AdminOverview> {
 		return adminFetch<AdminOverview>("/overview");
 	},
 
-	async getAdminOrganizations(params?: {
-		search?: string;
-		is_active?: boolean | "";
-		page?: number;
-		limit?: number;
-	}): Promise<AdminOrganizationsResponse> {
+	async getAdminOrganizations(params?: { search?: string; is_active?: boolean | ""; page?: number; limit?: number }): Promise<AdminOrganizationsResponse> {
 		const query = new URLSearchParams();
 		if (params?.search) query.set("search", params.search);
 		if (params?.is_active !== undefined && params.is_active !== "") {
@@ -216,6 +198,17 @@ export const api = {
 		if (params?.limit) query.set("limit", String(params.limit));
 		const suffix = query.toString() ? `?${query.toString()}` : "";
 		return adminFetch<AdminOrganizationsResponse>(`/organizations${suffix}`);
+	},
+
+	async getDashboardStats(): Promise<DashboardStats> {
+		return {
+			totalConversations: 0,
+			aiResolutionRate: 0,
+			avgResponseTime: "—",
+			csatScore: 0,
+			recentConversations: [],
+			resolutionByTier: { tier1: 0, tier2: 0, human: 0 },
+		};
 	},
 
 	// ─── KNOWLEDGE BASE ─────────────────────────────────────────────────────────
@@ -281,7 +274,6 @@ export const api = {
 			const data = await response.json();
 			if (!response.ok) throw new Error(data.message || "Something went wrong");
 
-			console.log("Success:", data.message);
 			return { success: data.success };
 		} catch (error: unknown) {
 			if (error instanceof Error) {
@@ -291,6 +283,105 @@ export const api = {
 			}
 			return { success: false };
 		}
+	},
+
+	// ─── BUSINESS API CONFIG ────────────────────────────────────────────────────
+
+	async getApiConfig(): Promise<{
+		id?: string;
+		baseUrl?: string;
+		authType?: string;
+		headerName?: string;
+		isVerified?: boolean;
+		lastVerifiedAt?: string;
+		configured: boolean;
+	}> {
+		const res = await fetch(`${BASE_URL}/organizations/api-config`, {
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to load API config");
+		return data.id ? { ...data, configured: true } : { configured: false };
+	},
+
+	async saveApiConfig(input: { baseUrl: string; authType: string; authValue: string; headerName?: string }): Promise<{ id: string; isVerified: boolean }> {
+		const res = await fetch(`${BASE_URL}/organizations/api-config`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify(input),
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.message ?? data.error ?? "Failed to save API config");
+		return data;
+	},
+
+	async verifyApiConfig(): Promise<{ isVerified: boolean; message: string }> {
+		const res = await fetch(`${BASE_URL}/organizations/api-config/verify`, {
+			method: "POST",
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.message ?? data.error ?? "Verification failed");
+		return data;
+	},
+
+	async submitSwaggerUrl(input: { title: string; swaggerUrl: string }): Promise<{ documentId: string; status: string }> {
+		const user = getSession();
+		if (!user) throw new Error("User not found");
+		const res = await fetch(`${BASE_URL}/organizations/${user.orgId}/documents/swagger`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify(input),
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.message ?? data.error ?? "Failed to submit Swagger URL");
+		return data;
+	},
+
+	deleteAccount: (data: { fullName: string; organizationName: string }) =>
+		fetch(`${BASE_URL}/users/me`, {
+			method: "DELETE",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify(data),
+		}).then(async (res) => {
+			const json = await res.json();
+			if (!res.ok) throw new Error(json.error ?? "Failed to delete account.");
+			return json;
+		}),
+
+	// ─── TOOLS ──────────────────────────────────────────────────────────────────
+
+	async getAllOrgTools(): Promise<{
+		tools: {
+			id: string;
+			name: string;
+			description: string;
+			method: string;
+			path: string;
+			isActive: boolean;
+			createdAt: string;
+			document: { title: string; type: string } | null;
+		}[];
+	}> {
+		const res = await fetch(`${BASE_URL}/organizations/tools/all`, {
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to load tools");
+		return data;
+	},
+
+	async toggleOrgTool(toolId: string): Promise<{ id: string; isActive: boolean }> {
+		const res = await fetch(`${BASE_URL}/organizations/tools/${toolId}/toggle`, {
+			method: "PATCH",
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to toggle tool");
+		return data;
 	},
 
 	// ─── SETTINGS ───────────────────────────────────────────────────────────────
