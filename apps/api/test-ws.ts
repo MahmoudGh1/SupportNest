@@ -4,7 +4,7 @@
 import WebSocket from "ws";
 import jwt from "jsonwebtoken";
 
-const WS_URL = "ws://api-production-e60c.up.railway.app/widget/ws"; // change to your server port/path
+const WS_URL = "ws://https://api-production-e60c.up.railway.app/widget/ws"; // change to your server port/path
 const API_KEY = "sk_test_1234567890abcdef";
 const WIDGET_SECRET = "my-super-secret-widget-key";
 
@@ -142,7 +142,7 @@ async function testVerifyFlow(conversationId: string) {
   );
 
   const response = await fetch(
-    `http://api-production-e60c.up.railway.app/api/v1/widget/sessions/${conversationId}/verify`,
+    `http://https://api-production-e60c.up.railway.app/api/v1/widget/sessions/${conversationId}/verify`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

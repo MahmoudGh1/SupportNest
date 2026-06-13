@@ -4,7 +4,7 @@
 	const CUSTOMER_TOKEN = config.customerToken || null;
 	const currentScript = document.currentScript;
 	const WIDGET_KEY = currentScript?.dataset?.widgetKey;
-	const BASE_URL = currentScript?.dataset?.baseUrl ?? "api-production-e60c.up.railway.app";
+	const BASE_URL = currentScript?.dataset?.baseUrl ?? "https://api-production-e60c.up.railway.app";
 
 	if (!WIDGET_KEY) {
 		console.error("[SupportNest] No apiKey found in window.SupportNestConfig");

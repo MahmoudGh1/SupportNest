@@ -17,7 +17,7 @@ const options: swaggerJsdoc.Options = {
 
 		servers: [
 			{
-				url: "api-production-e60c.up.railway.app",
+				url: "https://api-production-e60c.up.railway.app",
 				description: "Development Server",
 			},
 		],

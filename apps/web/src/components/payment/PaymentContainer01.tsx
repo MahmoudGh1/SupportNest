@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-const API_BASE = "api-production-e60c.up.railway.app/api/v1";
+const API_BASE = "https://api-production-e60c.up.railway.app/api/v1";
 const PAYMOB_PUBLIC_KEY = "egy_pk_test_24gr1hEc6j0YheiEeIh2oailmkBszFKX";
 
 interface StoredPlan {
