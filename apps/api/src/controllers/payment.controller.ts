@@ -1,17 +1,9 @@
 import type { Request, Response } from "express";
-import {
-	completeCheckoutService,
-	createPaymentIntentionService,
-	getPaymentHistoryService,
-	handleWebhookService,
-} from "src/services/payment.service.js";
+import { completeCheckoutService, confirmPaymentService, createPaymentIntentionService, getPaymentHistoryService, handleWebhookService } from "src/services/payment.service.js";
 import type { AuthenticatedRequest } from "src/types/auth.types.js";
 import AppError from "src/utils/appError.js";
 
-export const createPaymentIntentionController = async (
-	req: AuthenticatedRequest,
-	res: Response,
-) => {
+export const createPaymentIntentionController = async (req: AuthenticatedRequest, res: Response) => {
 	try {
 		const organizationId = req.user?.organizationId;
 		const { pricingId, amountCents, currency, billingData } = req.body;
@@ -37,10 +29,7 @@ export const createPaymentIntentionController = async (
 	}
 };
 
-export const completeCheckoutController = async (
-	req: AuthenticatedRequest,
-	res: Response,
-) => {
+export const completeCheckoutController = async (req: AuthenticatedRequest, res: Response) => {
 	try {
 		const organizationId = req.user?.organizationId;
 		const { pricingId, amount, currency, isAnnual } = req.body;
@@ -82,10 +71,7 @@ export const handleWebhookController = async (req: Request, res: Response) => {
 	}
 };
 
-export const getPaymentHistoryController = async (
-	req: AuthenticatedRequest,
-	res: Response,
-) => {
+export const getPaymentHistoryController = async (req: AuthenticatedRequest, res: Response) => {
 	try {
 		const organizationId = req.user?.organizationId;
 		const payments = await getPaymentHistoryService(organizationId as string);
@@ -97,3 +83,17 @@ export const getPaymentHistoryController = async (
 		return res.status(500).json({ error: "Internal server error" });
 	}
 };
+
+export async function confirmPaymentController(req: Request, res: Response) {
+	try {
+		const { paymentId } = req.body;
+		const result = await confirmPaymentService(paymentId);
+		// console.log(result)
+		return res.json(result);
+	} catch (err: any) {
+		if (err.message === "PAYMENT_NOT_FOUND") {
+			return res.status(404).json({ error: "Payment not found" });
+		}
+		return res.status(500).json({ error: "Failed to confirm payment" });
+	}
+}

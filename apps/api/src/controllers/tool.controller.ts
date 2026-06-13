@@ -3,6 +3,7 @@ import type { AuthenticatedRequest } from "src/types/auth.types.js";
 import prisma from "src/config/prisma.js";
 import AppError from "src/utils/appError.js";
 import asyncHandler from "src/utils/asyncHandler.js";
+import type { UuidFilter } from "generated/prisma/commonInputTypes.js";
 
 export const getToolsByDocument: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
@@ -111,7 +112,7 @@ export const getActiveToolsForOrg: RequestHandler = asyncHandler(
 });
 
 export const getAllToolsForOrg: RequestHandler = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-	const organizationId = req.user?.organizationId;
+	const organizationId = req.user?.organizationId as string | UuidFilter<"ToolDefinition">
 
 	const tools = await prisma.toolDefinition.findMany({
 		where: { organizationId },
@@ -124,7 +125,7 @@ export const getAllToolsForOrg: RequestHandler = asyncHandler(async (req: Authen
 			path: true,
 			isActive: true,
 			createdAt: true,
-			document: {
+			knowledge_documents: {
 				select: { title: true, type: true },
 			},
 		},

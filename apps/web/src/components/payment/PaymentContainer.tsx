@@ -121,7 +121,7 @@ export default function PaymentContainer({
                 return;
             }
 
-            sessionStorage.setItem("pendingPaymentId", result.paymentId);
+            
             window.location.href =
                 `https://accept.paymob.com/unifiedcheckout/?publicKey=${PAYMOB_PUBLIC_KEY}&clientSecret=${result.clientSecret}`;
         } catch (err) {

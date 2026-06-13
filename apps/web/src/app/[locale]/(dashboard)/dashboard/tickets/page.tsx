@@ -114,7 +114,7 @@ async function apiGetTickets(filters?: {
 }
 
 async function apiGetMessages(conversationId: string): Promise<Message[]> {
-	const res = await fetch(`${BASE}/conversations/${conversationId}/messages`, {
+	const res = await fetch(`${BASE}/widget/conversations/${conversationId}/messages`, {
 		credentials: "include",
 	});
 	const json = await res.json();
@@ -447,7 +447,7 @@ function TicketDetail({
 						<textarea
 							value={replyText}
 							onChange={(e) => setReplyText(e.target.value)}
-							placeholder="Type a reply… (connect POST /messages when ready)"
+							placeholder="Type your reply...)"
 							rows={2}
 							className="flex-1 text-[13px] px-3 py-2 border-[1.5px] border-[#e8e6f0] rounded-xl outline-none resize-none focus:border-[#534AB7] transition-colors"
 						/>

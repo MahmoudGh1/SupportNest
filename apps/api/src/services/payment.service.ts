@@ -6,6 +6,7 @@ import AppError from "src/utils/appError.js";
 const PAYMOB_SECRET_KEY = process.env.PAYMOB_SECRET_KEY as string;
 const PAYMOB_HMAC_SECRET = process.env.PAYMOB_HMAC_SECRET as string;
 const PAYMOB_API_BASE = process.env.PAYMOB_API_BASE;
+const BACKEND_URL = process.env.BACKEND_URL;
 
 // ─── HMAC Verification ─────────────────────────────────────────────────────────
 // Paymob signs webhook payloads with HMAC-SHA512
@@ -100,8 +101,8 @@ export const createPaymentIntentionService = async ({ organizationId, pricingId,
 				organizationId,
 				pricingId,
 			},
-			notification_url: `${PAYMOB_API_BASE}/api/v1/payments/webhook`,
-			redirection_url: `${process.env.FRONTEND_URL}/payment/callback`,
+			notification_url: `${BACKEND_URL}/api/v1/payments/webhook`,
+			redirection_url: `${process.env.FRONTEND_URL}/payment-callback`,
 		}),
 	});
 	const intention: any = await response.json();
@@ -224,6 +225,7 @@ interface CompleteCheckoutInput {
 
 export const completeCheckoutService = async ({ organizationId, pricingId, amount, currency, isAnnual }: CompleteCheckoutInput) => {
 	await assertNoActiveSubscription(organizationId);
+	console.log("first");
 
 	const pricing = await prisma.pricing.findFirst({
 		where: { id: pricingId, isActive: true },
@@ -248,6 +250,7 @@ export const completeCheckoutService = async ({ organizationId, pricingId, amoun
 				billingPeriodEnd,
 			},
 		});
+		console.log(created ? `Created True: ${created} ` : "Created False");
 
 		await tx.organization.update({
 			where: { id: organizationId },
@@ -276,3 +279,23 @@ export const getPaymentHistoryService = async (organizationId: string): Promise<
 
 	return payments;
 };
+
+export async function confirmPaymentService(paymentId: string) {
+	const payment = await prisma.payment.findUnique({
+		where: { id: paymentId },
+	});
+
+	if (!payment) throw new Error("PAYMENT_NOT_FOUND");
+
+	await prisma.payment.update({
+		where: { id: paymentId },
+		data: { status: PaymentStatus.SUCCEEDED },
+	});
+
+	await prisma.organization.update({
+		where: { id: payment.organizationId },
+		data: { isActive: true, planId: payment.pricingId },
+	});
+
+	return { ok: true };
+}

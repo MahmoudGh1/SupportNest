@@ -16,15 +16,22 @@ import type { PipelineContext, TierResponse } from "src/types/agent.types.js";
 // 		},
 // 	};
 // }
+// export async function askTier1Agent(
+// 	context: PipelineContext,
+// ): Promise<TierResponse> {
+// 	return {
+// 		tier: MessageTier.TIER2,
+// 		responseText: "[Tier1 stub - complex troubleshooting not implemented yet]",
+// 		agentLog: {
+// 			confidenceScore: 0.9,
+// 			tokensUsed: 0,
+// 		},
+// 	};
+// }
+
+
 export async function askTier1Agent(
 	context: PipelineContext,
 ): Promise<TierResponse> {
-	return {
-		tier: MessageTier.TIER2,
-		responseText: "[Tier1 stub - complex troubleshooting not implemented yet]",
-		agentLog: {
-			confidenceScore: 0.9,
-			tokensUsed: 0,
-		},
-	};
-}
+	return await runTier1Agent(context)
+};

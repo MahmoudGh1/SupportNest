@@ -1,19 +1,9 @@
 import prisma from "src/config/prisma.js";
 import { PaymentStatus, Role } from "generated/prisma/enums.js";
 import slugify from "src/utils/slug.utils.js";
-import type {
-	LoginInput,
-	OraganizationDataDTO,
-	RegisterInput,
-	TokenPayload,
-	userData,
-} from "src/types/auth.types.js";
+import type { LoginInput, OraganizationDataDTO, RegisterInput, TokenPayload, userData } from "src/types/auth.types.js";
 import AppError from "src/utils/appError.js";
-import {
-	comparePassword,
-	generateSecret,
-	hashPassword,
-} from "src/utils/password.util.js";
+import { comparePassword, generateSecret, hashPassword } from "src/utils/password.util.js";
 import apiKey from "src/utils/apiKey.utils.js";
 import { hashApiKey } from "src/utils/crypto.utils.js";
 import * as jwt from "jsonwebtoken";
@@ -172,11 +162,13 @@ export const loginService = async ({ email, password }: LoginInput): Promise<Ora
 			where: { email: normalizedEmail },
 		});
 		if (!user) {
+			console.log("first")
 			throw new AppError("Wrong Email or Password", 401);
 		}
 		console.log(user);
 		const passwordCheck = await comparePassword(password, user.passwordHash);
 		if (!passwordCheck) {
+			console.log("Second")
 			throw new AppError("Wrong Email or Password", 401);
 		}
 		const { passwordHash: _password, ...dataDTO } = user;
@@ -270,10 +262,7 @@ export async function validateApiKey(rawKey: string, origin?: string) {
 	return apiKeyRecord;
 }
 
-export async function verifyCustomerJWT(
-	token: string,
-	organizationId: string,
-) {
+export async function verifyCustomerJWT(token: string, organizationId: string) {
 	const org = await prisma.organization.findUnique({
 		where: { id: organizationId },
 		select: { widgetSecret: true },
