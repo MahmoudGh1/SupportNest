@@ -14,7 +14,7 @@ export const S = {
 	darkMid: "var(--surface-elevated)",
 
 
-
+	brand: "#534AB7",
 	white: "#ffffff",
 	surface: "var(--surface)",
 	bg: "var(--surface-elevated)",
