@@ -1159,7 +1159,7 @@ export default function SettingsPage() {
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		if (user?.role === "super_admin") {
+		if (user?.role === "SUPER_ADMIN") {
 			setLoading(false);
 			return;
 		}
