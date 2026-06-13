@@ -21,7 +21,6 @@ async function connectionAuth(
 	req: IncomingMessage,
 ) {
 	const { apiKey, customerJwt, visitorId } = payload;
-	console.log(apiKey, customerJwt, visitorId);
 	// if (!apiKey || !customerJwt) {
 	// 	send(socket, { type: "error", payload: { message: `you have to provide APIKey and customerJwt within the payload` } });
 	// 	socket.close();
@@ -43,7 +42,6 @@ async function connectionAuth(
 		where: { keyHash },
 		include: { organization: true },
 	});
-	console.log(isKey);
 	if (!isKey || !isKey.isActive || !isKey.organizationId) {
 		send(socket, {
 			type: "error",

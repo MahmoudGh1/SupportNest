@@ -6,7 +6,7 @@ import { localePath, stripLocale, type AppLocale } from "@/lib/routes";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
 import { ProtectedRoute } from "@/components/protected-route";
-import { msg, t } from "@lingui/core/macro";
+import { t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 
 export const getPageMeta = (): Record<string, string> => ({
@@ -17,6 +17,8 @@ export const getPageMeta = (): Record<string, string> => ({
 	"/dashboard/knowledge": t`Knowledge Base`,
 	"/dashboard/tools": t`API Tools`,
 	"/dashboard/analytics": t`Analytics`,
+	"/dashboard/admin": t`Overview`,
+	"/dashboard/organizations": t`Organizations`,
 	"/dashboard/settings": t`Settings`,
 	"/dashboard/profile": t`Profile`,
 });

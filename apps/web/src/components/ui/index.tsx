@@ -12,7 +12,11 @@ export const S = {
 	purpleDark: "#3C3489",
 	dark: "var(--page-text)",
 	darkMid: "var(--surface-elevated)",
+
+
+
 	white: "#ffffff",
+	surface: "var(--surface)",
 	bg: "var(--surface-elevated)",
 	bgSoft: "var(--color-bg-soft)",
 	border: "var(--card-border)",
@@ -20,15 +24,14 @@ export const S = {
 	textSecondary: "var(--label-muted)",
 	green: "#1D9E75",
 	greenBg: "var(--color-success-bg)",
-	greenBgRgb: "var(--color-success-bg-rgb)",
 	amber: "#854F0B",
 	amberBg: "var(--color-warning-bg)",
-	amberBgRgb: "var(--color-warning-bg-rgb)",
 	purpleBg: "var(--color-brand-faint)",
-	purpleBgRgb: "var(--color-brand-faint)",
-	danger: "#E24B4A",
+	purpleFaint: "var(--color-brand-faint)",
+	info: "var(--color-info)",
+	infoBg: "#EEF2FF",
+	danger: "#A32D2D",
 	dangerBg: "var(--color-danger-bg)",
-	dangerBgRgb: "var(--color-danger-bg-rgb)",
 };
 
 // ─── INPUT ────────────────────────────────────────────────────────────────────

@@ -10,7 +10,7 @@ async function createSuperAdmin() {
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
-    console.log("Super admin already exists.");
+    // console.log("Super admin already exists.");
     return;
   }
 
@@ -27,9 +27,9 @@ async function createSuperAdmin() {
     },
   });
 
-  console.log("✅ Super Admin created successfully!");
-  console.log("Email:   ", email);
-  console.log("Password:", password);
+  // console.log("✅ Super Admin created successfully!");
+  // console.log("Email:   ", email);
+  // console.log("Password:", password);
 }
 
 createSuperAdmin()

@@ -1,16 +1,7 @@
 import prisma from "src/config/prisma.js";
 import { queryEmbeddings, model } from "../config/langChain.js";
-import {
-	HumanMessage,
-	SystemMessage,
-	AIMessage,
-	BaseMessage,
-} from "@langchain/core/messages";
-import {
-	AgentAction,
-	AgentTier,
-	MessageTier,
-} from "generated/prisma/enums.js";
+import { HumanMessage, SystemMessage, AIMessage, BaseMessage } from "@langchain/core/messages";
+import { AgentAction, AgentTier, MessageTier } from "generated/prisma/enums.js";
 import type { MemoryMessage } from "../utils/conversationMemory.utils.js";
 import type { PipelineContext, TierResponse } from "src/types/agent.types.js";
 import { chunkText } from "src/config/chunker.js";
@@ -124,13 +115,7 @@ interface ChunkResult {
 // );
 // }
 
-export async function askTier0Agent({
-	conversationId,
-	organizationId,
-	latestMessage,
-	conversationHistory,
-}: PipelineContext): Promise<TierResponse> {
-	console.log(organizationId);
+export async function askTier0Agent({ conversationId, organizationId, latestMessage, conversationHistory }: PipelineContext): Promise<TierResponse> {
 	const questionVector = await queryEmbeddings.embedQuery(latestMessage);
 	const vectorLiteral = `[${questionVector.join(",")}]`;
 
@@ -143,25 +128,13 @@ export async function askTier0Agent({
     ORDER BY embedding <=> ${vectorLiteral}::vector
     LIMIT 5
   `;
-	console.log(
-		"[RAG] chunks found:",
-		chunks.length,
-		"for org:",
-		organizationId,
-	);
+	console.log("[RAG] chunks found:", chunks.length, "for org:", organizationId);
 
 	if (chunks.length === 0) {
-		return buildResponse(
-			"Oh. about that thing. maybe you are talking about something else we don't have.",
-			AgentAction.NO_MATCH,
-			0,
-			0,
-		);
+		return buildResponse("Oh. about that thing. maybe you are talking about something else we don't have.", AgentAction.NO_MATCH, 0, 0);
 	}
 
-	const context = chunks
-		.map((chunk, i) => `[Source ${i + 1}]:\n${chunk.content}`)
-		.join("\n\n");
+	const context = chunks.map((chunk, i) => `[Source ${i + 1}]:\n${chunk.content}`).join("\n\n");
 
 	const historyMessages = conversationHistory.flatMap((msg): BaseMessage[] => {
 		if (msg.role === "CUSTOMER") return [new HumanMessage(msg.content)];
@@ -211,10 +184,7 @@ ${context}
 		new HumanMessage(latestMessage),
 	]);
 
-	const raw =
-		typeof response.content === "string"
-			? response.content
-			: (response.content[0] as { text: string }).text;
+	const raw = typeof response.content === "string" ? response.content : (response.content[0] as { text: string }).text;
 
 	let parsed: { agentText: string; confidenceScore: number };
 
@@ -226,24 +196,12 @@ ${context}
 		parsed = { agentText: raw, confidenceScore: 0.5 };
 	}
 
-	const usage = response.usage_metadata as
-		| { total_tokens?: number }
-		| undefined;
+	const usage = response.usage_metadata as { total_tokens?: number } | undefined;
 
-	return buildResponse(
-		parsed.agentText,
-		AgentAction.NO_MATCH,
-		parsed.confidenceScore,
-		usage?.total_tokens ?? 0,
-	);
+	return buildResponse(parsed.agentText, AgentAction.NO_MATCH, parsed.confidenceScore, usage?.total_tokens ?? 0);
 }
 
-function buildResponse(
-	responseText: string,
-	action: AgentAction,
-	confidenceScore: number,
-	tokensUsed: number,
-) {
+function buildResponse(responseText: string, action: AgentAction, confidenceScore: number, tokensUsed: number) {
 	return {
 		responseText,
 		action,

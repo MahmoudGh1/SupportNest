@@ -54,7 +54,6 @@ export const getApiConfigController: RequestHandler = asyncHandler(
 export const verifyApiConfigController: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res) => {
 		const organizationId = req.user?.organizationId;
-		// console.log(organizationId);
 		if (!organizationId) throw new AppError("Unauthorized", 401);
 
 		const result = await verifyApiConfigService(organizationId);

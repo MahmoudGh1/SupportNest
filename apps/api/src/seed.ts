@@ -28,7 +28,7 @@ async function main() {
 			isActive: true,
 		},
 	});
-	console.log("✅ Org created:", org.id);
+	// console.log("✅ Org created:", org.id);
 
 	// 2. Create API key
 	const rawKey = "sk_test_1234567890abcdef";
@@ -44,7 +44,7 @@ async function main() {
 			isActive: true,
 		},
 	});
-	console.log("✅ API key created — use this in WebSocket auth:", rawKey);
+	// console.log("✅ API key created — use this in WebSocket auth:", rawKey);
 
 	// 3. Create BusinessApiConfig
 	// This points to a mock API server (we'll use jsonplaceholder or a local mock)
@@ -57,7 +57,7 @@ async function main() {
 			headerName: "x-api-key",
 		},
 	});
-	console.log("✅ BusinessApiConfig created:", apiConfig.id);
+	// console.log("✅ BusinessApiConfig created:", apiConfig.id);
 
 	// 4. Create ToolDefinitions
 	// Tool 1 — get order (maps to GET /todos/:id on jsonplaceholder)
@@ -130,11 +130,11 @@ async function main() {
 		},
 	});
 
-	console.log("✅ ToolDefinitions created");
-	console.log("\n── COPY THESE FOR TESTING ──────────────────────");
-	console.log("orgId:         ", org.id);
-	console.log("widgetSecret:  ", "my-super-secret-widget-key");
-	console.log("rawApiKey:     ", rawKey);
+	// console.log("✅ ToolDefinitions created");
+	// console.log("\n── COPY THESE FOR TESTING ──────────────────────");
+	// console.log("orgId:         ", org.id);
+	// console.log("widgetSecret:  ", "my-super-secret-widget-key");
+	// console.log("rawApiKey:     ", rawKey);
 }
 
 main()

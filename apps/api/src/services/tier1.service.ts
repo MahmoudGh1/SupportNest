@@ -633,8 +633,6 @@ function buildTool(toolDef: ToolDefinition, apiConfig: BusinessApiConfig): Dynam
 		func: async (args: Record<string, unknown>) => {
 			try {
 				const parameters = toolDef.parameters as unknown as ToolParameter[];
-				console.log(parameters);
-				console.log(toolDef.name);
 				let resolvedPath = toolDef.path;
 				const queryParams: Record<string, string> = {};
 				const bodyParams: Record<string, unknown> = {};
@@ -660,7 +658,6 @@ function buildTool(toolDef: ToolDefinition, apiConfig: BusinessApiConfig): Dynam
 					"Content-Type": "application/json",
 					...buildAuthHeaders(apiConfig),
 				};
-				console.log(apiConfig);
 				console.log(url);
 
 				const fetchOptions: RequestInit = { method: toolDef.method, headers };
@@ -729,7 +726,7 @@ function buildResponse(responseText: string, action: Tier1ActionType, confidence
 
 export async function runTier1Agent(context: PipelineContext): Promise<TierResponse> {
 	console.log("[Tier1] starting");
-	const { organizationId, latestMessage, conversationHistory } = context;
+	const { organizationId, latestMessage, conversationHistory, conversationId } = context;
 
 	// 1. Load org's API config + active tool definitions
 	const apiConfig = await prisma.businessApiConfig.findUnique({
@@ -857,7 +854,22 @@ ANSWER ROLES:
 - Don't ever hallucinate or fabricate data.
 - only answer from what you have got from live data
 - Always think and response like a human will do.
-- if there are any way to provide a link to to the response so you can not leave the customer without actinal things then do it immediately without and hesitation.
+- if there are any way to filter and provide a link to go to the specific thing that the customer asked for then do it without hesitating, and give him a complete url + path.
+- don't invent or fabricate any names, or anything if it is not in the call of the tools.
+- Make your response bypass this quality assurance rules:
+	1- RELEVANT — directly addresses what the customer asked, does not answer a different question
+	2- COMPLETE — does not trail off, is not vague, gives the customer something actionable
+	3- CONFIDENT — does not say "I'm not sure" or "maybe" without providing real substance
+	4- ACCURATE TONE — professional, empathetic, not robotic or rude
+	5- NO OBVIOUS FABRICATION — does not contain suspicious specifics like invented phone numbers, made-up URLs, or contradicts itself within the same response. 
+- don't invent any name or any data if it is not in the live data you get from the tool.
+
+LINKS:
+	- Never include raw API or Swagger URLs in your response.
+	- If you want to point the customer somewhere, describe it naturally (e.g. "you can browse all available pets on our website") or omit the link entirely.
+	- Only include a URL if it's a clean, customer-facing page.
+	- If the customer asks for a photo or image of a pet, include the image URL from the tool result in your response using this exact format on its own line: [IMAGE: <url>]
+	- Only use URLs that exist in the tool results. Never invent URLs.
 
 Respond ONLY with valid JSON matching this schema:
 { "agentText": string, "confidenceScore": number }
@@ -897,7 +909,7 @@ ${toolResults.join("\n\n")}
 	}
 
 	console.log(`[Tier1] confidence: ${confidenceScore} | text: ${agentText}`);
-
+	await appendToMemory(conversationId, latestMessage, agentText);
 	return {
 		tier: MessageTier.TIER1,
 		responseText: agentText,
@@ -905,6 +917,7 @@ ${toolResults.join("\n\n")}
 			confidenceScore,
 			tokensUsed: totalTokens,
 		},
+		toolResults
 	};
 }
 

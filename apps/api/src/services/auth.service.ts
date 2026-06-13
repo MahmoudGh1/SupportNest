@@ -19,7 +19,6 @@ export const registerService = async ({ businessName, email, password, firstName
 	if (existing) {
 		throw new AppError("Email already registered", 409);
 	}
-	console.log(businessName, email, password, firstName, lastName, planId);
 
 	try {
 		const org = await prisma.organization.create({
@@ -162,17 +161,15 @@ export const loginService = async ({ email, password }: LoginInput): Promise<Ora
 			where: { email: normalizedEmail },
 		});
 		if (!user) {
-			console.log("first")
 			throw new AppError("Wrong Email or Password", 401);
 		}
-		console.log(user);
+
 		const passwordCheck = await comparePassword(password, user.passwordHash);
 		if (!passwordCheck) {
-			console.log("Second")
 			throw new AppError("Wrong Email or Password", 401);
 		}
 		const { passwordHash: _password, ...dataDTO } = user;
-		console.log(dataDTO);
+		
 		return dataDTO;
 	} catch (err) {
 		console.log(err);

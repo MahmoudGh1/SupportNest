@@ -37,7 +37,6 @@ const PORT = process.env.PORT || 3001;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
-console.log(crypto.randomBytes(24).toString('hex'))
 
 app.use(
 	helmet({
