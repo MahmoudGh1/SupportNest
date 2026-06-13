@@ -129,11 +129,8 @@ export default function RegisterPage() {
 				lastName: form.lastName,
 				email: form.email,
 			}));
-			sessionStorage.setItem("pendingAuth", JSON.stringify({
-				email: form.email,
-				password: form.password,
-			}));
-			sessionStorage.setItem("pendingPaymentId", "pending-" + Date.now());
+
+			
 
 			router.push(`/payment?planId=${planId}&annual=${annual}`);
 		} catch (err) {

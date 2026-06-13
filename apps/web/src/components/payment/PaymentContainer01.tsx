@@ -101,7 +101,7 @@ export default function PaymentContainer({
         return;
       }
 
-      sessionStorage.setItem("pendingPaymentId", result.paymentId);
+      
 
       // ✅ Same tab redirect — Paymob redirects back to /payment-callback
       window.location.href = `https://accept.paymob.com/unifiedcheckout/?publicKey=${PAYMOB_PUBLIC_KEY}&clientSecret=${result.clientSecret}`;

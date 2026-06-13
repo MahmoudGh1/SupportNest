@@ -3,13 +3,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import { S } from "@/components/ui";
+import { OrganizationDetail } from "@/components/admin-dashboard/OrganizationDetail";
+import { OrganizationEditor } from "@/components/admin-dashboard/OrganizationEditor";
+import { UserEditor } from "@/components/admin-dashboard/UserEditor";
 import type {
 	AdminOrganization,
 	AdminOrganizationsResponse,
 	AdminOverview,
+	AdminUser,
+	AdminUsersResponse,
 } from "@/types/types";
 
 type ActiveFilter = boolean | "";
+type Tab = "overview" | "organizations" | "users";
 
 const cellStyle: React.CSSProperties = {
 	padding: "12px 10px",
@@ -131,6 +137,32 @@ function StatusPill({ active }: { active: boolean }) {
 	);
 }
 
+function RolePill({ role }: { role: string }) {
+	const colors: Record<string, { bg: string; text: string }> = {
+		super_admin: { bg: S.purpleFaint, text: S.purple },
+		org_admin: { bg: S.infoBg, text: S.info },
+		support_agent: { bg: S.greenBg, text: S.green },
+	};
+	const style = colors[role.toLowerCase()] || { bg: S.border, text: S.textMuted };
+	return (
+		<span
+			style={{
+				display: "inline-flex",
+				alignItems: "center",
+				background: style.bg,
+				color: style.text,
+				borderRadius: 6,
+				padding: "2px 8px",
+				fontSize: 10,
+				fontWeight: 600,
+				textTransform: "uppercase",
+			}}
+		>
+			{role.replace("_", " ")}
+		</span>
+	);
+}
+
 function TierProgress({
 	label,
 	value,
@@ -176,29 +208,10 @@ function TierProgress({
 	);
 }
 
-function OrganizationRow({ org }: { org: AdminOrganization }) {
-	return (
-		<tr>
-			<td style={cellStyle}>
-				<div style={{ color: S.dark, fontWeight: 600 }}>{org.name}</div>
-				<div style={{ color: S.textMuted, fontSize: 11 }}>{org.email}</div>
-			</td>
-			<td style={cellStyle}>{org.plan?.name ?? "No plan"}</td>
-			<td style={cellStyle}>
-				<StatusPill active={org.is_active} />
-			</td>
-			<td style={cellStyle}>{formatNumber(org.stats.total_users)}</td>
-			<td style={cellStyle}>
-				{formatNumber(org.stats.total_conversations)}
-			</td>
-			<td style={cellStyle}>{formatNumber(org.stats.open_tickets)}</td>
-			<td style={cellStyle}>{formatNumber(org.stats.escalated_tickets)}</td>
-		</tr>
-	);
-}
-
 export default function AdminDashboardPage() {
-	const [overview, setOverview] = useState<AdminOverview | null>(null);
+	const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+	const [showCreateOrg, setShowCreateOrg] = useState(false);
+	const [refreshCounter, setRefreshCounter] = useState(0);
 	const [orgs, setOrgs] = useState<AdminOrganizationsResponse | null>(null);
 	const [search, setSearch] = useState("");
 	const [activeFilter, setActiveFilter] = useState<ActiveFilter>("");
@@ -207,391 +220,165 @@ export default function AdminDashboardPage() {
 
 	useEffect(() => {
 		let ignore = false;
+		setLoading(true);
 
-		Promise.all([
-			api.getAdminOverview(),
-			api.getAdminOrganizations({
-				search,
-				is_active: activeFilter,
-				page: 1,
-				limit: 20,
-			}),
-		])
-			.then(([overviewData, orgData]) => {
-				if (ignore) return;
-				setOverview(overviewData);
-				setOrgs(orgData);
-				setError("");
-			})
-			.catch((err) => {
-				if (!ignore) setError(err.message ?? "Failed to load admin data");
-			})
-			.finally(() => {
+		const fetchData = async () => {
+			try {
+				const data = await api.getAdminOrganizations({
+					search,
+					is_active: activeFilter,
+					page: 1,
+					limit: 50,
+				});
+				if (!ignore) setOrgs(data);
+				if (!ignore) setError("");
+			} catch (err: any) {
+				if (!ignore) setError(err.message ?? "Failed to load data");
+			} finally {
 				if (!ignore) setLoading(false);
-			});
-
-		return () => {
-			ignore = true;
+			}
 		};
-	}, [activeFilter, search]);
 
-	const health = useMemo(() => {
-		if (!overview?.total_organizations) return 0;
-		return Math.round(
-			(overview.active_organizations / overview.total_organizations) * 100,
-		);
-	}, [overview]);
+		fetchData();
+		return () => { ignore = true; };
+	}, [activeFilter, search, refreshCounter]);
 
-	if (loading && !overview) {
-		return (
-			<div
-				style={{
-					height: "100%",
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					color: S.textMuted,
-				}}
-			>
-				<i
-					className="ti ti-loader-2"
-					style={{ fontSize: 24, animation: "spin 1s linear infinite" }}
-				/>
-				<style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-			</div>
-		);
-	}
-
-	return (
-		<div style={{ padding: "1.5rem", minWidth: 0 }}>
+	const renderOrganizations = () => (
+		<section
+			style={{
+				background: "#fff",
+				border: `0.5px solid ${S.border}`,
+				borderRadius: 12,
+				padding: "1.5rem",
+				minWidth: 0,
+			}}
+		>
 			<div
 				style={{
 					display: "flex",
 					alignItems: "center",
 					justifyContent: "space-between",
-					gap: 16,
-					marginBottom: 18,
+					gap: 12,
+					marginBottom: 20,
 					flexWrap: "wrap",
 				}}
 			>
-				<div>
-					<p
+				<h2 style={{ fontSize: 16, color: S.dark, margin: 0, fontWeight: 700 }}>
+					Registered Organizations
+				</h2>
+				<div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+					<button
+						onClick={() => setShowCreateOrg(true)}
 						style={{
-							fontSize: 11,
+							height: 36,
+							padding: "0 14px",
+							background: S.purple,
+							color: "#fff",
+							borderRadius: 8,
+							border: "none",
+							fontSize: 13,
 							fontWeight: 600,
-							color: S.textMuted,
-							letterSpacing: ".06em",
-							textTransform: "uppercase",
-							margin: "0 0 8px",
-						}}
-					>
-						Platform administration
-					</p>
-					<h1
-						style={{
-							fontSize: 22,
-							lineHeight: 1.2,
-							color: S.dark,
-							margin: 0,
-							fontWeight: 650,
-						}}
-					>
-						Organizations, conversations, and escalation health
-					</h1>
-				</div>
-				<div
-					style={{
-						display: "inline-flex",
-						alignItems: "center",
-						gap: 8,
-						color: S.green,
-						background: S.greenBg,
-						borderRadius: 8,
-						padding: "9px 12px",
-						fontSize: 12,
-						fontWeight: 600,
-					}}
-				>
-					<i className="ti ti-activity" style={{ fontSize: 16 }} />
-					{health}% orgs active
-				</div>
-			</div>
-
-			{error && (
-				<div
-					style={{
-						background: S.dangerBg,
-						color: S.danger,
-						border: `0.5px solid ${S.danger}33`,
-						borderRadius: 8,
-						padding: "10px 12px",
-						fontSize: 13,
-						marginBottom: 14,
-					}}
-				>
-					{error}
-				</div>
-			)}
-
-			<div
-				style={{
-					display: "grid",
-					gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
-					gap: 12,
-					marginBottom: 14,
-				}}
-			>
-				<MetricCard
-					label="Organizations"
-					value={formatNumber(overview?.total_organizations)}
-					meta={`${formatNumber(overview?.suspended_organizations)} suspended`}
-					icon="building"
-				/>
-				<MetricCard
-					label="Users"
-					value={formatNumber(overview?.total_users)}
-					meta="Across every organization"
-					icon="users"
-					color="#2563EB"
-				/>
-				<MetricCard
-					label="Conversations"
-					value={formatNumber(overview?.total_conversations)}
-					meta={`${formatNumber(overview?.active_conversations)} active now`}
-					icon="messages"
-					color="#0F766E"
-				/>
-				<MetricCard
-					label="Open tickets"
-					value={formatNumber(overview?.open_tickets)}
-					meta={`${formatNumber(overview?.escalated_tickets)} escalated`}
-					icon="ticket"
-					color="#B45309"
-				/>
-				<MetricCard
-					label="AI resolution"
-					value={`${overview?.overall_ai_resolution_rate ?? 0}%`}
-					meta={`CSAT ${overview?.avg_csat_score ?? 0}/5 average`}
-					icon="sparkles"
-					color="#7C3AED"
-				/>
-			</div>
-
-			<div
-				style={{
-					display: "grid",
-					gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-					gap: 14,
-					alignItems: "start",
-				}}
-			>
-				<section
-					style={{
-						background: "#fff",
-						border: `0.5px solid ${S.border}`,
-						borderRadius: 8,
-						padding: "1rem",
-					}}
-				>
-					<h2
-						style={{
-							fontSize: 14,
-							color: S.dark,
-							margin: "0 0 14px",
-							fontWeight: 650,
-						}}
-					>
-						Tier funnel
-					</h2>
-					<div style={{ display: "grid", gap: 14 }}>
-						<TierProgress
-							label="Tier 1 resolved"
-							value={overview?.tier_breakdown.tier1_resolve_rate ?? 0}
-							color={S.purple}
-						/>
-						<TierProgress
-							label="Tier 2 resolved"
-							value={overview?.tier_breakdown.tier2_resolve_rate ?? 0}
-							color="#2563EB"
-						/>
-						<TierProgress
-							label="Human escalated"
-							value={overview?.tier_breakdown.human_escalation_rate ?? 0}
-							color="#B45309"
-						/>
-					</div>
-					<div
-						style={{
-							display: "grid",
-							gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-							gap: 10,
-							marginTop: 18,
-						}}
-					>
-						<MetricCard
-							label="Tier 1 latency"
-							value={formatLatency(overview?.tier_breakdown.avg_tier1_latency_ms)}
-							meta="Average response"
-							icon="clock"
-						/>
-						<MetricCard
-							label="Tier 2 latency"
-							value={formatLatency(overview?.tier_breakdown.avg_tier2_latency_ms)}
-							meta={`${formatNumber(overview?.tier_breakdown.total_tokens_used)} tokens`}
-							icon="timer"
-							color="#2563EB"
-						/>
-					</div>
-				</section>
-
-				<section
-					style={{
-						background: "#fff",
-						border: `0.5px solid ${S.border}`,
-						borderRadius: 8,
-						padding: "1rem",
-						minWidth: 0,
-					}}
-				>
-					<div
-						style={{
+							cursor: "pointer",
 							display: "flex",
 							alignItems: "center",
-							justifyContent: "space-between",
-							gap: 12,
-							marginBottom: 14,
-							flexWrap: "wrap",
+							gap: 6,
 						}}
 					>
-						<h2
-							style={{
-								fontSize: 14,
-								color: S.dark,
-								margin: 0,
-								fontWeight: 650,
-							}}
-						>
-							Organizations
-						</h2>
-						<div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-							<div style={{ position: "relative" }}>
-								<i
-									className="ti ti-search"
-									style={{
-										position: "absolute",
-										left: 11,
-										top: "50%",
-										transform: "translateY(-50%)",
-										color: S.textMuted,
-										fontSize: 15,
-									}}
-								/>
-								<input
-									value={search}
-									onChange={(e) => setSearch(e.target.value)}
-									placeholder="Search organizations"
-									style={{
-										width: 210,
-										height: 34,
-										boxSizing: "border-box",
-										border: `1px solid ${S.border}`,
-										borderRadius: 8,
-										padding: "0 10px 0 34px",
-										color: S.dark,
-										fontFamily: "inherit",
-										fontSize: 12,
-										outline: "none",
-									}}
-								/>
-							</div>
-							<select
-								value={String(activeFilter)}
-								onChange={(e) => {
-									const value = e.target.value;
-									setActiveFilter(value === "" ? "" : value === "true");
-								}}
-								style={{
-									height: 34,
-									border: `1px solid ${S.border}`,
-									borderRadius: 8,
-									padding: "0 10px",
-									color: S.dark,
-									background: "#fff",
-									fontFamily: "inherit",
-									fontSize: 12,
-									outline: "none",
-								}}
+						<i className="ti ti-plus" style={{ fontSize: 14 }} />
+						New Organization
+					</button>
+					<div style={{ position: "relative" }}>
+						<i className="ti ti-search" style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: S.textMuted, fontSize: 15 }} />
+						<input
+							value={search}
+							onChange={(e) => setSearch(e.target.value)}
+							placeholder="Search..."
+							style={{ width: 210, height: 36, border: `1px solid ${S.border}`, borderRadius: 8, padding: "0 10px 0 34px", fontSize: 13, outline: "none" }}
+						/>
+					</div>
+				</div>
+			</div>
+
+			<div style={{ overflowX: "auto" }}>
+				<table style={{ width: "100%", borderCollapse: "collapse", minWidth: 760 }}>
+					<thead>
+						<tr>
+							{["Organization", "Admin Email", "Status", "Users", "Tickets", "Escalated"].map((heading) => (
+								<th key={heading} style={headerStyle}>{heading}</th>
+							))}
+						</tr>
+					</thead>
+					<tbody>
+						{orgs?.data.map((org) => (
+							<tr
+								key={org.id}
+								onClick={() => setSelectedOrgId(org.id)}
+								style={{ cursor: "pointer", transition: "background 0.1s" }}
+								onMouseEnter={(e) => (e.currentTarget.style.background = S.bgSoft)}
+								onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
 							>
-								<option value="">All statuses</option>
-								<option value="true">Active</option>
-								<option value="false">Suspended</option>
-							</select>
-						</div>
+								<td style={cellStyle}>
+									<div style={{ color: S.dark, fontWeight: 650, fontSize: 13 }}>{org.name}</div>
+									<div style={{ color: S.textMuted, fontSize: 11 }}>{org.slug}</div>
+								</td>
+								<td style={cellStyle}>{org.email}</td>
+								<td style={cellStyle}><StatusPill active={org.is_active} /></td>
+								<td style={cellStyle}>{formatNumber(org.stats.total_users)}</td>
+								<td style={cellStyle}>{formatNumber(org.stats.total_tickets)}</td>
+								<td style={cellStyle}>
+									<span style={{ color: org.stats.escalated_tickets > 0 ? S.danger : S.textSecondary, fontWeight: org.stats.escalated_tickets > 0 ? 600 : 400 }}>
+										{formatNumber(org.stats.escalated_tickets)}
+									</span>
+								</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
+		</section>
+	);
+
+	return (
+		<div style={{ padding: "1.5rem", minWidth: 0 }}>
+			{selectedOrgId ? (
+				<OrganizationDetail
+					orgId={selectedOrgId}
+					onClose={() => setSelectedOrgId(null)}
+				/>
+			) : (
+				<>
+					<div style={{ marginBottom: 24 }}>
+						<p style={{ fontSize: 11, fontWeight: 600, color: S.textMuted, letterSpacing: ".06em", textTransform: "uppercase", margin: "0 0 4px" }}>
+							Platform Administration
+						</p>
+						<h1 style={{ fontSize: 24, fontWeight: 750, color: S.dark, margin: 0 }}>
+							Manage Organizations & Performance
+						</h1>
 					</div>
 
-					<div style={{ overflowX: "auto" }}>
-						<table
-							style={{
-								width: "100%",
-								borderCollapse: "collapse",
-								minWidth: 760,
-							}}
-						>
-							<thead>
-								<tr>
-									{[
-										"Organization",
-										"Plan",
-										"Status",
-										"Users",
-										"Conversations",
-										"Open",
-										"Escalated",
-									].map((heading) => (
-										<th key={heading} style={headerStyle}>
-											{heading}
-										</th>
-									))}
-								</tr>
-							</thead>
-							<tbody>
-								{orgs?.data.map((org) => (
-									<OrganizationRow key={org.id} org={org} />
-								))}
-							</tbody>
-						</table>
-					</div>
-
-					{!loading && orgs?.data.length === 0 && (
-						<div
-							style={{
-								textAlign: "center",
-								padding: "2rem",
-								color: S.textMuted,
-								fontSize: 13,
-							}}
-						>
-							No organizations match these filters.
+					{error && (
+						<div style={{ background: S.dangerBg, color: S.danger, borderRadius: 8, padding: "12px", fontSize: 13, marginBottom: 14 }}>
+							{error}
 						</div>
 					)}
 
-					<div
-						style={{
-							display: "flex",
-							justifyContent: "space-between",
-							alignItems: "center",
-							color: S.textMuted,
-							fontSize: 11,
-							marginTop: 12,
-						}}
-					>
-						<span>{formatNumber(orgs?.meta.total)} total organizations</span>
-						<span>
-							Page {orgs?.meta.page ?? 1} of {orgs?.meta.total_pages ?? 1}
-						</span>
-					</div>
-				</section>
-			</div>
+					{loading ? (
+						<div style={{ height: "200px", display: "flex", alignItems: "center", justifyContent: "center", color: S.textMuted }}>
+							<i className="ti ti-loader-2" style={{ fontSize: 24, animation: "spin 1s linear infinite" }} />
+						</div>
+					) : renderOrganizations()}
+				</>
+			)}
+
+			{showCreateOrg && (
+				<OrganizationEditor
+					onClose={() => setShowCreateOrg(false)}
+					onSuccess={() => {
+						setShowCreateOrg(false);
+						setRefreshCounter(prev => prev + 1);
+					}}
+				/>
+			)}
 		</div>
 	);
 }
