@@ -25,6 +25,7 @@ export const S = {
 	green: "#1D9E75",
 	greenBg: "var(--color-success-bg)",
 	amber: "#854F0B",
+	warning: "#854F0B",
 	amberBg: "var(--color-warning-bg)",
 	purpleBg: "var(--color-brand-faint)",
 	purpleFaint: "var(--color-brand-faint)",
