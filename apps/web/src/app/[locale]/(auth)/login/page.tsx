@@ -171,7 +171,7 @@ function FormPanel() {
 			// how user.onboarded is handled frontend or backend?
 			// it gives me error
 			// router.push("/dashboard");
-			if (user.role === "super_admin") {
+			if (user.role === "SUPER_ADMIN") {
 				router.push("/dashboard/admin");
 			} else {
 				router.push("/dashboard");

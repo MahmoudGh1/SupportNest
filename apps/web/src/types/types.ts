@@ -63,7 +63,7 @@ export interface UserProfile {
 	email: string;
 	first_name: string; // snake_case — matches schema
 	last_name: string;
-	role: "super_admin" | "org_admin" | "support_agent";
+	role: "SUPER_ADMIN" | "org_admin" | "support_agent";
 	organization_id: string;
 	is_active: boolean;
 	created_at: string;
