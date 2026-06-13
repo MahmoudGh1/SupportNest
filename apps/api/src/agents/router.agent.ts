@@ -64,9 +64,9 @@ export async function runRouter(context: PipelineContext): Promise<RouterOutput>
 	const routingStart = Date.now();
 
 	const { parsed: routingResult, tokensUsed: routingTokens } = await callRouterLLM(routingPrompt);
-	console.log("Routing Result: ",routingResult);
+	console.log("Routing Result: ", routingResult);
 	const routingLatency = Date.now() - routingStart;
-	console.log("Latency: ", routingLatency)
+	console.log("Latency: ", routingLatency);
 	const routingDecision = routingResult.routingDecision as Exclude<AgentTier, "ROUTER"> | "HUMAN";
 	console.log("Routing decision value:", routingDecision);
 
@@ -102,7 +102,7 @@ export async function runRouter(context: PipelineContext): Promise<RouterOutput>
 
 		const tierStart = Date.now();
 		const tierResponse: TierResponse = await callTier(currentTier, context);
-		console.log(`${currentTier} Response:`, tierResponse)
+		console.log(`${currentTier} Response:`, tierResponse);
 
 		// short-circuit: customer needs to authenticate first
 		if ((tierResponse as any).loginUrl) {
@@ -118,7 +118,9 @@ export async function runRouter(context: PipelineContext): Promise<RouterOutput>
 
 		// -- phase 3: Review Decision
 
-		const reviewPrompt = buildReviewPrompt(latestMessage, tierResponse.responseText, currentTier);
+		const toolResultsSummary = tierResponse.toolResults?.join("\n\n");
+		const reviewPrompt = buildReviewPrompt(latestMessage, tierResponse.responseText, currentTier, toolResultsSummary);
+
 
 		const reviewStart = Date.now();
 

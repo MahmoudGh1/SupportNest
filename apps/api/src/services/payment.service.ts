@@ -225,7 +225,6 @@ interface CompleteCheckoutInput {
 
 export const completeCheckoutService = async ({ organizationId, pricingId, amount, currency, isAnnual }: CompleteCheckoutInput) => {
 	await assertNoActiveSubscription(organizationId);
-	console.log("first");
 
 	const pricing = await prisma.pricing.findFirst({
 		where: { id: pricingId, isActive: true },

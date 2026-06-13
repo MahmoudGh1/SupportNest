@@ -7,8 +7,12 @@ import { PasswordSection } from "./Profile/Passwordsection";
 import { DangerZone } from "./Profile/Dangerzone";
 import { ApiKeysSection } from "./Profile/Apikeyssection";
 import { Section } from "./Profile/Ui";
+import { useAuth } from "@/context/auth-context";
 
 export default function ProfilePage() {
+  const { user } = useAuth();
+  const isSuperAdmin = String(user?.role).toUpperCase() === "SUPER_ADMIN";
+
   const [tab, setTab] = useState<"profile" | "apikeys">("profile");
 
   const tabStyle = (t: typeof tab) => ({
@@ -42,35 +46,41 @@ export default function ProfilePage() {
             color: S.dark,
           }}
         >
-          Profile & API Keys
+          {isSuperAdmin ? "Profile" : "Profile & API Keys"}
         </h2>
         <p style={{ margin: 0, fontSize: 13, color: S.textMuted }}>
-          Manage your account details and widget authentication keys.
+          {isSuperAdmin
+            ? "Manage your account details."
+            : "Manage your account details and widget authentication keys."}
         </p>
       </div>
 
-      <div
-        style={{
-          display: "inline-flex",
-          gap: 4,
-          background: S.bg,
-          border: `0.5px solid ${S.border}`,
-          borderRadius: 10,
-          padding: 4,
-          marginBottom: 24,
-        }}
-      >
-        <button style={tabStyle("profile")} onClick={() => setTab("profile")}>
-          <i className="ti ti-user" style={{ fontSize: 14, marginRight: 6 }} />
-          Profile
-        </button>
-        <button style={tabStyle("apikeys")} onClick={() => setTab("apikeys")}>
-          <i className="ti ti-key" style={{ fontSize: 14, marginRight: 6 }} />
-          API Keys
-        </button>
-      </div>
+      {/* ── Tab switcher — hide API Keys for Super Admin ── */}
+      {!isSuperAdmin && (
+        <div
+          style={{
+            display: "inline-flex",
+            gap: 4,
+            background: S.bg,
+            border: `0.5px solid ${S.border}`,
+            borderRadius: 10,
+            padding: 4,
+            marginBottom: 24,
+          }}
+        >
+          <button style={tabStyle("profile")} onClick={() => setTab("profile")}>
+            <i className="ti ti-user" style={{ fontSize: 14, marginRight: 6 }} />
+            Profile
+          </button>
+          <button style={tabStyle("apikeys")} onClick={() => setTab("apikeys")}>
+            <i className="ti ti-key" style={{ fontSize: 14, marginRight: 6 }} />
+            API Keys
+          </button>
+        </div>
+      )}
 
-      {tab === "profile" && (
+      {/* ── Profile tab — always visible ── */}
+      {(tab === "profile" || isSuperAdmin) && (
         <>
           <ProfileSection />
           <PasswordSection />
@@ -78,7 +88,8 @@ export default function ProfilePage() {
         </>
       )}
 
-      {tab === "apikeys" && (
+      {/* ── API Keys tab — org admins only ── */}
+      {tab === "apikeys" && !isSuperAdmin && (
         <>
           <ApiKeysSection />
           <Section
@@ -102,17 +113,7 @@ export default function ProfilePage() {
                   display: "block",
                 }}
               >
-                {`<script>
-  window.SupportNestConfig = {
-    apiKey: "sn_live_YOUR_KEY_HERE",
-    // color: "#534AB7",
-    // position: "bottom-right",
-  };
-</script>
-<script
-  src="https://cdn.supportnest.ai/widget.js"
-  async
-></script>`}
+                {`<script src="https://cdn.supportnest.ai/widget.js" data-widget-key="sn_live_YOUR_KEY_HERE"></script>`}
               </code>
             </div>
           </Section>

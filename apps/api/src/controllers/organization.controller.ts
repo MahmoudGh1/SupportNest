@@ -9,7 +9,6 @@ export const getMyOrgController = async (req: AuthenticatedRequest, res: Respons
 		return res.status(200).json(org);
 	} catch (error: any) {
 		if (error.status) return res.status(error.status).json({ error: error.message });
-		console.error(error);
 		return res.status(500).json({ error: "Internal server error" });
 	}
 };
@@ -29,7 +28,6 @@ export const updateWidgetConfigController = async (req: AuthenticatedRequest, re
 		return res.status(200).json(result);
 	} catch (error: any) {
 		if (error.status) return res.status(error.status).json({ error: error.message });
-		console.error(error);
 		return res.status(500).json({ error: "Internal server error" });
 	}
 };
@@ -46,7 +44,6 @@ export const updateOrgProfileController = async (req: AuthenticatedRequest, res:
 		return res.status(200).json(result);
 	} catch (error: any) {
 		if (error.status) return res.status(error.status).json({ error: error.message });
-		console.error(error);
 		return res.status(500).json({ error: "Internal server error" });
 	}
 };
@@ -58,7 +55,6 @@ export const updateOrgProfileController = async (req: AuthenticatedRequest, res:
 //     return res.status(200).json(stats);
 //   } catch (error: any) {
 //     if (error.status) return res.status(error.status).json({ error: error.message });
-//     console.error(error);
 //     return res.status(500).json({ error: 'Internal server error' });
 //   }
 // };

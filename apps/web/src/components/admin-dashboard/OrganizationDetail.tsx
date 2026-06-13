@@ -17,7 +17,7 @@ interface Props {
 }
 
 const cardStyle: React.CSSProperties = {
-	background: "#fff",
+	background: S.surface,
 	border: `0.5px solid ${S.border}`,
 	borderRadius: 12,
 	padding: "1.25rem",
@@ -38,6 +38,108 @@ const valueStyle: React.CSSProperties = {
 	fontWeight: 500,
 };
 
+// ─── SKELETON COMPONENTS ──────────────────────────────────────────────────────
+function Shimmer({ width = "100%", height = 16, radius = 6 }: { width?: string | number; height?: number; radius?: number }) {
+	return (
+		<div
+			style={{
+				width,
+				height,
+				borderRadius: radius,
+				background: `linear-gradient(90deg, ${S.border} 25%, #f0eff8 50%, ${S.border} 75%)`,
+				backgroundSize: "200% 100%",
+				animation: "shimmer 1.4s infinite",
+				flexShrink: 0,
+			}}
+		/>
+	);
+}
+
+function OrganizationDetailSkeleton() {
+	return (
+		<div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+			<style>{`
+        @keyframes shimmer {
+          0%   { background-position: 200% 0 }
+          100% { background-position: -200% 0 }
+        }
+      `}</style>
+
+			{/* Header Skeleton */}
+			<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+				<div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+					<Shimmer width={24} height={24} radius={4} />
+					<div>
+						<Shimmer width={200} height={24} radius={6} />
+						<div style={{ marginTop: 6 }}>
+							<Shimmer width={150} height={13} radius={4} />
+						</div>
+					</div>
+				</div>
+				<Shimmer width={100} height={36} radius={8} />
+			</div>
+
+			{/* Stats Row Skeleton */}
+			<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
+				<div style={cardStyle}>
+					<Shimmer width={80} height={11} radius={4} />
+					<div style={{ display: "grid", gap: 12, marginTop: 12 }}>
+						<div>
+							<Shimmer width={60} height={10} radius={4} />
+							<div style={{ marginTop: 4 }}><Shimmer width="80%" height={14} radius={4} /></div>
+						</div>
+						<div>
+							<Shimmer width={80} height={10} radius={4} />
+							<div style={{ marginTop: 4 }}><Shimmer width="50%" height={14} radius={4} /></div>
+						</div>
+					</div>
+				</div>
+
+				<div style={cardStyle}>
+					<Shimmer width={120} height={11} radius={4} />
+					<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
+						{Array.from({ length: 4 }).map((_, i) => (
+							<div key={i}>
+								<Shimmer width="60%" height={24} radius={6} />
+								<div style={{ marginTop: 4 }}><Shimmer width="40%" height={10} radius={4} /></div>
+							</div>
+						))}
+					</div>
+				</div>
+			</div>
+
+			{/* Tier Performance Skeleton */}
+			<section style={cardStyle}>
+				<Shimmer width={150} height={11} radius={4} />
+				<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 20, marginTop: 16 }}>
+					{Array.from({ length: 4 }).map((_, i) => (
+						<div key={i}>
+							<Shimmer width="70%" height={11} radius={4} />
+							<div style={{ marginTop: 6, marginBottom: 4 }}><Shimmer width="50%" height={22} radius={6} /></div>
+							<Shimmer width="40%" height={10} radius={4} />
+						</div>
+					))}
+				</div>
+			</section>
+
+			{/* Team Table Skeleton */}
+			<section style={cardStyle}>
+				<Shimmer width={180} height={11} radius={4} />
+				<div style={{ marginTop: 16 }}>
+					{Array.from({ length: 3 }).map((_, i) => (
+						<div key={i} style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: `0.5px solid ${S.border}` }}>
+							<Shimmer width="25%" height={13} radius={4} />
+							<Shimmer width="35%" height={13} radius={4} />
+							<Shimmer width="20%" height={13} radius={4} />
+							<Shimmer width="10%" height={13} radius={4} />
+						</div>
+					))}
+				</div>
+			</section>
+		</div>
+	);
+}
+
 export function OrganizationDetail({ orgId, onClose }: Props) {
 	const [org, setOrg] = useState<AdminOrganizationDetail | null>(null);
 	const [tierStats, setTierStats] = useState<AdminTierStats | null>(null);
@@ -56,11 +158,7 @@ export function OrganizationDetail({ orgId, onClose }: Props) {
 	}, [orgId]);
 
 	if (loading) {
-		return (
-			<div style={{ padding: "2rem", textAlign: "center", color: S.textMuted }}>
-				<i className="ti ti-loader-2" style={{ fontSize: 24, animation: "spin 1s linear infinite" }} />
-			</div>
-		);
+		return <OrganizationDetailSkeleton />;
 	}
 
 	if (error || !org) {

@@ -22,7 +22,6 @@ export async function handleMessageSend(
 ) {
 	const { content } = payload;
 	const { conversationId, organizationId, customerId, apiKeyId } = ws.meta!;
-	console.log(ws.meta);
 	await prisma.message.create({
 		data: {
 			conversationId,
@@ -55,7 +54,6 @@ export async function handleMessageSend(
 	const redisHistory = await loadMemory(conversationId);
 
 	// Build PipelineContext for the router
-	console.log(organizationId);
 	const context: PipelineContext = {
 		customerId,
 		conversationId,

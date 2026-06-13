@@ -88,7 +88,6 @@ export async function confirmPaymentController(req: Request, res: Response) {
 	try {
 		const { paymentId } = req.body;
 		const result = await confirmPaymentService(paymentId);
-		// console.log(result)
 		return res.json(result);
 	} catch (err: any) {
 		if (err.message === "PAYMENT_NOT_FOUND") {
