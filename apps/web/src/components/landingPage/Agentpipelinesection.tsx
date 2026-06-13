@@ -4,43 +4,43 @@ import { useEffect, useRef, useState, useCallback } from "react";
 
 /* ─── theme ──────────────────────────────────────────────────────────────── */
 const T = {
-  bg:          "#ffffff",
-  bgSection:   "#f6f5fc",
-  text:        "#1a1830",
-  textMid:     "#3d3a55",
-  textBody:    "#64607a",
-  textHint:    "#AFA9EC",
-  border:      "#e8e6f0",
-  borderMid:   "#d4d0e8",
-  purple:      "#534AB7",
+  bg: "#ffffff",
+  bgSection: "#f6f5fc",
+  text: "#1a1830",
+  textMid: "#3d3a55",
+  textBody: "#64607a",
+  textHint: "#AFA9EC",
+  border: "#e8e6f0",
+  borderMid: "#d4d0e8",
+  purple: "#534AB7",
   purpleLight: "#7F77DD",
   purpleFaint: "#EEEDFE",
-  purpleTint:  "rgba(83,74,183,0.08)",
-  purpleRing:  "rgba(83,74,183,0.18)",
-  green:       "#1D9E75",
-  greenFaint:  "#E1F5EE",
-  greenTint:   "rgba(29,158,117,0.08)",
-  greenRing:   "rgba(29,158,117,0.18)",
-  amber:       "#D97706",
-  amberFaint:  "#FEF3C7",
-  amberTint:   "rgba(217,119,6,0.07)",
-  amberRing:   "rgba(217,119,6,0.15)",
-  red:         "#E24B4A",
-  redFaint:    "#FEECEC",
-  redTint:     "rgba(226,75,74,0.07)",
+  purpleTint: "rgba(83,74,183,0.08)",
+  purpleRing: "rgba(83,74,183,0.18)",
+  green: "#1D9E75",
+  greenFaint: "#E1F5EE",
+  greenTint: "rgba(29,158,117,0.08)",
+  greenRing: "rgba(29,158,117,0.18)",
+  amber: "#D97706",
+  amberFaint: "#FEF3C7",
+  amberTint: "rgba(217,119,6,0.07)",
+  amberRing: "rgba(217,119,6,0.15)",
+  red: "#E24B4A",
+  redFaint: "#FEECEC",
+  redTint: "rgba(226,75,74,0.07)",
 } as const;
 
 /* ─── types ─────────────────────────────────────────────────────────────── */
 type StepKind =
   | { kind: "arrive"; to: 0 | 1 | 2; msg: string }
-  | { kind: "solve";  at: 0 | 1 | 2; msg: string }
-  | { kind: "fail";   at: 0 | 1 | 2; msg: string };
+  | { kind: "solve"; at: 0 | 1 | 2; msg: string }
+  | { kind: "fail"; at: 0 | 1 | 2; msg: string };
 
 interface Scenario {
-  id:    string;
-  icon:  string;
+  id: string;
+  icon: string;
   label: string;
-  tag:   string;
+  tag: string;
   steps: StepKind[];
 }
 
@@ -49,78 +49,78 @@ type AgentState = "idle" | "active" | "success" | "fail";
 /* ─── data ──────────────────────────────────────────────────────────────── */
 const SCENARIOS: Scenario[] = [
   {
-    id:    "password",
-    icon:  "🔑",
+    id: "password",
+    icon: "🔑",
     label: "Password reset",
-    tag:   "Simple",
+    tag: "Simple",
     steps: [
       { kind: "arrive", to: 0, msg: "Incoming: password reset request" },
-      { kind: "solve",  at: 0, msg: "Tier 1 resolved it — reset link sent instantly" },
+      { kind: "solve", at: 0, msg: "Tier 1 resolved it — reset link sent instantly" },
     ],
   },
   {
-    id:    "integration",
-    icon:  "⚙️",
+    id: "integration",
+    icon: "⚙️",
     label: "Integration error",
-    tag:   "Medium",
+    tag: "Medium",
     steps: [
       { kind: "arrive", to: 0, msg: "Incoming: webhook integration failure" },
-      { kind: "fail",   at: 0, msg: "Outside Tier 1 scope — escalating to Tier 2" },
+      { kind: "fail", at: 0, msg: "Outside Tier 1 scope — escalating to Tier 2" },
       { kind: "arrive", to: 1, msg: "Tier 2 analysing error logs and stack trace" },
-      { kind: "solve",  at: 1, msg: "Tier 2 pinpointed the root cause — patch applied" },
+      { kind: "solve", at: 1, msg: "Tier 2 pinpointed the root cause — patch applied" },
     ],
   },
   {
-    id:    "dataloss",
-    icon:  "🚨",
+    id: "dataloss",
+    icon: "🚨",
     label: "Critical data loss",
-    tag:   "Critical",
+    tag: "Critical",
     steps: [
       { kind: "arrive", to: 0, msg: "Incoming: critical data integrity alert" },
-      { kind: "fail",   at: 0, msg: "Severity too high for Tier 1 — escalating" },
+      { kind: "fail", at: 0, msg: "Severity too high for Tier 1 — escalating" },
       { kind: "arrive", to: 1, msg: "Tier 2 running diagnostics on affected tables" },
-      { kind: "fail",   at: 1, msg: "Requires human judgement — escalating to agent" },
+      { kind: "fail", at: 1, msg: "Requires human judgement — escalating to agent" },
       { kind: "arrive", to: 2, msg: "Human agent reviewing full incident context" },
-      { kind: "solve",  at: 2, msg: "Human agent resolved with tailored response" },
+      { kind: "solve", at: 2, msg: "Human agent resolved with tailored response" },
     ],
   },
 ];
 
 const AGENTS = [
   {
-    tier:    "Tier 1",
-    name:    "AI Responder",
-    desc:    "Handles common, repetitive queries instantly using your knowledge base.",
-    accent:  T.purple,
+    tier: "Tier 1",
+    name: "AI Responder",
+    desc: "Handles common, repetitive queries instantly using your knowledge base.",
+    accent: T.purple,
     bgLight: T.purpleTint,
-    ring:    T.purpleRing,
-    faint:   T.purpleFaint,
-    emoji:   "🤖",
+    ring: T.purpleRing,
+    faint: T.purpleFaint,
+    emoji: "🤖",
   },
   {
-    tier:    "Tier 2",
-    name:    "AI Analyst",
-    desc:    "Multi-step reasoning for technical issues and edge cases.",
-    accent:  T.green,
+    tier: "Tier 2",
+    name: "AI Analyst",
+    desc: "Multi-step reasoning for technical issues and edge cases.",
+    accent: T.green,
     bgLight: T.greenTint,
-    ring:    T.greenRing,
-    faint:   T.greenFaint,
-    emoji:   "🧠",
+    ring: T.greenRing,
+    faint: T.greenFaint,
+    emoji: "🧠",
   },
   {
-    tier:    "Human",
-    name:    "Support Agent",
-    desc:    "Complex, sensitive, or escalated issues requiring empathy and judgement.",
-    accent:  T.amber,
+    tier: "Human",
+    name: "Support Agent",
+    desc: "Complex, sensitive, or escalated issues requiring empathy and judgement.",
+    accent: T.amber,
     bgLight: T.amberTint,
-    ring:    T.amberRing,
-    faint:   T.amberFaint,
-    emoji:   "👩‍💼",
+    ring: T.amberRing,
+    faint: T.amberFaint,
+    emoji: "👩‍💼",
   },
 ];
 
 const CYCLE_MS = 5_000;
-const STEP_MS  = 1_600;
+const STEP_MS = 1_600;
 const PAUSE_MS = 900;
 
 function sleep(ms: number) {
@@ -141,21 +141,21 @@ function AgentCard({
 
   const borderColor =
     state === "success" ? T.green
-    : state === "fail"   ? T.red
-    : state === "active" ? a.accent
-    : T.border;
+      : state === "fail" ? T.red
+        : state === "active" ? a.accent
+          : T.border;
 
   const bgColor =
     state === "success" ? T.greenTint
-    : state === "fail"   ? T.redTint
-    : state === "active" ? a.bgLight
-    : T.bg;
+      : state === "fail" ? T.redTint
+        : state === "active" ? a.bgLight
+          : T.bg;
 
   const shadowColor =
     state === "success" ? T.greenRing
-    : state === "fail"   ? "rgba(226,75,74,0.12)"
-    : state === "active" ? a.ring
-    : "transparent";
+      : state === "fail" ? "rgba(226,75,74,0.12)"
+        : state === "active" ? a.ring
+          : "transparent";
 
   return (
     <div
@@ -188,7 +188,7 @@ function AgentCard({
 
       {/* status badge */}
       {(state === "success" || state === "fail") && (
-        <span style={{ position:"absolute", top:12, left:14, fontSize:14 }}>
+        <span style={{ position: "absolute", top: 12, left: 14, fontSize: 14 }}>
           {state === "success" ? "✅" : "❌"}
         </span>
       )}
@@ -245,7 +245,7 @@ function Connector({ active }: { active: boolean }) {
         transition: "background 0.4s",
       }} />
       <svg width="7" height="11" viewBox="0 0 7 11"
-        style={{ position:"absolute", right:-1 }}>
+        style={{ position: "absolute", right: -1 }}>
         <path d="M1 1l5 4.5L1 10"
           stroke={active ? T.green : T.borderMid}
           strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
@@ -256,12 +256,12 @@ function Connector({ active }: { active: boolean }) {
 
 /* ─── main ──────────────────────────────────────────────────────────────── */
 export default function AgentPipelineSection() {
-  const [agentStates,  setAgentStates]  = useState<AgentState[]>(["idle","idle","idle"]);
+  const [agentStates, setAgentStates] = useState<AgentState[]>(["idle", "idle", "idle"]);
   const [activeProbAt, setActiveProbAt] = useState<number | null>(null);
-  const [statusMsg,    setStatusMsg]    = useState("Watch how every ticket finds the right agent.");
-  const [statusKind,   setStatusKind]   = useState<"default"|"success"|"fail"|"active">("default");
-  const [countdown,    setCountdown]    = useState(CYCLE_MS / 1000);
-  const [activePill,   setActivePill]   = useState(0);
+  const [statusMsg, setStatusMsg] = useState("Watch how every ticket finds the right agent.");
+  const [statusKind, setStatusKind] = useState<"default" | "success" | "fail" | "active">("default");
+  const [countdown, setCountdown] = useState(CYCLE_MS / 1000);
+  const [activePill, setActivePill] = useState(0);
 
   const runningRef = useRef(false);
   const mountedRef = useRef(true);
@@ -271,7 +271,7 @@ export default function AgentPipelineSection() {
   useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
 
   const reset = useCallback(() => {
-    setAgentStates(["idle","idle","idle"]);
+    setAgentStates(["idle", "idle", "idle"]);
     setActiveProbAt(null);
     setStatusMsg("Watch how every ticket finds the right agent.");
     setStatusKind("default");
@@ -282,7 +282,7 @@ export default function AgentPipelineSection() {
     runningRef.current = true;
     const s = SCENARIOS[idx % SCENARIOS.length];
     setActivePill(idx % SCENARIOS.length);
-    const states: AgentState[] = ["idle","idle","idle"];
+    const states: AgentState[] = ["idle", "idle", "idle"];
 
     for (const step of s.steps) {
       if (!mountedRef.current) return;
@@ -309,8 +309,8 @@ export default function AgentPipelineSection() {
   }, []);
 
   const startCycle = useCallback((idx: number) => {
-    clearTimeout(timerRef.current);
-    clearInterval(cdRef.current);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    if (cdRef.current) clearInterval(cdRef.current);
     reset();
     setTimeout(async () => {
       await runScenario(idx);
@@ -337,9 +337,9 @@ export default function AgentPipelineSection() {
 
   const statusColor =
     statusKind === "success" ? T.green
-    : statusKind === "fail"   ? T.red
-    : statusKind === "active" ? T.purple
-    : T.textHint;
+      : statusKind === "fail" ? T.red
+        : statusKind === "active" ? T.purple
+          : T.textHint;
 
   const PILL_COLORS = [T.purple, T.green, T.red];
 
@@ -370,13 +370,13 @@ export default function AgentPipelineSection() {
       `}</style>
 
       {/* Lavender radial glow — matches hero section */}
-      <div style={{ position:"absolute", top:-180, left:"50%", transform:"translateX(-50%)", width:700, height:480, borderRadius:"50%", background:"radial-gradient(ellipse, rgba(83,74,183,0.07) 0%, transparent 70%)", pointerEvents:"none" }} />
-      <div style={{ position:"absolute", bottom:-100, right:"4%", width:340, height:340, borderRadius:"50%", background:"radial-gradient(circle, rgba(29,158,117,0.05) 0%, transparent 70%)", pointerEvents:"none" }} />
+      <div style={{ position: "absolute", top: -180, left: "50%", transform: "translateX(-50%)", width: 700, height: 480, borderRadius: "50%", background: "radial-gradient(ellipse, rgba(83,74,183,0.07) 0%, transparent 70%)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: -100, right: "4%", width: 340, height: 340, borderRadius: "50%", background: "radial-gradient(circle, rgba(29,158,117,0.05) 0%, transparent 70%)", pointerEvents: "none" }} />
 
       <div style={{ maxWidth: 1040, margin: "0 auto" }}>
 
         {/* Section header */}
-        <div style={{ textAlign:"center", marginBottom:52, animation:"fadeUp 0.6s ease both" }}>
+        <div style={{ textAlign: "center", marginBottom: 52, animation: "fadeUp 0.6s ease both" }}>
           <div style={{
             display: "inline-block",
             fontSize: 11, fontWeight: 700, letterSpacing: "0.1em",
@@ -401,7 +401,7 @@ export default function AgentPipelineSection() {
         </div>
 
         {/* Scenario pills */}
-        <div style={{ display:"flex", justifyContent:"center", gap:8, marginBottom:40, flexWrap:"wrap" }}>
+        <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 40, flexWrap: "wrap" }}>
           {SCENARIOS.map((sc, i) => {
             const isActive = activePill === i;
             const c = PILL_COLORS[i];
@@ -442,7 +442,7 @@ export default function AgentPipelineSection() {
         </div>
 
         {/* Agent cards */}
-        <div style={{ display:"flex", alignItems:"stretch", gap:0, marginBottom:20 }}>
+        <div style={{ display: "flex", alignItems: "stretch", gap: 0, marginBottom: 20 }}>
           <AgentCard index={0} state={agentStates[0]} problemHere={activeProbAt === 0} />
           <Connector active={agentStates[0] === "fail" || activeProbAt === 1 || agentStates[1] !== "idle"} />
           <AgentCard index={1} state={agentStates[1]} problemHere={activeProbAt === 1} />
@@ -460,7 +460,7 @@ export default function AgentPipelineSection() {
           boxShadow: "0 1px 4px rgba(83,74,183,0.05)",
           marginBottom: 16,
         }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{
               width: 7, height: 7, borderRadius: "50%", flexShrink: 0,
               background: statusColor,
@@ -480,29 +480,29 @@ export default function AgentPipelineSection() {
           </div>
 
           {/* Countdown ring */}
-          <div style={{ display:"flex", alignItems:"center", gap:7, flexShrink:0 }}>
-            <svg width="18" height="18" viewBox="0 0 18 18" style={{ transform:"rotate(-90deg)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 7, flexShrink: 0 }}>
+            <svg width="18" height="18" viewBox="0 0 18 18" style={{ transform: "rotate(-90deg)" }}>
               <circle cx="9" cy="9" r="7.5" fill="none" stroke={T.border} strokeWidth="2" />
               <circle
                 cx="9" cy="9" r="7.5" fill="none"
                 stroke={T.purple} strokeWidth="2" strokeLinecap="round"
                 strokeDasharray={2 * Math.PI * 7.5}
                 strokeDashoffset={2 * Math.PI * 7.5 * (1 - countdown / (CYCLE_MS / 1000))}
-                style={{ transition:"stroke-dashoffset 1s linear" }}
+                style={{ transition: "stroke-dashoffset 1s linear" }}
               />
             </svg>
-            <span style={{ fontSize:12, color:T.textHint, fontVariantNumeric:"tabular-nums" }}>
+            <span style={{ fontSize: 12, color: T.textHint, fontVariantNumeric: "tabular-nums" }}>
               {countdown}s
             </span>
           </div>
         </div>
 
         {/* Stats strip */}
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
           {[
-            { value:"80%",  label:"Tickets auto-resolved", color: T.purple },
-            { value:"1.4s", label:"Avg response time",     color: T.green  },
-            { value:"24/7", label:"Always on",             color: T.amber  },
+            { value: "80%", label: "Tickets auto-resolved", color: T.purple },
+            { value: "1.4s", label: "Avg response time", color: T.green },
+            { value: "24/7", label: "Always on", color: T.amber },
           ].map(stat => (
             <div key={stat.label} style={{
               background: T.bg,
