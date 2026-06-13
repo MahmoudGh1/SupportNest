@@ -22,7 +22,7 @@ interface UpdateUserBody {
 const roleMap: Record<string, string> = {
   support_agent: "SUPPORT_AGENT",
   org_admin: "ORG_ADMIN",
-  super_admin: "SUPER_ADMIN",
+  SUPER_ADMIN: "SUPER_ADMIN",
 };
 
 export async function listUsersForOrg(
