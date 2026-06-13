@@ -239,7 +239,7 @@ export interface AdminUser {
 	email: string;
 	first_name: string;
 	last_name: string;
-	role: "super_admin" | "org_admin" | "support_agent";
+	role: "SUPER_ADMIN" | "org_admin" | "support_agent";
 	is_active: boolean;
 	organization_id: string;
 	created_at: string;

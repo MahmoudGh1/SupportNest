@@ -176,8 +176,12 @@ function FormPanel() {
 			} else {
 				router.push("/dashboard");
 			}
-		} catch (e: any) {
-			setError(e.message ?? t`Invalid email or password.`);
+		} catch (e) {
+			if (e instanceof Error) {
+				setError(e.message ?? t`Invalid email or password.`);
+			} else {
+				setError("An unexpected error occurred.");
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -251,8 +255,12 @@ function FormPanel() {
 							try {
 								await loginWithGoogle(credentialResponse.credential!);
 								router.push("/dashboard");
-							} catch (e: any) {
-								setError(e.message ?? t`Invalid email or password.`);
+							} catch (e) {
+								if (e instanceof Error) {
+									setError(e.message ?? t`Invalid email or password.`);
+								} else {
+									setError("An unexpected error occurred.");
+								}
 							} finally {
 								setLoading(false);
 							}
@@ -517,7 +525,7 @@ function BrandPanel() {
 							marginBottom: 16,
 						}}
 					>
-						"
+						{"\""}
 					</div>
 					<p
 						style={{

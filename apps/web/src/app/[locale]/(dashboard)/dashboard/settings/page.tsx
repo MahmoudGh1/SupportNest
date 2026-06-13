@@ -7,7 +7,6 @@ import {
 	WidgetConfig,
 	UpdateProfileInput,
 	UpdatePasswordInput,
-	UpdateWidgetConfigInput,
 } from "@/types/types";
 import { S } from "@/components/ui";
 import { api } from "@/lib/api";
@@ -251,7 +250,7 @@ function ProfileTab({ user }: { user: UserProfile }) {
 	const roleLabel: Record<string, string> = {
 		org_admin: "Admin",
 		support_agent: "Support Agent",
-		super_admin: "Super Admin",
+		SUPER_ADMIN: "Super Admin",
 	};
 
 	// Password strength
@@ -289,8 +288,12 @@ function ProfileTab({ user }: { user: UserProfile }) {
 		try {
 			await api.updateUserProfile(form);
 			setToast("Profile saved.");
-		} catch (err: any) {
-			setToast("Error: " + err.message);
+		} catch (err) {
+			if (err instanceof Error) {
+				setToast("Error: " + err.message);
+			} else {
+				setToast("An unexpected error occurred.");
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -317,8 +320,12 @@ function ProfileTab({ user }: { user: UserProfile }) {
 			await api.updatePassword(pwForm);
 			setPwForm({ current_password: "", new_password: "" });
 			setToast("Password updated.");
-		} catch (err: any) {
-			setToast("Error: " + err.message);
+		} catch (err) {
+			if (err instanceof Error) {
+				setToast("Error: " + err.message);
+			} else {
+				setToast("An unexpected error occurred.");
+			}
 		} finally {
 			setPwLoading(false);
 		}
@@ -665,8 +672,12 @@ function OrgTab({ org }: { org: OrgProfile }) {
 			setEmail(merged.email);
 			setWidget(merged.widget_config);
 			setToast("Organization settings saved.");
-		} catch (err: any) {
-			setToast("Error: " + err.message);
+		} catch (err) {
+			if (err instanceof Error) {
+				setToast("Error: " + err.message);
+			} else {
+				setToast("An unexpected error occurred.");
+			}
 		} finally {
 			setLoading(false);
 		}

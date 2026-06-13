@@ -179,11 +179,10 @@ function TicketRow({
 	return (
 		<button
 			onClick={onClick}
-			className={`w-full text-left px-4 py-3.5 border-b border-[#e8e6f0] transition-all duration-150 hover:bg-[#f6f5fc] group ${
-				selected
-					? "bg-[#f6f5fc] border-l-2 border-l-[#534AB7]"
-					: "border-l-2 border-l-transparent"
-			}`}
+			className={`w-full text-left px-4 py-3.5 border-b border-[#e8e6f0] transition-all duration-150 hover:bg-[#f6f5fc] group ${selected
+				? "bg-[#f6f5fc] border-l-2 border-l-[#534AB7]"
+				: "border-l-2 border-l-transparent"
+				}`}
 		>
 			<div className="flex items-start justify-between gap-2 mb-1.5">
 				<div className="flex items-center gap-2 min-w-0">
@@ -283,11 +282,25 @@ function TicketDetail({
 	const bottomRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		setMsgLoading(true);
-		apiGetMessages(ticket.conversationId)
-			.then(setMessages)
-			.catch(() => setMessages([]))
-			.finally(() => setMsgLoading(false));
+		let isCurrent = true;
+
+		const loadMessages = async () => {
+			setMsgLoading(true);
+			try {
+				const data = await apiGetMessages(ticket.conversationId);
+				if (isCurrent) setMessages(data);
+			} catch {
+				if (isCurrent) setMessages([]);
+			} finally {
+				if (isCurrent) setMsgLoading(false);
+			}
+		};
+
+		loadMessages();
+
+		return () => {
+			isCurrent = false;
+		};
 	}, [ticket.conversationId]);
 
 	useEffect(() => {
@@ -305,8 +318,12 @@ function TicketDetail({
 			const updated = await apiStart(ticket.id);
 			onUpdated(updated);
 			showToast("Ticket claimed — status set to In Progress");
-		} catch (e: any) {
-			showToast(e.message);
+		} catch (e) {
+			if (e instanceof Error) {
+				setToast("Error: " + e.message);
+			} else {
+				setToast("An unexpected error occurred.");
+			}
 		} finally {
 			setActionLoading(false);
 		}
@@ -319,8 +336,12 @@ function TicketDetail({
 			onUpdated(updated);
 			setShowResolve(false);
 			showToast("Ticket resolved ✓");
-		} catch (e: any) {
-			showToast(e.message);
+		} catch (e) {
+			if (e instanceof Error) {
+				setToast("Error: " + e.message);
+			} else {
+				setToast("An unexpected error occurred.");
+			}
 		} finally {
 			setActionLoading(false);
 		}
@@ -500,18 +521,25 @@ export default function TicketsPage() {
 	const [error, setError] = useState("");
 
 	const fetchTickets = useCallback(async (status?: TicketStatus | "ALL") => {
-		setLoading(true);
-		setError("");
-		try {
-			const params = status && status !== "ALL" ? { status } : undefined;
-			const { tickets: t, meta: m } = await apiGetTickets(params);
-			setTickets(t);
-			setMeta(m);
-		} catch (e: any) {
-			setError(e.message);
-		} finally {
-			setLoading(false);
+		const runFetch = async () => {
+			setError("");
+			setLoading(true);
+			try {
+				const params = status && status !== "ALL" ? { status } : undefined;
+				const { tickets: t, meta: m } = await apiGetTickets(params);
+				setTickets(t);
+				setMeta(m);
+			} catch (e) {
+				if (e instanceof Error) {
+					setError("Error: " + e.message);
+				} else {
+					setError("An unexpected error occurred.");
+				}
+			} finally {
+				setLoading(false);
+			}
 		}
+		runFetch()
 	}, []);
 
 	useEffect(() => {
@@ -561,19 +589,17 @@ export default function TicketsPage() {
 								setActiveTab(tab.value);
 								setSelected(null);
 							}}
-							className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold rounded-lg transition-all ${
-								activeTab === tab.value
-									? "bg-[#534AB7] text-white"
-									: "text-[#64607a] hover:bg-[#f6f5fc]"
-							}`}
+							className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold rounded-lg transition-all ${activeTab === tab.value
+								? "bg-[#534AB7] text-white"
+								: "text-[#64607a] hover:bg-[#f6f5fc]"
+								}`}
 						>
 							{tab.label}
 							<span
-								className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-									activeTab === tab.value
-										? "bg-white/20 text-white"
-										: "bg-[#e8e6f0] text-[#64607a]"
-								}`}
+								className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === tab.value
+									? "bg-white/20 text-white"
+									: "bg-[#e8e6f0] text-[#64607a]"
+									}`}
 							>
 								{countForTab(tab.value)}
 							</span>
