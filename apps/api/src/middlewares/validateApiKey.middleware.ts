@@ -6,6 +6,7 @@ import prisma from "src/config/prisma.js";
 import apiKey from "src/utils/apiKey.utils.js";
 import type { AuthenticatedWidgetRequest } from "src/types/apiKey.types.js";
 import type { ApiKey } from "generated/prisma/client.js";
+import AppError from "src/utils/appError.js";
 
 export const validateApiKey = async (
 	req: AuthenticatedWidgetRequest,
@@ -66,6 +67,9 @@ export const validateApiKey = async (
 			},
 		});
 
+		if (apiKeyRecord && !apiKeyRecord.organization) {
+			throw new AppError("invalid api key", 400);
+		}
 		req.organization = apiKeyRecord.organization;
 		req.apiKey = apiKeyRecord;
 
