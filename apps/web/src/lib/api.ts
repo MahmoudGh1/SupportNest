@@ -30,7 +30,7 @@ import {
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
 function normalizeApiBaseUrl(rawBaseUrl?: string) {
-	const fallback = "api-production-e60c.up.railway.app/api/v1";
+	const fallback = "https://api-production-e60c.up.railway.app/api/v1";
 	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");
 	return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
 }
@@ -117,7 +117,6 @@ export const api = {
 		});
 		const data = await res.json();
 		if (!res.ok) throw new Error(data.error ?? data.message ?? "Login failed");
-
 		return { user: mapApiUser(data.result) };
 	},
 

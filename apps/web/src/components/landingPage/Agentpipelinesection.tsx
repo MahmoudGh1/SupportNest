@@ -308,31 +308,51 @@ export default function AgentPipelineSection() {
     runningRef.current = false;
   }, []);
 
+  const startCycleRef = useRef<(idx: number) => void>(() => { });
+
   const startCycle = useCallback((idx: number) => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    if (cdRef.current) clearInterval(cdRef.current);
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+    if (cdRef.current) window.clearInterval(cdRef.current);
     reset();
-    setTimeout(async () => {
+
+    window.setTimeout(async () => {
       await runScenario(idx);
       if (!mountedRef.current) return;
       let rem = CYCLE_MS / 1000;
       setCountdown(rem);
-      cdRef.current = setInterval(() => {
+
+      cdRef.current = window.setInterval(() => {
         rem--;
         if (!mountedRef.current) return;
         setCountdown(Math.max(0, rem));
-        if (rem <= 0) clearInterval(cdRef.current);
+        if (rem <= 0 && cdRef.current) window.clearInterval(cdRef.current);
       }, 1000);
-      timerRef.current = setTimeout(() => {
+
+      timerRef.current = window.setTimeout(() => {
         if (!mountedRef.current) return;
-        startCycle(idx + 1);
+        // 2. Call it via the ref to bypass the TDZ declaration error!
+        startCycleRef.current(idx + 1);
       }, CYCLE_MS);
     }, 300);
   }, [reset, runScenario]);
 
+  // 3. Keep the ref updated with the latest memoized function instance
   useEffect(() => {
-    startCycle(0);
-    return () => { clearTimeout(timerRef.current); clearInterval(cdRef.current); };
+    startCycleRef.current = startCycle;
+  }, [startCycle]);
+
+  // 4. Kick off the initialization loop safely
+  useEffect(() => {
+    // Delay the initial execution by 1 frame to prevent cascading synchronous renders
+    const initTimeout = window.setTimeout(() => {
+      startCycle(0);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(initTimeout); // Clean up the init hook if unmounted instantly
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+      if (cdRef.current) window.clearInterval(cdRef.current);
+    };
   }, [startCycle]);
 
   const statusColor =
@@ -410,7 +430,10 @@ export default function AgentPipelineSection() {
                 key={sc.id}
                 onClick={() => {
                   if (runningRef.current) return;
-                  clearTimeout(timerRef.current); clearInterval(cdRef.current);
+
+                  window.clearTimeout(timerRef.current || undefined);
+                  window.clearInterval(cdRef.current || undefined);
+
                   reset();
                   setTimeout(() => startCycle(i), 80);
                 }}

@@ -47,7 +47,7 @@ interface Meta {
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
 function normalizeApiBaseUrl(rawBaseUrl?: string) {
-	const fallback = "api-production-e60c.up.railway.app/api/v1";
+	const fallback = "https://api-production-e60c.up.railway.app/api/v1";
 	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");
 	return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
 }
