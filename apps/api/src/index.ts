@@ -51,8 +51,12 @@ app.use(
 		origin: function (origin, callback) {
 			// Allow requests with no origin (like mobile apps, curl, or postman)
 			if (!origin) return callback(null, true);
-
-			callback(null, true);
+			if([ "https://web-production-71c60.up.railway.app", "http://localhost:3000" ].includes(origin)){
+				callback(null, true)
+			}
+			else{
+				callback(null, true);
+			}
 		},
 		credentials: true,
 	}),

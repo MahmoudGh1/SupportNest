@@ -40,7 +40,7 @@ async function main() {
 			keyHash,
 			keyPrefix: rawKey.slice(0, 8),
 			name: "Test Key",
-			allowedOrigins: ["http://localhost:3000"],
+			allowedOrigins: ["https://web-production-71c60.up.railway.app"],
 			isActive: true,
 		},
 	});
