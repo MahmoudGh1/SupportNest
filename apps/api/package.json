@@ -14,6 +14,7 @@
 	"type": "module",
 	"dependencies": {
 		"@apidevtools/swagger-parser": "^12.1.0",
+		"@getbrevo/brevo": "^5.0.4",
 		"@google/genai": "^2.8.0",
 		"@google/generative-ai": "^0.24.1",
 		"@langchain/core": "^1.1.48",
