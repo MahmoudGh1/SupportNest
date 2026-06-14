@@ -15,6 +15,7 @@ import type {
 	PipelineContext,
 } from "src/types/agent.types.js";
 import { runRouter } from "src/agents/router.agent.js";
+import { createReport } from "src/services/reporter.service.js";
 
 export async function handleMessageSend(
 	ws: any,
@@ -86,12 +87,14 @@ export async function handleMessageSend(
 
 		if (!existingTicket) {
 			await prisma.ticket.create({
-				data: {
-					conversationId,
-					organizationId: conversation.organizationId,
-					status: "OPEN",
-					priority: "MEDIUM",
-				},
+			  data: {
+			    conversationId,
+			    organizationId: conversation.organizationId,
+			    status:         "OPEN",
+			    priority:       "MEDIUM",
+			    tiersVisited:   [AgentTier.TIER0, AgentTier.TIER1, AgentTier.TIER2],
+			    customerMessage: content,
+			  },
 			});
 
 			await prisma.conversation.update({
@@ -103,7 +106,28 @@ export async function handleMessageSend(
 
 	// append both messages to redis history
 	await appendToMemory(conversationId, content, routerOutput.finalResponse);
-
+	const agentTierMap: Record<string, AgentTier | null> = {
+	  TIER0: AgentTier.TIER0,
+	  TIER1: AgentTier.TIER1,
+	  TIER2: AgentTier.TIER2,
+	  HUMAN: null,
+	  UNRESOLVED: null,
+	};
+	const resolvedTierAsAgentTier = agentTierMap[routerOutput.resolvedByTier ?? ""] ?? null;
+	
+	await createReport({
+	  conversationId,
+	  organizationId: conversation.organizationId,
+	  conversationHistory: [
+	    ...redisHistory,
+	    { role: "customer", content },
+	    { role: "agent",    content: routerOutput.finalResponse },
+	  ],
+	  tiersVisited:  resolvedTierAsAgentTier ? [resolvedTierAsAgentTier] : [],
+	  wasEscalated:  routerOutput.resolvedByTier === "HUMAN",
+	  resolvedByAi:  routerOutput.resolvedByTier !== "HUMAN",
+	  tokensUsed:    0,
+	});
 	const messagePayload: any = {
 		role: "AI",
 		content: routerOutput.finalResponse,
