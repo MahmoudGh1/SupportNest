@@ -6,7 +6,6 @@ export interface AuthUser {
 	lastName: string;
 	role: Role;
 	orgId: string | null;
-	token?: string;
 	orgName?: string;
 	token?: string;
 	onboarded: boolean;
