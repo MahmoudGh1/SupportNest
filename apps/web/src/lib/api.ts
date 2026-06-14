@@ -117,7 +117,6 @@ export const api = {
 		});
 		const data = await res.json();
 		if (!res.ok) throw new Error(data.error ?? data.message ?? "Login failed");
-
 		return { user: mapApiUser(data.result) };
 	},
 
