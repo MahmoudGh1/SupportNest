@@ -54,7 +54,13 @@ export async function sendInvitationService(organizationId: string, invitedById:
 	});
 
 	const inviterName = `${inviter.firstName} ${inviter.lastName}`;
-	await sendInvitationEmail(email, org.name, inviterName, token)
+	try {
+		await sendInvitationEmail(email, org.name, inviterName, token);
+		console.log(`[Invitation] Email sent successfully to ${email}`);
+	} catch (err) {
+		console.error(`[Invitation] Failed to send email to ${email}:`, err);
+		throw new Error("Failed to send invitation email");
+	}
 }
 
 
@@ -198,5 +204,11 @@ export async function revokeInvitationService(invitationId: string, organization
         data: { status: InvitationStatus.EXPIRED },
     });
 
-    await sendRevocationEmail(invitation.email, invitation.organization.name)
+    try {
+        await sendRevocationEmail(invitation.email, invitation.organization.name);
+        console.log(`[Revocation] Email sent successfully to ${invitation.email}`);
+    } catch (err) {
+        console.error(`[Revocation] Failed to send revocation email to ${invitation.email}:`, err);
+        throw new Error("Failed to send revocation email");
+    }
 }
