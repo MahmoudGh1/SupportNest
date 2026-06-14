@@ -30,9 +30,10 @@ import { swaggerUi, swaggerSpec } from "./docs/swagger.js";
 import knowledgeRouter from "./routes/knowledge.routes.js";
 import tier2Router from "./routes/tier2.routes.js";
 import reportRouter from "./routes/reporter.routes.js";
-const app = express();
-const PORT = process.env.PORT || 3001;
 
+const app = express();
+app.set("trust proxy", 1);
+const PORT = process.env.PORT || 3001;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
@@ -50,8 +51,16 @@ app.use(
 		origin: function (origin, callback) {
 			// Allow requests with no origin (like mobile apps, curl, or postman)
 			if (!origin) return callback(null, true);
-
-			callback(null, true);
+			if (
+				[
+					"https://supportnest.up.railway.app",
+					"http://localhost:3000",
+				].includes(origin)
+			) {
+				callback(null, true);
+			} else {
+				callback(null, true);
+			}
 		},
 		credentials: true,
 	}),
@@ -93,6 +102,6 @@ const Server = createServer(app);
 const wss = new WebSocketServer({ server: Server, path: "/widget/ws" });
 setupWebSocket(wss);
 
-Server.listen(PORT, () => {
+Server.listen(Number(PORT), "0.0.0.0", () => {
 	console.log("Server is running on port:", PORT);
 });

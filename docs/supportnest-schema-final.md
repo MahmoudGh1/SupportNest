@@ -94,10 +94,10 @@ Ticket
 | Field | Type | Notes |
 |---|---|---|
 | id | uuid | PK |
-| organization_id | uuid | FK → organizations · nullable for super_admin |
+| organization_id | uuid | FK → organizations · nullable for SUPER_ADMIN |
 | email | varchar | login credential |
 | password_hash | varchar | bcrypt |
-| role | enum | `super_admin` · `org_admin` · `support_agent` |
+| role | enum | `SUPER_ADMIN` · `org_admin` · `support_agent` |
 | first_name | varchar | |
 | last_name | varchar | |
 | is_active | boolean | soft disable |

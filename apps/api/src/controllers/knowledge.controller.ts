@@ -18,7 +18,7 @@ export const uploadDocument: RequestHandler = asyncHandler(
 		const userId = req.user?.sub;
 		const orgId = req.user?.organizationId;
 		const { title, type } = req.body;
-		const file = req.file; // Buffer from multer memoryStorage
+		const file = req.file;
 
 		if (!file) throw new AppError("No file provided", 400);
 
@@ -36,20 +36,18 @@ export const uploadDocument: RequestHandler = asyncHandler(
 			}
 		}
 
-		// 1. Upload raw file to Cloudinary
 		const storagePath = await uploadToCloudinary(
 			file.buffer,
-			`supportnest/${orgId}/knowledge`, // folder
-			`${Date.now()}-${title}`, // public_id
+			`supportnest/${orgId}/knowledge`,
+			`${Date.now()}-${title}`,
 		);
 
-		// 2. Save document record in Postgres via Prisma
 		const doc = await prisma.knowledgeDocument.create({
 			data: {
 				organizationId: orgId as string,
 				title,
-				type, // 'pdf' | 'word doc' ...etc
-				storagePath: storagePath, // Cloudinary URL
+				type,
+				storagePath,
 				status: "PROCESSING",
 				createdById: userId as string,
 			},
@@ -68,9 +66,7 @@ export const getKnowledgeDocuments: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
 		const orgId = req.user?.organizationId;
 		const organization = await prisma.organization.findUnique({
-			where: {
-				id: orgId as string,
-			},
+			where: { id: orgId as string },
 		});
 
 		if (!organization) throw new AppError("organization not found", 404);
@@ -78,10 +74,7 @@ export const getKnowledgeDocuments: RequestHandler = asyncHandler(
 		const filter = buildFilter(req.query);
 		const { page, limit, skip } = buildPagination(req.query as QueryParams);
 
-		const baseWhere = {
-			organizationId: organization.id,
-			...filter,
-		};
+		const baseWhere = { organizationId: organization.id, ...filter };
 
 		const [total, documents] = await Promise.all([
 			prisma.knowledgeDocument.count({ where: baseWhere }),
@@ -98,9 +91,7 @@ export const getKnowledgeDocuments: RequestHandler = asyncHandler(
 		res.status(200).json({
 			success: true,
 			message: "documents fetched successfully",
-			data: {
-				documents,
-			},
+			data: { documents },
 			metadata: {
 				total,
 				page,
@@ -119,24 +110,16 @@ export const deleteKnowledgeDocument: RequestHandler = asyncHandler(
 		const docId = req.params.docId;
 
 		const organization = await prisma.organization.findUnique({
-			where: {
-				id: orgId as string,
-			},
-			select: {
-				id: true,
-				isActive: true,
-			},
+			where: { id: orgId as string },
+			select: { id: true, isActive: true },
 		});
 
-		if (!organization || (organization && organization.isActive === false))
+		if (!organization || organization.isActive === false)
 			throw new AppError("invalid document delete operation", 400);
 
 		try {
-			// delete chunks related to the document
 			await prisma.documentChunk.deleteMany({
-				where: {
-					documentId: docId as string,
-				},
+				where: { documentId: docId as string },
 			});
 
 			const document = await prisma.knowledgeDocument.delete({
@@ -152,15 +135,15 @@ export const deleteKnowledgeDocument: RequestHandler = asyncHandler(
 				data: document,
 			});
 		} catch (error) {
-			if (error instanceof PrismaClientKnownRequestError) {
-				// code error for record not found
-				if (error.code === "P2025") {
-					return res.status(404).json({
-						success: false,
-						error: "Not Found",
-						message: `Knowledge Document with ID ${docId} does not exist.`,
-					});
-				}
+			if (
+				error instanceof PrismaClientKnownRequestError &&
+				error.code === "P2025"
+			) {
+				return res.status(404).json({
+					success: false,
+					error: "Not Found",
+					message: `Knowledge Document with ID ${docId} does not exist.`,
+				});
 			}
 			throw error;
 		}

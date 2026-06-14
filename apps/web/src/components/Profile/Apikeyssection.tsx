@@ -38,25 +38,6 @@ export function ApiKeysSection() {
 		loadKeys();
 	}, []);
 
-	useEffect(() => {
-		const loadKeys = async () => {
-			setLoading(true);
-			try {
-				const data = await api.getApiKeys();
-				setKeys(data);
-			} catch (error: any) {
-				setToast({
-					msg: error.message ?? "Failed to load API keys",
-					type: "error",
-				});
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		loadKeys();
-	}, []);
-
 	const handleCreated = (key: ApiKey) => {
 		setKeys((k) => [key, ...k]);
 		setShowCreate(false);

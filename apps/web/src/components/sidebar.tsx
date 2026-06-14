@@ -26,9 +26,15 @@ const navItems = [
 	{ icon: "users", label: msg`Team`, page: "team" },
 	{ icon: "chart-bar", label: msg`Analytics`, page: "analytics" },
 	{
-		icon: "building-skyscraper",
-		label: msg`Admin`,
+		icon: "layout-dashboard",
+		label: msg`Overview`,
 		page: "admin",
+		superAdminOnly: true,
+	},
+	{
+		icon: "building-skyscraper",
+		label: msg`Organizations`,
+		page: "organizations",
 		superAdminOnly: true,
 	},
 	// { icon: "code", label: msg({ message: "API & Widget" }), page: "api" },
@@ -100,7 +106,7 @@ export function Sidebar({
 					<div style={{ minWidth: 0 }}>
 						<div
 							style={{
-								color: "var(--page-text)",
+								color: "var(--sidebar-text-active)",
 								fontSize: 13,
 								fontWeight: 600,
 								whiteSpace: "nowrap",
@@ -134,7 +140,14 @@ export function Sidebar({
 				}}
 			>
 				{navItems
-					.filter((item) => !item.superAdminOnly || isSuperAdmin)
+					.filter((item) => {
+						if (isSuperAdmin) {
+							// For Super Admin, only show Admin, Organizations, and Profile
+							return ["admin", "organizations", "profile"].includes(item.page);
+						}
+						// For others, show everything EXCEPT Admin
+						return !item.superAdminOnly;
+					})
 					.map((item) => {
 					const isActive = currentPage === item.page;
 					return (

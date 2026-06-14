@@ -32,6 +32,7 @@ export const getReportsController: RequestHandler = asyncHandler(
 	},
 );
 
+// Get a single report
 export const getReportByIdController: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
 		const organizationId = req.user?.organizationId;

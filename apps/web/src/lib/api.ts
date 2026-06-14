@@ -1,10 +1,36 @@
 import { getSession } from "@/lib/auth";
 import { mapApiUser } from "@/lib/map-user";
-import { AuthUser, DashboardStats, GetKnowledgeDocsResponse, KnowledgeDocument, LoginResponse, PricingPlan, OrgProfile, OrgSetupData, UpdatePasswordInput, UpdateProfileInput, UploadPdfInput, UserProfile, ApiKey, AdminOverview, AdminOrganizationsResponse } from "@/types/types";
+import {
+	AuthUser,
+	DashboardStats,
+	GetKnowledgeDocsResponse,
+	KnowledgeDocument,
+	LoginResponse,
+	PricingPlan,
+	OrgProfile,
+	OrgSetupData,
+	UpdatePasswordInput,
+	UpdateProfileInput,
+	UploadPdfInput,
+	UserProfile,
+	ApiKey,
+	AdminOverview,
+	AdminOrganizationsResponse,
+	AdminUser,
+	AdminUsersResponse,
+	AdminEscalationsResponse,
+	AdminCsatStats,
+	AdminTicketStats,
+	AdminConversationStats,
+	AdminTierStats,
+	AdminOrganization,
+	WidgetConfig,
+	AdminOrganizationDetail,
+} from "@/types/types";
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
 function normalizeApiBaseUrl(rawBaseUrl?: string) {
-	const fallback = "http://localhost:3001/api/v1";
+	const fallback = "https://api-production-e60c.up.railway.app/api/v1";
 	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");
 	return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
 }
@@ -65,7 +91,7 @@ function normalizeApiKey(input: ApiRecord): ApiKey {
 
 async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
 	const session = getSession();
-	const response = await fetch(`${BASE_URL}/admin${path}`, {
+	const response = await fetch(`${BASE_URL}/admindashboard${path}`, {
 		...init,
 		credentials: "include",
 		headers: {
@@ -76,9 +102,7 @@ async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
 	});
 	const data = await response.json().catch(() => ({}));
 	if (!response.ok) {
-		throw new Error(
-			data?.error?.message ?? data?.message ?? "Admin request failed",
-		);
+		throw new Error(data?.error?.message ?? data?.message ?? "Admin request failed");
 	}
 	return data as T;
 }
@@ -93,7 +117,6 @@ export const api = {
 		});
 		const data = await res.json();
 		if (!res.ok) throw new Error(data.error ?? data.message ?? "Login failed");
-
 		return { user: mapApiUser(data.result) };
 	},
 
@@ -175,6 +198,18 @@ export const api = {
 		return body;
 	},
 
+	async confirmPayment(paymentId: string): Promise<{ ok: boolean }> {
+		const res = await fetch(`${BASE_URL}/payments/confirm`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ paymentId }),
+			credentials: "include",
+		});
+		const body = await res.json();
+		if (!res.ok) throw new Error(body.error ?? "Failed to confirm payment");
+		return body;
+	},
+
 	async logout(): Promise<void> {
 		await fetch(`${BASE_URL}/auth/logout`, {
 			method: "POST",
@@ -186,27 +221,11 @@ export const api = {
 		throw new Error("Organization setup is not available.");
 	},
 
-	async getDashboardStats(): Promise<DashboardStats> {
-		return {
-			totalConversations: 0,
-			aiResolutionRate: 0,
-			avgResponseTime: "—",
-			csatScore: 0,
-			recentConversations: [],
-			resolutionByTier: { tier1: 0, tier2: 0, human: 0 },
-		};
-	},
-
 	async getAdminOverview(): Promise<AdminOverview> {
 		return adminFetch<AdminOverview>("/overview");
 	},
 
-	async getAdminOrganizations(params?: {
-		search?: string;
-		is_active?: boolean | "";
-		page?: number;
-		limit?: number;
-	}): Promise<AdminOrganizationsResponse> {
+	async getAdminOrganizations(params?: { search?: string; is_active?: boolean | ""; page?: number; limit?: number }): Promise<AdminOrganizationsResponse> {
 		const query = new URLSearchParams();
 		if (params?.search) query.set("search", params.search);
 		if (params?.is_active !== undefined && params.is_active !== "") {
@@ -216,6 +235,189 @@ export const api = {
 		if (params?.limit) query.set("limit", String(params.limit));
 		const suffix = query.toString() ? `?${query.toString()}` : "";
 		return adminFetch<AdminOrganizationsResponse>(`/organizations${suffix}`);
+	},
+
+	async getAdminOrganization(orgId: string): Promise<AdminOrganizationDetail> {
+		return adminFetch<AdminOrganizationDetail>(`/organizations/${orgId}`);
+	},
+
+	async createAdminOrganization(data: { name: string; email: string; slug: string; plan_id?: string; widget_config?: Partial<WidgetConfig> }): Promise<AdminOrganization> {
+		return adminFetch<AdminOrganization>("/organizations", {
+			method: "POST",
+			body: JSON.stringify(data),
+		});
+	},
+
+	async updateAdminOrganization(
+		orgId: string,
+		data: Partial<{
+			name: string;
+			email: string;
+			is_active: boolean;
+			plan_id: string;
+			widget_config: Partial<WidgetConfig>;
+		}>,
+	): Promise<AdminOrganization> {
+		return adminFetch<AdminOrganization>(`/organizations/${orgId}`, {
+			method: "PATCH",
+			body: JSON.stringify(data),
+		});
+	},
+
+	async suspendAdminOrganization(orgId: string): Promise<void> {
+		return adminFetch<void>(`/organizations/${orgId}/suspend`, {
+			method: "PATCH",
+		});
+	},
+
+	async activateAdminOrganization(orgId: string): Promise<void> {
+		return adminFetch<void>(`/organizations/${orgId}/activate`, {
+			method: "PATCH",
+		});
+	},
+
+	async getAdminGlobalTierStats(params?: { from?: string; to?: string }): Promise<AdminTierStats> {
+		const query = new URLSearchParams();
+		if (params?.from) query.set("from", params.from);
+		if (params?.to) query.set("to", params.to);
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminTierStats>(`/tier-stats${suffix}`);
+	},
+
+	async getAdminGlobalEscalations(params?: { priority?: string; status?: string; from?: string; to?: string; page?: number; limit?: number }): Promise<AdminEscalationsResponse> {
+		const query = new URLSearchParams();
+		if (params?.priority) query.set("priority", params.priority);
+		if (params?.status) query.set("status", params.status);
+		if (params?.from) query.set("from", params.from);
+		if (params?.to) query.set("to", params.to);
+		if (params?.page) query.set("page", String(params.page));
+		if (params?.limit) query.set("limit", String(params.limit));
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminEscalationsResponse>(`/escalations${suffix}`);
+	},
+
+	async getAdminOrgTierStats(orgId: string, params?: { from?: string; to?: string }): Promise<AdminTierStats> {
+		const query = new URLSearchParams();
+		if (params?.from) query.set("from", params.from);
+		if (params?.to) query.set("to", params.to);
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminTierStats>(`/organizations/${orgId}/tier-stats${suffix}`);
+	},
+
+	async getAdminOrgConversationStats(orgId: string, params?: { from?: string; to?: string }): Promise<AdminConversationStats> {
+		const query = new URLSearchParams();
+		if (params?.from) query.set("from", params.from);
+		if (params?.to) query.set("to", params.to);
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminConversationStats>(`/organizations/${orgId}/conversation-stats${suffix}`);
+	},
+
+	async getAdminOrgTicketStats(orgId: string, params?: { from?: string; to?: string }): Promise<AdminTicketStats> {
+		const query = new URLSearchParams();
+		if (params?.from) query.set("from", params.from);
+		if (params?.to) query.set("to", params.to);
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminTicketStats>(`/organizations/${orgId}/ticket-stats${suffix}`);
+	},
+
+	async getAdminOrgCsat(orgId: string, params?: { from?: string; to?: string }): Promise<AdminCsatStats> {
+		const query = new URLSearchParams();
+		if (params?.from) query.set("from", params.from);
+		if (params?.to) query.set("to", params.to);
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminCsatStats>(`/organizations/${orgId}/csat${suffix}`);
+	},
+
+	async getAdminOrgEscalations(orgId: string, params?: { from?: string; to?: string; page?: number; limit?: number }): Promise<AdminEscalationsResponse> {
+		const query = new URLSearchParams();
+		if (params?.from) query.set("from", params.from);
+		if (params?.to) query.set("to", params.to);
+		if (params?.page) query.set("page", String(params.page));
+		if (params?.limit) query.set("limit", String(params.limit));
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminEscalationsResponse>(`/organizations/${orgId}/escalations${suffix}`);
+	},
+
+	async getAdminAllUsers(params?: { role?: string; is_active?: boolean; search?: string; page?: number; limit?: number }): Promise<AdminUsersResponse> {
+		const query = new URLSearchParams();
+		if (params?.role) query.set("role", params.role);
+		if (params?.is_active !== undefined) query.set("is_active", String(params.is_active));
+		if (params?.search) query.set("search", params.search);
+		if (params?.page) query.set("page", String(params.page));
+		if (params?.limit) query.set("limit", String(params.limit));
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminUsersResponse>(`/users${suffix}`);
+	},
+
+	async getAdminOrgUsers(
+		orgId: string,
+		params?: {
+			role?: string;
+			is_active?: boolean;
+			page?: number;
+			limit?: number;
+		},
+	): Promise<AdminUsersResponse> {
+		const query = new URLSearchParams();
+		if (params?.role) query.set("role", params.role);
+		if (params?.is_active !== undefined) query.set("is_active", String(params.is_active));
+		if (params?.page) query.set("page", String(params.page));
+		if (params?.limit) query.set("limit", String(params.limit));
+		const suffix = query.toString() ? `?${query.toString()}` : "";
+		return adminFetch<AdminUsersResponse>(`/organizations/${orgId}/users${suffix}`);
+	},
+
+	async getAdminOrgUser(orgId: string, userId: string): Promise<AdminUser> {
+		return adminFetch<AdminUser>(`/organizations/${orgId}/users/${userId}`);
+	},
+
+	async createAdminOrgUser(
+		orgId: string,
+		data: {
+			email: string;
+			password?: string;
+			first_name: string;
+			last_name: string;
+			role: string;
+		},
+	): Promise<AdminUser> {
+		return adminFetch<AdminUser>(`/organizations/${orgId}/users`, {
+			method: "POST",
+			body: JSON.stringify(data),
+		});
+	},
+
+	async updateAdminOrgUser(
+		orgId: string,
+		userId: string,
+		data: Partial<{
+			first_name: string;
+			last_name: string;
+			role: string;
+			is_active: boolean;
+		}>,
+	): Promise<AdminUser> {
+		return adminFetch<AdminUser>(`/organizations/${orgId}/users/${userId}`, {
+			method: "PATCH",
+			body: JSON.stringify(data),
+		});
+	},
+
+	async removeAdminOrgUser(orgId: string, userId: string): Promise<void> {
+		return adminFetch<void>(`/organizations/${orgId}/users/${userId}`, {
+			method: "DELETE",
+		});
+	},
+
+	async getDashboardStats(): Promise<DashboardStats> {
+		return {
+			totalConversations: 0,
+			aiResolutionRate: 0,
+			avgResponseTime: "—",
+			csatScore: 0,
+			recentConversations: [],
+			resolutionByTier: { tier1: 0, tier2: 0, human: 0 },
+		};
 	},
 
 	// ─── KNOWLEDGE BASE ─────────────────────────────────────────────────────────
@@ -281,7 +483,6 @@ export const api = {
 			const data = await response.json();
 			if (!response.ok) throw new Error(data.message || "Something went wrong");
 
-			console.log("Success:", data.message);
 			return { success: data.success };
 		} catch (error: unknown) {
 			if (error instanceof Error) {
@@ -291,6 +492,105 @@ export const api = {
 			}
 			return { success: false };
 		}
+	},
+
+	// ─── BUSINESS API CONFIG ────────────────────────────────────────────────────
+
+	async getApiConfig(): Promise<{
+		id?: string;
+		baseUrl?: string;
+		authType?: string;
+		headerName?: string;
+		isVerified?: boolean;
+		lastVerifiedAt?: string;
+		configured: boolean;
+	}> {
+		const res = await fetch(`${BASE_URL}/organizations/api-config`, {
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to load API config");
+		return data.id ? { ...data, configured: true } : { configured: false };
+	},
+
+	async saveApiConfig(input: { baseUrl: string; authType: string; authValue: string; headerName?: string }): Promise<{ id: string; isVerified: boolean }> {
+		const res = await fetch(`${BASE_URL}/organizations/api-config`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify(input),
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.message ?? data.error ?? "Failed to save API config");
+		return data;
+	},
+
+	async verifyApiConfig(): Promise<{ isVerified: boolean; message: string }> {
+		const res = await fetch(`${BASE_URL}/organizations/api-config/verify`, {
+			method: "POST",
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.message ?? data.error ?? "Verification failed");
+		return data;
+	},
+
+	async submitSwaggerUrl(input: { title: string; swaggerUrl: string }): Promise<{ documentId: string; status: string }> {
+		const user = getSession();
+		if (!user) throw new Error("User not found");
+		const res = await fetch(`${BASE_URL}/organizations/${user.orgId}/documents/swagger`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify(input),
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.message ?? data.error ?? "Failed to submit Swagger URL");
+		return data;
+	},
+
+	deleteAccount: (data: { fullName: string; organizationName: string }) =>
+		fetch(`${BASE_URL}/users/me`, {
+			method: "DELETE",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify(data),
+		}).then(async (res) => {
+			const json = await res.json();
+			if (!res.ok) throw new Error(json.error ?? "Failed to delete account.");
+			return json;
+		}),
+
+	// ─── TOOLS ──────────────────────────────────────────────────────────────────
+
+	async getAllOrgTools(): Promise<{
+		tools: {
+			id: string;
+			name: string;
+			description: string;
+			method: string;
+			path: string;
+			isActive: boolean;
+			createdAt: string;
+			document: { title: string; type: string } | null;
+		}[];
+	}> {
+		const res = await fetch(`${BASE_URL}/organizations/tools/all`, {
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to load tools");
+		return data;
+	},
+
+	async toggleOrgTool(toolId: string): Promise<{ id: string; isActive: boolean }> {
+		const res = await fetch(`${BASE_URL}/organizations/tools/${toolId}/toggle`, {
+			method: "PATCH",
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to toggle tool");
+		return data;
 	},
 
 	// ─── SETTINGS ───────────────────────────────────────────────────────────────
@@ -446,6 +746,7 @@ export const api = {
 		});
 		const body = await res.json();
 		if (!res.ok) throw new Error(body.error ?? "Failed to initialize Paymob checkout");
+		sessionStorage.setItem("paymentId", body?.paymentId);
 		return body;
 	},
 	async getPaymentHistory(): Promise<Array<{ id: string; status: string }>> {

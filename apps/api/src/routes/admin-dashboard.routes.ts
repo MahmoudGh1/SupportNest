@@ -71,7 +71,7 @@ router.get("/escalations", getGlobalEscalations);
  * GET /admin/organizations
  * List all organizations with stats summary
  * Query: ?search=shopwave&is_active=true&page=1&limit=20
- * Role: super_admin
+ * Role: SUPER_ADMIN
  */
 router.get("/organizations", getOrganizations);
 
@@ -79,40 +79,40 @@ router.get("/organizations", getOrganizations);
  * POST /admin/organizations
  * Create a new tenant organization
  * Body: { name, email, slug, plan_id?, widget_config? }
- * Role: super_admin
+ * Role: SUPER_ADMIN
  */
 router.post("/organizations", createOrganization);
 
 /**
  * GET /admin/organizations/:orgId
  * Full org detail: info + users + tier stats + conversation stats + ticket stats + CSAT + recent escalations
- * Role: super_admin
+ * Role: SUPER_ADMIN
  */
 router.get("/organizations/:orgId", getOrganization);
 
 /**
  * PATCH /admin/organizations/:orgId
  * Update org fields: name, email, is_active, plan_id, widget_config
- * Role: super_admin
+ * Role: SUPER_ADMIN
  */
 router.patch("/organizations/:orgId", updateOrganization);
 
 /**
  * PATCH /admin/organizations/:orgId/suspend
  * Suspend org (sets is_active = false)
- * Role: super_admin
+ * Role: SUPER_ADMIN
  */
 router.patch("/organizations/:orgId/suspend", suspendOrganization);
 
 /**
  * PATCH /admin/organizations/:orgId/activate
  * Re-activate a suspended org
- * Role: super_admin
+ * Role: SUPER_ADMIN
  */
 router.patch("/organizations/:orgId/activate", activateOrganization);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ORG-SCOPED STATS (accessible by super_admin and org_admin of that org)
+// ORG-SCOPED STATS (accessible by SUPER_ADMIN and org_admin of that org)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**

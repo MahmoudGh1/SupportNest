@@ -19,11 +19,6 @@ interface StoredPlan {
 	amountCents: number;
 }
 
-interface PendingAuth {
-	email: string;
-	password: string;
-}
-
 // ── Design tokens ─────────────────────────────────────────────────────────────
 
 const T = {
@@ -87,9 +82,6 @@ function PaymentPageContent() {
 				setStoredPlan(parsedPlan);
 				setIsAnnual(annual);
 
-				// 3. If we came from registration, log the user in silently
-				//    so that create-intention (which requires auth) will work.
-				sessionStorage.removeItem("pendingAuth");
 			} catch (err) {
 				setError(
 					err instanceof Error ? err.message : "Failed to load pricing plans",
@@ -156,7 +148,6 @@ function PaymentPageContent() {
 				},
 			});
 
-			sessionStorage.setItem("pendingPaymentId", result.paymentId);
 			window.location.href = `https://accept.paymob.com/unifiedcheckout/?publicKey=${PAYMOB_PUBLIC_KEY}&clientSecret=${result.clientSecret}`;
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Failed to initialize payment");

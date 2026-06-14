@@ -12,14 +12,13 @@ const T = {
 	darkPanel: "var(--surface-elevated)",
 	darkSurface: "var(--surface)",
 	darkBorder: "var(--card-border)",
-	white: "var(--page-text)",
-	gray500: "var(--page-muted)",
-	gray600: "var(--page-muted)",
+	text: "var(--page-text)",
+	muted: "var(--page-muted)",
 	inputBg: "var(--surface)",
 	inputBorder: "var(--card-border)",
 	inputFocus: "var(--input-focus)",
-	violet: "#534AB7",
-	violetLight: "#AFA9EC",
+	violet: "var(--brand-violet, #534AB7)",
+	violetLight: "var(--brand-violet-light, #7F77DD)",
 	danger: "#E24B4A",
 	dangerBg: "var(--danger-bg)",
 	radius: "10px",
@@ -171,9 +170,18 @@ function FormPanel() {
 			const user = await login(email, password);
 			// how user.onboarded is handled frontend or backend?
 			// it gives me error
-			router.push("/dashboard");
-		} catch (e: any) {
-			setError(e.message ?? t`Invalid email or password.`);
+			// router.push("/dashboard");
+			if (user.role === "SUPER_ADMIN") {
+				router.push("/dashboard/admin");
+			} else {
+				router.push("/dashboard");
+			}
+		} catch (e) {
+			if (e instanceof Error) {
+				setError(e.message ?? t`Invalid email or password.`);
+			} else {
+				setError("An unexpected error occurred.");
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -239,7 +247,7 @@ function FormPanel() {
 				</p>
 
 				<div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-					{/* Google — disabled */}
+					{/* Google */}
 					<GoogleLogin
 						onSuccess={async (credentialResponse) => {
 							setError("");
@@ -247,8 +255,12 @@ function FormPanel() {
 							try {
 								await loginWithGoogle(credentialResponse.credential!);
 								router.push("/dashboard");
-							} catch (e: any) {
-								setError(e.message ?? t`Invalid email or password.`);
+							} catch (e) {
+								if (e instanceof Error) {
+									setError(e.message ?? t`Invalid email or password.`);
+								} else {
+									setError("An unexpected error occurred.");
+								}
 							} finally {
 								setLoading(false);
 							}
@@ -259,7 +271,7 @@ function FormPanel() {
 					{/* Divider */}
 					<div style={{ display: "flex", alignItems: "center", gap: 12 }}>
 						<div style={{ flex: 1, height: 1, background: T.darkBorder }} />
-						<span style={{ fontSize: 12, color: T.gray600 }}>{t`or`}</span>
+						<span style={{ fontSize: 12, color: T.muted }}>{t`or`}</span>
 						<div style={{ flex: 1, height: 1, background: T.darkBorder }} />
 					</div>
 
@@ -516,7 +528,7 @@ function BrandPanel() {
 							marginBottom: 16,
 						}}
 					>
-						"
+						{'"'}
 					</div>
 					<p
 						style={{
@@ -571,19 +583,69 @@ function BrandPanel() {
 export default function LoginPage() {
 	return (
 		<>
-			<style>{`@keyframes spin { to { transform: rotate(360deg); } } * { box-sizing: border-box; }`}</style>
-			<div
-				style={{
-					display: "flex",
-					height: "100vh",
-					fontFamily: T.font,
-					overflow: "hidden",
-					background: "var(--page-bg)",
-					color: "var(--page-text)",
-					justifyContent: "center",
-					gap: "2rem",
-				}}
-			>
+			<style>{`
+				@keyframes spin { to { transform: rotate(360deg); } }
+				* { box-sizing: border-box; }
+
+				.login-layout {
+					display: flex;
+					min-height: 100vh;
+					font-family: 'Sora', system-ui, sans-serif;
+					background: var(--page-bg);
+					color: var(--page-text);
+				}
+
+				.login-form-panel {
+					width: 45%;
+					background: var(--surface-elevated);
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					justify-content: center;
+					padding: 60px 64px;
+					min-height: 100vh;
+					border-right: 1px solid var(--card-border);
+				}
+
+				.login-brand-panel {
+					flex: 1;
+					background: var(--page-bg);
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					justify-content: center;
+					padding: 60px 64px;
+					min-height: 100vh;
+				}
+
+				/* Tablet */
+				@media (max-width: 900px) {
+					.login-form-panel {
+						width: 55%;
+						padding: 48px 40px;
+					}
+					.login-brand-panel {
+						padding: 48px 32px;
+					}
+				}
+
+				/* Mobile — stack vertically, brand panel hidden */
+				@media (max-width: 640px) {
+					.login-layout {
+						flex-direction: column;
+					}
+					.login-form-panel {
+						width: 100%;
+						min-height: 100vh;
+						padding: 48px 24px;
+						border-right: none;
+					}
+					.login-brand-panel {
+						display: none;
+					}
+				}
+			`}</style>
+			<div className="login-layout">
 				<FormPanel />
 				<BrandPanel />
 			</div>

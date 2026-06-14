@@ -7,10 +7,10 @@ import {
 	WidgetConfig,
 	UpdateProfileInput,
 	UpdatePasswordInput,
-	UpdateWidgetConfigInput,
 } from "@/types/types";
 import { S } from "@/components/ui";
 import { api } from "@/lib/api";
+import { useAuth } from "@/context/auth-context";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 const fieldStyle = (
@@ -250,7 +250,7 @@ function ProfileTab({ user }: { user: UserProfile }) {
 	const roleLabel: Record<string, string> = {
 		org_admin: "Admin",
 		support_agent: "Support Agent",
-		super_admin: "Super Admin",
+		SUPER_ADMIN: "Super Admin",
 	};
 
 	// Password strength
@@ -288,8 +288,12 @@ function ProfileTab({ user }: { user: UserProfile }) {
 		try {
 			await api.updateUserProfile(form);
 			setToast("Profile saved.");
-		} catch (err: any) {
-			setToast("Error: " + err.message);
+		} catch (err) {
+			if (err instanceof Error) {
+				setToast("Error: " + err.message);
+			} else {
+				setToast("An unexpected error occurred.");
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -316,8 +320,12 @@ function ProfileTab({ user }: { user: UserProfile }) {
 			await api.updatePassword(pwForm);
 			setPwForm({ current_password: "", new_password: "" });
 			setToast("Password updated.");
-		} catch (err: any) {
-			setToast("Error: " + err.message);
+		} catch (err) {
+			if (err instanceof Error) {
+				setToast("Error: " + err.message);
+			} else {
+				setToast("An unexpected error occurred.");
+			}
 		} finally {
 			setPwLoading(false);
 		}
@@ -664,8 +672,12 @@ function OrgTab({ org }: { org: OrgProfile }) {
 			setEmail(merged.email);
 			setWidget(merged.widget_config);
 			setToast("Organization settings saved.");
-		} catch (err: any) {
-			setToast("Error: " + err.message);
+		} catch (err) {
+			if (err instanceof Error) {
+				setToast("Error: " + err.message);
+			} else {
+				setToast("An unexpected error occurred.");
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -1141,17 +1153,25 @@ function OrgTab({ org }: { org: OrgProfile }) {
 type Tab = "organization";
 
 export default function SettingsPage() {
+	const { user } = useAuth();
 	const [tab, setTab] = useState<Tab>("organization");
 	const [org, setOrg] = useState<OrgProfile | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
+		if (user?.role === "SUPER_ADMIN") {
+			setLoading(false);
+			return;
+		}
 		api.getOrgProfile()
 			.then((o) => {
 				setOrg(o.organization);
 			})
+			.catch((err) => {
+				console.error("Failed to load org profile:", err);
+			})
 			.finally(() => setLoading(false));
-	}, []);
+	}, [user]);
 
 	if (loading) {
 		return (

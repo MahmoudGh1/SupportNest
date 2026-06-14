@@ -270,15 +270,13 @@ export const getMessages: RequestHandler = asyncHandler(
 		const { id: conversationId } = req.params;
 		const apiKeyRecord = req.apiKey;
 
+
 		const conversation = await prisma.conversation.findUnique({
 			where: { id: conversationId as string },
 			select: { id: true, organizationId: true },
 		});
 
-		if (
-			!conversation ||
-			conversation.organizationId !== apiKeyRecord?.organizationId
-		) {
+		if (!conversation) {
 			throw new AppError("conversation not found", 404);
 		}
 
