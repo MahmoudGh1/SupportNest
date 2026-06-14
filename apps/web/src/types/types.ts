@@ -8,6 +8,7 @@ export interface AuthUser {
 	orgId: string | null;
 	token?: string;
 	orgName?: string;
+	token?: string;
 	onboarded: boolean;
 	hasActiveSubscription?: boolean;
 	currentPlanId?: string | null;
