@@ -13,7 +13,9 @@
 	"dependencies": {
 		"@lingui/core": "^6.2.0",
 		"@lingui/react": "^6.2.0",
+		"@react-oauth/google": "^0.13.5",
 		"@supportnest/shared": "workspace:*",
+		"google-auth-library": "^10.7.0",
 		"make-plural": "^8.1.0",
 		"next": "16.2.6",
 		"next-intl": "^4.13.0",

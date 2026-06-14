@@ -1,7 +1,7 @@
 import prisma from "src/config/prisma.js";
 import crypto from "crypto";
 import AppError from "src/utils/appError.js";
-import { sendInvitationEmail } from "src/config/mailer.js";
+import { sendInvitationEmail, sendRevocationEmail } from "src/config/mailer.js";
 import { InvitationStatus, Role } from "generated/prisma/enums.js";
 import { generateInviteToken } from "src/utils/crypto.utils.js";
 
@@ -41,7 +41,6 @@ export async function sendInvitationService(organizationId: string, invitedById:
 	});
 
 	const token = generateInviteToken();
-    console.log(token)
 	await prisma.invitation.create({
 		data: {
 			organizationId,
@@ -55,7 +54,9 @@ export async function sendInvitationService(organizationId: string, invitedById:
 	});
 
 	const inviterName = `${inviter.firstName} ${inviter.lastName}`;
-	await sendInvitationEmail(email, org.name, inviterName, token);
+	sendInvitationEmail(email, org.name, inviterName, token).catch((err) => {
+	  console.error("[sendInvitationEmail] failed:", err);
+	});
 }
 
 
@@ -181,20 +182,25 @@ export async function getTeamService(organizationId: string) {
 
 
 export async function revokeInvitationService(invitationId: string, organizationId: string): Promise<void> {
-	const invitation = await prisma.invitation.findUnique({
-		where: { id: invitationId },
-	});
+    const invitation = await prisma.invitation.findUnique({
+        where: { id: invitationId },
+        include: { organization: true },
+    });
 
-	if (!invitation || invitation.organizationId !== organizationId) {
-		throw new AppError("Invitation not found", 404);
-	}
+    if (!invitation || invitation.organizationId !== organizationId) {
+        throw new AppError("Invitation not found", 404);
+    }
 
-	if (invitation.status !== InvitationStatus.PENDING) {
-		throw new AppError("Only pending invitations can be revoked", 400);
-	}
+    if (invitation.status !== InvitationStatus.PENDING) {
+        throw new AppError("Only pending invitations can be revoked", 400);
+    }
 
-	await prisma.invitation.update({
-		where: { id: invitationId },
-		data: { status: InvitationStatus.EXPIRED },
+    await prisma.invitation.update({
+        where: { id: invitationId },
+        data: { status: InvitationStatus.EXPIRED },
+    });
+
+    sendRevocationEmail(invitation.email, invitation.organization.name).catch((err) => {
+	  console.error("[sendRevocationEmail] failed:", err);
 	});
 }

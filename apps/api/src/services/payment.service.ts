@@ -6,6 +6,7 @@ import AppError from "src/utils/appError.js";
 const PAYMOB_SECRET_KEY = process.env.PAYMOB_SECRET_KEY as string;
 const PAYMOB_HMAC_SECRET = process.env.PAYMOB_HMAC_SECRET as string;
 const PAYMOB_API_BASE = process.env.PAYMOB_API_BASE;
+const BACKEND_URL = process.env.BACKEND_URL;
 
 // ─── HMAC Verification ─────────────────────────────────────────────────────────
 // Paymob signs webhook payloads with HMAC-SHA512
@@ -64,6 +65,23 @@ interface CreateIntentionInput {
 	};
 }
 
+async function assertNoActiveSubscription(organizationId: string) {
+	const active = await prisma.payment.findFirst({
+		where: {
+			organizationId,
+			status: PaymentStatus.SUCCEEDED,
+			billingPeriodEnd: { gt: new Date() },
+		},
+	});
+
+	if (active) {
+		throw new AppError(
+			"You already have an active subscription for this billing period",
+			409,
+		);
+	}
+}
+
 export const createPaymentIntentionService = async ({
 	organizationId,
 	pricingId,
@@ -77,6 +95,8 @@ export const createPaymentIntentionService = async ({
 	});
 
 	if (!org) throw new AppError("Organization not found", 404);
+
+	await assertNoActiveSubscription(organizationId);
 
 	// 2. Verify plan exists
 	const pricing = await prisma.pricing.findFirst({
@@ -110,14 +130,14 @@ export const createPaymentIntentionService = async ({
 				email: billingData.email,
 				phone_number: billingData.phone,
 			},
-			// Pass your internal IDs so you can match on webhook
 			extras: {
 				organizationId,
 				pricingId,
 			},
+			notification_url: `${BACKEND_URL}/api/v1/payments/webhook`,
+			redirection_url: `${process.env.FRONTEND_URL}/payment-callback`,
 		}),
 	});
-	console.log(response);
 	const intention: any = await response.json();
 
 	if (!response.ok) {
@@ -174,14 +194,6 @@ export const handleWebhookService = async (body: any, hmacHeader: string) => {
 	const transactionId = body.obj?.id?.toString();
 	const amountCents = body.obj?.amount_cents;
 
-	console.log("Webhook received:", {
-		transactionId,
-		success,
-		pending,
-		organizationId,
-		pricingId,
-	});
-
 	// 2. Find the pending payment record
 	const payment = await prisma.payment.findFirst({
 		where: {
@@ -237,6 +249,64 @@ export const handleWebhookService = async (body: any, hmacHeader: string) => {
 
 // ─── Get Payment History ───────────────────────────────────────────────────────
 
+interface CompleteCheckoutInput {
+	organizationId: string;
+	pricingId: string;
+	amount: number;
+	currency: string;
+	isAnnual: boolean;
+}
+
+export const completeCheckoutService = async ({
+	organizationId,
+	pricingId,
+	amount,
+	currency,
+	isAnnual,
+}: CompleteCheckoutInput) => {
+	await assertNoActiveSubscription(organizationId);
+
+	const pricing = await prisma.pricing.findFirst({
+		where: { id: pricingId, isActive: true },
+	});
+	if (!pricing) throw new AppError("Pricing plan not found", 404);
+
+	const periodDays = isAnnual ? 365 : 30;
+	const now = new Date();
+	const billingPeriodEnd = new Date(
+		now.getTime() + periodDays * 24 * 60 * 60 * 1000,
+	);
+
+	const payment = await prisma.$transaction(async (tx) => {
+		const created = await tx.payment.create({
+			data: {
+				organizationId,
+				pricingId,
+				amount,
+				currency,
+				status: PaymentStatus.SUCCEEDED,
+				paymentProvider: "checkout",
+				providerPaymentId: `checkout_${organizationId}_${Date.now()}`,
+				billingPeriodStart: now,
+				billingPeriodEnd,
+			},
+		});
+		console.log(created ? `Created True: ${created} ` : "Created False");
+
+		await tx.organization.update({
+			where: { id: organizationId },
+			data: { planId: pricingId },
+		});
+
+		return created;
+	});
+
+	return {
+		paymentId: payment.id,
+		billingPeriodEnd: payment.billingPeriodEnd,
+	};
+};
+
 export const getPaymentHistoryService = async (
 	organizationId: string,
 ): Promise<any> => {
@@ -252,3 +322,23 @@ export const getPaymentHistoryService = async (
 
 	return payments;
 };
+
+export async function confirmPaymentService(paymentId: string) {
+	const payment = await prisma.payment.findUnique({
+		where: { id: paymentId },
+	});
+
+	if (!payment) throw new Error("PAYMENT_NOT_FOUND");
+
+	await prisma.payment.update({
+		where: { id: paymentId },
+		data: { status: PaymentStatus.SUCCEEDED },
+	});
+
+	await prisma.organization.update({
+		where: { id: payment.organizationId },
+		data: { isActive: true, planId: payment.pricingId },
+	});
+
+	return { ok: true };
+}

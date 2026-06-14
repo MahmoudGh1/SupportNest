@@ -1,11 +1,12 @@
 "use client";
 
 import { ApiKey } from "@/types/profile.js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Section, Toast } from "./Ui";
 import { Btn, S } from "../ui";
 import { fmtDate, timeAgo } from "@/app/[locale]/utils/profile";
 import { CreateKeyModal, KeyRevealModal } from "./Apikeymodals";
+import { api } from "@/lib/api";
 
 export function ApiKeysSection() {
 	const [keys, setKeys] = useState<ApiKey[]>([]);
@@ -13,11 +14,29 @@ export function ApiKeysSection() {
 	const [showCreate, setShowCreate] = useState(false);
 	const [newKey, setNewKey] = useState<ApiKey | null>(null);
 	const [revoking, setRevoking] = useState<string | null>(null);
-	const [deleting, setDeleting] = useState<string | null>(null);
 	const [toast, setToast] = useState<{
 		msg: string;
 		type: "success" | "error";
 	} | null>(null);
+
+	useEffect(() => {
+		const loadKeys = async () => {
+			setLoading(true);
+			try {
+				const data = await api.getApiKeys();
+				setKeys(data);
+			} catch (error: any) {
+				setToast({
+					msg: error.message ?? "Failed to load API keys",
+					type: "error",
+				});
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		loadKeys();
+	}, []);
 
 	const handleCreated = (key: ApiKey) => {
 		setKeys((k) => [key, ...k]);
@@ -28,7 +47,7 @@ export function ApiKeysSection() {
 	const handleRevoke = async (id: string) => {
 		setRevoking(id);
 		try {
-			// await apiKeyApi.revokeApiKey(id);
+			await api.revokeApiKey(id);
 			setKeys((k) =>
 				k.map((x) => (x.id === id ? { ...x, is_active: false } : x)),
 			);
@@ -37,19 +56,6 @@ export function ApiKeysSection() {
 			setToast({ msg: "Failed to revoke key", type: "error" });
 		} finally {
 			setRevoking(null);
-		}
-	};
-
-	const handleDelete = async (id: string) => {
-		setDeleting(id);
-		try {
-			// await apiKeyApi.deleteApiKey(id);
-			setKeys((k) => k.filter((x) => x.id !== id));
-			setToast({ msg: "API key deleted", type: "success" });
-		} catch {
-			setToast({ msg: "Failed to delete key", type: "error" });
-		} finally {
-			setDeleting(null);
 		}
 	};
 
@@ -278,40 +284,6 @@ export function ApiKeysSection() {
 											Revoke
 										</button>
 									)}
-									<button
-										onClick={() => handleDelete(key.id)}
-										disabled={deleting === key.id}
-										style={{
-											padding: "6px 12px",
-											borderRadius: 7,
-											border: "1px solid #FCA5A5",
-											background: "#FEF2F2",
-											color: "#DC2626",
-											fontSize: 12,
-											cursor: "pointer",
-											fontFamily: "inherit",
-											display: "flex",
-											alignItems: "center",
-											gap: 5,
-											opacity: deleting === key.id ? 0.6 : 1,
-										}}
-									>
-										{deleting === key.id ? (
-											<i
-												className="ti ti-loader-2"
-												style={{
-													fontSize: 13,
-													animation: "spin 1s linear infinite",
-												}}
-											/>
-										) : (
-											<i
-												className="ti ti-trash"
-												style={{ fontSize: 13 }}
-											/>
-										)}
-										Delete
-									</button>
 								</div>
 							</div>
 						</div>

@@ -24,7 +24,7 @@ const DocumentList = ({
 					style={{
 						textAlign: "center",
 						padding: "3rem",
-						color: S.textMuted,
+						color: "var(--page-muted)",
 					}}
 				>
 					<i
@@ -35,7 +35,7 @@ const DocumentList = ({
 						style={{
 							fontSize: 14,
 							fontWeight: 500,
-							color: S.dark,
+							color: "var(--page-text)",
 							marginBottom: 4,
 						}}
 					>
@@ -50,9 +50,9 @@ const DocumentList = ({
 					<div
 						className="hidden md:block"
 						style={{
-							background: "#fff",
+							background: "var(--surface)",
 							borderRadius: 12,
-							border: `0.5px solid ${S.border}`,
+							border: `0.5px solid var(--card-border)`,
 							overflow: "hidden",
 						}}
 					>
@@ -64,7 +64,7 @@ const DocumentList = ({
 							}}
 						>
 							<thead>
-								<tr style={{ borderBottom: `0.5px solid ${S.border}` }}>
+								<tr style={{ borderBottom: `0.5px solid var(--card-border)` }}>
 									{[
 										t`Document`,
 										t`Type`,
@@ -80,7 +80,7 @@ const DocumentList = ({
 												padding: "10px 16px",
 												fontSize: 10,
 												fontWeight: 600,
-												color: S.textMuted,
+												color: "var(--page-muted)",
 												letterSpacing: ".06em",
 												textTransform: "uppercase",
 											}}
@@ -98,9 +98,9 @@ const DocumentList = ({
 										style={{
 											borderBottom:
 												i < docs.length - 1
-													? `0.5px solid ${S.border}`
+													? `0.5px solid var(--card-border)`
 													: "none",
-											background: "#fff",
+											background: "var(--surface)",
 											transition: "background .1s",
 											animation: "fadeIn .2s ease",
 										}}
@@ -110,7 +110,7 @@ const DocumentList = ({
 											<div
 												style={{
 													fontWeight: 500,
-													color: S.dark,
+													color: "var(--page-text)",
 													whiteSpace: "nowrap",
 													overflow: "hidden",
 													textOverflow: "ellipsis",
@@ -121,7 +121,7 @@ const DocumentList = ({
 											<div
 												style={{
 													fontSize: 11,
-													color: S.textMuted,
+													color: "var(--page-muted)",
 													marginTop: 2,
 													whiteSpace: "nowrap",
 													overflow: "hidden",
@@ -143,7 +143,7 @@ const DocumentList = ({
 										<td
 											style={{
 												padding: "12px 16px",
-												color: S.textMuted,
+												color: "var(--page-muted)",
 												fontSize: 12,
 											}}
 										>
@@ -162,7 +162,7 @@ const DocumentList = ({
 										<td
 											style={{
 												padding: "12px 16px",
-												color: S.textMuted,
+												color: "var(--page-muted)",
 												fontSize: 12,
 												whiteSpace: "nowrap",
 											}}
@@ -177,14 +177,14 @@ const DocumentList = ({
 												style={{
 													width: 30,
 													height: 30,
-													border: `0.5px solid ${S.border}`,
+													border: `0.5px solid var(--card-border)`,
 													borderRadius: 7,
-													background: "#fff",
+													background: "var(--surface)",
 													cursor: "pointer",
 													display: "inline-flex",
 													alignItems: "center",
 													justifyContent: "center",
-													color: S.danger,
+													color: "var(--color-danger)",
 												}}
 											>
 												<i
@@ -204,10 +204,10 @@ const DocumentList = ({
 								<div
 									key={doc.id}
 									style={{
-										border: `0.5px solid ${S.border}`,
+										border: `0.5px solid var(--card-border)`,
 										borderRadius: 10,
 										padding: "14px 16px",
-										background: "#fff",
+										background: "var(--surface)",
 										display: "flex",
 										flexDirection: "column",
 										gap: 8,
@@ -225,7 +225,7 @@ const DocumentList = ({
 											<div
 												style={{
 													fontWeight: 500,
-													color: S.dark,
+													color: "var(--page-text)",
 													overflow: "hidden",
 													textOverflow: "ellipsis",
 													whiteSpace: "nowrap",
@@ -236,7 +236,7 @@ const DocumentList = ({
 											<div
 												style={{
 													fontSize: 11,
-													color: S.textMuted,
+													color: "var(--page-muted)",
 													marginTop: 2,
 													overflow: "hidden",
 													textOverflow: "ellipsis",
@@ -252,15 +252,15 @@ const DocumentList = ({
 											style={{
 												width: 30,
 												height: 30,
-												border: `0.5px solid ${S.border}`,
+												border: `0.5px solid var(--card-border)`,
 												borderRadius: 7,
-												background: "#fff",
+												background: "var(--surface)",
 												cursor: "pointer",
 												flexShrink: 0,
 												display: "inline-flex",
 												alignItems: "center",
 												justifyContent: "center",
-												color: S.danger,
+												color: "var(--color-danger)",
 											}}
 										>
 											<i
@@ -281,7 +281,7 @@ const DocumentList = ({
 									>
 										<TypeBadge type={doc.type} />
 										<StatusBadge status={doc.status} />
-										<span style={{ fontSize: 11, color: S.textMuted }}>
+										<span style={{ fontSize: 11, color: "var(--page-muted)" }}>
 											{doc.type === "PDF"
 												? `${formatBytes(doc.metadata.fileSize)}${doc.metadata.pageCount ? ` · ${doc.metadata.pageCount} pages` : ""}`
 												: doc.metadata.faqCategory || "—"}
@@ -289,7 +289,7 @@ const DocumentList = ({
 									</div>
 
 									{/* Row 3: Date */}
-									<div style={{ fontSize: 11, color: S.textMuted }}>
+									<div style={{ fontSize: 11, color: "var(--page-muted)" }}>
 										Added {formatDate(doc.createdAt)}
 									</div>
 								</div>

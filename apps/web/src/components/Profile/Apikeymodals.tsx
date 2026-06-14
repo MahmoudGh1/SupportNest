@@ -47,9 +47,17 @@ export function CreateKeyModal({
 			return;
 		}
 		setLoading(true);
+		setErrors({});
 		try {
-			const key = await createApiKey(name, origins); // ← pass name
+			const key = await createApiKey(
+				name,
+				origins.filter((origin) => origin.trim()),
+			);
 			onCreate(key);
+		} catch (error: any) {
+			setErrors({
+				submit: error.message ?? "Failed to create API key.",
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -250,6 +258,18 @@ export function CreateKeyModal({
 				</div>
 
 				<div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+					{errors.submit && (
+						<p
+							style={{
+								fontSize: 12,
+								color: "#E24B4A",
+								margin: "0 auto 0 0",
+								alignSelf: "center",
+							}}
+						>
+							{errors.submit}
+						</p>
+					)}
 					<Btn
 						variant="ghost"
 						onClick={onClose}

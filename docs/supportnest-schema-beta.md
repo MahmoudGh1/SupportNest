@@ -24,7 +24,7 @@
 | organization_id | uuid      | FK to Organization, null if Super Admin     |
 | email           | varchar   | login credential                            |
 | password_hash   | varchar   | bcrypt                                      |
-| role            | enum      | `super_admin`, `org_admin`, `support_agent` |
+| role            | enum      | `SUPER_ADMIN`, `org_admin`, `support_agent` |
 | first_name      | varchar   |                                             |
 | last_name       | varchar   |                                             |
 | is_active       | boolean   | soft disable without deleting               |

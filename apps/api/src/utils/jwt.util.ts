@@ -6,15 +6,21 @@ import type { IncomingHttpHeaders } from "http";
 
 dotenv.config();
 
+function getJwtSecret(): string {
+	const secret = process.env.JWT_SECRET;
+	if (!secret) throw new Error("JWT_SECRET is not configured");
+	return secret;
+}
+
 export function signAccessToken(payload: TokenPayload): string {
-	return jwt.sign(payload, String(process.env.JWT_SECRET), {
-		expiresIn: String(process.env.JWT_ACCESS_EXPIRES_IN),
+	return jwt.sign(payload, getJwtSecret(), {
+		expiresIn: process.env.JWT_ACCESS_EXPIRES_IN ?? "15m",
 	} as jwt.SignOptions);
 }
 
 export function signRefreshToken(payload: TokenPayload): string {
-	return jwt.sign({ ...payload, type: "refresh" }, String(process.env.JWT_SECRET), {
-		expiresIn: String(process.env.JWT_REFRESH_EXPIRES_IN),
+	return jwt.sign({ ...payload, type: "refresh" }, getJwtSecret(), {
+		expiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? "7d",
 	} as jwt.SignOptions);
 }
 
@@ -39,7 +45,7 @@ export function verifyToken(token: string, secret: string): JwtPayload {
 
 export function verifyAccessToken(token: string): JwtPayload {
 	try {
-		return jwt.verify(token, String(process.env.JWT_SECRET), {}) as JwtPayload;
+		return jwt.verify(token, getJwtSecret(), {}) as JwtPayload;
 	} catch (error) {
 		if (error instanceof jwt.TokenExpiredError) {
 			throw new AuthError("Token expired");
@@ -50,7 +56,7 @@ export function verifyAccessToken(token: string): JwtPayload {
 
 export function verifyRefreshToken(token: string): JwtPayload {
 	try {
-		const payload = jwt.verify(token, String(process.env.JWT_SECRET), {}) as JwtPayload & { type?: string };
+		const payload = jwt.verify(token, getJwtSecret(), {}) as JwtPayload & { type?: string };
 
 		if (payload.type !== "refresh") {
 			throw new AuthError("Invalid token type");

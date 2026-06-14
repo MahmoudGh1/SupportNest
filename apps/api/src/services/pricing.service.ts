@@ -32,6 +32,9 @@ export const getActivePlansService = async (): Promise<
     maxConversations: plan.maxConversations ?? 0,
     maxAgents: plan.maxAgents ?? 0,
     maxKnowledgeDocuments: plan.maxKnowledgeDocuments ?? 0,
-    features: String(plan.features),
+    features:
+      typeof plan.features === "string"
+        ? plan.features
+        : JSON.stringify(plan.features),
   }));
 };

@@ -2,16 +2,22 @@
 
 import { I18nProvider } from "@lingui/react";
 import { i18n } from "@lingui/core";
-import { messages } from "@/locales/en/messages";
-import { useEffect, useState } from "react";
+import { messages as enMessages } from "@/locales/en/messages";
+import { messages as arMessages } from "@/locales/ar/messages";
+import { useEffect } from "react";
 import { LocaleContext } from "@/context/local-context";
 import { usePathname, useRouter } from "next/navigation";
+import { localePath, stripLocale, type AppLocale } from "@/lib/routes";
+import { AppShell } from "@/components/AppShell";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 export type Locale = "en" | "ar";
+// console.log("Client ID:", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
 
-async function loadCatalog(locale: Locale) {
-	const { messages } = await import(`@/locales/${locale}/messages`);
-	i18n.load(locale, messages);
+const catalogs = { en: enMessages, ar: arMessages } as const;
+
+function activateLocale(locale: Locale) {
+	i18n.load(locale, catalogs[locale]);
 	i18n.activate(locale);
 }
 
@@ -22,27 +28,25 @@ export function Providers({
 	children: React.ReactNode;
 	locale: Locale;
 }) {
-	// const [locale, setLocale] = useState<Locale>("en");
-	const [loaded, setLoaded] = useState(false);
 	const router = useRouter();
 	const pathname = usePathname();
 
 	const setLocale = (newLocale: Locale) => {
-		const newPath = pathname.replace(`/${locale}`, `/${newLocale}`);
-		router.push(newPath);
+		const { pathname: pathWithoutLocale } = stripLocale(pathname);
+		router.push(localePath(pathWithoutLocale, newLocale as AppLocale));
 	};
 
 	useEffect(() => {
-		loadCatalog(locale as Locale).then(() => setLoaded(true));
+		activateLocale(locale);
 	}, [locale]);
 
-	if (!loaded) return null;
-
 	return (
-		<I18nProvider i18n={i18n}>
-			<LocaleContext.Provider value={{ locale, setLocale }}>
-				<div dir={locale === "ar" ? "rtl" : "ltr"}>{children}</div>
-			</LocaleContext.Provider>
-		</I18nProvider>
+		<GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
+			<I18nProvider i18n={i18n}>
+				<LocaleContext.Provider value={{ locale, setLocale }}>
+					<AppShell>{children}</AppShell>
+				</LocaleContext.Provider>
+			</I18nProvider>
+		</GoogleOAuthProvider>
 	);
 }

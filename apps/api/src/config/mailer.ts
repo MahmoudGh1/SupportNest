@@ -32,3 +32,18 @@ export async function sendInvitationEmail(toEmail: string, businessName: string,
     `,
 	});
 }
+
+export async function sendRevocationEmail(toEmail: string, businessName: string): Promise<void> {
+	await transporter.sendMail({
+		from: `"SupportNest" <${process.env.GMAIL_USER}>`,
+		to: toEmail,
+		subject: `Your invitation to join ${businessName} has been cancelled`,
+		html: `
+          <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+            <h2>Invitation Cancelled</h2>
+            <p>Your invitation to join <strong>${businessName}</strong> on SupportNest has been cancelled by the organization admin.</p>
+            <p style="color:#6b7280; font-size:14px;">If you believe this was a mistake, please contact the organization directly.</p>
+          </div>
+        `,
+	});
+}
