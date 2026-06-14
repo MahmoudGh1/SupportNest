@@ -1,133 +1,27 @@
-import {
-	AgentAction,
-	AgentTier,
-	MessageRole,
-} from "generated/prisma/enums.js";
-import prisma from "src/config/prisma.js";
-import { askTier0Agent } from "src/services/rag.service.js";
-import {
-	loadMemory,
-	appendToMemory,
-} from "../../utils/conversationMemory.utils.js";
-import { activeSockets } from "../ws.map.js";
-import type {
-	ConversationMessage,
-	PipelineContext,
-} from "src/types/agent.types.js";
-import { runRouter } from "src/agents/router.agent.js";
-import { createReport } from "src/services/reporter.service.js";
-
+import * as conversationService from "src/services/conversations.service.js";
+import * as ticketService from "src/services/ticket.service.js";
+import type { WsSendMessagePayload } from "src/types/ws.types.js";
 export async function handleMessageSend(
 	ws: any,
-	payload: { conversationId: string; content: string },
+	payload: WsSendMessagePayload,
 ) {
-	const { content } = payload;
 	const { conversationId, organizationId, customerId, apiKeyId } = ws.meta!;
-	await prisma.message.create({
-		data: {
+
+	const { routerOutput, aiMessage } =
+		await conversationService.processPipelineTurn({
 			conversationId,
-			role: MessageRole.CUSTOMER,
-			content,
-		},
-	});
+			organizationId,
+			customerId,
+			content: payload.content,
+		});
 
 	ws.send(JSON.stringify({ type: "typing", conversationId }));
 
-	// load conversation context
-	// fetch org id from conversation (needed for PipelineContext)
-	const conversation = await prisma.conversation.findUnique({
-		where: { id: conversationId },
-		select: { organizationId: true },
-	});
-
-	if (!conversation) {
-		ws.send(
-			JSON.stringify({
-				type: "error",
-				conversationId,
-				message: "Conversation not found.",
-			}),
-		);
-		return;
-	}
-
-	// load history from Redis
-	const redisHistory = await loadMemory(conversationId);
-
-	// Build PipelineContext for the router
-	const context: PipelineContext = {
-		customerId,
-		conversationId,
-		organizationId,
-		latestMessage: content,
-		conversationHistory: redisHistory as ConversationMessage[],
-	};
-
-	// run the router
-	const routerOutput = await runRouter(context);
-
-	// save AI message to DB
-	const aiMessage = await prisma.message.create({
-		data: {
-			conversationId,
-			role: routerOutput.resolvedByTier === "HUMAN" ? "HUMAN_AGENT" : "AI",
-			content: routerOutput.finalResponse,
-			tier:
-				routerOutput.resolvedByTier === "HUMAN"
-					? null
-					: routerOutput.resolvedByTier,
-		},
-	});
-
 	// If human escalation - create a ticket
 	if (routerOutput.resolvedByTier === "HUMAN") {
-		const existingTicket = await prisma.ticket.findUnique({
-			where: { conversationId },
-		});
-
-		if (!existingTicket) {
-			await prisma.ticket.create({
-			  data: {
-			    conversationId,
-			    organizationId: conversation.organizationId,
-			    status:         "OPEN",
-			    priority:       "MEDIUM",
-			    tiersVisited:   [AgentTier.TIER0, AgentTier.TIER1, AgentTier.TIER2],
-			    customerMessage: content,
-			  },
-			});
-
-			await prisma.conversation.update({
-				where: { id: conversationId },
-				data: { conversationStatus: "ESCALATED" },
-			});
-		}
+		await ticketService.createTicket(organizationId, conversationId);
 	}
 
-	// append both messages to redis history
-	await appendToMemory(conversationId, content, routerOutput.finalResponse);
-	const agentTierMap: Record<string, AgentTier | null> = {
-	  TIER0: AgentTier.TIER0,
-	  TIER1: AgentTier.TIER1,
-	  TIER2: AgentTier.TIER2,
-	  HUMAN: null,
-	  UNRESOLVED: null,
-	};
-	const resolvedTierAsAgentTier = agentTierMap[routerOutput.resolvedByTier ?? ""] ?? null;
-	
-	await createReport({
-	  conversationId,
-	  organizationId: conversation.organizationId,
-	  conversationHistory: [
-	    ...redisHistory,
-	    { role: "customer", content },
-	    { role: "agent",    content: routerOutput.finalResponse },
-	  ],
-	  tiersVisited:  resolvedTierAsAgentTier ? [resolvedTierAsAgentTier] : [],
-	  wasEscalated:  routerOutput.resolvedByTier === "HUMAN",
-	  resolvedByAi:  routerOutput.resolvedByTier !== "HUMAN",
-	  tokensUsed:    0,
-	});
 	const messagePayload: any = {
 		role: "AI",
 		content: routerOutput.finalResponse,
