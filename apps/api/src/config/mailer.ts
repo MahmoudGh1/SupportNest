@@ -1,4 +1,4 @@
-import * as Brevo from "@getbrevo/brevo";
+import Brevo from "@getbrevo/brevo";
 
 if (!process.env.BREVO_API_KEY) {
     throw new Error("BREVO_API_KEY must be set");
