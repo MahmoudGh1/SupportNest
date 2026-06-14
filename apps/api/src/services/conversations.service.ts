@@ -22,6 +22,7 @@ import {
 } from "src/utils/conversationMemory.utils.js";
 import { verifyToken } from "src/utils/jwt.util.js";
 import type { Organization } from "generated/prisma/client.js";
+import { conversationCloseQueue } from "src/queues/conversationCloseQueue.js";
 
 export async function startConversation({
 	organizationId,
@@ -47,6 +48,7 @@ export async function startConversation({
 	});
 	return conversation;
 }
+
 export async function upsertCustomer({
 	organization,
 	customerToken,
@@ -185,6 +187,27 @@ export async function processPipelineTurn({
 	});
 	// appends to Redis memory
 	await appendToMemory(conversationId, content, routerOutput.finalResponse);
+
+	// --- inactivity close rescheduling ---
+	// every turn pushes the auto-close timer forward; if one is already
+	// pending for this conversation, remove it before adding the new one
+	const closeJobId = `close-${conversationId}`;
+	const existingCloseJob = await conversationCloseQueue.getJob(closeJobId);
+	if (existingCloseJob) {
+		await existingCloseJob.remove();
+	}
+
+	await conversationCloseQueue.add(
+		"close-conversation",
+		{ conversationId, organizationId },
+		{
+			jobId: closeJobId,
+			delay: Number(process.env.CONVERSATION_INACTIVITY_TIMEOUT_MS) || 600000, // 10 min default
+		},
+	);
+	console.log(
+		`[close-queue] scheduled close for ${conversationId} in ${process.env.CONVERSATION_INACTIVITY_TIMEOUT_MS}ms`,
+	);
 
 	return { routerOutput, aiMessage };
 }
