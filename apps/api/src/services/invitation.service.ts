@@ -54,9 +54,7 @@ export async function sendInvitationService(organizationId: string, invitedById:
 	});
 
 	const inviterName = `${inviter.firstName} ${inviter.lastName}`;
-	sendInvitationEmail(email, org.name, inviterName, token).catch((err) => {
-	  console.error("[sendInvitationEmail] failed:", err);
-	});
+	await sendInvitationEmail(email, org.name, inviterName, token)
 }
 
 
@@ -200,7 +198,5 @@ export async function revokeInvitationService(invitationId: string, organization
         data: { status: InvitationStatus.EXPIRED },
     });
 
-    sendRevocationEmail(invitation.email, invitation.organization.name).catch((err) => {
-	  console.error("[sendRevocationEmail] failed:", err);
-	});
+    await sendRevocationEmail(invitation.email, invitation.organization.name)
 }
