@@ -6,10 +6,12 @@ import type {
 	WsEnvelope,
 	SocketMeta,
 	AuthenticatedSocket,
+	WsSendMessagePayload,
 } from "../types/ws.types.js";
 import { verifyToken } from "src/utils/jwt.util.js";
 import { handleMessageSend } from "src/websocket/handlers/message.handler.js";
 import { activeSockets } from "src/websocket/ws.map.js";
+import * as conversationService from "src/services/conversations.service.js";
 
 function send(socket: AuthenticatedSocket, envelope: WsEnvelope) {
 	socket.send(JSON.stringify(envelope));
@@ -21,12 +23,6 @@ async function connectionAuth(
 	req: IncomingMessage,
 ) {
 	const { apiKey, customerJwt, visitorId } = payload;
-	console.log(apiKey, customerJwt, visitorId);
-	// if (!apiKey || !customerJwt) {
-	// 	send(socket, { type: "error", payload: { message: `you have to provide APIKey and customerJwt within the payload` } });
-	// 	socket.close();
-	// 	return;
-	// }
 
 	if (!apiKey) {
 		send(socket, {
@@ -54,6 +50,8 @@ async function connectionAuth(
 		socket.close();
 		return;
 	}
+
+	//TODO : stolen api keys would work at the current state
 
 	const origin =
 		typeof req.headers.origin == "string" ? req.headers.origin : undefined;
@@ -120,40 +118,19 @@ async function connectionAuth(
 		});
 	}
 
-	let conversation = null;
-	let conversationMemory: any[] = [];
+	/* Conversation Initialization is already handled in the conversation service */
 
-	if (!customer.isAnonymous) {
-		const existing = await prisma.conversation.findFirst({
-			where: {
-				customerId: customer.id,
-				organizationId: isKey.organizationId,
-				conversationStatus: "ACTIVE",
-			},
-			include: {
-				messages: {
-					orderBy: { createdAt: "asc" },
-					take: 100,
-				},
-			},
-		});
+	const conversation = await conversationService.startConversation({
+		organizationId: isKey.organizationId,
+		customerId: customer.id,
+		apiKeyId: isKey.id,
+	});
 
-		if (existing) {
-			conversation = existing;
-			conversationMemory = existing.messages;
-		}
-	}
-
-	if (!conversation) {
-		conversation = await prisma.conversation.create({
-			data: {
-				organizationId: isKey.organizationId,
-				customerId: customer.id,
-				apiKeyId: isKey.id,
-				conversationStatus: "ACTIVE",
-			},
-		});
-	}
+	const conversationMemory = await prisma.message.findMany({
+		where: { conversationId: conversation.id },
+		orderBy: { createdAt: "asc" },
+		take: 100,
+	});
 
 	socket.authenticated = true;
 	socket.meta = {
@@ -162,6 +139,8 @@ async function connectionAuth(
 		conversationId: conversation.id,
 		apiKeyId: isKey.id,
 	};
+
+	/* WARNING: the conversation socket is not set in the activeSockets map */
 
 	send(socket, {
 		type: "auth_ack",
@@ -207,7 +186,10 @@ export function setupWebSocket(wss: WebSocketServer) {
 				}
 
 				if (envelope.type === "message_send") {
-					await handleMessageSend(socket, envelope.payload);
+					await handleMessageSend(
+						socket,
+						envelope.payload as WsSendMessagePayload,
+					);
 				}
 			} catch (err) {
 				console.error("Web Socket Error:", err);

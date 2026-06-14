@@ -9,7 +9,7 @@ router.use(validateApiKey);
 
 router.post("/", conversationsController.startConversation);
 
-router.post("/:id/messages", conversationsController.sendMessage);
+// router.post("/:id/messages", conversationsController.sendMessage);
 
 router.get("/:id/messages", conversationsController.getMessages);
 
