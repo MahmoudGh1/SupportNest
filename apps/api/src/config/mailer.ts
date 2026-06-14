@@ -1,11 +1,13 @@
-import { TransactionalEmailsApi, TransactionalEmailsApiApiKeys, SendSmtpEmail } from "@getbrevo/brevo";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const Brevo = require("@getbrevo/brevo");
 
 if (!process.env.BREVO_API_KEY) {
     throw new Error("BREVO_API_KEY must be set");
 }
 
-const apiInstance = new TransactionalEmailsApi();
-apiInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+const apiInstance = new Brevo.TransactionalEmailsApi();
+apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
 
 export async function sendInvitationEmail(
     toEmail: string,
@@ -15,7 +17,7 @@ export async function sendInvitationEmail(
 ): Promise<void> {
     const inviteUrl = `${process.env.FRONTEND_URL}/accept-invite?token=${token}`;
 
-    const sendSmtpEmail = new SendSmtpEmail();
+    const sendSmtpEmail = new Brevo.SendSmtpEmail();
     sendSmtpEmail.subject = `You've been invited to join ${businessName} on SupportNest`;
     sendSmtpEmail.to = [{ email: toEmail }];
     sendSmtpEmail.sender = { name: "SupportNest", email: process.env.BREVO_SENDER_EMAIL! };
@@ -38,7 +40,7 @@ export async function sendRevocationEmail(
     toEmail: string,
     businessName: string
 ): Promise<void> {
-    const sendSmtpEmail = new SendSmtpEmail();
+    const sendSmtpEmail = new Brevo.SendSmtpEmail();
     sendSmtpEmail.subject = `Your invitation to join ${businessName} has been cancelled`;
     sendSmtpEmail.to = [{ email: toEmail }];
     sendSmtpEmail.sender = { name: "SupportNest", email: process.env.BREVO_SENDER_EMAIL! };
