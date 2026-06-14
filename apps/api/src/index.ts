@@ -33,6 +33,7 @@ import AdminRoutes from "./routes/admin-dashboard.routes.js"
 
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3001;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -100,6 +101,6 @@ const Server = createServer(app);
 const wss = new WebSocketServer({ server: Server, path: "/widget/ws" });
 setupWebSocket(wss);
 
-Server.listen(PORT, () => {
+Server.listen(PORT, Number("0.0.0.0"), () => {
 	console.log("Server is running on port:", PORT);
 });
