@@ -745,8 +745,8 @@ export const api = {
 			body: JSON.stringify(data),
 		});
 		const body = await res.json();
-		sessionStorage.setItem("paymentId", body?.paymentId);
 		if (!res.ok) throw new Error(body.error ?? "Failed to initialize Paymob checkout");
+		sessionStorage.setItem("paymentId", body?.paymentId);
 		return body;
 	},
 	async getPaymentHistory(): Promise<Array<{ id: string; status: string }>> {
