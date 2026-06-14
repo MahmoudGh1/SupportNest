@@ -490,7 +490,10 @@ function BrandPanel() {
 						letterSpacing: "-1.2px",
 					}}
 				>
-					<Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
+					<Link
+						href="/"
+						style={{ color: "inherit", textDecoration: "none" }}
+					>
 						SupportNest
 					</Link>
 				</h1>
@@ -527,7 +530,7 @@ function BrandPanel() {
 							marginBottom: 16,
 						}}
 					>
-						{"\""}
+						{'"'}
 					</div>
 					<p
 						style={{
