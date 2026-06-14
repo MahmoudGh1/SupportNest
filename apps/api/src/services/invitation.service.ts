@@ -41,6 +41,10 @@ export async function sendInvitationService(organizationId: string, invitedById:
 	});
 
 	const token = generateInviteToken();
+	console.log("1. Organization found");
+
+	console.log("2. Creating invitation");
+	
 	await prisma.invitation.create({
 		data: {
 			organizationId,
@@ -52,9 +56,13 @@ export async function sendInvitationService(organizationId: string, invitedById:
 			expiresAt: sevenDaysFromNow(),
 		},
 	});
+	console.log("3. Invitation created");
+
+	console.log("4. Sending email");
 
 	const inviterName = `${inviter.firstName} ${inviter.lastName}`;
 	await sendInvitationEmail(email, org.name, inviterName, token)
+	console.log("5. Email sent");
 }
 
 
