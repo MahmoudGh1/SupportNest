@@ -15,7 +15,7 @@ export async function sendInvitationEmail(
     const inviteUrl = `${process.env.FRONTEND_URL}/accept-invite?token=${token}`;
 
     await resend.emails.send({
-        from: "SupportNest <no-reply@yourdomain.com>",
+        from: "SupportNest <no-reply@supportnest.up.railway.app>",
         to: toEmail,
         subject: `You've been invited to join ${businessName} on SupportNest`,
         html: `
@@ -37,7 +37,7 @@ export async function sendRevocationEmail(
     businessName: string
 ): Promise<void> {
     await resend.emails.send({
-        from: "SupportNest <no-reply@yourdomain.com>",
+        from: "SupportNest <no-reply@supportnest.up.railway.app>",
         to: toEmail,
         subject: `Your invitation to join ${businessName} has been cancelled`,
         html: `
