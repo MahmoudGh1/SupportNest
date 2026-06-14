@@ -351,7 +351,11 @@ importers:
         version: 2.1.0
       '@types/node':
         specifier: ^25.9.1
+<<<<<<< HEAD
+        version: 25.9.2
+=======
         version: 25.9.3
+>>>>>>> 2d98a38141ec1eb896af6760a34612c8e6567a64
       '@types/nodemailer':
         specifier: ^8.0.1
         version: 8.0.1
@@ -2028,6 +2032,9 @@ packages:
 
   '@types/node@25.9.3':
     resolution: {integrity: sha512-603BddQMv3pUcr4U2dhujk83N2tTDVr/34wII2B6bJy6g+8WD6yUb11jszNs0gdi4PesVWl7ABt8nYMVpnLUcg==}
+
+  '@types/nodemailer@8.0.1':
+    resolution: {integrity: sha512-PxpaInm8V1JQDd4j0ds5HfvWQk8JupS1C0Picb96QJsrrRDjBH+DlK7L4ZdNSqNULhiZRQHc40nLVShaGxXAMw==}
 
   '@types/nodemailer@8.0.1':
     resolution: {integrity: sha512-PxpaInm8V1JQDd4j0ds5HfvWQk8JupS1C0Picb96QJsrrRDjBH+DlK7L4ZdNSqNULhiZRQHc40nLVShaGxXAMw==}
@@ -6019,7 +6026,11 @@ snapshots:
 
   '@types/nodemailer@8.0.1':
     dependencies:
+<<<<<<< HEAD
+      '@types/node': 25.9.2
+=======
       '@types/node': 25.9.3
+>>>>>>> 2d98a38141ec1eb896af6760a34612c8e6567a64
 
   '@types/parse-json@4.0.2': {}
 

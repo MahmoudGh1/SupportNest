@@ -29,11 +29,10 @@ import { swaggerUi, swaggerSpec } from "./docs/swagger.js";
 import knowledgeRouter from "./routes/knowledge.routes.js";
 import tier2Router from "./routes/tier2.routes.js";
 import reportRouter from "./routes/reporter.routes.js";
-import AdminRoutes from "./routes/admin-dashboard.routes.js"
-
+import AdminRoutes from "./routes/admin-dashboard.routes.js";
 
 const app = express();
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 const PORT = process.env.PORT || 3001;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -46,24 +45,26 @@ app.use(
 	}),
 );
 
-
 app.use(
 	cors({
 		// Dynamically sets the header to match whoever is making the request
 		origin: function (origin, callback) {
 			// Allow requests with no origin (like mobile apps, curl, or postman)
 			if (!origin) return callback(null, true);
-			if([ "https://supportnest.up.railway.app", "http://localhost:3000" ].includes(origin)){
-				callback(null, true)
-			}
-			else{
+			if (
+				[
+					"https://supportnest.up.railway.app",
+					"http://localhost:3000",
+				].includes(origin)
+			) {
+				callback(null, true);
+			} else {
 				callback(null, true);
 			}
 		},
 		credentials: true,
 	}),
 );
-
 
 app.use(morgan("dev"));
 
@@ -72,6 +73,7 @@ const publicDir = path.resolve(process.cwd(), "public");
 app.use(express.static(publicDir));
 app.use(rateLimit);
 app.get("/health", (_, res) => res.json({ ok: true }));
+app.use("/api/v1", knowledgeRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
