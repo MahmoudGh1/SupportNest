@@ -21,6 +21,7 @@ transporter.verify()
 export async function sendInvitationEmail(toEmail: string, businessName: string, inviterName: string, token: string): Promise<void> {
 	const inviteUrl = `${process.env.FRONTEND_URL}/accept-invite?token=${token}`;
 
+	console.log("BEFORE SEND");
 	await transporter.sendMail({
 		from: `"SupportNest" <${process.env.GMAIL_USER}>`,
 		to: toEmail,
@@ -37,9 +38,11 @@ export async function sendInvitationEmail(toEmail: string, businessName: string,
       </div>
     `,
 	});
+	console.log("AFTER SEND");
 }
 
 export async function sendRevocationEmail(toEmail: string, businessName: string): Promise<void> {
+	console.log("BEFORE SEND REVOKE");
 	await transporter.sendMail({
 		from: `"SupportNest" <${process.env.GMAIL_USER}>`,
 		to: toEmail,
@@ -52,4 +55,5 @@ export async function sendRevocationEmail(toEmail: string, businessName: string)
           </div>
         `,
 	});
+	console.log("AFTER SEND REVOKE");
 }
