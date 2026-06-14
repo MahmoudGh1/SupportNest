@@ -10,34 +10,12 @@ export const transporter = nodemailer.createTransport({
 		user: process.env.GMAIL_USER,
 		pass: process.env.GMAIL_APP_PASSWORD,
 	},
-	tls: {
-		rejectUnauthorized: false,
-	},
 });
-
-const emailTimeout = 30000;
-
-function sendEmailWithTimeout(mailOptions: nodemailer.SendMailOptions, timeoutMs: number): Promise<void> {
-	return new Promise((resolve, reject) => {
-		const timeoutId = setTimeout(() => {
-			reject(new Error("Email sending timed out"));
-		}, timeoutMs);
-
-		transporter.sendMail(mailOptions, (error, info) => {
-			clearTimeout(timeoutId);
-			if (error) {
-				reject(error);
-			} else {
-				resolve();
-			}
-		});
-	});
-}
 
 export async function sendInvitationEmail(toEmail: string, businessName: string, inviterName: string, token: string): Promise<void> {
 	const inviteUrl = `${process.env.FRONTEND_URL}/accept-invite?token=${token}`;
 
-	const mailOptions: nodemailer.SendMailOptions = {
+	await transporter.sendMail({
 		from: `"SupportNest" <${process.env.GMAIL_USER}>`,
 		to: toEmail,
 		subject: `You've been invited to join ${businessName} on SupportNest`,
@@ -52,13 +30,11 @@ export async function sendInvitationEmail(toEmail: string, businessName: string,
         <p style="color:#6b7280; font-size:14px;">If you didn't expect this invitation, you can ignore this email.</p>
       </div>
     `,
-	};
-
-	await sendEmailWithTimeout(mailOptions, emailTimeout);
+	});
 }
 
 export async function sendRevocationEmail(toEmail: string, businessName: string): Promise<void> {
-	const mailOptions: nodemailer.SendMailOptions = {
+	await transporter.sendMail({
 		from: `"SupportNest" <${process.env.GMAIL_USER}>`,
 		to: toEmail,
 		subject: `Your invitation to join ${businessName} has been cancelled`,
@@ -69,7 +45,5 @@ export async function sendRevocationEmail(toEmail: string, businessName: string)
             <p style="color:#6b7280; font-size:14px;">If you believe this was a mistake, please contact the organization directly.</p>
           </div>
         `,
-	};
-
-	await sendEmailWithTimeout(mailOptions, emailTimeout);
+	});
 }
