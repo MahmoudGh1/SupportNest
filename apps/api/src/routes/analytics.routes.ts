@@ -6,9 +6,9 @@ import { Role } from "generated/prisma/enums.js";
 import asyncHandler from "src/utils/asyncHandler.js";
 
 const router: Router = express.Router();
-
+/* /summary?range=7d */
 router.get(
-	"/summary?range=7d",
+	"/summary",
 	authMiddleware,
 	adminMiddleware(Role.ORG_ADMIN),
 	analyticsController.summary,
