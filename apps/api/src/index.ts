@@ -45,14 +45,19 @@ app.use(
 	}),
 );
 
+
 app.use(
 	cors({
 		// Dynamically sets the header to match whoever is making the request
 		origin: function (origin, callback) {
 			// Allow requests with no origin (like mobile apps, curl, or postman)
 			if (!origin) return callback(null, true);
-
-			callback(null, true);
+			if([ "https://your-frontend.vercel.app", "http://localhost:3000" ].includes(origin)){
+				callback(null, true)
+			}
+			else{
+				callback(null, true);
+			}
 		},
 		credentials: true,
 	}),
