@@ -56,7 +56,7 @@ export type PipelineContext = {
 // What the router returns after the full cycle (routing + tier call + review)
 export type RouterOutput = {
 	finalResponse: string;
-	resolvedByTier: Exclude<AgentTier, "ROUTER"> | ResolutionTier;
+	resolvedByTier: MessageTier | "HUMAN";
 	approved: boolean;
 	loginUrl?: string | null;
 };

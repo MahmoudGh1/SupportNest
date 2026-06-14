@@ -23,9 +23,89 @@ import {
 	validateRoutingDecision,
 } from "src/utils/validateAgentAction.js";
 
+function normalizeMessage(message: string): string {
+	return (
+		message
+			.trim()
+			.toLowerCase()
+			// strip Arabic diacritics (tashkeel)
+			.replace(/[\u064B-\u065F\u0670]/g, "")
+			// strip Arabic elongation marks (tatweel), e.g. "مرحبـــا"
+			.replace(/\u0640/g, "")
+			// normalize Arabic letter variants
+			.replace(/[إأآا]/g, "ا")
+			.replace(/ى/g, "ي")
+			.replace(/ة/g, "ه")
+			// strip trailing punctuation (Latin + Arabic) and collapse whitespace
+			.replace(/[!.,؟،؛]+$/g, "")
+			.replace(/\s+/g, " ")
+			.trim()
+	);
+}
+
+const SMALL_TALK_PATTERNS: { pattern: RegExp; reply: string }[] = [
+	// Greetings
+	{
+		pattern: /^(hi+|hey+|hello+|yo|sup|good (morning|afternoon|evening))$/,
+		reply: "Hi there! How can I help you today?",
+	},
+	{
+		pattern:
+			/^(السلام عليكم|سلام|اهلا|اهلين|مرحبا|هاي|هلا|صباح الخير|مساء الخير)$/,
+		reply: "أهلاً! كيف يمكنني مساعدتك اليوم؟",
+	},
+
+	// Thanks
+	{
+		pattern:
+			/^(thanks?( you)?|thank you( so much| very much)?|thx|ty|appreciate it)$/,
+		reply:
+			"You're welcome! Let me know if there's anything else I can help with.",
+	},
+	{
+		pattern: /^(شكرا|متشكر|تشكرات|تسلم|يعطيك العافيه)$/,
+		reply: "العفو! قول لي لو احتجت أي مساعدة تانية.",
+	},
+
+	// Acknowledgement
+	{
+		pattern: /^(ok|okay|alright|got it|sounds good|cool|great|perfect)$/,
+		reply:
+			"Glad that helps! Let me know if there's anything else I can do for you.",
+	},
+	{
+		pattern: /^(تمام|اوك|أوكي|ماشي|حلو)$/,
+		reply: "تمام! أنا موجود لو احتجت أي شيء تاني.",
+	},
+
+	// Farewell
+	{
+		pattern:
+			/^(bye|goodbye|see you|see ya|later|have a (good|nice) (day|one))$/,
+		reply: "Take care! Feel free to reach out anytime you need help.",
+	},
+	{
+		pattern: /^(باي|مع السلامه|الى اللقاء|تصبح على خير|تصبحي على خير)$/,
+		reply: "مع السلامة! تواصل معنا في أي وقت تحتاج مساعدة.",
+	},
+];
+
+function detectSmallTalk(message: string): string | null {
+	const normalized = normalizeMessage(message);
+
+	for (const { pattern, reply } of SMALL_TALK_PATTERNS) {
+		if (pattern.test(normalized)) {
+			return reply;
+		}
+	}
+
+	return null;
+}
+
 // helper - call the llm and parse the json response
 async function callRouterLLM(
 	prompt: string,
+	retries = 1,
 ): Promise<{ parsed: any; tokensUsed: number }> {
 	const response = await fastModel.invoke([{ role: "user", content: prompt }]);
 
@@ -36,14 +116,27 @@ async function callRouterLLM(
 				? response.content.map((c: any) => c.text ?? "").join("")
 				: "";
 
-	const cleanedText = rawText.replace(/```json\s*|```/g, "").trim();
+	const tokensUsed = (response.usage_metadata as any)?.total_tokens ?? 0;
+
+	let cleanedText = rawText.replace(/```json\s*|```/g, "").trim();
+
+	// Extract the JSON object even if surrounded by extra text
+	const firstBrace = cleanedText.indexOf("{");
+	const lastBrace = cleanedText.lastIndexOf("}");
+	if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+		cleanedText = cleanedText.slice(firstBrace, lastBrace + 1);
+	}
 
 	try {
-		return {
-			parsed: JSON.parse(cleanedText),
-			tokensUsed: (response.usage_metadata as any)?.total_tokens ?? 0,
-		};
+		return { parsed: JSON.parse(cleanedText), tokensUsed };
 	} catch (error) {
+		console.error("Router LLM returned invalid JSON. Raw response:", rawText);
+
+		if (retries > 0) {
+			const retryPrompt = `${prompt}\n\nYour previous response was not valid JSON. Respond again with ONLY the JSON object, nothing else.`;
+			return callRouterLLM(retryPrompt, retries - 1);
+		}
+
 		throw new Error(`Model returned invalid JSON:\n${cleanedText}`);
 	}
 }
@@ -89,25 +182,89 @@ export async function runRouter(
 		conversationHistory,
 		organizationId,
 	} = context;
+	// --- phase 0: cheap small-talk pre-filter (no LLM call)
+	const smallTalkReply = detectSmallTalk(latestMessage);
+
+	if (smallTalkReply) {
+		await writeAgentLog({
+			conversationId,
+			tier: AgentTier.ROUTER,
+			action: AgentAction.RESOLVED,
+			input: latestMessage,
+			output: "Matched small talk pattern, responded without invoking any LLM",
+			latencyMs: 0,
+			tokensUsed: 0,
+		});
+
+		return {
+			finalResponse: smallTalkReply,
+			resolvedByTier: ResolutionTier.TIER0,
+			approved: true,
+		};
+	}
 
 	// --- phase 1: routing decision
 
 	const routingPrompt = buildRoutingPrompt(latestMessage, conversationHistory);
-
+	// console.log(routingPrompt);
 	const routingStart = Date.now();
 
-	const { parsed: routingResult, tokensUsed: routingTokens } =
-		await callRouterLLM(routingPrompt);
+	let routingResult: any;
+	let routingTokens = 0;
+
+	try {
+		const result = await callRouterLLM(routingPrompt);
+		routingResult = result.parsed;
+		routingTokens = result.tokensUsed;
+	} catch (error) {
+		console.error("Router LLM failed after retries:", error);
+
+		await writeAgentLog({
+			conversationId,
+			tier: AgentTier.ROUTER,
+			action: AgentAction.NO_MATCH,
+			input: latestMessage,
+			output: `Router LLM failed after retries: ${(error as Error).message}`,
+			latencyMs: Date.now() - routingStart,
+			tokensUsed: 0,
+		});
+
+		routingResult = {
+			routingDecision: "TIER0",
+			routingReason:
+				"Fallback default — router LLM failed to return valid JSON",
+		};
+	}
+
+	// Short-circuit - small talk handled directly by the router, no tier needed
+	if (routingResult.smallTalkReply) {
+		await writeAgentLog({
+			conversationId,
+			tier: AgentTier.ROUTER,
+			action: AgentAction.RESOLVED,
+			input: latestMessage,
+			output: "Handled as small talk, no tier invoked",
+			latencyMs: 0,
+			tokensUsed: 0,
+		});
+		console.log(routingResult);
+		return {
+			finalResponse: routingResult.smallTalkReply,
+			resolvedByTier: ResolutionTier.TIER0,
+			approved: true,
+		};
+	}
 
 	const routingLatency = Date.now() - routingStart;
 	const routingDecision = routingResult.routingDecision as
 		| Exclude<AgentTier, "ROUTER">
 		| "HUMAN";
+
+	console.log("routing results", routingResult);
 	// console.log("Routing decision value:", routingDecision);
 
 	// Log the routing decision
 	const validatedRoutingDecision = validateRoutingDecision(routingDecision);
-
 	await writeAgentLog({
 		conversationId,
 		tier: AgentTier.ROUTER,
@@ -141,7 +298,7 @@ export async function runRouter(
 
 		const tierStart = Date.now();
 		const tierResponse: TierResponse = await callTier(currentTier, context);
-
+		console.log(tierResponse);
 		// short-circuit: customer needs to authenticate first
 		if ((tierResponse as any).loginUrl) {
 			return {
@@ -176,9 +333,9 @@ export async function runRouter(
 				? AgentAction.RESOLVED
 				: AgentAction.REJECTED_OUTPUT;
 
+		console.log("review result", reviewResult);
 		// Log the review decision
 		const validatedReviewDecision = validateReviewDecision(reviewDecision);
-
 		await writeAgentLog({
 			conversationId,
 			tier: AgentTier.ROUTER,
