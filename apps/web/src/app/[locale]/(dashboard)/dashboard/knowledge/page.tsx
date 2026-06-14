@@ -1,7 +1,7 @@
 "use client";
 import { useDebouncedCallback } from "use-debounce";
-
-import { useEffect, useState } from "react";
+import ApiToolsPanel from "@/features/knowledgebase/ApiToolsPanel";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { KnowledgeDocument } from "@/types/types";
 import UploadPdfPanel from "@/features/knowledgebase/UploadPdfPanel";
@@ -11,15 +11,15 @@ import Loading from "@/features/knowledgebase/Loading";
 import ProcessingNotice from "@/features/knowledgebase/ProcessingNotice";
 import Header from "@/features/knowledgebase/Header";
 import Toast from "@/features/knowledgebase/Toast";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
+// import { useSearchParams } from "next/navigation";
+// import { useRouter } from "next/router";
 import { useUrlFilters } from "@/hooks/use-url-filters";
 import DocumentFilter from "@/features/knowledgebase/DocumentFilter";
-import { useLingui } from "@lingui/react/macro";
+// import { useLingui } from "@lingui/react/macro";
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function KnowledgePage() {
-	const { i18n } = useLingui();
+	// const { i18n } = useLingui();
 	const { searchParams, updateFilters } = useUrlFilters();
 
 	const [docs, setDocs] = useState<KnowledgeDocument[]>([]);
@@ -39,6 +39,12 @@ export default function KnowledgePage() {
 		updateFilters("page", null);
 	}, 400);
 
+	// ── Stats ──────────────────────────────────────────────────────────────────
+	const total = docs.length;
+	const ready = docs.filter((d) => d.status === "READY").length;
+	const processing = docs.filter((d) => d.status === "PROCESSING").length;
+	const failed = docs.filter((d) => d.status === "FAILED").length;
+
 	const [pageLoading, setPageLoading] = useState(true);
 	const [deleteTarget, setDeleteTarget] = useState<KnowledgeDocument | null>(
 		null,
@@ -47,28 +53,28 @@ export default function KnowledgePage() {
 	const [toast, setToast] = useState("");
 
 	// ── Fetch ──────────────────────────────────────────────────────────────────
-	const fetchDocs = async () => {
+	 
+	const fetchDocs = useCallback(async () => {
 		const data = await api.getKnowledgeDocs(filterState);
 		const documents = data ? data.data.documents : [];
 		setDocs(documents);
-	};
+	}, [filterState]);
 
 	useEffect(() => {
 		fetchDocs().finally(() => setPageLoading(false));
-	}, [
-		filterState.title,
-		filterState.type,
-		filterState.page,
-		filterState.limit,
-	]);
+	}, [filterState.title, filterState.type, filterState.page, filterState.limit, fetchDocs]);
 
 	// ── Polling: only runs while any doc is "processing" ──────────────────────
 	useEffect(() => {
 		const hasProcessing = docs.some((d) => d.status === "PROCESSING");
 		if (!hasProcessing) return;
-		const timer = setInterval(fetchDocs, 3000);
+
+		const timer = setInterval(() => {
+			fetchDocs();
+		}, 3000);
+
 		return () => clearInterval(timer);
-	}, [docs]);
+	}, [processing > 0, fetchDocs]);
 
 	// ── Toast helper ───────────────────────────────────────────────────────────
 	const showToast = (msg: string) => {
@@ -97,11 +103,7 @@ export default function KnowledgePage() {
 		}
 	};
 
-	// ── Stats ──────────────────────────────────────────────────────────────────
-	const total = docs.length;
-	const ready = docs.filter((d) => d.status === "READY").length;
-	const processing = docs.filter((d) => d.status === "PROCESSING").length;
-	const failed = docs.filter((d) => d.status === "FAILED").length;
+
 
 	if (pageLoading) {
 		return <Loading />;
@@ -110,20 +112,25 @@ export default function KnowledgePage() {
 	return (
 		<>
 			<style>{`
-        @keyframes spin { to { transform: rotate(360deg) } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
-        .kb-row:hover { background: #fafafa !important; }
-        .kb-del-btn { opacity: 0 !important; transition: opacity .15s; }
-        .kb-row:hover .kb-del-btn { opacity: 1 !important; }
-      `}</style>
-			<div style={{ padding: "1.5rem", maxWidth: 1100, margin: "0 auto" }}>
+      @keyframes spin { to { transform: rotate(360deg) } }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+      .kb-row:hover { background: #fafafa !important; }
+      .kb-del-btn { opacity: 0 !important; transition: opacity .15s; }
+      .kb-row:hover .kb-del-btn { opacity: 1 !important; }
+    `}</style>
+			<div style={{ padding: "1.5rem", maxWidth: 1200, margin: "0 auto" }}>
 				<KnowledgePage.Header stats={{ total, ready, processing, failed }} />
-				<div className="mt-6">
+
+				{/* Two-column upload section */}
+				<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 24 }}>
 					<UploadPdfPanel onUploaded={handleUploaded} />
-				</div>{" "}
+					<ApiToolsPanel onToolsExtracted={handleUploaded} />
+				</div>
+
 				<div className="mt-6">
 					{processing > 0 && <ProcessingNotice processing={processing} />}
 				</div>
+
 				<div className="mt-6">
 					<DocumentFilter
 						title={searchInput}
@@ -145,7 +152,7 @@ export default function KnowledgePage() {
 					/>
 				</div>
 			</div>
-			{/* Delete confirm modal */}
+
 			{deleteTarget && (
 				<DeleteModal
 					doc={deleteTarget}

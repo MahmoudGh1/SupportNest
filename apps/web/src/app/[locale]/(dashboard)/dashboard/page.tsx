@@ -23,10 +23,10 @@ function StatCard({
 	return (
 		<div
 			style={{
-				background: "#fff",
+				background: "var(--surface)",
 				borderRadius: 10,
 				padding: "1rem 1.1rem",
-				border: `0.5px solid ${S.border}`,
+				border: `0.5px solid var(--card-border)`,
 			}}
 		>
 			<div
@@ -37,13 +37,13 @@ function StatCard({
 					marginBottom: 10,
 				}}
 			>
-				<span style={{ fontSize: 12, color: S.textMuted }}>{label}</span>
+				<span style={{ fontSize: 12, color: "var(--page-muted)" }}>{label}</span>
 				<div
 					style={{
 						width: 32,
 						height: 32,
 						borderRadius: 8,
-						background: S.purpleBg,
+						background: "var(--color-brand-faint)",
 						display: "flex",
 						alignItems: "center",
 						justifyContent: "center",
@@ -51,7 +51,7 @@ function StatCard({
 				>
 					<i
 						className={`ti ti-${icon}`}
-						style={{ fontSize: 16, color: S.purple }}
+						style={{ fontSize: 16, color: "var(--color-brand)" }}
 					/>
 				</div>
 			</div>
@@ -59,13 +59,13 @@ function StatCard({
 				style={{
 					fontSize: 24,
 					fontWeight: 600,
-					color: S.dark,
+					color: "var(--page-text)",
 					marginBottom: 4,
 				}}
 			>
 				{value}
 			</div>
-			<div style={{ fontSize: 11, color: S.green }}>{delta}</div>
+			<div style={{ fontSize: 11, color: "var(--color-success)" }}>{delta}</div>
 		</div>
 	);
 }
@@ -82,9 +82,9 @@ function TierBar({
 	return (
 		<div>
 			{[
-				{ label: t`Tier 1 — AI Instant`, pct: tier1, color: S.purple },
-				{ label: t`Tier 2 — AI Complex`, pct: tier2, color: S.purpleLight },
-				{ label: t`Human Agent`, pct: human, color: "#AFA9EC" },
+				{ label: t`Tier 1 — AI Instant`, pct: tier1, color: "var(--color-brand)" },
+				{ label: t`Tier 2 — AI Complex`, pct: tier2, color: "var(--color-brand-light)" },
+				{ label: t`Human Agent`, pct: human, color: "var(--color-brand-mid)" },
 			].map((item) => (
 				<div
 					key={item.label}
@@ -97,17 +97,17 @@ function TierBar({
 							marginBottom: 5,
 						}}
 					>
-						<span style={{ fontSize: 12, color: S.textSecondary }}>
+						<span style={{ fontSize: 12, color: "var(--page-muted)" }}>
 							{item.label}
 						</span>
-						<span style={{ fontSize: 12, fontWeight: 500, color: S.dark }}>
+						<span style={{ fontSize: 12, fontWeight: 500, color: "var(--page-text)" }}>
 							{item.pct}%
 						</span>
 					</div>
 					<div
 						style={{
 							height: 6,
-							background: S.border,
+							background: "var(--card-border)",
 							borderRadius: 3,
 							overflow: "hidden",
 						}}
@@ -156,7 +156,7 @@ export default function OverviewPage() {
 					alignItems: "center",
 					justifyContent: "center",
 					height: "100%",
-					color: S.textMuted,
+					color: "var(--page-muted)",
 				}}
 			>
 				<i
@@ -174,7 +174,7 @@ export default function OverviewPage() {
 				style={{
 					fontSize: 11,
 					fontWeight: 500,
-					color: S.textMuted,
+					color: "var(--page-muted)",
 					letterSpacing: ".06em",
 					textTransform: "uppercase",
 					marginBottom: 12,
@@ -234,82 +234,82 @@ export default function OverviewPage() {
 				>
 					<p
 						style={{
-							fontSize: 13,
-							fontWeight: 500,
-							color: S.dark,
-							marginBottom: 14,
-							marginTop: 0,
-						}}
-					>
-						<Trans>Recent Conversations</Trans>
-					</p>
-					<table
-						style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}
-					>
-						<thead>
-							<tr>
-								{[t`Customer`, t`Status`, t`Tier`, t`Time`].map((h) => (
-									<th
-										key={h}
-										style={{
-											textAlign: "left",
-											color: S.textMuted,
-											fontWeight: 500,
-											fontSize: 10,
-											letterSpacing: ".05em",
-											textTransform: "uppercase",
-											paddingBottom: 10,
-											borderBottom: `0.5px solid ${S.border}`,
-										}}
-									>
-										{h}
-									</th>
-								))}
-							</tr>
-						</thead>
-						<tbody>
-							{stats.recentConversations.map((c) => (
-								<tr key={c.id}>
-									<td
-										style={{
-											padding: "9px 0",
-											borderBottom: `0.5px solid ${S.bg}`,
-											color: S.dark,
-										}}
-									>
-										{c.customer}
-									</td>
-									<td
-										style={{
-											padding: "9px 0",
-											borderBottom: `0.5px solid ${S.bg}`,
-										}}
-									>
-										<StatusBadge status={c.status} />
-									</td>
-									<td
-										style={{
-											padding: "9px 0",
-											borderBottom: `0.5px solid ${S.bg}`,
-											color: S.textMuted,
-										}}
-									>
-										{i18n._(TIER_LABELS[c.tier]) as Tiers}
-									</td>
-									<td
-										style={{
-											padding: "9px 0",
-											borderBottom: `0.5px solid ${S.bg}`,
-											color: S.textMuted,
-										}}
-									>
-										{c.timestamp}
-									</td>
-								</tr>
+						fontSize: 13,
+						fontWeight: 500,
+						color: "var(--page-text)",
+						marginBottom: 14,
+						marginTop: 0,
+					}}
+				>
+					<Trans>Recent Conversations</Trans>
+				</p>
+				<table
+					style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}
+				>
+					<thead>
+						<tr>
+							{[t`Customer`, t`Status`, t`Tier`, t`Time`].map((h) => (
+								<th
+									key={h}
+									style={{
+										textAlign: "left",
+										color: "var(--page-muted)",
+										fontWeight: 500,
+										fontSize: 10,
+										letterSpacing: ".05em",
+										textTransform: "uppercase",
+										paddingBottom: 10,
+										borderBottom: `0.5px solid var(--card-border)`,
+									}}
+								>
+									{h}
+								</th>
 							))}
-						</tbody>
-					</table>
-				</div>
+						</tr>
+					</thead>
+					<tbody>
+						{stats.recentConversations.map((c) => (
+							<tr key={c.id}>
+								<td
+									style={{
+										padding: "9px 0",
+										borderBottom: `0.5px solid var(--surface)`,
+										color: "var(--page-text)",
+									}}
+								>
+									{c.customer}
+								</td>
+								<td
+									style={{
+										padding: "9px 0",
+										borderBottom: `0.5px solid var(--surface)`,
+									}}
+								>
+									<StatusBadge status={c.status} />
+								</td>
+								<td
+									style={{
+										padding: "9px 0",
+										borderBottom: `0.5px solid var(--surface)`,
+										color: "var(--page-muted)",
+									}}
+								>
+									{i18n._(TIER_LABELS[c.tier]) as Tiers}
+								</td>
+								<td
+									style={{
+										padding: "9px 0",
+										borderBottom: `0.5px solid var(--surface)`,
+										color: "var(--page-muted)",
+									}}
+								>
+									{c.timestamp}
+								</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
 
 				{/* Resolution by tier */}
 				<div

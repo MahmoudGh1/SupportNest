@@ -1,6 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { api } from "@/lib/api";
+import { useAuth } from "@/context/auth-context";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 interface Props {
   annual: boolean;
@@ -56,108 +60,130 @@ interface Plan {
   variant: "glass" | "white" | "dark-glass";
 }
 
-const PLANS: Plan[] = [
-  {
-    id: "fdfb9397-de6b-4977-a9b9-de2610881d8a",
-    name: "Starter",
-    monthlyPrice: 500,
-    annualPrice: 350,
-    subline: (annual) =>
-      annual ? `Billed EGP${350 * 12}/yr` : "Billed monthly",
-    cta: "Get started →",
-    variant: "glass",
-    features: [
-      "Up to 3 team members",
-      "5,000 AI conversations / mo",
-      "10 knowledge base docs",
-      "Embeddable chat widget",
-      "Basic analytics dashboard",
-      "Email support",
-    ],
-  },
-  {
-    id: "5a2cbacf-512b-4d2f-8ee6-4421a51d9e0e",
-    name: "Pro",
-    badge: "MOST POPULAR",
-    monthlyPrice: 1500,
-    annualPrice: 1250,
-    subline: (annual) =>
-      annual ? `Billed EGP${1250 * 12}/yr` : "Billed monthly",
-    cta: "Start free trial →",
-    variant: "white",
-    features: [
-      "Up to 15 team members",
-      "Unlimited AI conversations",
-      "50 knowledge base docs",
-      "Tier 1 + Tier 2 AI agents",
-      "Human agent inbox",
-      "Advanced analytics & CSAT",
-      "Custom widget branding",
-      "API access",
-      "Priority support",
-    ],
-  },
-  {
-    id: "80b4d7be-849e-4ce3-b045-8691fb59e360",
-    name: "Enterprise",
-    monthlyPrice: null,
-    annualPrice: null,
-    subline: () => "Custom contract & invoicing",
-    cta: "Contact sales",
-    variant: "dark-glass",
-    features: [
-      "Unlimited team members",
-      "Unlimited AI conversations",
-      "Unlimited knowledge docs",
-      "Full AI agent pipeline",
-      "Dedicated infrastructure",
-      "SSO / SAML login",
-      "Custom integrations",
-      "SLA & uptime guarantee",
-      "Dedicated account manager",
-    ],
-  },
-];
+function formatFeatureItem(item: unknown): string {
+  if (typeof item === "string") return item;
+  if (item && typeof item === "object") {
+    const o = item as Record<string, unknown>;
+    if (typeof o.name === "string") return o.name;
+    if (typeof o.title === "string") return o.title;
+    if (typeof o.text === "string") return o.text;
+    if (typeof o.label === "string") return o.label;
+  }
+  return String(item);
+}
+
+function parseFeatures(features: string): string[] {
+  if (!features) return [];
+  try {
+    const parsed = JSON.parse(features) as unknown;
+    if (Array.isArray(parsed)) return parsed.map(formatFeatureItem);
+    if (parsed && typeof parsed === "object") {
+      return Object.values(parsed as Record<string, unknown>).map(formatFeatureItem);
+    }
+  } catch {
+    return [features];
+  }
+  return [];
+}
+
+function mapDbPlanToCard(plan: {
+  id: string;
+  name: string;
+  priceMonthly: number;
+  maxConversations: number;
+  maxAgents: number;
+  maxKnowledgeDocuments: number;
+  features: string;
+}, index: number, total: number): Plan {
+  const isEnterprise =
+    plan.name.toLowerCase() === "enterprise" || plan.priceMonthly <= 0;
+  const annualPrice = isEnterprise
+    ? null
+    : Math.round(plan.priceMonthly * 0.8);
+  const featured = index === Math.min(1, total - 1);
+
+  const defaultFeatures = [
+    `${plan.maxAgents || "Unlimited"} team members`,
+    `${plan.maxConversations || "Unlimited"} AI conversations / mo`,
+    `${plan.maxKnowledgeDocuments || "Unlimited"} knowledge base docs`,
+  ];
+  const parsedFeatures = parseFeatures(plan.features);
+  const features =
+    parsedFeatures.length > 0 ? parsedFeatures : defaultFeatures;
+
+  return {
+    id: plan.id,
+    name: plan.name,
+    badge: featured ? "MOST POPULAR" : undefined,
+    monthlyPrice: isEnterprise ? null : plan.priceMonthly,
+    annualPrice,
+    subline: (annual) => {
+      if (isEnterprise) return "Custom contract & invoicing";
+      const price = annual ? annualPrice! : plan.priceMonthly;
+      return annual ? `Billed EGP${price * 12}/yr` : "Billed monthly";
+    },
+    cta: isEnterprise ? "Contact sales" : "Get started →",
+    variant: featured ? "white" : isEnterprise ? "dark-glass" : "glass",
+    features,
+  };
+}
 
 function PlanCard({
   plan,
   annual,
   featured,
+  currentPlanId,
+  isSubscribed,
+  isLoggedIn,
 }: {
   plan: Plan;
   annual: boolean;
   featured: boolean;
+  currentPlanId?: string | null;
+  isSubscribed?: boolean;
+  isLoggedIn?: boolean;
 }) {
   const router = useRouter();
+  const { t } = useLingui();
   const price = annual ? plan.annualPrice : plan.monthlyPrice;
+  const isCurrent = Boolean(isSubscribed && currentPlanId === plan.id);
+  const isEnterprise = plan.name.toLowerCase() === "enterprise";
+
+  const ctaLabel = isCurrent
+    ? t`Your current plan`
+    : isLoggedIn && isSubscribed
+      ? t`Upgrade your plan`
+      : isEnterprise
+        ? t`Contact sales`
+        : t`Get started →`;
 
   const isWhite = plan.variant === "white";
 
-  const labelColor = isWhite ? "text-white/50" : "text-black/40";
-  const priceColor = isWhite ? "text-white" : "text-[#0d0d0d]";
-  const unitColor = isWhite ? "text-white/40" : "text-black/30";
-  const sublineColor = isWhite ? "text-white/40" : "text-black/30";
-  const featureColor = isWhite ? "text-white/70" : "text-black/55";
+  const labelColor = isWhite ? "text-white/50" : "sn-muted";
+  const priceColor = isWhite ? "text-white" : "text-[var(--page-text)]";
+  const unitColor = isWhite ? "text-white/40" : "sn-muted";
+  const sublineColor = isWhite ? "text-white/40" : "sn-muted";
+  const featureColor = isWhite ? "text-white/70" : "sn-muted";
 
   const ctaCls = isWhite
     ? "bg-white text-[#111] hover:bg-white/90"
-    : "bg-[#111] text-white hover:bg-black";
+    : "bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] hover:opacity-90";
 
   const wrapperCls = featured
-    ? "rounded-[22px] shadow-[0_4px_32px_rgba(0,0,0,0.13)] ring-1 ring-black/10"
+    ? "rounded-[22px] shadow-[0_4px_32px_rgba(0,0,0,0.13)] ring-1 ring-black/10 dark:ring-white/10"
     : "rounded-2xl shadow-sm";
 
-  const cardBg = isWhite ? "bg-[#111]" : "bg-white border border-black/[0.08]";
+  const cardBg = isWhite ? "bg-[#111]" : "sn-surface border";
 
   // ── Handle CTA click ───────────────────────────────────────────────────────
   function handleClick() {
-    // Enterprise → contact page, no sessionStorage
-    if (plan.id === "enterprise") {
+    if (isCurrent) return;
+
+    if ((isLoggedIn && isSubscribed) || isEnterprise) {
       router.push("/contact");
       return;
     }
 
-    // Store selected plan in sessionStorage
     sessionStorage.setItem(
       "selectedPlan",
       JSON.stringify({
@@ -169,8 +195,11 @@ function PlanCard({
       }),
     );
 
-    // Navigate to register
-    router.push("/register");
+    if (isLoggedIn) {
+      router.push(`/payment?planId=${plan.id}&annual=${annual}`);
+    } else {
+      router.push("/register");
+    }
   }
 
   return (
@@ -232,23 +261,24 @@ function PlanCard({
         {/* CTA button — replaced Link with button */}
         <button
           onClick={handleClick}
-          className={`w-full text-center rounded-full font-semibold border-none cursor-pointer transition-all duration-150 mb-8 ${
+          disabled={isCurrent}
+          className={`w-full text-center rounded-full font-semibold border-none transition-all duration-150 mb-8 ${
             featured ? "py-3 text-[14px]" : "py-2.5 text-[13px]"
-          } ${ctaCls}`}
+          } ${isCurrent ? "opacity-50 cursor-not-allowed" : "cursor-pointer"} ${ctaCls}`}
         >
-          {plan.cta}
+          {ctaLabel}
         </button>
 
         {/* Divider */}
         <div
-          className={`w-full h-px mb-6 ${isWhite ? "bg-white/10" : "bg-black/[0.07]"}`}
+          className={`w-full h-px mb-6 ${isWhite ? "bg-white/10" : "bg-[var(--card-border)]"}`}
         />
 
         {/* Features */}
         <div className="flex flex-col gap-3 mt-2">
-          {plan.features.map((f) => (
+          {plan.features.map((f, i) => (
             <div
-              key={f}
+              key={i}
               className={`flex items-start gap-2.5 ${featured ? "text-[13.5px]" : "text-[13px]"} ${featureColor}`}
             >
               {isWhite ? <CheckLight /> : <CheckDark />}
@@ -262,21 +292,63 @@ function PlanCard({
 }
 
 export default function PricingCards({ annual }: Props) {
+  const { user } = useAuth();
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    api
+      .getPlans()
+      .then((dbPlans) => {
+        setPlans(
+          dbPlans.map((plan, index) =>
+            mapDbPlanToCard(plan, index, dbPlans.length),
+          ),
+        );
+      })
+      .catch((err) => {
+        setError(
+          err instanceof Error ? err.message : "Failed to load pricing plans",
+        );
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="max-w-260 mx-auto px-4 py-16 text-center sn-muted text-sm">
+        <Trans>Loading plans…</Trans>
+      </div>
+    );
+  }
+
+  if (error || plans.length === 0) {
+    return (
+      <div className="max-w-260 mx-auto px-4 py-16 text-center text-black/40 text-sm">
+        {error || "No plans available right now."}
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-260 mx-auto px-4">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-stretch">
-        {PLANS.map((plan) => (
+        {plans.map((plan, index) => (
           <PlanCard
             key={plan.id}
             plan={plan}
             annual={annual}
-            featured={plan.id === "c76ac77c-22de-4383-9d1a-986f70ef7694"}
+            featured={index === Math.min(1, plans.length - 1)}
+            currentPlanId={user?.currentPlanId}
+            isSubscribed={user?.hasActiveSubscription}
+            isLoggedIn={Boolean(user)}
           />
         ))}
       </div>
 
       {annual && (
-        <p className="text-center text-black/25 text-[12px] mt-6">
+        <p className="text-center text-[#534AB7] text-[12px] mt-6">
           Annual billing saves up to{" "}
           <span className="text-emerald-500/70 font-semibold">20%</span>{" "}
           compared to monthly.

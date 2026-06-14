@@ -23,7 +23,6 @@ export const sendInvitationController: RequestHandler = asyncHandler(async (req:
 
 export const validateInvitationController: RequestHandler = asyncHandler(async (req, res) => {
 	const { token } = req.params;
-	console.log(token);
 	const result = await validateInvitationService(token);
 	res.status(200).json(result);
 });

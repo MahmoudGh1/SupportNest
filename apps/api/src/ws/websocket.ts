@@ -39,7 +39,6 @@ async function connectionAuth(
 		where: { keyHash },
 		include: { organization: true },
 	});
-	console.log(isKey);
 	if (!isKey || !isKey.isActive || !isKey.organizationId) {
 		send(socket, {
 			type: "error",

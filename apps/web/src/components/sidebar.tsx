@@ -3,11 +3,12 @@
 import { S } from "@/components/ui";
 import { useAuth } from "@/context/auth-context";
 import { msg, t } from "@lingui/core/macro";
+import type { MessageDescriptor } from "@lingui/core";
 import { i18n } from "@lingui/core";
 import { Trans } from "@lingui/react/macro";
 import { Role } from "@/types/types";
 
-export const ROLE_TRANSLATIONS: Record<Role, any> = {
+export const ROLE_TRANSLATIONS: Record<Role, MessageDescriptor> = {
 	ORG_ADMIN: msg`Org Admin`,
 	SUPPORT_AGENT: msg`Support Agent`,
 	SUPER_ADMIN: msg`Super Admin`,
@@ -24,8 +25,21 @@ const navItems = [
 	},
 	{ icon: "users", label: msg`Team`, page: "team" },
 	{ icon: "chart-bar", label: msg`Analytics`, page: "analytics" },
+	{
+		icon: "layout-dashboard",
+		label: msg`Overview`,
+		page: "admin",
+		superAdminOnly: true,
+	},
+	{
+		icon: "building-skyscraper",
+		label: msg`Organizations`,
+		page: "organizations",
+		superAdminOnly: true,
+	},
 	// { icon: "code", label: msg({ message: "API & Widget" }), page: "api" },
 	{ icon: "settings", label: msg`Settings`, page: "settings" },
+	{ icon: "plug", label: msg`API Tools`, page: "tools" },
 	{ icon: "user-circle", label: msg`Profile`, page: "profile" },
 ];
 
@@ -40,19 +54,20 @@ export function Sidebar({
 	currentPage,
 	onNavigate,
 	collapsed,
-	onToggle,
+	onToggle: _onToggle,
 }: SidebarProps) {
 	const { user, logout } = useAuth();
 	const initials = user
 		? `${user.firstName?.[0]}${user.lastName?.[0]}`.toUpperCase()
 		: "U";
+	const isSuperAdmin = String(user?.role).toUpperCase() === Role.SUPER_ADMIN;
 
 	return (
 		<div
 			style={{
 				width: collapsed ? 64 : 220,
 				minWidth: collapsed ? 64 : 220,
-				background: S.dark,
+				background: "var(--sidebar-bg)",
 				display: "flex",
 				flexDirection: "column",
 				transition: "width .2s, min-width .2s",
@@ -66,7 +81,7 @@ export function Sidebar({
 					alignItems: "center",
 					gap: 10,
 					padding: "1.25rem 1rem 1rem",
-					borderBottom: "0.5px solid rgba(255,255,255,0.08)",
+					borderBottom: "0.5px solid var(--sidebar-border)",
 					minWidth: 0,
 				}}
 			>
@@ -74,7 +89,7 @@ export function Sidebar({
 					style={{
 						width: 32,
 						height: 32,
-						background: S.purple,
+						background: "var(--color-brand)",
 						borderRadius: 8,
 						display: "flex",
 						alignItems: "center",
@@ -91,7 +106,7 @@ export function Sidebar({
 					<div style={{ minWidth: 0 }}>
 						<div
 							style={{
-								color: "#fff",
+								color: "var(--sidebar-text-active)",
 								fontSize: 13,
 								fontWeight: 600,
 								whiteSpace: "nowrap",
@@ -101,7 +116,7 @@ export function Sidebar({
 						</div>
 						<div
 							style={{
-								color: "rgba(255,255,255,0.35)",
+								color: "var(--sidebar-text)",
 								fontSize: 10,
 								whiteSpace: "nowrap",
 								overflow: "hidden",
@@ -124,7 +139,16 @@ export function Sidebar({
 					gap: 2,
 				}}
 			>
-				{navItems.map((item) => {
+				{navItems
+					.filter((item) => {
+						if (isSuperAdmin) {
+							// For Super Admin, only show Admin, Organizations, and Profile
+							return ["admin", "organizations", "profile"].includes(item.page);
+						}
+						// For others, show everything EXCEPT Admin
+						return !item.superAdminOnly;
+					})
+					.map((item) => {
 					const isActive = currentPage === item.page;
 					return (
 						<button
@@ -178,7 +202,7 @@ export function Sidebar({
 					<button
 						style={{
 							width: "100%",
-							background: S.purple,
+							background: "var(--color-brand)",
 							border: "none",
 							borderRadius: 8,
 							color: "#fff",
@@ -226,7 +250,7 @@ export function Sidebar({
 								width: 28,
 								height: 28,
 								borderRadius: "50%",
-								background: S.purple,
+								background: "var(--color-brand)",
 								display: "flex",
 								alignItems: "center",
 								justifyContent: "center",
@@ -243,7 +267,7 @@ export function Sidebar({
 								style={{
 									fontSize: 12,
 									fontWeight: 500,
-									color: "rgba(255,255,255,0.85)",
+									color: "var(--sidebar-text-active)",
 									whiteSpace: "nowrap",
 									overflow: "hidden",
 									textOverflow: "ellipsis",
@@ -254,7 +278,7 @@ export function Sidebar({
 							<div
 								style={{
 									fontSize: 10,
-									color: "rgba(255,255,255,0.35)",
+									color: "var(--sidebar-text)",
 									whiteSpace: "nowrap",
 									overflow: "hidden",
 									textOverflow: "ellipsis",
@@ -277,7 +301,7 @@ export function Sidebar({
 						cursor: "pointer",
 						border: "none",
 						background: "transparent",
-						color: "rgba(255,255,255,0.35)",
+						color: "var(--sidebar-text)",
 						fontFamily: "inherit",
 						fontSize: 12,
 						justifyContent: collapsed ? "center" : "flex-start",

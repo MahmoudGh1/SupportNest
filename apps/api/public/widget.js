@@ -4,7 +4,11 @@
 	const CUSTOMER_TOKEN = config.customerToken || null;
 	const currentScript = document.currentScript;
 	const WIDGET_KEY = currentScript?.dataset?.widgetKey;
+<<<<<<< HEAD
 	const BASE_URL = currentScript?.dataset?.baseUrl ?? "http://localhost:3002";
+=======
+	const BASE_URL = currentScript?.dataset?.baseUrl ?? "https://api-production-e60c.up.railway.app";
+>>>>>>> 9c430a9f219751b3ece3b15c12488c0f8b1f8d9f
 
 	if (!WIDGET_KEY) {
 		console.error("[SupportNest] No apiKey found in window.SupportNestConfig");
@@ -19,7 +23,10 @@
 	let isSending = false;
 	let isAuthenticated = false;
 	let isExpanded = false;
+<<<<<<< HEAD
 	let conversationId = null;
+=======
+>>>>>>> 9c430a9f219751b3ece3b15c12488c0f8b1f8d9f
 
 	function getOrCreateVisitorId() {
 		var key = "sn_visitor_id";
@@ -730,7 +737,7 @@
             </svg>
           </button>
         </div>
-        <div id="sn-footer">Powered by <a href="http://localhost:3000" target="_blank" tabindex="-1">SupportNest</a></div>
+        <div id="sn-footer">Powered by <a href="https://supportnest.up.railway.app" target="_blank" tabindex="-1">SupportNest</a></div>
       </div>
     `;
 		var backdrop = document.createElement("div");
@@ -755,10 +762,7 @@
 	// ── 8. APPLY SERVER CONFIG ─────────────────────────────────────────────────
 	function applyWidgetConfig() {
 		if (widgetConfig.accentColor) {
-			document.documentElement.style.setProperty(
-				"--sn-accent",
-				widgetConfig.accentColor,
-			);
+			document.documentElement.style.setProperty("--sn-accent", widgetConfig.accentColor);
 		}
 		var titleEl = document.getElementById("sn-header-title");
 		if (titleEl && widgetConfig.title)

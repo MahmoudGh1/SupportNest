@@ -14,7 +14,7 @@ type FormState = { name: string; email: string; company: string; message: string
 const INITIAL_FORM: FormState = { name: "", email: "", company: "", message: "" }
 
 const INPUT_CLS =
-  "w-full box-border px-3.5 py-2.5 text-sm border-[1.5px] border-[#e8e6f0] rounded-lg outline-none font-[inherit] text-[#1a1830] bg-white transition-colors duration-150 focus:border-[#534AB7]"
+  "w-full box-border px-3.5 py-2.5 text-sm border-[1.5px] border-border rounded-lg outline-none font-[inherit] sn-page-text bg-surface transition-colors duration-150 focus:border-brand"
 
 export default function Contact() {
   const { ref, visible } = useInView()
@@ -33,20 +33,20 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="py-[90px] px-[5%] bg-[#f6f5fc]">
+    <section id="contact" className="py-[90px] px-[5%]" style={{ background: "var(--surface-elevated)" }}>
       <div className="max-w-[1100px] mx-auto">
         {/* Heading */}
         <div className="text-center mb-13">
-          <div className="inline-block bg-[#EEEDFE] text-[#534AB7] text-xs font-bold px-3.5 py-1 rounded-full tracking-[.08em] uppercase mb-4">
+          <div className="inline-block bg-brand-faint text-brand text-xs font-bold px-3.5 py-1 rounded-full tracking-[.08em] uppercase mb-4">
             Get in touch
           </div>
           <h2
-            className="font-extrabold text-[#1a1830] tracking-[-0.025em] mb-3 mt-0"
+            className="font-extrabold sn-page-text tracking-[-0.025em] mb-3 mt-0"
             style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)" }}
           >
             We'd love to hear from you
           </h2>
-          <p className="text-base text-[#64607a]">
+          <p className="text-base sn-muted">
             Questions, demos, or custom enterprise plans — we reply within 24 hours.
           </p>
         </div>

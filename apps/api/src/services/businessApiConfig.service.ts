@@ -65,8 +65,7 @@ export async function getApiConfigService(organizationId: string) {
 			isVerified: true,
 			lastVerifiedAt: true,
 			createdAt: true,
-			updatedAt: true,
-			// authValue intentionally excluded
+			updatedAt: true
 		},
 	});
 
@@ -79,13 +78,17 @@ export async function verifyApiConfigService(organizationId: string) {
 		where: { organizationId },
 	});
 
-	if (!config) throw new AppError("No API config found. Save your config first.", 404);
+	if (!config)
+		throw new AppError("No API config found. Save your config first.", 404);
 
 	let authValue: string;
 	try {
 		authValue = decrypt(config.authValue);
 	} catch {
-		throw new AppError("Stored auth token is corrupted. Please re-save your config.", 500);
+		throw new AppError(
+			"Stored auth token is corrupted. Please re-save your config.",
+			500,
+		);
 	}
 
 	const headers: Record<string, string> = {
@@ -102,7 +105,9 @@ export async function verifyApiConfigService(organizationId: string) {
 		headers["Authorization"] = `Basic ${encoded}`;
 	}
 
-	const urlToTest = config.testEndpoint ? `${config.baseUrl.replace(/\/$/, "")}/${config.testEndpoint.replace(/^\//, "")}` : config.baseUrl;
+	const urlToTest = config.testEndpoint
+		? `${config.baseUrl.replace(/\/$/, "")}/${config.testEndpoint.replace(/^\//, "")}`
+		: config.baseUrl;
 
 	let isVerified = false;
 	let verificationError: string | null = null;
@@ -126,7 +131,8 @@ export async function verifyApiConfigService(organizationId: string) {
 		}
 	} catch (err: any) {
 		if (err.name === "AbortError") {
-			verificationError = "Request timed out after 8 seconds. Check your base URL is correct and your server is reachable.";
+			verificationError =
+				"Request timed out after 8 seconds. Check your base URL is correct and your server is reachable.";
 		} else {
 			verificationError = `Could not reach your API: ${err.message}`;
 		}
@@ -137,7 +143,8 @@ export async function verifyApiConfigService(organizationId: string) {
 		data: { isVerified, lastVerifiedAt: new Date() },
 	});
 
-	if (!isVerified) throw new AppError(verificationError ?? "Verification failed", 400);
+	if (!isVerified)
+		throw new AppError(verificationError ?? "Verification failed", 400);
 
 	return {
 		isVerified: true,

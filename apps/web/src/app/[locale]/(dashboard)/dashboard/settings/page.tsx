@@ -7,11 +7,10 @@ import {
 	WidgetConfig,
 	UpdateProfileInput,
 	UpdatePasswordInput,
-	UpdateWidgetConfigInput,
 } from "@/types/types";
 import { S } from "@/components/ui";
-import { updateWidgetConfig } from "@/app/[locale]/apis/widget_config";
 import { api } from "@/lib/api";
+import { useAuth } from "@/context/auth-context";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 const fieldStyle = (
@@ -22,13 +21,13 @@ const fieldStyle = (
 	boxSizing: "border-box",
 	height: 40,
 	padding: "0 12px",
-	border: `1.5px solid ${error ? "#E24B4A" : focused ? S.purple : S.border}`,
+	border: `1.5px solid ${error ? S.danger : focused ? S.purple : S.border}`,
 	borderRadius: 8,
 	fontSize: 13,
 	fontFamily: "inherit",
 	color: S.dark,
 	outline: "none",
-	background: "#fafafa",
+	background: "var(--surface)",
 	transition: "border-color .15s",
 });
 
@@ -246,12 +245,12 @@ function ProfileTab({ user }: { user: UserProfile }) {
 		setPwForm((f) => ({ ...f, [k]: v }));
 
 	const initials =
-		`${form.first_name[0] ?? ""}${form.last_name[0] ?? ""}`.toUpperCase();
+		`${form.first_name?.[0] ?? ""}${form.last_name?.[0] ?? ""}`.toUpperCase();
 
 	const roleLabel: Record<string, string> = {
 		org_admin: "Admin",
 		support_agent: "Support Agent",
-		super_admin: "Super Admin",
+		SUPER_ADMIN: "Super Admin",
 	};
 
 	// Password strength
@@ -289,8 +288,12 @@ function ProfileTab({ user }: { user: UserProfile }) {
 		try {
 			await api.updateUserProfile(form);
 			setToast("Profile saved.");
-		} catch (err: any) {
-			setToast("Error: " + err.message);
+		} catch (err) {
+			if (err instanceof Error) {
+				setToast("Error: " + err.message);
+			} else {
+				setToast("An unexpected error occurred.");
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -317,8 +320,12 @@ function ProfileTab({ user }: { user: UserProfile }) {
 			await api.updatePassword(pwForm);
 			setPwForm({ current_password: "", new_password: "" });
 			setToast("Password updated.");
-		} catch (err: any) {
-			setToast("Error: " + err.message);
+		} catch (err) {
+			if (err instanceof Error) {
+				setToast("Error: " + err.message);
+			} else {
+				setToast("An unexpected error occurred.");
+			}
 		} finally {
 			setPwLoading(false);
 		}
@@ -648,19 +655,29 @@ function OrgTab({ org }: { org: OrgProfile }) {
 		setErrors({});
 		setLoading(true);
 		try {
-			// Save org profile + widget config in parallel
-			await Promise.all([
-				// api.updateOrgProfile({ name, email }),
-				updateWidgetConfig({
-					title: widget.title, // ← map your fields
+			const [orgResult, widgetResult] = await Promise.all([
+				api.updateOrgProfile({ name, email }),
+				api.updateWidgetConfig({
+					title: widget.title ?? "Support",
 					greetingMessage: widget.greeting,
 					accentColor: widget.color,
 					placeholder: "Type a message...",
 				}),
 			]);
+			const merged = {
+				...orgResult.organization,
+				widget_config: widgetResult.organization.widget_config,
+			};
+			setName(merged.name);
+			setEmail(merged.email);
+			setWidget(merged.widget_config);
 			setToast("Organization settings saved.");
-		} catch (err: any) {
-			setToast("Error: " + err.message);
+		} catch (err) {
+			if (err instanceof Error) {
+				setToast("Error: " + err.message);
+			} else {
+				setToast("An unexpected error occurred.");
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -850,9 +867,9 @@ function OrgTab({ org }: { org: OrgProfile }) {
 								}}
 								onFocus={(e) => (e.target.style.borderColor = S.purple)}
 								onBlur={(e) =>
-									(e.target.style.borderColor = errors.title
-										? "#E24B4A"
-										: S.border)
+								(e.target.style.borderColor = errors.title
+									? "#E24B4A"
+									: S.border)
 								}
 							/>
 							{errors.title && (
@@ -910,9 +927,9 @@ function OrgTab({ org }: { org: OrgProfile }) {
 								}}
 								onFocus={(e) => (e.target.style.borderColor = S.purple)}
 								onBlur={(e) =>
-									(e.target.style.borderColor = errors.greeting
-										? "#E24B4A"
-										: S.border)
+								(e.target.style.borderColor = errors.greeting
+									? "#E24B4A"
+									: S.border)
 								}
 							/>
 							{errors.greeting && (
@@ -1133,22 +1150,28 @@ function OrgTab({ org }: { org: OrgProfile }) {
 }
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
-type Tab = "profile" | "organization";
+type Tab = "organization";
 
 export default function SettingsPage() {
-	const [tab, setTab] = useState<Tab>("profile");
-	const [user, setUser] = useState<UserProfile | null>(null);
+	const { user } = useAuth();
+	const [tab, setTab] = useState<Tab>("organization");
 	const [org, setOrg] = useState<OrgProfile | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		Promise.all([api.getUserProfile(), api.getOrgProfile()])
-			.then(([u, o]) => {
-				setUser(u.user);
+		if (user?.role === "SUPER_ADMIN") {
+			setLoading(false);
+			return;
+		}
+		api.getOrgProfile()
+			.then((o) => {
 				setOrg(o.organization);
 			})
+			.catch((err) => {
+				console.error("Failed to load org profile:", err);
+			})
 			.finally(() => setLoading(false));
-	}, []);
+	}, [user]);
 
 	if (loading) {
 		return (
@@ -1171,7 +1194,6 @@ export default function SettingsPage() {
 	}
 
 	const tabs: { key: Tab; label: string; icon: string }[] = [
-		{ key: "profile", label: "Profile", icon: "user" },
 		{ key: "organization", label: "Organization", icon: "building" },
 	];
 
@@ -1196,7 +1218,7 @@ export default function SettingsPage() {
 						Settings
 					</h1>
 					<p style={{ fontSize: 13, color: S.textMuted, margin: 0 }}>
-						Manage your profile, security, and widget configuration.
+						Manage your organization details and widget configuration.
 					</p>
 				</div>
 
@@ -1251,7 +1273,6 @@ export default function SettingsPage() {
 					style={{ animation: "fadeIn .2s ease" }}
 					key={tab}
 				>
-					{tab === "profile" && user && <ProfileTab user={user} />}
 					{tab === "organization" && org && <OrgTab org={org} />}
 				</div>
 			</div>

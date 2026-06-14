@@ -79,6 +79,82 @@ type PipelineResult = {
 	};
 };
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const fakeAIService = async (conversationId: string, organizationId: string, messageContent: string, conversationHistory: Message[]): Promise<PipelineResult> => {
+	await sleep(2000);
+
+	return {
+		responseText: `AI response for "${messageContent}"`,
+		action: AgentAction.RESOLVED,
+		tier: MessageTier.TIER1,
+		agentLog: {
+			tier: AgentTier.TIER1,
+			confidenceScore: 0.91,
+			latencyMs: 2000,
+			tokensUsed: 150,
+		},
+	};
+};
+/******************************/
+export const sendMessage: RequestHandler = asyncHandler(async (req: AuthenticatedWidgetRequest, res: Response) => {
+	const apiKeyRecord = req.apiKey;
+
+	const conversation = await prisma.conversation.findUnique({
+		where: {
+			id: req.params.id as string,
+		},
+	});
+	if (!conversation) {
+		throw new AppError("conversation not found", 400);
+	}
+
+	if (!apiKeyRecord || conversation.apiKeyId !== apiKeyRecord.id) {
+		throw new AppError("conversation doesn't belong to the current organization");
+	}
+
+	if (conversation.conversationStatus === ConversationStatus.CLOSED) {
+		throw new AppError("conversation is already closed");
+	}
+
+	const customerMessage = await prisma.message.create({
+		data: {
+			conversationId: conversation.id,
+			role: MessageRole.CUSTOMER,
+			content: req.body.content,
+		},
+	});
+
+	const conversationHistory = await prisma.message.findMany({
+		where: {
+			conversationId: conversation.id,
+		},
+	});
+
+	const aiResponse = await askTier0Agent(customerMessage.content, conversation.organizationId, conversation.id, conversationHistory);
+	const aiMessage = await prisma.message.create({
+		data: {
+			conversationId: conversation.id,
+			role: MessageRole.AI,
+			content: aiResponse.responseText,
+			tier: AgentTier.TIER1,
+		},
+	});
+
+	await prisma.agentLog.create({
+		data: {
+			conversationId: conversation.id,
+			tier: aiResponse.agentLog.tier,
+			action: aiResponse.action,
+			input: customerMessage.content,
+			output: aiResponse.responseText,
+			confidenceScore: aiResponse.agentLog.confidenceScore,
+			latencyMs: aiResponse.agentLog.latencyMs,
+			tokensUsed: aiResponse.agentLog.tokensUsed,
+		},
+	});
+
+	/* If action is escalated_to_human: 
 export const sendMessage: RequestHandler = asyncHandler(
 	async (req: AuthenticatedWidgetRequest, res: Response) => {
 		// const apiKeyRecord = req.apiKey;
@@ -129,15 +205,13 @@ export const getMessages: RequestHandler = asyncHandler(
 		const { id: conversationId } = req.params;
 		const apiKeyRecord = req.apiKey;
 
+
 		const conversation = await prisma.conversation.findUnique({
 			where: { id: conversationId as string },
 			select: { id: true, organizationId: true },
 		});
 
-		if (
-			!conversation ||
-			conversation.organizationId !== apiKeyRecord?.organizationId
-		) {
+		if (!conversation) {
 			throw new AppError("conversation not found", 404);
 		}
 

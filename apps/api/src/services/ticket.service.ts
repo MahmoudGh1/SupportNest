@@ -37,9 +37,6 @@ export async function createTicket(
     where: { id: conversationId },
     select: { id: true, organizationId: true, conversationStatus: true },
   });
- // ADD THIS LINE TEMPORARILY
-  console.log("conversation.organizationId:", conversation?.organizationId);
-  console.log("req.user.orgId:", orgId);
   
   if (!conversation) {
     throw new AppError("Conversation not found.", 404);
