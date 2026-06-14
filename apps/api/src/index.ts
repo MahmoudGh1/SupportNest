@@ -73,6 +73,7 @@ const publicDir = path.resolve(process.cwd(), "public");
 app.use(express.static(publicDir));
 app.use(rateLimit);
 app.get("/health", (_, res) => res.json({ ok: true }));
+app.use("/api/v1", knowledgeRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
@@ -102,6 +103,6 @@ const Server = createServer(app);
 const wss = new WebSocketServer({ server: Server, path: "/widget/ws" });
 setupWebSocket(wss);
 
-Server.listen(PORT, Number("0.0.0.0"), () => {
+Server.listen(Number(PORT), "0.0.0.0", () => {
 	console.log("Server is running on port:", PORT);
 });

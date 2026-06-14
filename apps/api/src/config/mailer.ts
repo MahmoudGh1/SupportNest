@@ -4,17 +4,25 @@ if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
 	throw new Error("GMAIL_USER and GMAIL_APP_PASSWORD must be set");
 }
 
-export const transporter = nodemailer.createTransport({
-	service: "gmail",
-	auth: {
-		user: process.env.GMAIL_USER,
-		pass: process.env.GMAIL_APP_PASSWORD,
-	},
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  family: 4,
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
 });
+
+transporter.verify()
+  .then(() => console.log("SMTP READY"))
+  .catch(err => console.error("SMTP ERROR", err));
 
 export async function sendInvitationEmail(toEmail: string, businessName: string, inviterName: string, token: string): Promise<void> {
 	const inviteUrl = `${process.env.FRONTEND_URL}/accept-invite?token=${token}`;
 
+	console.log("BEFORE SEND");
 	await transporter.sendMail({
 		from: `"SupportNest" <${process.env.GMAIL_USER}>`,
 		to: toEmail,
@@ -31,9 +39,11 @@ export async function sendInvitationEmail(toEmail: string, businessName: string,
       </div>
     `,
 	});
+	console.log("AFTER SEND");
 }
 
 export async function sendRevocationEmail(toEmail: string, businessName: string): Promise<void> {
+	console.log("BEFORE SEND REVOKE");
 	await transporter.sendMail({
 		from: `"SupportNest" <${process.env.GMAIL_USER}>`,
 		to: toEmail,
@@ -46,4 +56,5 @@ export async function sendRevocationEmail(toEmail: string, businessName: string)
           </div>
         `,
 	});
+	console.log("AFTER SEND REVOKE");
 }

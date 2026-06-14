@@ -12,11 +12,11 @@ allowBuilds:
   unrs-resolver: true
   node-base64: false
   msgpackr-extract: false
-  '@google/genai': true
+  "@google/genai": true
   protobufjs: true
-  '@prisma/client': false
-  '@parcel/watcher': true
-  '@swc/core': true
-  '@scarf/scarf': true
+  "@prisma/client": false
+  "@parcel/watcher": true
+  "@swc/core": true
+  "@scarf/scarf": true
 
 preferWorkspacePackages: true
