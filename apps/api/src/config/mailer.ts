@@ -4,14 +4,15 @@ if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
 	throw new Error("GMAIL_USER and GMAIL_APP_PASSWORD must be set");
 }
 
-export const transporter = nodemailer.createTransport({
-	host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
-	auth: {
-		user: process.env.GMAIL_USER,
-		pass: process.env.GMAIL_APP_PASSWORD,
-	},
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  family: 4,
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
 });
 
 transporter.verify()
