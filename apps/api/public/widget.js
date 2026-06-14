@@ -725,7 +725,7 @@
             </svg>
           </button>
         </div>
-        <div id="sn-footer">Powered by <a href="https://web-production-71c60.up.railway.app" target="_blank" tabindex="-1">SupportNest</a></div>
+        <div id="sn-footer">Powered by <a href="https://supportnest.up.railway.app" target="_blank" tabindex="-1">SupportNest</a></div>
       </div>
     `;
 		var backdrop = document.createElement("div");
