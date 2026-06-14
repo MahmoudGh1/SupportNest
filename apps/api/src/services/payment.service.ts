@@ -104,7 +104,7 @@ export const createPaymentIntentionService = async ({
 	});
 
 	if (!pricing) throw new AppError("Pricing plan not found", 404);
-
+	console.log("here");
 	// 3. Create intention on Paymob
 	const response = await fetch(`${PAYMOB_API_BASE}/intention/`, {
 		method: "POST",
