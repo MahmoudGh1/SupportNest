@@ -5,12 +5,18 @@ if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
 }
 
 export const transporter = nodemailer.createTransport({
-	service: "gmail",
+	host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
 	auth: {
 		user: process.env.GMAIL_USER,
 		pass: process.env.GMAIL_APP_PASSWORD,
 	},
 });
+
+transporter.verify()
+  .then(() => console.log("SMTP READY"))
+  .catch(err => console.error("SMTP ERROR", err));
 
 export async function sendInvitationEmail(toEmail: string, businessName: string, inviterName: string, token: string): Promise<void> {
 	const inviteUrl = `${process.env.FRONTEND_URL}/accept-invite?token=${token}`;
