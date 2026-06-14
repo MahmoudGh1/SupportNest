@@ -52,7 +52,7 @@ app.use(
 		origin: function (origin, callback) {
 			// Allow requests with no origin (like mobile apps, curl, or postman)
 			if (!origin) return callback(null, true);
-			if([ "https://your-frontend.vercel.app", "http://localhost:3000" ].includes(origin)){
+			if([ "https://api-production-e60c.up.railway.app", "http://localhost:3000" ].includes(origin)){
 				callback(null, true)
 			}
 			else{
