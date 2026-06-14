@@ -23,6 +23,22 @@ const ticketSelect = {
   resolvedAt:     true,
   createdAt:      true,
   updatedAt:      true,
+  conversation: {
+    select: {
+      id: true,
+      conversationStatus: true,
+      createdAt: true,
+      messages: {
+        orderBy: { createdAt: "asc" as const },
+        select: {
+          id:        true,
+          role:      true,
+          content:   true,
+          createdAt: true,
+        },
+      },
+    },
+  },
 } as const;
 
 // ─── CREATE TICKET ────────────────────────────────────────────────────────────

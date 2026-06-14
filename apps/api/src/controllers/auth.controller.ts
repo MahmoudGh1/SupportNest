@@ -14,8 +14,8 @@ function setAuthCookies(res: Response, tokenPayload: TokenPayload) {
 }
 
 function clearAuthCookies(res: Response) {
-	res.clearCookie("accessToken");
-	res.clearCookie("refreshToken");
+  res.clearCookie("accessToken", accessCookieOptions);
+  res.clearCookie("refreshToken", refreshCookieOptions);
 }
 
 function toTokenPayload(user: { id: string; email: string; role: string; organizationId: string | null }): TokenPayload {
