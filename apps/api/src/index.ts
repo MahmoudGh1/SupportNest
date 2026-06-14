@@ -45,6 +45,7 @@ app.use(
 	}),
 );
 
+
 app.use(
 	cors({
 		// Dynamically sets the header to match whoever is making the request
