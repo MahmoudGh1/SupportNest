@@ -27,7 +27,6 @@ export const apiKeyController: RequestHandler = async (req: AuthenticatedRequest
 		return res.status(201).json(result.rawKey);
 	} catch (error: any) {
 		if (error.status) return res.status(error.status).json({ error: error.message });
-		console.error(error);
 		return res.status(500).json({ error: "Internal server error" });
 	}
 };
@@ -50,7 +49,6 @@ export const listApiKeysController = async (req: AuthenticatedRequest, res: Resp
 		return res.status(200).json(keys);
 	} catch (error: any) {
 		if (error.status) return res.status(error.status).json({ error: error.message });
-		console.error(error);
 		return res.status(500).json({ error: "Internal server error" });
 	}
 };
@@ -77,7 +75,6 @@ export const revokeApiKeyController = async (req: AuthenticatedRequest, res: Res
 		return res.status(200).json(result);
 	} catch (error: any) {
 		if (error.status) return res.status(error.status).json({ error: error.message });
-		console.error(error);
 		return res.status(500).json({ error: "Internal server error" });
 	}
 };

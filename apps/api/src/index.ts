@@ -24,15 +24,16 @@ import invitationRouter from "./routes/invitation.routes.js";
 import businessApiConfigRouter from "./routes/businessApiConfig.routes.js";
 import ticketRouter from "./routes/ticket.routes.js";
 import userRouter from "./routes/user.routes.js";
+import pricingRouter from "./routes/pricing.routes.js";
+import { swaggerUi, swaggerSpec } from "./docs/swagger.js";
 import knowledgeRouter from "./routes/knowledge.routes.js";
 import tier2Router from "./routes/tier2.routes.js";
 import reportRouter from "./routes/reporter.routes.js";
 import AdminRoutes from "./routes/admin-dashboard.routes.js";
-import analyticsRouter from "./routes/analytics.routes.js";
 
 const app = express();
+app.set("trust proxy", 1);
 const PORT = process.env.PORT || 3001;
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
@@ -50,8 +51,16 @@ app.use(
 		origin: function (origin, callback) {
 			// Allow requests with no origin (like mobile apps, curl, or postman)
 			if (!origin) return callback(null, true);
-
-			callback(null, true);
+			if (
+				[
+					"https://supportnest.up.railway.app",
+					"http://localhost:3000",
+				].includes(origin)
+			) {
+				callback(null, true);
+			} else {
+				callback(null, true);
+			}
 		},
 		credentials: true,
 	}),
@@ -62,23 +71,23 @@ app.use(morgan("dev"));
 const publicDir = path.resolve(process.cwd(), "public");
 // console.log("[static] serving from:", publicDir);
 app.use(express.static(publicDir));
-
 app.use(rateLimit);
 app.get("/health", (_, res) => res.json({ ok: true }));
 app.use("/api/v1", knowledgeRouter);
-app.use("/api/v1/analytics", analyticsRouter);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/rag", ragRouter);
 app.use("/api/v1/dashboard/apikey", ApiKeyRouter);
 app.use("/api/v1/widget", WidgetRouter);
+app.use("/api/v1/organizations/api-config", businessApiConfigRouter);
 app.use("/api/v1/organizations", OrganizationRoutes);
 app.use("/api/v1/reports", reportRouter);
 
 app.use("/api/v1/widget/conversations", conversationsRoutes);
-app.use("/api/v1/organizations/api-config", businessApiConfigRouter);
 
 app.use("/api/v1/payments", paymentRoutes);
+app.use("/api/v1/pricing", pricingRouter);
 app.use("/api/v1/invitations", invitationRouter);
 app.use("/api/v1/tickets", ticketRouter);
 
@@ -94,6 +103,6 @@ const Server = createServer(app);
 const wss = new WebSocketServer({ server: Server, path: "/widget/ws" });
 setupWebSocket(wss);
 
-Server.listen(PORT, () => {
+Server.listen(Number(PORT), "0.0.0.0", () => {
 	console.log("Server is running on port:", PORT);
 });

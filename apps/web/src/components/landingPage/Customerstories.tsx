@@ -30,15 +30,15 @@ export default function CustomerStories() {
   const { ref, visible } = useInView()
 
   return (
-    <section id="testimonials" className="py-[90px] px-[5%] bg-white">
+    <section id="testimonials" className="py-[90px] px-[5%]" style={{ background: "var(--page-bg)" }}>
       <div className="max-w-[1100px] mx-auto">
         {/* Heading */}
         <div className="text-center mb-13">
-          <div className="inline-block bg-[#EEEDFE] text-[#534AB7] text-xs font-bold px-3.5 py-1 rounded-full tracking-[.08em] uppercase mb-4">
+          <div className="inline-block bg-brand-faint text-brand text-xs font-bold px-3.5 py-1 rounded-full tracking-[.08em] uppercase mb-4">
             Customer stories
           </div>
           <h2
-            className="font-extrabold text-[#1a1830] tracking-[-0.025em] m-0"
+            className="font-extrabold sn-page-text tracking-[-0.025em] m-0"
             style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)" }}
           >
             Teams love SupportNest
@@ -50,7 +50,7 @@ export default function CustomerStories() {
           {TESTIMONIALS.map((t, i) => (
             <div
               key={t.name}
-              className="bg-[#f6f5fc] border-[1.5px] border-[#e8e6f0] rounded-2xl px-6 py-7"
+              className="sn-surface border border-brand-mid/20 rounded-2xl px-6 py-7"
               style={{
                 opacity:    visible ? 1 : 0,
                 transform:  visible ? "translateY(0)" : "translateY(22px)",
@@ -60,11 +60,11 @@ export default function CustomerStories() {
               {/* Stars */}
               <div className="flex gap-[3px] mb-4">
                 {[...Array(5)].map((_, j) => (
-                  <i key={j} className="ti ti-star-filled text-sm text-[#F59E0B]" />
+                  <i key={j} className="ti ti-star-filled text-sm text-warning" />
                 ))}
               </div>
 
-              <p className="text-sm text-[#3d3a55] leading-[1.7] mt-0 mb-5 italic">
+              <p className="text-sm sn-muted leading-[1.7] mt-0 mb-5 italic">
                 &ldquo;{t.quote}&rdquo;
               </p>
 
@@ -77,8 +77,8 @@ export default function CustomerStories() {
                   {t.initials}
                 </div>
                 <div>
-                  <div className="text-[13px] font-bold text-[#1a1830]">{t.name}</div>
-                  <div className="text-xs text-[#64607a]">{t.role}</div>
+                  <div className="text-[13px] font-bold sn-page-text">{t.name}</div>
+                  <div className="text-xs sn-muted">{t.role}</div>
                 </div>
               </div>
             </div>

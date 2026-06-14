@@ -3,14 +3,21 @@ import type { AuthenticatedRequest } from "src/types/auth.types.js";
 import prisma from "src/config/prisma.js";
 import AppError from "src/utils/appError.js";
 import asyncHandler from "src/utils/asyncHandler.js";
+import type { UuidFilter } from "generated/prisma/commonInputTypes.js";
 
 export const getToolsByDocument: RequestHandler = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
 	const { documentId } = req.params;
 	const organizationId = req.user?.organizationId;
 
 	const document = await prisma.knowledgeDocument.findUnique({
-		where: { id: documentId },
-		select: { organizationId: true, title: true, toolCount: true, activeToolCount: true, disabledToolCount: true },
+		where: { id: documentId as string },
+		select: {
+			organizationId: true,
+			title: true,
+			toolCount: true,
+			activeToolCount: true,
+			disabledToolCount: true,
+		},
 	});
 
 	if (!document || document.organizationId !== organizationId) {
@@ -18,7 +25,7 @@ export const getToolsByDocument: RequestHandler = asyncHandler(async (req: Authe
 	}
 
 	const tools = await prisma.toolDefinition.findMany({
-		where: { documentId },
+		where: { documentId: documentId as string },
 		orderBy: { createdAt: "asc" },
 		select: {
 			id: true,
@@ -50,8 +57,10 @@ export const toggleTool: RequestHandler = asyncHandler(async (req: Authenticated
 
 	const tool = await prisma.toolDefinition.findUnique({
 		where: { id: toolId },
-		include: { document: true },
+		include: { knowledge_documents: true },
 	});
+
+	console.log(tool)
 
 	if (!tool || tool.organizationId !== organizationId) {
 		throw new AppError("Tool not found", 404);
@@ -94,6 +103,29 @@ export const getActiveToolsForOrg: RequestHandler = asyncHandler(async (req: Aut
 	const tools = await prisma.toolDefinition.findMany({
 		where: { organizationId, isActive: true },
 		orderBy: { createdAt: "asc" },
+	});
+
+	res.status(200).json({ tools });
+});
+
+export const getAllToolsForOrg: RequestHandler = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+	const organizationId = req.user?.organizationId as string | UuidFilter<"ToolDefinition">;
+
+	const tools = await prisma.toolDefinition.findMany({
+		where: { organizationId },
+		orderBy: [{ isActive: "desc" }, { createdAt: "asc" }],
+		select: {
+			id: true,
+			name: true,
+			description: true,
+			method: true,
+			path: true,
+			isActive: true,
+			createdAt: true,
+			knowledge_documents: {
+				select: { title: true, type: true },
+			},
+		},
 	});
 
 	res.status(200).json({ tools });

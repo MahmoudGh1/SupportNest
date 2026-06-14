@@ -1,15 +1,9 @@
 import type { Request, Response } from "express";
-import {
-	createPaymentIntentionService,
-	getPaymentHistoryService,
-	handleWebhookService,
-} from "src/services/payment.service.js";
+import { completeCheckoutService, confirmPaymentService, createPaymentIntentionService, getPaymentHistoryService, handleWebhookService } from "src/services/payment.service.js";
 import type { AuthenticatedRequest } from "src/types/auth.types.js";
+import AppError from "src/utils/appError.js";
 
-export const createPaymentIntentionController = async (
-	req: AuthenticatedRequest,
-	res: Response,
-) => {
+export const createPaymentIntentionController = async (req: AuthenticatedRequest, res: Response) => {
 	try {
 		const organizationId = req.user?.organizationId;
 		const { pricingId, amountCents, currency, billingData } = req.body;
@@ -27,9 +21,36 @@ export const createPaymentIntentionController = async (
 		});
 
 		return res.status(201).json(result);
-	} catch (error: any) {
-		if (error.status)
-			return res.status(error.status).json({ error: error.message });
+	} catch (error: unknown) {
+		if (error instanceof AppError) {
+			return res.status(error.statusCode).json({ error: error.message });
+		}
+		return res.status(500).json({ error: "Internal server error" });
+	}
+};
+
+export const completeCheckoutController = async (req: AuthenticatedRequest, res: Response) => {
+	try {
+		const organizationId = req.user?.organizationId;
+		const { pricingId, amount, currency, isAnnual } = req.body;
+
+		if (!organizationId || !pricingId || amount == null) {
+			return res.status(400).json({ error: "Missing required fields" });
+		}
+
+		const result = await completeCheckoutService({
+			organizationId,
+			pricingId,
+			amount: Number(amount),
+			currency: currency || "EGP",
+			isAnnual: Boolean(isAnnual),
+		});
+
+		return res.status(200).json(result);
+	} catch (error: unknown) {
+		if (error instanceof AppError) {
+			return res.status(error.statusCode).json({ error: error.message });
+		}
 		return res.status(500).json({ error: "Internal server error" });
 	}
 };
@@ -50,17 +71,28 @@ export const handleWebhookController = async (req: Request, res: Response) => {
 	}
 };
 
-export const getPaymentHistoryController = async (
-	req: AuthenticatedRequest,
-	res: Response,
-) => {
+export const getPaymentHistoryController = async (req: AuthenticatedRequest, res: Response) => {
 	try {
 		const organizationId = req.user?.organizationId;
 		const payments = await getPaymentHistoryService(organizationId as string);
 		return res.status(200).json(payments);
-	} catch (error: any) {
-		if (error.status)
-			return res.status(error.status).json({ error: error.message });
+	} catch (error: unknown) {
+		if (error instanceof AppError) {
+			return res.status(error.statusCode).json({ error: error.message });
+		}
 		return res.status(500).json({ error: "Internal server error" });
 	}
 };
+
+export async function confirmPaymentController(req: Request, res: Response) {
+	try {
+		const { paymentId } = req.body;
+		const result = await confirmPaymentService(paymentId);
+		return res.json(result);
+	} catch (err: any) {
+		if (err.message === "PAYMENT_NOT_FOUND") {
+			return res.status(404).json({ error: "Payment not found" });
+		}
+		return res.status(500).json({ error: "Failed to confirm payment" });
+	}
+}

@@ -13,10 +13,10 @@ const Header = ({
 }) => {
 	const statsItems = useMemo<StatsItemProps[]>(
 		() => [
-			{ label: t`Total`, value: stats.total, color: S.dark },
-			{ label: t`Ready`, value: stats.ready, color: S.green },
-			{ label: t`Processing`, value: stats.processing, color: "#4F46E5" },
-			{ label: t`Failed`, value: stats.failed, color: S.danger },
+			{ label: t`Total`, value: stats.total, color: "var(--page-text)" },
+			{ label: t`Ready`, value: stats.ready, color: "var(--color-success)" },
+			{ label: t`Processing`, value: stats.processing, color: "var(--color-info)" },
+			{ label: t`Failed`, value: stats.failed, color: "var(--color-danger)" },
 		],
 		[stats],
 	);
@@ -28,13 +28,13 @@ const Header = ({
 					style={{
 						fontSize: 18,
 						fontWeight: 600,
-						color: S.dark,
+						color: "var(--page-text)",
 						margin: "0 0 4px",
 					}}
 				>
 					<Trans>Knowledge Base</Trans>
 				</h1>
-				<p style={{ fontSize: 13, color: S.textMuted, margin: 0 }}>
+				<p style={{ fontSize: 13, color: "var(--page-muted)", margin: 0 }}>
 					<Trans>
 						Documents your AI pipeline uses to answer customer questions.
 					</Trans>

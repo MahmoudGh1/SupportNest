@@ -285,6 +285,7 @@ export async function runRouter(
 		};
 	}
 
+	console.log(validatedRoutingDecision);
 	// -- phase 2: tier call + review loop
 
 	let currentTier = routingDecision as Exclude<
@@ -292,7 +293,6 @@ export async function runRouter(
 		"HUMAN"
 	>;
 	const MAX_ATTEMPTS = 3; // tier0 -> tier1 -> tier2 -> human
-
 	for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
 		// Call the current tier
 
@@ -313,16 +313,20 @@ export async function runRouter(
 
 		// -- phase 3: Review Decision
 
+		const toolResultsSummary = tierResponse.toolResults?.join("\n\n");
 		const reviewPrompt = buildReviewPrompt(
 			latestMessage,
 			tierResponse.responseText,
 			currentTier,
+			toolResultsSummary,
 		);
 
 		const reviewStart = Date.now();
 
 		const { parsed: reviewResult, tokensUsed: reviewTokens } =
 			await callRouterLLM(reviewPrompt);
+
+		console.log(reviewResult);
 
 		const reviewLatency = Date.now() - reviewStart;
 

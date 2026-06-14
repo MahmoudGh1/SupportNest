@@ -34,6 +34,7 @@ export type TierResponse = {
 		confidenceScore: number; // 0.0 - 1.0
 		tokensUsed?: number;
 	};
+	toolResults?: string[];
 };
 
 // A single message in the conversation history passed to the router
