@@ -266,6 +266,7 @@ function FormPanel() {
 							}
 						}}
 						onError={() => setError(t`Google sign-in failed.`)}
+						width="full"
 					/>
 
 					{/* Divider */}
