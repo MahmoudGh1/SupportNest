@@ -1,7 +1,8 @@
 "use client";
+
 import { useDebouncedCallback } from "use-debounce";
 import ApiToolsPanel from "@/features/knowledgebase/ApiToolsPanel";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { api } from "@/lib/api";
 import { KnowledgeDocument } from "@/types/types";
 import UploadPdfPanel from "@/features/knowledgebase/UploadPdfPanel";
@@ -11,18 +12,17 @@ import Loading from "@/features/knowledgebase/Loading";
 import ProcessingNotice from "@/features/knowledgebase/ProcessingNotice";
 import Header from "@/features/knowledgebase/Header";
 import Toast from "@/features/knowledgebase/Toast";
-// import { useSearchParams } from "next/navigation";
-// import { useRouter } from "next/router";
 import { useUrlFilters } from "@/hooks/use-url-filters";
 import DocumentFilter from "@/features/knowledgebase/DocumentFilter";
-// import { useLingui } from "@lingui/react/macro";
 
-// ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function KnowledgePage() {
-	// const { i18n } = useLingui();
 	const { searchParams, updateFilters } = useUrlFilters();
 
 	const [docs, setDocs] = useState<KnowledgeDocument[]>([]);
+	const [pageLoading, setPageLoading] = useState(true);
+	const [deleteTarget, setDeleteTarget] = useState<KnowledgeDocument | null>(null);
+	const [deleteLoading, setDeleteLoading] = useState(false);
+	const [toast, setToast] = useState("");
 
 	const [filterState, setFilterState] = useState({
 		title: searchParams.get("title") ?? "",
@@ -33,6 +33,7 @@ export default function KnowledgePage() {
 		limit: Number(searchParams.get("limit")) || 10,
 	});
 	const [searchInput, setSearchInput] = useState(filterState.title);
+
 	const debouncedTitleUpdate = useDebouncedCallback((value: string) => {
 		setFilterState((prev) => ({ ...prev, title: value, page: 1 }));
 		updateFilters("title", value);
@@ -40,20 +41,15 @@ export default function KnowledgePage() {
 	}, 400);
 
 	// ── Stats ──────────────────────────────────────────────────────────────────
-	const total = docs.length;
-	const ready = docs.filter((d) => d.status === "READY").length;
-	const processing = docs.filter((d) => d.status === "PROCESSING").length;
-	const failed = docs.filter((d) => d.status === "FAILED").length;
-
-	const [pageLoading, setPageLoading] = useState(true);
-	const [deleteTarget, setDeleteTarget] = useState<KnowledgeDocument | null>(
-		null,
-	);
-	const [deleteLoading, setDeleteLoading] = useState(false);
-	const [toast, setToast] = useState("");
+	const stats = useMemo(() => {
+		const total = docs.length;
+		const ready = docs.filter((d) => d.status === "READY").length;
+		const processing = docs.filter((d) => d.status === "PROCESSING").length;
+		const failed = docs.filter((d) => d.status === "FAILED").length;
+		return { total, ready, processing, failed };
+	}, [docs]);
 
 	// ── Fetch ──────────────────────────────────────────────────────────────────
-	 
 	const fetchDocs = useCallback(async () => {
 		const data = await api.getKnowledgeDocs(filterState);
 		const documents = data ? data.data.documents : [];
@@ -64,7 +60,7 @@ export default function KnowledgePage() {
 		fetchDocs().finally(() => setPageLoading(false));
 	}, [filterState.title, filterState.type, filterState.page, filterState.limit, fetchDocs]);
 
-	// ── Polling: only runs while any doc is "processing" ──────────────────────
+	// ── Polling ────────────────────────────────────────────────────────────────
 	useEffect(() => {
 		const hasProcessing = docs.some((d) => d.status === "PROCESSING");
 		if (!hasProcessing) return;
@@ -74,15 +70,13 @@ export default function KnowledgePage() {
 		}, 3000);
 
 		return () => clearInterval(timer);
-	}, [processing > 0, fetchDocs]);
+	}, [docs, fetchDocs]);
 
-	// ── Toast helper ───────────────────────────────────────────────────────────
 	const showToast = (msg: string) => {
 		setToast(msg);
 		setTimeout(() => setToast(""), 3000);
 	};
 
-	// ── Handlers ───────────────────────────────────────────────────────────────
 	const handleUploaded = () => {
 		fetchDocs();
 		showToast("Document added — processing started.");
@@ -103,35 +97,63 @@ export default function KnowledgePage() {
 		}
 	};
 
-
-
 	if (pageLoading) {
 		return <Loading />;
 	}
 
 	return (
 		<>
+			{/* Force Child Component Themes via Scoped Global Overrides */}
 			<style>{`
-      @keyframes spin { to { transform: rotate(360deg) } }
-      @keyframes fadeIn { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
-      .kb-row:hover { background: #fafafa !important; }
-      .kb-del-btn { opacity: 0 !important; transition: opacity .15s; }
-      .kb-row:hover .kb-del-btn { opacity: 1 !important; }
-    `}</style>
-			<div style={{ padding: "1.5rem", maxWidth: 1200, margin: "0 auto" }}>
-				<KnowledgePage.Header stats={{ total, ready, processing, failed }} />
+				@keyframes spin { to { transform: rotate(360deg) } }
+				@keyframes fadeIn { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+				
+				.kb-row:hover { background-color: var(--row-hover-bg, #fafafa) !important; }
+				.kb-del-btn { opacity: 0 !important; transition: opacity .15s; }
+				.kb-row:hover .kb-del-btn { opacity: 1 !important; }
 
-				{/* Two-column upload section */}
-				<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 24 }}>
+				/* Target Dark Mode Classes injected by theme-context.tsx */
+				html.dark .kb-row:hover {
+					--row-hover-bg: #1f1f23 !important;
+				}
+
+				/* ── FIXES FOR REVEALED ISSUES IN THE IMAGE ── */
+				/* Fix 1: Force the right container panel to look like the left card in dark mode */
+				html.dark .kb-panel-container > div,
+				html.dark [style*="background: white"],
+				html.dark [style*="background-color: white"],
+				html.dark .bg-white {
+					background-color: #14142b !important; 
+					color: #f4f4f6 !important;
+					border-color: #222240 !important;
+				}
+
+				/* Fix 2: Repair Input Field Backgrounds & Placeholder Text visibility */
+				html.dark input, 
+				html.dark textarea {
+					background-color: #0b0b1a !important;
+					color: #ffffff !important;
+					border: 1px solid #2d2d4d !important;
+				}
+				html.dark input::placeholder {
+					color: #71717a !important;
+				}
+			`}</style>
+
+			<div className="mx-auto max-w-[1200px] p-4 sm:p-6 text-zinc-900 dark:text-zinc-100 bg-transparent transition-colors duration-200">
+				<KnowledgePage.Header stats={stats} />
+
+				{/* Enhanced responsive grid wrapper with hook className */}
+				<div className="kb-panel-container grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
 					<UploadPdfPanel onUploaded={handleUploaded} />
 					<ApiToolsPanel onToolsExtracted={handleUploaded} />
 				</div>
 
 				<div className="mt-6">
-					{processing > 0 && <ProcessingNotice processing={processing} />}
+					{stats.processing > 0 && <ProcessingNotice processing={stats.processing} />}
 				</div>
 
-				<div className="mt-6">
+				<div className="mt-6 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 sm:p-6 shadow-sm">
 					<DocumentFilter
 						title={searchInput}
 						type={filterState.type}
@@ -145,11 +167,13 @@ export default function KnowledgePage() {
 							updateFilters("page", null);
 						}}
 					/>
-					<DocumentList
-						docs={docs}
-						handleDelete={handleDelete}
-						setDeleteTarget={setDeleteTarget}
-					/>
+					<div className="mt-4 overflow-x-auto">
+						<DocumentList
+							docs={docs}
+							handleDelete={handleDelete}
+							setDeleteTarget={setDeleteTarget}
+						/>
+					</div>
 				</div>
 			</div>
 
