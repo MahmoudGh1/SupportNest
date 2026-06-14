@@ -1,3 +1,10 @@
+/**
+ * Admin organization controller.
+ *
+ * This controller exposes REST endpoints used by the admin dashboard to manage
+ * organizations, inspect organization-level and global metrics, and delete
+ * completed conversations safely.
+ */
 import type { Response } from "express";
 
 import {
@@ -9,6 +16,10 @@ import {
   buildTicketStats,
   buildCsatSummary,
   buildRecentEscalations,
+  deleteConversationService,
+  getOrgConversationsService,
+  getConversationByIdService,
+  deleteOrganizationService,
 } from "../../services/admin-dashboard/organization.service.js";
 import {
   parsePagination,
@@ -21,6 +32,12 @@ import { parseDateRange } from "../../utils/helpers.js";
 import type { AuthenticatedRequest } from "src/types/auth.types.js";
 import prisma from "src/config/prisma.js";
 
+/**
+ * Normalize a URL/query parameter value to a single string.
+ *
+ * This helper accepts string, string array, or object values and returns the
+ * first string value when available.
+ */
 function getStringParam(
   value: string | string[] | Record<string, unknown> | undefined,
 ): string | undefined {
@@ -31,7 +48,11 @@ function getStringParam(
   return undefined;
 }
 
-// GET /admin/overview
+/**
+ * GET /admin/overview
+ *
+ * Return the overall global admin dashboard overview metrics.
+ */
 export async function getOverview(
   req: AuthenticatedRequest,
   res: Response,
@@ -40,7 +61,11 @@ export async function getOverview(
   res.json(overview);
 }
 
-// GET /admin/organizations
+/**
+ * GET /admin/organizations
+ *
+ * List organizations with pagination, optional search, and optional active-state filter.
+ */
 export async function getOrganizations(
   req: AuthenticatedRequest,
   res: Response,
@@ -71,7 +96,11 @@ export async function getOrganizations(
   res.json(buildPaginatedResponse(data, total, page, limit));
 }
 
-// GET /admin/organizations/:orgId
+/**
+ * GET /admin/organizations/:orgId
+ *
+ * Return detailed organization data for the specified organization id.
+ */
 export async function getOrganization(
   req: AuthenticatedRequest,
   res: Response,
@@ -89,7 +118,11 @@ export async function getOrganization(
   res.json(detail);
 }
 
-// POST /admin/organizations
+/**
+ * POST /admin/organizations
+ *
+ * Create a new organization, validating required fields and slug uniqueness.
+ */
 export async function createOrganization(
   req: AuthenticatedRequest,
   res: Response,
@@ -149,7 +182,11 @@ export async function createOrganization(
   });
 }
 
-// PATCH /admin/organizations/:orgId
+/**
+ * PATCH /admin/organizations/:orgId
+ *
+ * Update allowed organization fields for the specified organization id.
+ */
 export async function updateOrganization(
   req: AuthenticatedRequest,
   res: Response,
@@ -209,7 +246,11 @@ export async function updateOrganization(
   });
 }
 
-// PATCH /admin/organizations/:orgId/suspend
+/**
+ * PATCH /admin/organizations/:orgId/suspend
+ *
+ * Suspend an organization by setting its active flag to false.
+ */
 export async function suspendOrganization(
   req: AuthenticatedRequest,
   res: Response,
@@ -232,7 +273,11 @@ export async function suspendOrganization(
   res.json({ message: "Organization suspended." });
 }
 
-// PATCH /admin/organizations/:orgId/activate
+/**
+ * PATCH /admin/organizations/:orgId/activate
+ *
+ * Reactivate an organization by setting its active flag to true.
+ */
 export async function activateOrganization(
   req: AuthenticatedRequest,
   res: Response,
@@ -255,7 +300,42 @@ export async function activateOrganization(
   res.json({ message: "Organization activated." });
 }
 
-// GET /admin/organizations/:orgId/tier-stats
+export async function deleteOrganization(
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> {
+  const { orgId } = req.params;
+
+  const result = await deleteOrganizationService(orgId as string);
+
+  if ("error" in result) {
+    switch (result.error) {
+      case "ORG_NOT_FOUND":
+        notFound(res, "Organization");
+        return;
+      case "ORG_HAS_ACTIVE_CONVERSATIONS":
+        sendError(
+          res,
+          400,
+          "ORG_HAS_ACTIVE_CONVERSATIONS",
+          "Cannot delete an organization with active conversations. Close them first.",
+        );
+        return;
+    }
+  }
+
+  res.json({
+    message: "Organization and all related data deleted successfully.",
+    deleted: {
+      organization_id: result.organization_id,
+    },
+  });
+}
+/**
+ * GET /admin/organizations/:orgId/tier-stats
+ *
+ * Retrieve tier-level metrics for a specific organization, with optional date filtering.
+ */
 export async function getOrgTierStats(
   req: AuthenticatedRequest,
   res: Response,
@@ -281,7 +361,11 @@ export async function getOrgTierStats(
   res.json(stats);
 }
 
-// GET /admin/organizations/:orgId/conversation-stats
+/**
+ * GET /admin/organizations/:orgId/conversation-stats
+ *
+ * Return conversation metrics for a specific organization, with optional date filtering.
+ */
 export async function getOrgConversationStats(
   req: AuthenticatedRequest,
   res: Response,
@@ -307,7 +391,11 @@ export async function getOrgConversationStats(
   res.json(stats);
 }
 
-// GET /admin/organizations/:orgId/ticket-stats
+/**
+ * GET /admin/organizations/:orgId/ticket-stats
+ *
+ * Retrieve ticket statistics for a specific organization, with optional date filtering.
+ */
 export async function getOrgTicketStats(
   req: AuthenticatedRequest,
   res: Response,
@@ -333,7 +421,11 @@ export async function getOrgTicketStats(
   res.json(stats);
 }
 
-// GET /admin/organizations/:orgId/csat
+/**
+ * GET /admin/organizations/:orgId/csat
+ *
+ * Return customer satisfaction summary data for a specific organization.
+ */
 export async function getOrgCsat(
   req: AuthenticatedRequest,
   res: Response,
@@ -359,7 +451,11 @@ export async function getOrgCsat(
   res.json(stats);
 }
 
-// GET /admin/organizations/:orgId/escalations
+/**
+ * GET /admin/organizations/:orgId/escalations
+ *
+ * List active escalation tickets for a specific organization with pagination and optional date filtering.
+ */
 export async function getOrgEscalations(
   req: AuthenticatedRequest,
   res: Response,
@@ -428,7 +524,11 @@ export async function getOrgEscalations(
   res.json(buildPaginatedResponse(data, total, page, limit));
 }
 
-// GET /admin/tier-stats  (global)
+/**
+ * GET /admin/tier-stats
+ *
+ * Return global tier statistics across all organizations, with optional date filtering.
+ */
 export async function getGlobalTierStats(
   req: AuthenticatedRequest,
   res: Response,
@@ -442,7 +542,11 @@ export async function getGlobalTierStats(
   res.json(stats);
 }
 
-// GET /admin/escalations  (global)
+/**
+ * GET /admin/escalations
+ *
+ * List global escalation tickets with pagination, filtering by priority/status/date.
+ */
 export async function getGlobalEscalations(
   req: AuthenticatedRequest,
   res: Response,
@@ -496,4 +600,89 @@ export async function getGlobalEscalations(
   }));
 
   res.json(buildPaginatedResponse(data, total, page, limit));
+}
+
+export async function getOrgConversations(
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> {
+  const { orgId } = req.params;
+
+  const result = await getOrgConversationsService(orgId as string);
+
+  if ("error" in result) {
+    notFound(res, "Organization");
+    return;
+  }
+
+  res.json({ data: result.data, total: result.total });
+}
+
+export async function getConversationById(
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> {
+  const { orgId, conversationId } = req.params;
+
+  const result = await getConversationByIdService(
+    orgId as string,
+    conversationId as string,
+  );
+
+  if ("error" in result) {
+    switch (result.error) {
+      case "ORG_NOT_FOUND":
+        notFound(res, "Organization");
+        return;
+      case "CONVERSATION_NOT_FOUND":
+        notFound(res, "Conversation");
+        return;
+    }
+  }
+
+  res.json(result.data);
+}
+
+/**
+ * DELETE /admin/organizations/:orgId/conversations/:conversationId
+ *
+ * Delete a completed conversation and its related records for the specified organization.
+ */
+export async function deleteConversation(
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> {
+  const { orgId, conversationId } = req.params;
+
+  const result = await deleteConversationService(
+    orgId as string,
+    conversationId as string,
+  );
+
+  if ("error" in result) {
+    switch (result.error) {
+      case "ORG_NOT_FOUND":
+        notFound(res, "Organization");
+        return;
+      case "CONVERSATION_NOT_FOUND":
+        notFound(res, "Conversation");
+        return;
+      case "CONVERSATION_STILL_ACTIVE":
+        sendError(
+          res,
+          400,
+          "CONVERSATION_STILL_ACTIVE",
+          "Cannot delete an active conversation. Close it first.",
+        );
+        return;
+    }
+  }
+
+  res.json({
+    message: "Conversation and all related data deleted successfully.",
+    deleted: {
+      conversation_id: result.conversation_id,
+      organization_id: result.organization_id,
+    },
+  });
 }
