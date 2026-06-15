@@ -7,6 +7,7 @@ export interface AuthUser {
 	role: Role;
 	organizationId: string | null;
 	organizationName?: string;
+	token?: string;
 	onboarded: boolean;
 	hasActiveSubscription?: boolean;
 	currentPlanId?: string | null;

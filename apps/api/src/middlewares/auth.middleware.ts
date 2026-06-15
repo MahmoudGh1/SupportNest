@@ -3,7 +3,11 @@ import { verifyAccessToken } from "../utils/jwt.util.js";
 import type { AuthenticatedRequest } from "../types/auth.types.js";
 import { AuthError } from "../utils/appError.js";
 
-export function authMiddleware(req: AuthenticatedRequest, _res: Response, next: NextFunction): void {
+export function authMiddleware(
+	req: AuthenticatedRequest,
+	_res: Response,
+	next: NextFunction,
+): void {
 	const cookieToken = req.cookies["accessToken"];
 
 	if (!cookieToken) {
@@ -12,6 +16,7 @@ export function authMiddleware(req: AuthenticatedRequest, _res: Response, next: 
 
 	try {
 		const payload = verifyAccessToken(cookieToken);
+		console.log(payload);
 		req.user = payload;
 		next();
 	} catch (error) {

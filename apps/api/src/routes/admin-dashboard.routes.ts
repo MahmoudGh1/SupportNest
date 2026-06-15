@@ -1,3 +1,10 @@
+/**
+ * Admin dashboard route definitions.
+ *
+ * This router exposes protected admin endpoints for platform overview,
+ * organization management, org-scoped metrics, and escalation tracking.
+ * All routes require authentication and SUPER_ADMIN authorization.
+ */
 import { Router } from "express";
 
 // Controllers
@@ -16,6 +23,10 @@ import {
   getOrgEscalations,
   getGlobalTierStats,
   getGlobalEscalations,
+  deleteConversation,
+  getOrgConversations,
+  getConversationById,
+  deleteOrganization,
 } from "../controllers/admin-dashboard/admin.organizations.controller.js";
 
 import {
@@ -35,19 +46,11 @@ const router: Router = Router();
 router.use(authMiddleware);
 router.use(adminMiddleware("SUPER_ADMIN"));
 
-// ─────────────────────────────────────────────────────────────────────────────
-// OVERVIEW  (super admin only)
-// ─────────────────────────────────────────────────────────────────────────────
-
 /**
  * GET /admin/overview
  * Global platform metrics: org counts, conversations, tickets, AI resolution rate, CSAT
  */
 router.get("/overview", getOverview);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// GLOBAL TIER STATS & ESCALATIONS  (super admin only)
-// ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * GET /admin/tier-stats
@@ -62,10 +65,6 @@ router.get("/tier-stats", getGlobalTierStats);
  * Query: ?priority=high&status=open&from=...&to=...&page=1&limit=20
  */
 router.get("/escalations", getGlobalEscalations);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ORGANIZATIONS
-// ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * GET /admin/organizations
@@ -97,6 +96,7 @@ router.get("/organizations/:organizationId", getOrganization);
  */
 router.patch("/organizations/:organizationId", updateOrganization);
 
+router.delete("/organizations/:orgId", deleteOrganization);
 /**
  * PATCH /admin/organizations/:organizationId/suspend
  * Suspend org (sets is_active = false)
@@ -111,10 +111,6 @@ router.patch("/organizations/:organizationId/suspend", suspendOrganization);
  */
 router.patch("/organizations/:organizationId/activate", activateOrganization);
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ORG-SCOPED STATS (accessible by SUPER_ADMIN and org_admin of that org)
-// ─────────────────────────────────────────────────────────────────────────────
-
 /**
  * GET /admin/organizations/:organizationId/tier-stats
  * Tier funnel, latencies, token usage for a single org
@@ -128,6 +124,13 @@ router.get("/organizations/:organizationId/tier-stats", getOrgTierStats);
  * Query: ?from=...&to=...
  */
 router.get("/organizations/:organizationId/conversation-stats", getOrgConversationStats);
+
+router.get("/organizations/:orgId/conversations", getOrgConversations);
+
+router.get(
+  "/organizations/:orgId/conversations/:conversationId",
+  getConversationById,
+);
 
 /**
  * GET /admin/organizations/:organizationId/ticket-stats
@@ -149,10 +152,6 @@ router.get("/organizations/:organizationId/csat", getOrgCsat);
  * Query: ?from=...&to=...&page=1&limit=20
  */
 router.get("/organizations/:organizationId/escalations", getOrgEscalations);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// USERS
-// ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * GET /admin/users
@@ -193,5 +192,14 @@ router.patch("/organizations/:organizationId/users/:userId", updateOrgUser);
  * Soft-delete user (deactivate + unassign open tickets)
  */
 router.delete("/organizations/:organizationId/users/:userId", removeOrgUser);
+
+/**
+ * DELETE /admin/organizations/:orgId/conversations/:conversationId
+ * Hard delete a conversation + all its messages, logs, ticket, CSAT, analytics
+ */
+router.delete(
+  "/organizations/:orgId/conversations/:conversationId",
+  deleteConversation,
+);
 
 export default router;

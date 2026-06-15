@@ -112,23 +112,19 @@ export default function KnowledgePage() {
 				.kb-del-btn { opacity: 0 !important; transition: opacity .15s; }
 				.kb-row:hover .kb-del-btn { opacity: 1 !important; }
 
-				/* Target Dark Mode Classes injected by theme-context.tsx */
+				/* Target Dark Mode Classes injected safely by theme-context */
 				html.dark .kb-row:hover {
 					--row-hover-bg: #1f1f23 !important;
 				}
 
-				/* ── FIXES FOR REVEALED ISSUES IN THE IMAGE ── */
-				/* Fix 1: Force the right container panel to look like the left card in dark mode */
+				/* Safely scope dark-mode overrides to NOT leak into Light Mode */
 				html.dark .kb-panel-container > div,
-				html.dark [style*="background: white"],
-				html.dark [style*="background-color: white"],
-				html.dark .bg-white {
+				html.dark .kb-custom-card {
 					background-color: #14142b !important; 
 					color: #f4f4f6 !important;
 					border-color: #222240 !important;
 				}
 
-				/* Fix 2: Repair Input Field Backgrounds & Placeholder Text visibility */
 				html.dark input, 
 				html.dark textarea {
 					background-color: #0b0b1a !important;
@@ -143,7 +139,7 @@ export default function KnowledgePage() {
 			<div className="mx-auto max-w-[1200px] p-4 sm:p-6 text-zinc-900 dark:text-zinc-100 bg-transparent transition-colors duration-200">
 				<KnowledgePage.Header stats={stats} />
 
-				{/* Enhanced responsive grid wrapper with hook className */}
+				{/* Panels Grid Setup */}
 				<div className="kb-panel-container grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
 					<UploadPdfPanel onUploaded={handleUploaded} />
 					<ApiToolsPanel onToolsExtracted={handleUploaded} />
@@ -153,7 +149,8 @@ export default function KnowledgePage() {
 					{stats.processing > 0 && <ProcessingNotice processing={stats.processing} />}
 				</div>
 
-				<div className="mt-6 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 sm:p-6 shadow-sm">
+				{/* Table Wrapper Component Card — Cleared Gray Overlay Bug */}
+				<div className="kb-custom-card mt-6 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 sm:p-6 shadow-sm">
 					<DocumentFilter
 						title={searchInput}
 						type={filterState.type}

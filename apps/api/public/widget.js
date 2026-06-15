@@ -19,6 +19,7 @@
 	let isSending = false;
 	let isAuthenticated = false;
 	let isExpanded = false;
+	let conversationId = null;
 
 	function getOrCreateVisitorId() {
 		var key = "sn_visitor_id";
@@ -51,8 +52,8 @@
 
 		ws.onmessage = function (event) {
 			try {
-				const envelope = JSON.parse(event.data);
-				handleEvent(envelope);
+				const msg = JSON.parse(event.data);
+				handleEvent(msg);
 			} catch (e) {
 				console.error("[SupportNest] Failed to parse message:", e);
 			}
@@ -60,7 +61,8 @@
 
 		ws.onclose = function () {
 			isAuthenticated = false;
-			scheduleReconnect();
+			setTimeout(connect, reconnectDelay);
+			reconnectDelay = Math.min(reconnectDelay * 2, 30000);
 		};
 
 		ws.onerror = function (err) {
@@ -85,12 +87,13 @@
 	}
 
 	// ── 4. EVENT HANDLER ───────────────────────────────────────────────────────
-	function handleEvent(envelope) {
-		const { type, payload } = envelope;
+	function handleEvent(msg) {
+		const { type, payload } = msg;
 
 		switch (type) {
 			case "auth_ack": {
 				isAuthenticated = true;
+				conversationId = payload.conversationId;
 				if (payload.widgetConfig) {
 					widgetConfig = payload.widgetConfig;
 					applyWidgetConfig();
@@ -126,7 +129,8 @@
 				appendSystemMessage("Something went wrong. Please try again.");
 				var sendBtnErr = document.getElementById("sn-send-btn");
 				var inputErr = document.getElementById("sn-input");
-				if (sendBtnErr && inputErr) sendBtnErr.disabled = !inputErr.value.trim();
+				if (sendBtnErr && inputErr)
+					sendBtnErr.disabled = !inputErr.value.trim();
 				break;
 			}
 			default:
@@ -139,7 +143,8 @@
 		if (!messages || messages.length === 0) return;
 		messages.forEach(function (msg) {
 			if (msg.role === "CUSTOMER") appendMessage("customer", msg.content);
-			else if (msg.role === "AI" || msg.role === "HUMAN_AGENT") appendMessage("ai", msg.content);
+			else if (msg.role === "AI" || msg.role === "HUMAN_AGENT")
+				appendMessage("ai", msg.content);
 		});
 	}
 
@@ -725,7 +730,7 @@
             </svg>
           </button>
         </div>
-        <div id="sn-footer">Powered by <a href="http://localhost:3000" target="_blank" tabindex="-1">SupportNest</a></div>
+        <div id="sn-footer">Powered by <a href="https://supportnest.up.railway.app" target="_blank" tabindex="-1">SupportNest</a></div>
       </div>
     `;
 		var backdrop = document.createElement("div");
@@ -733,11 +738,17 @@
 		document.body.appendChild(backdrop);
 		document.body.appendChild(panel);
 
-		document.getElementById("sn-close-btn").addEventListener("click", togglePanel);
-		document.getElementById("sn-expand-btn").addEventListener("click", toggleExpand);
-		document.getElementById("sn-backdrop").addEventListener("click", function () {
-			if (isExpanded) toggleExpand();
-		});
+		document
+			.getElementById("sn-close-btn")
+			.addEventListener("click", togglePanel);
+		document
+			.getElementById("sn-expand-btn")
+			.addEventListener("click", toggleExpand);
+		document
+			.getElementById("sn-backdrop")
+			.addEventListener("click", function () {
+				if (isExpanded) toggleExpand();
+			});
 		wireEvents();
 	}
 
@@ -747,10 +758,12 @@
 			document.documentElement.style.setProperty("--sn-accent", widgetConfig.accentColor);
 		}
 		var titleEl = document.getElementById("sn-header-title");
-		if (titleEl && widgetConfig.title) titleEl.textContent = widgetConfig.title;
+		if (titleEl && widgetConfig.title)
+			titleEl.textContent = widgetConfig.title;
 
 		var inputEl = document.getElementById("sn-input");
-		if (inputEl && widgetConfig.placeholder) inputEl.placeholder = widgetConfig.placeholder;
+		if (inputEl && widgetConfig.placeholder)
+			inputEl.placeholder = widgetConfig.placeholder;
 
 		var connectingEl = document.getElementById("sn-connecting");
 		if (connectingEl) connectingEl.classList.remove("sn-visible");
@@ -764,7 +777,8 @@
 			if (ring) {
 				ring.className = "online pulse";
 			}
-			if (subtitle) subtitle.textContent = "Online · Typically replies instantly";
+			if (subtitle)
+				subtitle.textContent = "Online · Typically replies instantly";
 		} else {
 			if (ring) ring.className = "";
 			if (subtitle) subtitle.textContent = "Connecting…";
@@ -819,7 +833,9 @@
 
 		const imageMatch = content.match(/\[IMAGE:\s*(https?:\/\/[^\]]+)\]/);
 		if (imageMatch) {
-			const textPart = content.replace(/\[IMAGE:\s*https?:\/\/[^\]]+\]/, "").trim();
+			const textPart = content
+				.replace(/\[IMAGE:\s*https?:\/\/[^\]]+\]/, "")
+				.trim();
 			if (textPart) {
 				const textNode = document.createElement("span");
 				textNode.textContent = textPart;
@@ -828,7 +844,8 @@
 			}
 			const img = document.createElement("img");
 			img.src = imageMatch[1];
-			img.style.cssText = "max-width:100%;border-radius:10px;margin-top:6px;display:block;";
+			img.style.cssText =
+				"max-width:100%;border-radius:10px;margin-top:6px;display:block;";
 			img.onerror = function () {
 				this.style.display = "none";
 				const alt = document.createElement("div");
@@ -841,7 +858,9 @@
 			bubble.textContent = content;
 		}
 		// Auto-detect RTL languages (Arabic, Hebrew, Persian, etc.)
-		if (/[\u0600-\u06FF\u0750-\u077F\u0590-\u05FF\u08A0-\u08FF]/.test(content)) {
+		if (
+			/[\u0600-\u06FF\u0750-\u077F\u0590-\u05FF\u08A0-\u08FF]/.test(content)
+		) {
 			bubble.setAttribute("dir", "rtl");
 		}
 		messages.insertBefore(bubble, typing);
@@ -913,7 +932,8 @@
 			if (dot) dot.classList.remove("sn-visible");
 			if (isAuthenticated && widgetConfig.greetingMessage) {
 				var bubbles = document.querySelectorAll(".sn-bubble");
-				if (bubbles.length === 0) appendMessage("ai", widgetConfig.greetingMessage);
+				if (bubbles.length === 0)
+					appendMessage("ai", widgetConfig.greetingMessage);
 			}
 			var input = document.getElementById("sn-input");
 			if (input && !input.disabled) input.focus();

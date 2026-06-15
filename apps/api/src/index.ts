@@ -8,6 +8,7 @@ import errorHandler from "./middlewares/errorhandler.middleware.js";
 import notFoundHandler from "./middlewares/notFoundHandler.middleware.js";
 import { rateLimit } from "./utils/rateLimiter.util.js";
 import "./workers/knowledgeWorker.js";
+import "./workers/conversationCloseWorker.js";
 import conversationsRoutes from "./routes/conversations.routes.js";
 import ApiKeyRouter from "./routes/apiKey.routes.js";
 import WidgetRouter from "./routes/widget.routes.js";
@@ -29,10 +30,10 @@ import { swaggerUi, swaggerSpec } from "./docs/swagger.js";
 import knowledgeRouter from "./routes/knowledge.routes.js";
 import tier2Router from "./routes/tier2.routes.js";
 import reportRouter from "./routes/reporter.routes.js";
-import AdminRoutes from "./routes/admin-dashboard.routes.js"
-
+import AdminRoutes from "./routes/admin-dashboard.routes.js";
 
 const app = express();
+app.set("trust proxy", 1);
 const PORT = process.env.PORT || 3001;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -51,13 +52,20 @@ app.use(
 		origin: function (origin, callback) {
 			// Allow requests with no origin (like mobile apps, curl, or postman)
 			if (!origin) return callback(null, true);
-
-			callback(null, true);
+			if (
+				[
+					"https://supportnest.up.railway.app",
+					"http://localhost:3000",
+				].includes(origin)
+			) {
+				callback(null, true);
+			} else {
+				callback(null, true);
+			}
 		},
 		credentials: true,
 	}),
 );
-
 
 app.use(morgan("dev"));
 
@@ -66,6 +74,7 @@ const publicDir = path.resolve(process.cwd(), "public");
 app.use(express.static(publicDir));
 app.use(rateLimit);
 app.get("/health", (_, res) => res.json({ ok: true }));
+app.use("/api/v1", knowledgeRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
@@ -95,6 +104,6 @@ const Server = createServer(app);
 const wss = new WebSocketServer({ server: Server, path: "/widget/ws" });
 setupWebSocket(wss);
 
-Server.listen(PORT, () => {
+Server.listen(Number(PORT), "0.0.0.0", () => {
 	console.log("Server is running on port:", PORT);
 });

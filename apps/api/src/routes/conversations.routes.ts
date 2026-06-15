@@ -5,12 +5,12 @@ import * as conversationsController from "../controllers/conversations.controlle
 import { validateApiKey } from "src/middlewares/validateApiKey.middleware.js";
 const router: Router = express.Router();
 
-router.use(authMiddleware)
-// router.use(validateApiKey);
+router.use(authMiddleware);
+router.use(validateApiKey);
 
 router.post("/", conversationsController.startConversation);
 
-router.post("/:id/messages", conversationsController.sendMessage);
+// router.post("/:id/messages", conversationsController.sendMessage);
 
 router.get("/:id/messages", conversationsController.getMessages);
 

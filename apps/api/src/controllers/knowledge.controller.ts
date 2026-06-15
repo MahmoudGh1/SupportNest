@@ -6,136 +6,154 @@ import type { Response, RequestHandler } from "express";
 import type { AuthenticatedRequest } from "src/types/auth.types.js";
 import { knowledgeQueue } from "src/queues/knowledgeQueue.js";
 import { PrismaClientKnownRequestError } from "generated/prisma/internal/prismaNamespace.js";
-import { buildFilter, buildPagination, type QueryParams } from "src/utils/filterBuilder.js";
+import {
+	buildFilter,
+	buildPagination,
+	type QueryParams,
+} from "src/utils/filterBuilder.js";
 import type { KnowledgeDocumentType } from "generated/prisma/enums.js";
 
 export const uploadDocument: RequestHandler = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user?.sub;
-    const organizationId = req.user?.organizationId;
-    const { title, type } = req.body;
-    const file = req.file;
+	async (req: AuthenticatedRequest, res: Response) => {
+		const userId = req.user?.sub;
+		const orgId = req.user?.organizationId;
+		const { title, type } = req.body;
+		const file = req.file;
 
-    if (!file) throw new AppError("No file provided", 400);
+		if (!file) throw new AppError("No file provided", 400);
 
-    const apiDocTypes = ["API_DOC", "SWAGGER_URL"];
+		const apiDocTypes = ["API_DOC", "SWAGGER_URL"];
 
-    if (apiDocTypes.includes(type)) {
-      const apiConfig = await prisma.businessApiConfig.findUnique({
-        where: { organizationId: organizationId as string },
-      });
-      if (!apiConfig || !apiConfig.isVerified) {
-        throw new AppError(
-          "You must configure and verify your API connection before uploading API documentation.",
-          400,
-        );
-      }
-    }
+		if (apiDocTypes.includes(type)) {
+			const apiConfig = await prisma.businessApiConfig.findUnique({
+				where: { organizationId: orgId as string },
+			});
+			if (!apiConfig || !apiConfig.isVerified) {
+				throw new AppError(
+					"You must configure and verify your API connection before uploading API documentation.",
+					400,
+				);
+			}
+		}
 
-    const storagePath = await uploadToCloudinary(
-      file.buffer,
-      `supportnest/${organizationId}/knowledge`,
-      `${Date.now()}-${title}`,
-    );
+		const storagePath = await uploadToCloudinary(
+			file.buffer,
+			`supportnest/${orgId}/knowledge`,
+			`${Date.now()}-${title}`,
+		);
 
-    const doc = await prisma.knowledgeDocument.create({
-      data: {
-        organizationId: organizationId as string,
-        title,
-        type,
-        storagePath,
-        status: "PROCESSING",
-        createdById: userId as string,
-      },
-    });
+		const doc = await prisma.knowledgeDocument.create({
+			data: {
+				organizationId: orgId as string,
+				title,
+				type,
+				storagePath,
+				status: "PROCESSING",
+				createdById: userId as string,
+			},
+		});
 
-    await knowledgeQueue.add("process-document", {
-      documentId: doc.id,
-      fileUrl: storagePath,
-      organizationId,
-    });
-
-    res.status(202).json({ documentId: doc.id, status: "PROCESSING" });
-  },
+		// 3. Queue chunking + embedding job in BullMQ
+		await knowledgeQueue.add("process-document", {
+			documentId: doc.id,
+			fileUrl: storagePath,
+			orgId,
+		});
+	},
 );
 
 export const getKnowledgeDocuments: RequestHandler = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
-    const organizationId = req.user?.organizationId;
-    const organization = await prisma.organization.findUnique({
-      where: { id: organizationId as string },
-    });
+	async (req: AuthenticatedRequest, res: Response) => {
+		const orgId = req.user?.organizationId;
+		const organization = await prisma.organization.findUnique({
+			where: { id: orgId as string },
+		});
 
-    if (!organization) throw new AppError("organization not found", 404);
+		if (!organization) throw new AppError("organization not found", 404);
 
-    const filter = buildFilter(req.query);
-    const { page, limit, skip } = buildPagination(req.query as QueryParams);
+		const filter = buildFilter(req.query);
+		const { page, limit, skip } = buildPagination(req.query as QueryParams);
 
-    const baseWhere = { organizationId: organization.id, ...filter };
+		const baseWhere = { organizationId: organization.id, ...filter };
 
-    const [total, documents] = await Promise.all([
-      prisma.knowledgeDocument.count({ where: baseWhere }),
-      prisma.knowledgeDocument.findMany({
-        where: baseWhere,
-        skip,
-        take: limit,
-        orderBy: { createdAt: "desc" },
-      }),
-    ]);
+		const [total, documents] = await Promise.all([
+			prisma.knowledgeDocument.count({ where: baseWhere }),
+			prisma.knowledgeDocument.findMany({
+				where: baseWhere,
+				skip,
+				take: limit,
+				orderBy: { createdAt: "desc" },
+			}),
+		]);
 
-    const totalPages = Math.ceil(total / limit);
+		const totalPages = Math.ceil(total / limit);
 
-    res.status(200).json({
-      success: true,
-      message: "documents fetched successfully",
-      data: { documents },
-      metadata: { total, page, limit, totalPages, hasNextPage: page < totalPages, hasPrevPage: page > 1 },
-    });
-  },
+		res.status(200).json({
+			success: true,
+			message: "documents fetched successfully",
+			data: { documents },
+			metadata: {
+				total,
+				page,
+				limit,
+				totalPages,
+				hasNextPage: page < totalPages,
+				hasPrevPage: page > 1,
+			},
+		});
+	},
 );
 
 export const deleteKnowledgeDocument: RequestHandler = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
-    const organizationId = req.user?.organizationId;
-    const docId = req.params.docId;
+	async (req: AuthenticatedRequest, res: Response) => {
+		const orgId = req.user?.organizationId;
+		const docId = req.params.docId;
 
-    const organization = await prisma.organization.findUnique({
-      where: { id: organizationId as string },
-      select: { id: true, isActive: true },
-    });
+		const organization = await prisma.organization.findUnique({
+			where: { id: orgId as string },
+			select: { id: true, isActive: true },
+		});
 
-    if (!organization || organization.isActive === false)
-      throw new AppError("invalid document delete operation", 400);
+		if (!organization || organization.isActive === false)
+			throw new AppError("invalid document delete operation", 400);
 
-    try {
-      await prisma.documentChunk.deleteMany({ where: { documentId: docId as string } });
+		try {
+			await prisma.documentChunk.deleteMany({
+				where: { documentId: docId as string },
+			});
 
-      const document = await prisma.knowledgeDocument.delete({
-        where: { id: docId as string, organizationId: organization.id as string },
-      });
+			const document = await prisma.knowledgeDocument.delete({
+				where: {
+					id: docId as string,
+					organizationId: organization.id as string,
+				},
+			});
 
-      return res.status(200).json({
-        success: true,
-        message: "Document deleted successfully",
-        data: document,
-      });
-    } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError && error.code === "P2025") {
-        return res.status(404).json({
-          success: false,
-          error: "Not Found",
-          message: `Knowledge Document with ID ${docId} does not exist.`,
-        });
-      }
-      throw error;
-    }
-  },
+			return res.status(200).json({
+				success: true,
+				message: "Document deleted successfully",
+				data: document,
+			});
+		} catch (error) {
+			if (
+				error instanceof PrismaClientKnownRequestError &&
+				error.code === "P2025"
+			) {
+				return res.status(404).json({
+					success: false,
+					error: "Not Found",
+					message: `Knowledge Document with ID ${docId} does not exist.`,
+				});
+			}
+			throw error;
+		}
+	},
 );
 
 export const uploadSwaggerUrl: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
 		const userId = req.user?.sub;
-		const organizationId = req.user?.organizationId;
+		const orgId = req.user?.organizationId;
 		const { title, swaggerUrl } = req.body;
 
 		if (!swaggerUrl) throw new AppError("swaggerUrl is required", 400);
@@ -147,7 +165,7 @@ export const uploadSwaggerUrl: RequestHandler = asyncHandler(
 		}
 
 		const apiConfig = await prisma.businessApiConfig.findUnique({
-			where: { organizationId: organizationId as string },
+			where: { organizationId: orgId as string },
 		});
 		if (!apiConfig || !apiConfig.isVerified) {
 			throw new AppError(
@@ -158,7 +176,7 @@ export const uploadSwaggerUrl: RequestHandler = asyncHandler(
 
 		const doc = await prisma.knowledgeDocument.create({
 			data: {
-				organizationId: organizationId as string,
+				organizationId: orgId as string,
 				title: title || swaggerUrl,
 				type: "SWAGGER_URL",
 				storagePath: swaggerUrl,
@@ -170,7 +188,7 @@ export const uploadSwaggerUrl: RequestHandler = asyncHandler(
 		await knowledgeQueue.add("process-document", {
 			documentId: doc.id,
 			fileUrl: swaggerUrl,
-			organizationId,
+			orgId,
 		});
 
 		res.status(202).json({ documentId: doc.id, status: "PROCESSING" });

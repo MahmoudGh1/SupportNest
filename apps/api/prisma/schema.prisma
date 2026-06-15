@@ -18,6 +18,8 @@ model Organization {
   isActive              Boolean                 @default(true)
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
+  isEmailVerified       Boolean                 @default(false)
+  emailVerifiedAt       DateTime?
   apiKeys               ApiKey[]
   businessApiConfig     BusinessApiConfig?
   conversationAnalytics ConversationAnalytics[]
@@ -33,6 +35,7 @@ model Organization {
   tickets               Ticket[]
   toolDefinitions       ToolDefinition[]
   users                 User[]
+  
 
   @@map("organizations")
 }
@@ -371,6 +374,16 @@ model Report {
 
   @@index([organizationId])
   @@map("reports")
+}
+
+model EmailVerification {
+    id        String   @id @default(uuid())
+    userId    String
+    email     String
+    code      String   // 6-digit code
+    expiresAt DateTime
+    createdAt DateTime @default(now())
+    user      User     @relation(fields: [userId], references: [id])
 }
 
 enum Role {

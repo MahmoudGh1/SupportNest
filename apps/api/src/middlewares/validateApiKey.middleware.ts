@@ -5,10 +5,18 @@ import { hashApiKey } from "src/utils/crypto.utils.js";
 import prisma from "src/config/prisma.js";
 import apiKey from "src/utils/apiKey.utils.js";
 import type { AuthenticatedWidgetRequest } from "src/types/apiKey.types.js";
+import type { ApiKey } from "generated/prisma/client.js";
+import AppError from "src/utils/appError.js";
 
-export const validateApiKey = async (req: AuthenticatedWidgetRequest, res: Response, next: NextFunction): Promise<void> => {
+export const validateApiKey = async (
+	req: AuthenticatedWidgetRequest,
+	res: Response,
+	next: NextFunction,
+): Promise<void> => {
 	const incomingApiKey = req.headers["x-api-key"] || req.headers["x-apikey"];
+
 	const origin = req.get("origin");
+
 	if (!incomingApiKey) {
 		res.status(401).json({ error: "API key is missing" });
 		return;
@@ -42,10 +50,13 @@ export const validateApiKey = async (req: AuthenticatedWidgetRequest, res: Respo
 			return;
 		}
 
-		// if (origin && !apiKeyRecord.allowedOrigins.includes(origin)) {
-		// 	res.status(403).json({ error: "Invalid origin" });
-		// 	return;
-		// }
+		if (
+			apiKeyRecord.allowedOrigins.length > 0 &&
+			(!origin || !apiKeyRecord.allowedOrigins.includes(origin))
+		) {
+			res.status(403).json({ error: "Origin not allowed" });
+			return;
+		}
 
 		await prisma.apiKey.update({
 			where: {
@@ -56,6 +67,10 @@ export const validateApiKey = async (req: AuthenticatedWidgetRequest, res: Respo
 			},
 		});
 
+		if (apiKeyRecord && !apiKeyRecord.organization) {
+			throw new AppError("invalid api key", 400);
+		}
+		req.organization = apiKeyRecord.organization;
 		req.apiKey = apiKeyRecord;
 
 		next();
