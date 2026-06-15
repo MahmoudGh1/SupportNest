@@ -57,7 +57,7 @@ export async function sendOrgDeletionScheduledEmail(
         <!-- Contact Us Button -->
         <div style="text-align: center; margin: 32px 0;">
           
-            <a href="mailto:support@supportnest.io"
+            <a href=${process.env.FRONTEND_URL}/contact
             style="
               background-color: #c0392b;
               color: #ffffff;
@@ -110,7 +110,7 @@ export async function sendOrgDeletionCancelledEmail(
         <!-- Contact Us Button -->
         <div style="text-align: center; margin: 32px 0;">
           
-            <a href="mailto:support@supportnest.io"
+            <a href=${process.env.FRONTEND_URL}/contact
             style="
               background-color: #1D9E75;
               color: #ffffff;
