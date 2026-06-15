@@ -12,6 +12,8 @@ import {
 	type QueryParams,
 } from "src/utils/filterBuilder.js";
 import type { KnowledgeDocumentType } from "generated/prisma/enums.js";
+import { validateFileMatchesType } from "src/utils/fileType.utils.js";
+import * as knowledgeService from "src/services/knowledge.service.js";
 
 export const uploadDocument: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
@@ -19,46 +21,18 @@ export const uploadDocument: RequestHandler = asyncHandler(
 		const orgId = req.user?.organizationId;
 		const { title, type } = req.body;
 		const file = req.file;
-
 		if (!file) throw new AppError("No file provided", 400);
+		if (!userId || !orgId) throw new AppError("invalid upload operation", 400);
 
-		const apiDocTypes = ["API_DOC", "SWAGGER_URL"];
-
-		if (apiDocTypes.includes(type)) {
-			const apiConfig = await prisma.businessApiConfig.findUnique({
-				where: { organizationId: orgId as string },
-			});
-			if (!apiConfig || !apiConfig.isVerified) {
-				throw new AppError(
-					"You must configure and verify your API connection before uploading API documentation.",
-					400,
-				);
-			}
-		}
-
-		const storagePath = await uploadToCloudinary(
-			file.buffer,
-			`supportnest/${orgId}/knowledge`,
-			`${Date.now()}-${title}`,
-		);
-
-		const doc = await prisma.knowledgeDocument.create({
-			data: {
-				organizationId: orgId as string,
-				title,
-				type,
-				storagePath,
-				status: "PROCESSING",
-				createdById: userId as string,
-			},
-		});
-
-		// 3. Queue chunking + embedding job in BullMQ
-		await knowledgeQueue.add("process-document", {
-			documentId: doc.id,
-			fileUrl: storagePath,
+		const { document, storagePath } = await knowledgeService.uploadDocument({
+			title,
+			type,
+			file,
+			userId,
 			orgId,
 		});
+
+		res.status(200).json({ success: true, data: document });
 	},
 );
 

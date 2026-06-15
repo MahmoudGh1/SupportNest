@@ -36,7 +36,7 @@ export const knowledgeWorker = new Worker(
 					document.type,
 				);
 			} else {
-				await ingestDocument(fileUrl, documentId, orgId);
+				await ingestDocument(fileUrl, documentId, orgId, document.type);
 				await prisma.knowledgeDocument.update({
 					where: { id: documentId },
 					data: { status: "READY" },
@@ -55,7 +55,12 @@ knowledgeWorker.on("completed", (job) => {
 
 knowledgeWorker.on("failed", async (job, err) => {
 	console.error(`Document ${job?.id} failed:`, err.message);
-	if (job?.data?.documentId) {
+
+	const attemptsMade = job?.attemptsMade ?? 0;
+	const maxAttempts = job?.opts?.attempts ?? 1;
+
+	if (job?.data?.documentId && attemptsMade >= maxAttempts) {
+		// only declare "FAILED" after all the attempts exhausted
 		await prisma.knowledgeDocument.update({
 			where: { id: job.data.documentId },
 			data: { status: "FAILED" },
