@@ -608,7 +608,7 @@ export default function RegisterPage() {
 
 			router.push(`/register/business?userId=${userId}`);
 		} catch (err) {
-			setError(err instanceof Error ? err.message : "Google sign-up failed");
+			setErrors(err instanceof Error ? err.message : "Google sign-up failed");
 		}
 	}
 
