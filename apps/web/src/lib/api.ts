@@ -217,7 +217,7 @@ export const api = {
 		});
 	},
 
-	async setupOrg(_data: OrgSetupData): Promise<{ orgId: string } & OrgSetupData> {
+	async setupOrg(_data: OrgSetupData): Promise<{ organizationId: string } & OrgSetupData> {
 		throw new Error("Organization setup is not available.");
 	},
 
@@ -237,8 +237,8 @@ export const api = {
 		return adminFetch<AdminOrganizationsResponse>(`/organizations${suffix}`);
 	},
 
-	async getAdminOrganization(orgId: string): Promise<AdminOrganizationDetail> {
-		return adminFetch<AdminOrganizationDetail>(`/organizations/${orgId}`);
+	async getAdminOrganization(organizationId: string): Promise<AdminOrganizationDetail> {
+		return adminFetch<AdminOrganizationDetail>(`/organizations/${organizationId}`);
 	},
 
 	async createAdminOrganization(data: { name: string; email: string; slug: string; plan_id?: string; widget_config?: Partial<WidgetConfig> }): Promise<AdminOrganization> {
@@ -249,7 +249,7 @@ export const api = {
 	},
 
 	async updateAdminOrganization(
-		orgId: string,
+		organizationId: string,
 		data: Partial<{
 			name: string;
 			email: string;
@@ -258,20 +258,20 @@ export const api = {
 			widget_config: Partial<WidgetConfig>;
 		}>,
 	): Promise<AdminOrganization> {
-		return adminFetch<AdminOrganization>(`/organizations/${orgId}`, {
+		return adminFetch<AdminOrganization>(`/organizations/${organizationId}`, {
 			method: "PATCH",
 			body: JSON.stringify(data),
 		});
 	},
 
-	async suspendAdminOrganization(orgId: string): Promise<void> {
-		return adminFetch<void>(`/organizations/${orgId}/suspend`, {
+	async suspendAdminOrganization(organizationId: string): Promise<void> {
+		return adminFetch<void>(`/organizations/${organizationId}/suspend`, {
 			method: "PATCH",
 		});
 	},
 
-	async activateAdminOrganization(orgId: string): Promise<void> {
-		return adminFetch<void>(`/organizations/${orgId}/activate`, {
+	async activateAdminOrganization(organizationId: string): Promise<void> {
+		return adminFetch<void>(`/organizations/${organizationId}/activate`, {
 			method: "PATCH",
 		});
 	},
@@ -296,46 +296,46 @@ export const api = {
 		return adminFetch<AdminEscalationsResponse>(`/escalations${suffix}`);
 	},
 
-	async getAdminOrgTierStats(orgId: string, params?: { from?: string; to?: string }): Promise<AdminTierStats> {
+	async getAdminOrgTierStats(organizationId: string, params?: { from?: string; to?: string }): Promise<AdminTierStats> {
 		const query = new URLSearchParams();
 		if (params?.from) query.set("from", params.from);
 		if (params?.to) query.set("to", params.to);
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminTierStats>(`/organizations/${orgId}/tier-stats${suffix}`);
+		return adminFetch<AdminTierStats>(`/organizations/${organizationId}/tier-stats${suffix}`);
 	},
 
-	async getAdminOrgConversationStats(orgId: string, params?: { from?: string; to?: string }): Promise<AdminConversationStats> {
+	async getAdminOrgConversationStats(organizationId: string, params?: { from?: string; to?: string }): Promise<AdminConversationStats> {
 		const query = new URLSearchParams();
 		if (params?.from) query.set("from", params.from);
 		if (params?.to) query.set("to", params.to);
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminConversationStats>(`/organizations/${orgId}/conversation-stats${suffix}`);
+		return adminFetch<AdminConversationStats>(`/organizations/${organizationId}/conversation-stats${suffix}`);
 	},
 
-	async getAdminOrgTicketStats(orgId: string, params?: { from?: string; to?: string }): Promise<AdminTicketStats> {
+	async getAdminOrgTicketStats(organizationId: string, params?: { from?: string; to?: string }): Promise<AdminTicketStats> {
 		const query = new URLSearchParams();
 		if (params?.from) query.set("from", params.from);
 		if (params?.to) query.set("to", params.to);
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminTicketStats>(`/organizations/${orgId}/ticket-stats${suffix}`);
+		return adminFetch<AdminTicketStats>(`/organizations/${organizationId}/ticket-stats${suffix}`);
 	},
 
-	async getAdminOrgCsat(orgId: string, params?: { from?: string; to?: string }): Promise<AdminCsatStats> {
+	async getAdminOrgCsat(organizationId: string, params?: { from?: string; to?: string }): Promise<AdminCsatStats> {
 		const query = new URLSearchParams();
 		if (params?.from) query.set("from", params.from);
 		if (params?.to) query.set("to", params.to);
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminCsatStats>(`/organizations/${orgId}/csat${suffix}`);
+		return adminFetch<AdminCsatStats>(`/organizations/${organizationId}/csat${suffix}`);
 	},
 
-	async getAdminOrgEscalations(orgId: string, params?: { from?: string; to?: string; page?: number; limit?: number }): Promise<AdminEscalationsResponse> {
+	async getAdminOrgEscalations(organizationId: string, params?: { from?: string; to?: string; page?: number; limit?: number }): Promise<AdminEscalationsResponse> {
 		const query = new URLSearchParams();
 		if (params?.from) query.set("from", params.from);
 		if (params?.to) query.set("to", params.to);
 		if (params?.page) query.set("page", String(params.page));
 		if (params?.limit) query.set("limit", String(params.limit));
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminEscalationsResponse>(`/organizations/${orgId}/escalations${suffix}`);
+		return adminFetch<AdminEscalationsResponse>(`/organizations/${organizationId}/escalations${suffix}`);
 	},
 
 	async getAdminAllUsers(params?: { role?: string; is_active?: boolean; search?: string; page?: number; limit?: number }): Promise<AdminUsersResponse> {
@@ -350,7 +350,7 @@ export const api = {
 	},
 
 	async getAdminOrgUsers(
-		orgId: string,
+		organizationId: string,
 		params?: {
 			role?: string;
 			is_active?: boolean;
@@ -364,15 +364,15 @@ export const api = {
 		if (params?.page) query.set("page", String(params.page));
 		if (params?.limit) query.set("limit", String(params.limit));
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminUsersResponse>(`/organizations/${orgId}/users${suffix}`);
+		return adminFetch<AdminUsersResponse>(`/organizations/${organizationId}/users${suffix}`);
 	},
 
-	async getAdminOrgUser(orgId: string, userId: string): Promise<AdminUser> {
-		return adminFetch<AdminUser>(`/organizations/${orgId}/users/${userId}`);
+	async getAdminOrgUser(organizationId: string, userId: string): Promise<AdminUser> {
+		return adminFetch<AdminUser>(`/organizations/${organizationId}/users/${userId}`);
 	},
 
 	async createAdminOrgUser(
-		orgId: string,
+		organizationId: string,
 		data: {
 			email: string;
 			password?: string;
@@ -381,14 +381,14 @@ export const api = {
 			role: string;
 		},
 	): Promise<AdminUser> {
-		return adminFetch<AdminUser>(`/organizations/${orgId}/users`, {
+		return adminFetch<AdminUser>(`/organizations/${organizationId}/users`, {
 			method: "POST",
 			body: JSON.stringify(data),
 		});
 	},
 
 	async updateAdminOrgUser(
-		orgId: string,
+		organizationId: string,
 		userId: string,
 		data: Partial<{
 			first_name: string;
@@ -397,14 +397,14 @@ export const api = {
 			is_active: boolean;
 		}>,
 	): Promise<AdminUser> {
-		return adminFetch<AdminUser>(`/organizations/${orgId}/users/${userId}`, {
+		return adminFetch<AdminUser>(`/organizations/${organizationId}/users/${userId}`, {
 			method: "PATCH",
 			body: JSON.stringify(data),
 		});
 	},
 
-	async removeAdminOrgUser(orgId: string, userId: string): Promise<void> {
-		return adminFetch<void>(`/organizations/${orgId}/users/${userId}`, {
+	async removeAdminOrgUser(organizationId: string, userId: string): Promise<void> {
+		return adminFetch<void>(`/organizations/${organizationId}/users/${userId}`, {
 			method: "DELETE",
 		});
 	},
@@ -434,7 +434,7 @@ export const api = {
 			}
 		});
 		try {
-			const response = await fetch(`${BASE_URL}/organizations/${user.orgId}/knowledge?${params.toString()}`, {
+			const response = await fetch(`${BASE_URL}/organizations/${user.organizationId}/knowledge?${params.toString()}`, {
 				credentials: "include",
 			});
 			if (!response.ok) throw new Error(response.statusText);
@@ -455,7 +455,7 @@ export const api = {
 		formData.append("title", input.title);
 		formData.append("type", "PDF");
 
-		const response = await fetch(`${BASE_URL}/organizations/${user.orgId}/knowledge`, {
+		const response = await fetch(`${BASE_URL}/organizations/${user.organizationId}/knowledge`, {
 			method: "POST",
 			body: formData,
 			credentials: "include",
@@ -474,7 +474,7 @@ export const api = {
 		if (!user) throw new Error("User not found");
 
 		try {
-			const response = await fetch(`${BASE_URL}/organizations/${user.orgId}/knowledge/${id}`, {
+			const response = await fetch(`${BASE_URL}/organizations/${user.organizationId}/knowledge/${id}`, {
 				method: "DELETE",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",
@@ -538,7 +538,7 @@ export const api = {
 	async submitSwaggerUrl(input: { title: string; swaggerUrl: string }): Promise<{ documentId: string; status: string }> {
 		const user = getSession();
 		if (!user) throw new Error("User not found");
-		const res = await fetch(`${BASE_URL}/organizations/${user.orgId}/documents/swagger`, {
+		const res = await fetch(`${BASE_URL}/organizations/${user.organizationId}/documents/swagger`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",

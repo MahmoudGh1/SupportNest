@@ -1,12 +1,12 @@
 import prisma from "src/config/prisma.js";
 
-export default async function bulkInsertChunks(chunks: { content: string; embedding: number[]; chunkIndex: number }[], documentId: string, orgId: string) {
+export default async function bulkInsertChunks(chunks: { content: string; embedding: number[]; chunkIndex: number }[], documentId: string, organizationId: string) {
 	const valueStrings = chunks.map((_, i) => `(gen_random_uuid(), $${i * 5 + 1}, $${i * 5 + 2}, $${i * 5 + 3}, $${i * 5 + 4}::vector, $${i * 5 + 5})`).join(", ");
 	/*
   "($1, $2::vector), .. ($i, $i+1::vector)"
   */
 
-	const flatValues = chunks.flatMap((chunk) => [documentId, orgId, chunk.content, `[${chunk.embedding.join(",")}]`, chunk.chunkIndex]);
+	const flatValues = chunks.flatMap((chunk) => [documentId, organizationId, chunk.content, `[${chunk.embedding.join(",")}]`, chunk.chunkIndex]);
 
 	/*
   [

@@ -156,7 +156,7 @@ function formatNumber(value: number | undefined) {
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function OrganizationsPage() {
-    const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+    const [selectedorganizationId, setSelectedorganizationId] = useState<string | null>(null);
     const [orgs, setOrgs] = useState<AdminOrganizationsResponse | null>(null);
     const [search, setSearch] = useState("");
     const [debouncedSearch] = useDebounce(search, 500);
@@ -242,7 +242,7 @@ export default function OrganizationsPage() {
                         {orgs?.data.map((org) => (
                             <tr
                                 key={org.id}
-                                onClick={() => setSelectedOrgId(org.id)}
+                                onClick={() => setSelectedorganizationId(org.id)}
                                 style={{ cursor: "pointer", transition: "background 0.1s" }}
                                 onMouseEnter={(e) => (e.currentTarget.style.background = S.bgSoft)}
                                 onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
@@ -283,10 +283,10 @@ export default function OrganizationsPage() {
 
     return (
         <div style={{ padding: "1.5rem", minWidth: 0 }}>
-            {selectedOrgId ? (
+            {selectedorganizationId ? (
                 <OrganizationDetail
-                    orgId={selectedOrgId}
-                    onClose={() => setSelectedOrgId(null)}
+                    organizationId={selectedorganizationId}
+                    onClose={() => setSelectedorganizationId(null)}
                 />
             ) : (
                 <>

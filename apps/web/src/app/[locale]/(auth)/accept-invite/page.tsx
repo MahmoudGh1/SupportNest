@@ -90,7 +90,7 @@ function FormPanel() {
     const router = useRouter();
     const token = searchParams.get("token") ?? "";
 
-    const [orgName, setOrgName] = useState("");
+    const [organizationName, setorganizationName] = useState("");
     const [email, setEmail] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
@@ -115,7 +115,7 @@ function FormPanel() {
             .then((data) => {
                 if (data.email) {
                     setEmail(data.email);
-                    setOrgName(data.organizationName ?? "");
+                    setorganizationName(data.organizationName ?? "");
                 } else {
                     setTokenError(data.message ?? "Invalid or expired invitation.");
                 }
@@ -201,7 +201,7 @@ function FormPanel() {
                     Accept Invitation
                 </h1>
                 <p style={{ fontSize: 14, color: T.muted, textAlign: "center", margin: "0 0 4px" }}>
-                    You've been invited to join <strong style={{ color: T.text }}>{orgName}</strong>
+                    You've been invited to join <strong style={{ color: T.text }}>{organizationName}</strong>
                 </p>
                 <p style={{ fontSize: 13, color: T.violetLight, textAlign: "center", margin: "0 0 32px" }}>
                     {email}

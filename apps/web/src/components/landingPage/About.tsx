@@ -4,7 +4,7 @@ import { useInView } from "@/hooks/useInView"
 
 const STATS = [
   { val: "2024", label: "Founded",             bg: "var(--color-brand-faint)", color: "var(--color-brand)" },
-  { val: "4",    label: "Core team members",   bg: "var(--color-success-bg)", color: "var(--color-success)" },
+  { val: "4",    label: "Core team members",    bg: "var(--color-success-bg)", color: "var(--color-success)" },
   { val: "80%",  label: "Avg auto-resolution", bg: "var(--color-warning-bg)", color: "var(--color-warning)" },
   { val: "24/7", label: "AI availability",     bg: "var(--color-brand-faint)", color: "var(--color-brand-dark)" },
 ]
@@ -36,17 +36,19 @@ export default function About() {
   const { ref, visible } = useInView()
 
   return (
-    <section id="about" className="py-[90px] px-[5%]" style={{ background: "var(--page-bg)" }}>
+    <section id="about" className="py-16 md:py-[90px] px-4 sm:px-[5%]" style={{ background: "var(--page-bg)" }}>
       <div className="max-w-[1100px] mx-auto">
 
         {/* Story + stats split */}
-        <div className="grid gap-16 items-center mb-[72px]" style={{ gridTemplateColumns: "1fr 1fr" }}>
+        {/* Changed from rigid 1fr 1fr inline style to a responsive Tailwind grid layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center mb-14 md:mb-[72px]">
+          
           {/* Story */}
           <div
             ref={ref}
             style={{
-              opacity:    visible ? 1 : 0,
-              transform:  visible ? "translateX(0)" : "translateX(-24px)",
+              opacity:     visible ? 1 : 0,
+              transform:   visible ? "translateX(0)" : "translateX(-24px)",
               transition: "all .6s ease",
             }}
           >
@@ -71,7 +73,8 @@ export default function About() {
           </div>
 
           {/* Stat tiles */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Modified breakpoints: stacks to 1 column on extra-small screens, grid layout elsewhere */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {STATS.map((s, i) => (
               <div
                 key={s.label}
@@ -84,7 +87,7 @@ export default function About() {
                 }}
               >
                 <div
-                  className="text-4xl font-extrabold tracking-[-0.03em] mb-1.5"
+                  className="text-3xl sm:text-4xl font-extrabold tracking-[-0.03em] mb-1.5"
                   style={{ color: s.color }}
                 >
                   {s.val}
@@ -101,14 +104,16 @@ export default function About() {
         <h3 className="text-xl font-bold sn-page-text text-center mb-8 tracking-tight">
           What we stand for
         </h3>
-        <div className="grid grid-cols-4 gap-4">
+
+        {/* Refactored Values Grid from a rigid grid-cols-4 layout to a fluid, fully adaptive matrix */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {VALUES.map((v, i) => (
             <div
               key={v.title}
               className="sn-surface border border-brand-mid/20 rounded-2xl px-5 py-6"
               style={{
-                opacity:    visible ? 1 : 0,
-                transform:  visible ? "translateY(0)" : "translateY(20px)",
+                opacity:     visible ? 1 : 0,
+                transform:   visible ? "translateY(0)" : "translateY(20px)",
                 transition: `all .5s ease ${(i * 0.1).toFixed(1)}s`,
               }}
             >

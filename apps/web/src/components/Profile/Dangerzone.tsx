@@ -16,13 +16,13 @@ export function DangerZone() {
   const router = useRouter();
 
   const expectedFullName = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
-  const expectedOrgName = user?.orgName ?? "";
+  const expectedorganizationName = user?.organizationName ?? "";
 
   const canDelete =
     nameInput.trim() === expectedFullName &&
-    orgInput.trim() === expectedOrgName &&
+    orgInput.trim() === expectedorganizationName &&
     expectedFullName !== "" &&
-    expectedOrgName !== "";
+    expectedorganizationName !== "";
 
   const handleDelete = async () => {
     if (!canDelete) return;
@@ -80,7 +80,7 @@ export function DangerZone() {
       ) : (
         <div>
           <p style={{ fontSize: 13, color: "#DC2626", margin: "0 0 10px" }}>
-            This cannot be undone. Type your full name (<strong>{expectedFullName}</strong>) and your organization's name (<strong>{expectedOrgName}</strong>) to confirm.
+            This cannot be undone. Type your full name (<strong>{expectedFullName}</strong>) and your organization's name (<strong>{expectedorganizationName}</strong>) to confirm.
           </p>
 
           <input

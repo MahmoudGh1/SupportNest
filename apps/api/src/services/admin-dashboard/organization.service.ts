@@ -139,14 +139,14 @@ const userSelect = {
 
 // ─── Build tier stats from agent_logs + conversation_analytics ────────────────
 
-async function buildTierStats(orgId?: string, dateFilter?: { gte?: Date; lte?: Date }): Promise<TierStats> {
+async function buildTierStats(organizationId?: string, dateFilter?: { gte?: Date; lte?: Date }): Promise<TierStats> {
 	const baseWhere = {
-		...(orgId ? { conversation: { is: { organizationId: orgId } } } : {}),
+		...(organizationId ? { conversation: { is: { organizationId: organizationId } } } : {}),
 		...(dateFilter ? { createdAt: dateFilter } : {}),
 	};
 
 	const analyticsWhere = {
-		...(orgId ? { organizationId: orgId } : {}),
+		...(organizationId ? { organizationId: organizationId } : {}),
 		...(dateFilter ? { createdAt: dateFilter } : {}),
 	};
 
@@ -198,16 +198,16 @@ async function buildTierStats(orgId?: string, dateFilter?: { gte?: Date; lte?: D
 
 // ─── Build conversation stats ─────────────────────────────────────────────────
 
-async function buildConversationStats(orgId?: string, dateFilter?: { gte?: Date; lte?: Date }): Promise<ConversationStats> {
+async function buildConversationStats(organizationId?: string, dateFilter?: { gte?: Date; lte?: Date }): Promise<ConversationStats> {
 	const where = {
-		...(orgId ? { organizationId: orgId } : {}),
+		...(organizationId ? { organizationId: organizationId } : {}),
 		...(dateFilter ? { createdAt: dateFilter } : {}),
 	};
 
 	const [total, active, escalated, closed] = await Promise.all([prisma.conversation.count({ where }), prisma.conversation.count({ where: { ...where, conversationStatus: "ACTIVE" } }), prisma.conversation.count({ where: { ...where, conversationStatus: "ESCALATED" } }), prisma.conversation.count({ where: { ...where, conversationStatus: "CLOSED" } })]);
 
 	const analyticsWhere = {
-		...(orgId ? { organizationId: orgId } : {}),
+		...(organizationId ? { organizationId: organizationId } : {}),
 		...(dateFilter ? { createdAt: dateFilter } : {}),
 	};
 
@@ -236,9 +236,9 @@ async function buildConversationStats(orgId?: string, dateFilter?: { gte?: Date;
 
 // ─── Build ticket stats ───────────────────────────────────────────────────────
 
-async function buildTicketStats(orgId?: string, dateFilter?: { gte?: Date; lte?: Date }): Promise<TicketStats> {
+async function buildTicketStats(organizationId?: string, dateFilter?: { gte?: Date; lte?: Date }): Promise<TicketStats> {
 	const where = {
-		...(orgId ? { organizationId: orgId } : {}),
+		...(organizationId ? { organizationId: organizationId } : {}),
 		...(dateFilter ? { createdAt: dateFilter } : {}),
 	};
 
@@ -263,9 +263,9 @@ async function buildTicketStats(orgId?: string, dateFilter?: { gte?: Date; lte?:
 
 // ─── Build CSAT summary ───────────────────────────────────────────────────────
 
-async function buildCsatSummary(orgId?: string, dateFilter?: { gte?: Date; lte?: Date }): Promise<CsatSummary> {
+async function buildCsatSummary(organizationId?: string, dateFilter?: { gte?: Date; lte?: Date }): Promise<CsatSummary> {
 	const where = {
-		...(orgId ? { organizationId: orgId } : {}),
+		...(organizationId ? { organizationId: organizationId } : {}),
 		...(dateFilter ? { createdAt: dateFilter } : {}),
 	};
 
@@ -283,11 +283,11 @@ async function buildCsatSummary(orgId?: string, dateFilter?: { gte?: Date; lte?:
 
 // ─── Build recent escalations ─────────────────────────────────────────────────
 
-async function buildRecentEscalations(orgId?: string, limit = 10): Promise<EscalationRecord[]> {
+async function buildRecentEscalations(organizationId?: string, limit = 10): Promise<EscalationRecord[]> {
 	const tickets = await prisma.ticket.findMany({
 		where: {
 			status: { in: ["OPEN", "IN_PROGRESS"] },
-			...(orgId ? { organizationId: orgId } : {}),
+			...(organizationId ? { organizationId: organizationId } : {}),
 		},
 		orderBy: { createdAt: "desc" },
 		take: limit,
@@ -348,23 +348,23 @@ export async function listOrganizations(opts: { page: number; limit: number; ski
 		prisma.organization.count({ where }),
 	]);
 
-	const orgIds = orgs.map((o) => o.id);
+	const organizationIds = orgs.map((o) => o.id);
 
 	const [activeConvCounts, openTicketCounts, escalatedTicketCounts, resolvedTicketCounts] = await Promise.all([
 		prisma.conversation.groupBy({
 			by: ["organizationId"],
-			where: { organizationId: { in: orgIds }, conversationStatus: "ACTIVE" },
+			where: { organizationId: { in: organizationIds }, conversationStatus: "ACTIVE" },
 			_count: { id: true },
 		}),
 		prisma.ticket.groupBy({
 			by: ["organizationId"],
-			where: { organizationId: { in: orgIds }, status: "OPEN" },
+			where: { organizationId: { in: organizationIds }, status: "OPEN" },
 			_count: { id: true },
 		}),
 		prisma.ticket.groupBy({
 			by: ["organizationId"],
 			where: {
-				organizationId: { in: orgIds },
+				organizationId: { in: organizationIds },
 				status: { in: ["OPEN", "IN_PROGRESS"] },
 				conversation: { conversationStatus: "ESCALATED" },
 			},
@@ -372,17 +372,17 @@ export async function listOrganizations(opts: { page: number; limit: number; ski
 		}),
 		prisma.ticket.groupBy({
 			by: ["organizationId"],
-			where: { organizationId: { in: orgIds }, status: "RESOLVED" },
+			where: { organizationId: { in: organizationIds }, status: "RESOLVED" },
 			_count: { id: true },
 		}),
 	]);
 
-	const byOrgId = <T extends { organizationId: string; _count: { id: number } }>(arr: T[]) => Object.fromEntries(arr.map((r) => [r.organizationId, r._count.id]));
+	const byorganizationId = <T extends { organizationId: string; _count: { id: number } }>(arr: T[]) => Object.fromEntries(arr.map((r) => [r.organizationId, r._count.id]));
 
-	const activeConvMap = byOrgId(activeConvCounts);
-	const openTicketMap = byOrgId(openTicketCounts);
-	const escalatedTicketMap = byOrgId(escalatedTicketCounts);
-	const resolvedTicketMap = byOrgId(resolvedTicketCounts);
+	const activeConvMap = byorganizationId(activeConvCounts);
+	const openTicketMap = byorganizationId(openTicketCounts);
+	const escalatedTicketMap = byorganizationId(escalatedTicketCounts);
+	const resolvedTicketMap = byorganizationId(resolvedTicketCounts);
 
 	const data: OrgSummary[] = orgs.map((o) => ({
 		id: o.id,
@@ -412,9 +412,9 @@ export async function listOrganizations(opts: { page: number; limit: number; ski
 	return { data, total };
 }
 
-export async function getOrganizationDetail(orgId: string): Promise<OrgDetail | null> {
+export async function getOrganizationDetail(organizationId: string): Promise<OrgDetail | null> {
 	const org = await prisma.organization.findUnique({
-		where: { id: orgId },
+		where: { id: organizationId },
 		include: {
 			plan: {
 				select: pricingSelect,
@@ -431,7 +431,7 @@ export async function getOrganizationDetail(orgId: string): Promise<OrgDetail | 
 
 	if (!org) return null;
 
-	const [tierStats, convStats, ticketStats, csatSummary, recentEscalations] = await Promise.all([buildTierStats(orgId), buildConversationStats(orgId), buildTicketStats(orgId), buildCsatSummary(orgId), buildRecentEscalations(orgId, 5)]);
+	const [tierStats, convStats, ticketStats, csatSummary, recentEscalations] = await Promise.all([buildTierStats(organizationId), buildConversationStats(organizationId), buildTicketStats(organizationId), buildCsatSummary(organizationId), buildRecentEscalations(organizationId, 5)]);
 
 	return {
 		id: org.id,

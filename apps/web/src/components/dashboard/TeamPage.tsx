@@ -5,20 +5,21 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/context/auth-context";
 
 // ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
-
+// Mapped cleanly to dynamic variables that respect your main app layout.
 const T = {
-	whitebg: "#FFF",
-	darkPanel: "#161616",
-	darkSurface: "#1E1E1E",
-	darkBorder: "rgba(255,255,255,0.08)",
-	darkBorder2: "rgba(255,255,255,0.12)",
-	Black: "#0F0F0F",
-	White: "#FFF",
-	gray400: "rgba(255,255,255,0.45)",
-	gray500: "#888888",
-	inputBg: "#1E1E1E",
-	inputBorder: "rgba(255,255,255,0.12)",
-	inputFocus: "rgba(255,255,255,0.35)",
+	bg: "var(--bg-main, transparent)", 
+	panel: "var(--panel-bg, rgba(255, 255, 255, 0.03))",
+	surface: "var(--surface-bg, rgba(255, 255, 255, 0.02))",
+	border: "var(--border-subtle, rgba(255, 255, 255, 0.08))",
+	border2: "var(--border-muted, rgba(255, 255, 255, 0.12))",
+	textPrimary: "var(--text-primary, #FFFFFF)",
+	textSecondary: "var(--text-secondary, #AFA9EC)",
+	inputBg: "var(--input-bg, rgba(0, 0, 0, 0.2))",
+	inputBorder: "var(--input-border, rgba(255, 255, 255, 0.15))",
+	inputFocus: "var(--input-focus, #534AB7)",
+	hoverBg: "var(--hover-bg, rgba(255, 255, 255, 0.03))",
+	
+	// Brand & Status Tokens
 	violet: "#534AB7",
 	violetLight: "#AFA9EC",
 	violetBg: "rgba(83,74,183,0.15)",
@@ -121,9 +122,9 @@ function StatusBadge({ type }: { type: "active" | "pending" | "inactive" }) {
 			label: "Pending",
 		},
 		inactive: {
-			bg: T.darkSurface,
-			color: T.gray500,
-			border: T.darkBorder2,
+			bg: T.surface,
+			color: T.textSecondary,
+			border: T.border2,
 			label: "Inactive",
 		},
 	};
@@ -203,27 +204,31 @@ function InviteModal({
 				style={{
 					position: "fixed",
 					inset: 0,
-					background: "rgba(0,0,0,0.6)",
-					backdropFilter: "blur(4px)",
+					background: "rgba(10, 10, 20, 0.6)",
+					backdropFilter: "blur(6px)",
 					zIndex: 100,
 				}}
 			/>
 
 			{/* Modal */}
 			<div
+				className="responsive-modal"
 				style={{
 					position: "fixed",
 					top: "50%",
 					left: "50%",
 					transform: "translate(-50%, -50%)",
 					zIndex: 101,
-					background: T.darkPanel,
-					border: `1px solid ${T.darkBorder2}`,
+					background: T.panel,
+					backdropFilter: "blur(20px)",
+					border: `1px solid ${T.border2}`,
 					borderRadius: T.radiusLg,
 					padding: "32px",
-					width: "100%",
+					width: "calc(100% - 32px)",
 					maxWidth: 420,
 					fontFamily: T.font,
+					boxSizing: "border-box",
+					boxShadow: "0 24px 50px -12px rgba(0, 0, 0, 0.5)"
 				}}
 			>
 				{/* Header */}
@@ -240,7 +245,7 @@ function InviteModal({
 							style={{
 								fontSize: 18,
 								fontWeight: 700,
-								color: T.White,
+								color: T.textPrimary,
 								margin: "0 0 6px",
 								letterSpacing: "-0.4px",
 							}}
@@ -250,9 +255,10 @@ function InviteModal({
 						<p
 							style={{
 								fontSize: 13,
-								color: T.gray500,
+								color: T.textSecondary,
 								margin: 0,
 								lineHeight: 1.5,
+								opacity: 0.8
 							}}
 						>
 							They'll receive an email to create their account.
@@ -264,7 +270,7 @@ function InviteModal({
 							background: "none",
 							border: "none",
 							cursor: "pointer",
-							color: T.gray500,
+							color: T.textSecondary,
 							padding: 4,
 							display: "flex",
 							borderRadius: T.radiusSm,
@@ -290,7 +296,8 @@ function InviteModal({
 						style={{
 							fontSize: 13,
 							fontWeight: 500,
-							color: "rgba(255,255,255,0.7)",
+							color: T.textPrimary,
+							opacity: 0.8
 						}}
 					>
 						Email address
@@ -310,12 +317,12 @@ function InviteModal({
 							padding: "12px 14px",
 							fontSize: 14,
 							fontFamily: T.font,
-							color: T.White,
+							color: T.textPrimary,
 							background: T.inputBg,
 							border: `1.5px solid ${error ? T.danger : focused ? T.inputFocus : T.inputBorder}`,
 							borderRadius: T.radius,
 							outline: "none",
-							transition: "border-color .15s",
+							transition: "border-color .15s, background-color .15s",
 						}}
 					/>
 					{error && (
@@ -344,19 +351,19 @@ function InviteModal({
 						alignItems: "center",
 						gap: 8,
 						padding: "10px 14px",
-						background: T.darkSurface,
-						border: `1px solid ${T.darkBorder}`,
+						background: T.surface,
+						border: `1px solid ${T.border}`,
 						borderRadius: T.radiusSm,
 						marginBottom: 24,
 					}}
 				>
 					<i
 						className="ti ti-info-circle"
-						style={{ fontSize: 15, color: T.gray500, flexShrink: 0 }}
+						style={{ fontSize: 15, color: T.textSecondary, flexShrink: 0 }}
 					/>
-					<span style={{ fontSize: 12, color: T.gray500, lineHeight: 1.5 }}>
+					<span style={{ fontSize: 12, color: T.textSecondary, lineHeight: 1.5, opacity: 0.9 }}>
 						Invited members join as{" "}
-						<strong style={{ color: "rgba(255,255,255,0.5)" }}>
+						<strong style={{ color: T.textPrimary }}>
 							Support Agents
 						</strong>
 						. You can change their role after they join.
@@ -371,8 +378,8 @@ function InviteModal({
 							flex: 1,
 							padding: "11px",
 							background: "transparent",
-							color: "rgba(255,255,255,0.45)",
-							border: `1.5px solid ${T.darkBorder2}`,
+							color: T.textSecondary,
+							border: `1.5px solid ${T.border2}`,
 							borderRadius: T.radius,
 							fontSize: 14,
 							fontWeight: 500,
@@ -389,7 +396,7 @@ function InviteModal({
 							flex: 2,
 							padding: "11px",
 							background: T.violet,
-							color: T.Black,
+							color: "#FFF",
 							border: "none",
 							borderRadius: T.radius,
 							fontSize: 14,
@@ -466,7 +473,7 @@ function EmptyState({ onInvite }: { onInvite: () => void }) {
 				style={{
 					fontSize: 16,
 					fontWeight: 600,
-					color: T.Black,
+					color: T.textPrimary,
 					margin: "0 0 8px",
 				}}
 			>
@@ -475,7 +482,7 @@ function EmptyState({ onInvite }: { onInvite: () => void }) {
 			<p
 				style={{
 					fontSize: 13,
-					color: T.gray500,
+					color: T.textSecondary,
 					margin: "0 0 24px",
 					lineHeight: 1.6,
 					maxWidth: 280,
@@ -489,7 +496,7 @@ function EmptyState({ onInvite }: { onInvite: () => void }) {
 				style={{
 					padding: "10px 20px",
 					background: T.violet,
-					color: T.Black,
+					color: "#FFF",
 					border: "none",
 					borderRadius: T.radius,
 					fontSize: 13,
@@ -562,12 +569,83 @@ export function TeamPage() {
 
 	return (
 		<>
-			<style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+			<style>{`
+				@keyframes spin { to { transform: rotate(360deg); } }
+
+				/* Custom variable overrides that synchronize perfectly with SupportNest's Navy/Violet Theme */
+				.teampage-container {
+					--bg-main: transparent; /* Allows your true app layout background to bleed through smoothly */
+					--panel-bg: rgba(255, 255, 255, 0.03);
+					--surface-bg: rgba(255, 255, 255, 0.05);
+					--border-subtle: rgba(255, 255, 255, 0.06);
+					--border-muted: rgba(255, 255, 255, 0.1);
+					--text-primary: #FFFFFF;
+					--text-secondary: rgba(255, 255, 255, 0.6);
+					--input-bg: rgba(0, 0, 0, 0.25);
+					--input-border: rgba(255, 255, 255, 0.12);
+					--input-focus: #534AB7;
+					--hover-bg: rgba(255, 255, 255, 0.03);
+				}
+
+				/* Balanced fallback variations for light mode optimization */
+				html:not(.dark) body .teampage-container {
+					--bg-main: transparent;
+					--panel-bg: #FFFFFF;
+					--surface-bg: #F8F9FA;
+					--border-subtle: rgba(0, 0, 0, 0.06);
+					--border-muted: rgba(0, 0, 0, 0.09);
+					--text-primary: #1A1B1E;
+					--text-secondary: #6C757D;
+					--input-bg: #FFFFFF;
+					--input-border: #CED4DA;
+					--input-focus: #534AB7;
+					--hover-bg: rgba(0, 0, 0, 0.015);
+				}
+
+				.table-grid-row:hover {
+					background-color: var(--hover-bg) !important;
+				}
+
+				@media (max-width: 768px) {
+					.teampage-container {
+						padding: 24px 16px !important;
+					}
+					.teampage-header {
+						flex-direction: column !important;
+						align-items: flex-start !important;
+						gap: 16px !important;
+					}
+					.teampage-header button {
+						width: 100% !important;
+						justify-content: center !important;
+					}
+					.responsive-table-wrapper {
+						border-radius: ${T.radius} !important;
+					}
+					.table-grid-row {
+						grid-template-columns: 1fr !important;
+						gap: 12px !important;
+						padding: 16px !important;
+					}
+					.table-header-row {
+						display: none !important;
+					}
+					.mobile-action-cell {
+						justify-content: flex-start !important;
+						margin-top: 4px;
+					}
+					.responsive-modal {
+						padding: 24px 16px !important;
+						width: calc(100% - 24px) !important;
+					}
+				}
+			`}</style>
 
 			<div
+				className="teampage-container"
 				style={{
 					flex: 1,
-					background: T.whitebg,
+					background: T.bg,
 					fontFamily: T.font,
 					padding: "36px 40px",
 					overflowY: "auto",
@@ -575,6 +653,7 @@ export function TeamPage() {
 			>
 				{/* Header */}
 				<div
+					className="teampage-header"
 					style={{
 						display: "flex",
 						justifyContent: "space-between",
@@ -587,14 +666,14 @@ export function TeamPage() {
 							style={{
 								fontSize: 22,
 								fontWeight: 700,
-								color: T.Black,
+								color: T.textPrimary,
 								margin: "0 0 4px",
 								letterSpacing: "-0.5px",
 							}}
 						>
-							{user?.orgName ?? "Your"} Team
+							{user?.organizationName ?? "Your"} Team
 						</h1>
-						<p style={{ fontSize: 13, color: T.gray500, margin: 0 }}>
+						<p style={{ fontSize: 13, color: T.textSecondary, margin: 0 }}>
 							{members.length} member{members.length !== 1 ? "s" : ""}
 							{invitations.length > 0 &&
 								` · ${invitations.length} pending invite${invitations.length !== 1 ? "s" : ""}`}
@@ -606,7 +685,7 @@ export function TeamPage() {
 						style={{
 							padding: "10px 18px",
 							background: T.violet,
-							color: T.White,
+							color: "#FFF",
 							border: "none",
 							borderRadius: T.radius,
 							fontSize: 13,
@@ -697,23 +776,27 @@ export function TeamPage() {
 					</div>
 				)}
 
-				{/* Table */}
+				{/* Table Area */}
 				<div
+					className="responsive-table-wrapper"
 					style={{
-						background: T.darkPanel,
-						border: `1px solid ${T.darkBorder}`,
+						background: T.panel,
+						border: `1px solid ${T.border}`,
 						borderRadius: T.radiusLg,
 						overflow: "hidden",
+						boxShadow: "0 4px 30px rgba(0, 0, 0, 0.2)",
+						backdropFilter: "blur(4px)",
 					}}
 				>
 					{/* Table header */}
 					<div
+						className="table-header-row"
 						style={{
 							display: "grid",
-							gridTemplateColumns: "2fr 1fr 1fr 1fr 80px",
+							gridTemplateColumns: "2fr 1fr 1fr 1fr 100px",
 							padding: "12px 20px",
-							borderBottom: `1px solid ${T.darkBorder}`,
-							background: T.darkSurface,
+							borderBottom: `1px solid ${T.border}`,
+							background: T.surface,
 						}}
 					>
 						{["Member", "Role", "Status", "Joined", ""].map((col) => (
@@ -722,7 +805,7 @@ export function TeamPage() {
 								style={{
 									fontSize: 11,
 									fontWeight: 600,
-									color: T.gray500,
+									color: T.textSecondary,
 									textTransform: "uppercase",
 									letterSpacing: "0.5px",
 								}}
@@ -741,7 +824,7 @@ export function TeamPage() {
 								justifyContent: "center",
 								gap: 10,
 								padding: "48px",
-								color: T.gray500,
+								color: T.textSecondary,
 								fontSize: 13,
 							}}
 						>
@@ -761,40 +844,27 @@ export function TeamPage() {
 						<EmptyState onInvite={() => setShowModal(true)} />
 					)}
 
-					{/* Members */}
+					{/* Members List */}
 					{!loading &&
 						members.map((member, i) => (
 							<div
 								key={member.id}
+								className="table-grid-row"
 								style={{
 									display: "grid",
-									gridTemplateColumns: "2fr 1fr 1fr 1fr 80px",
+									gridTemplateColumns: "2fr 1fr 1fr 1fr 100px",
 									padding: "14px 20px",
 									borderBottom:
-										i < totalRows - 1 ? `1px solid ${T.darkBorder}` : "none",
+										i < totalRows - 1 ? `1px solid ${T.border}` : "none",
 									alignItems: "center",
-									transition: "background .15s",
+									transition: "background .15s ease",
 								}}
-								onMouseEnter={(e) =>
-									((e.currentTarget as HTMLElement).style.background =
-										"rgba(255,255,255,0.02)")
-								}
-								onMouseLeave={(e) =>
-									((e.currentTarget as HTMLElement).style.background =
-										"transparent")
-								}
 							>
 								{/* Member info */}
-								<div
-									style={{ display: "flex", alignItems: "center", gap: 12 }}
-								>
-									<Avatar
-										initials={getInitials(member.firstName, member.lastName)}
-									/>
+								<div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+									<Avatar initials={getInitials(member.firstName, member.lastName)} />
 									<div>
-										<div
-											style={{ fontSize: 14, fontWeight: 500, color: T.White }}
-										>
+										<div style={{ fontSize: 14, fontWeight: 500, color: T.textPrimary }}>
 											{member.firstName} {member.lastName}
 											{member.id === user?.id && (
 												<span
@@ -813,16 +883,14 @@ export function TeamPage() {
 												</span>
 											)}
 										</div>
-										<div
-											style={{ fontSize: 12, color: T.gray500, marginTop: 2 }}
-										>
+										<div style={{ fontSize: 12, color: T.textSecondary, marginTop: 2 }}>
 											{member.email}
 										</div>
 									</div>
 								</div>
 
 								{/* Role */}
-								<span style={{ fontSize: 13, color: "rgba(255,255,255,0.6)" }}>
+								<span style={{ fontSize: 13, color: T.textPrimary, opacity: 0.8 }}>
 									{formatRole(member.role)}
 								</span>
 
@@ -830,11 +898,10 @@ export function TeamPage() {
 								<StatusBadge type={member.isActive ? "active" : "inactive"} />
 
 								{/* Joined */}
-								<span style={{ fontSize: 13, color: T.gray500 }}>
+								<span style={{ fontSize: 13, color: T.textSecondary }}>
 									{formatDate(member.createdAt)}
 								</span>
 
-								{/* Actions — nothing for active members */}
 								<div />
 							</div>
 						))}
@@ -844,30 +911,21 @@ export function TeamPage() {
 						invitations.map((inv, i) => (
 							<div
 								key={inv.id}
+								className="table-grid-row"
 								style={{
 									display: "grid",
-									gridTemplateColumns: "2fr 1fr 1fr 1fr 80px",
+									gridTemplateColumns: "2fr 1fr 1fr 1fr 100px",
 									padding: "14px 20px",
 									borderBottom:
 										i < invitations.length - 1
-											? `1px solid ${T.darkBorder}`
+											? `1px solid ${T.border}`
 											: "none",
 									alignItems: "center",
-									transition: "background .15s",
+									transition: "background .15s ease",
 								}}
-								onMouseEnter={(e) =>
-									((e.currentTarget as HTMLElement).style.background =
-										"rgba(255,255,255,0.02)")
-								}
-								onMouseLeave={(e) =>
-									((e.currentTarget as HTMLElement).style.background =
-										"transparent")
-								}
 							>
 								{/* Invite info */}
-								<div
-									style={{ display: "flex", alignItems: "center", gap: 12 }}
-								>
+								<div style={{ display: "flex", alignItems: "center", gap: 12 }}>
 									<div
 										style={{
 											width: 36,
@@ -887,27 +945,17 @@ export function TeamPage() {
 										/>
 									</div>
 									<div>
-										<div
-											style={{
-												fontSize: 14,
-												fontWeight: 500,
-												color: "rgba(255,255,255,0.7)",
-											}}
-										>
+										<div style={{ fontSize: 14, fontWeight: 500, color: T.textPrimary, opacity: 0.9 }}>
 											{inv.email}
 										</div>
-										<div
-											style={{ fontSize: 12, color: T.gray500, marginTop: 2 }}
-										>
-											Invited by {inv.invitedBy.firstName}{" "}
-											{inv.invitedBy.lastName} · Expires{" "}
-											{formatDate(inv.expiresAt)}
+										<div style={{ fontSize: 12, color: T.textSecondary, marginTop: 2 }}>
+											Invited by {inv.invitedBy.firstName} {inv.invitedBy.lastName} · Expires {formatDate(inv.expiresAt)}
 										</div>
 									</div>
 								</div>
 
 								{/* Role */}
-								<span style={{ fontSize: 13, color: "rgba(255,255,255,0.6)" }}>
+								<span style={{ fontSize: 13, color: T.textPrimary, opacity: 0.8 }}>
 									{formatRole(inv.role)}
 								</span>
 
@@ -915,59 +963,58 @@ export function TeamPage() {
 								<StatusBadge type="pending" />
 
 								{/* Sent date */}
-								<span style={{ fontSize: 13, color: T.gray500 }}>
+								<span style={{ fontSize: 13, color: T.textSecondary }}>
 									{formatDate(inv.createdAt)}
 								</span>
 
-								{/* Revoke */}
-								<button
-									onClick={() => handleRevoke(inv.id)}
-									disabled={revoking === inv.id}
-									title="Revoke invitation"
-									style={{
-										background: "none",
-										border: `1px solid ${T.darkBorder2}`,
-										borderRadius: T.radiusSm,
-										color: revoking === inv.id ? T.gray500 : T.danger,
-										cursor: revoking === inv.id ? "not-allowed" : "pointer",
-										padding: "5px 10px",
-										fontSize: 12,
-										fontFamily: T.font,
-										display: "flex",
-										alignItems: "center",
-										gap: 5,
-										transition: "border-color .15s, color .15s",
-									}}
-									onMouseEnter={(e) => {
-										if (revoking !== inv.id) {
-											(e.currentTarget as HTMLElement).style.borderColor =
-												T.dangerBorder;
-											(e.currentTarget as HTMLElement).style.background =
-												T.dangerBg;
-										}
-									}}
-									onMouseLeave={(e) => {
-										(e.currentTarget as HTMLElement).style.borderColor =
-											T.darkBorder2;
-										(e.currentTarget as HTMLElement).style.background = "none";
-									}}
-								>
-									{revoking === inv.id ? (
-										<i
-											className="ti ti-loader-2"
-											style={{
-												fontSize: 13,
-												animation: "spin 0.8s linear infinite",
-											}}
-										/>
-									) : (
-										<i
-											className="ti ti-x"
-											style={{ fontSize: 13 }}
-										/>
-									)}
-									Revoke
-								</button>
+								{/* Revoke Button Container */}
+								<div className="mobile-action-cell" style={{ display: "flex", justifyContent: "flex-end" }}>
+									<button
+										onClick={() => handleRevoke(inv.id)}
+										disabled={revoking === inv.id}
+										title="Revoke invitation"
+										style={{
+											background: "none",
+											border: `1px solid ${T.border2}`,
+											borderRadius: T.radiusSm,
+											color: revoking === inv.id ? T.textSecondary : T.danger,
+											cursor: revoking === inv.id ? "not-allowed" : "pointer",
+											padding: "5px 10px",
+											fontSize: 12,
+											fontFamily: T.font,
+											display: "flex",
+											alignItems: "center",
+											gap: 5,
+											transition: "border-color .15s, color .15s, background-color .15s",
+										}}
+										onMouseEnter={(e) => {
+											if (revoking !== inv.id) {
+												(e.currentTarget as HTMLElement).style.borderColor = T.dangerBorder;
+												(e.currentTarget as HTMLElement).style.background = T.dangerBg;
+											}
+										}}
+										onMouseLeave={(e) => {
+											(e.currentTarget as HTMLElement).style.borderColor = T.border2;
+											(e.currentTarget as HTMLElement).style.background = "none";
+										}}
+									>
+										{revoking === inv.id ? (
+											<i
+												className="ti ti-loader-2"
+												style={{
+													fontSize: 13,
+													animation: "spin 0.8s linear infinite",
+												}}
+											/>
+										) : (
+											<i
+												className="ti ti-x"
+												style={{ fontSize: 13 }}
+											/>
+										)}
+										Revoke
+									</button>
+								</div>
 							</div>
 						))}
 				</div>

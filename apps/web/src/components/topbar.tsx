@@ -72,9 +72,9 @@ export function Topbar({ pageTitle, onToggleSidebar }: TopbarProps) {
 					<span style={{ fontSize: 13, fontWeight: 600, color: "var(--page-text)" }}>
 						{displayName}
 					</span>
-					{user?.orgName && (
+					{user?.organizationName && (
 						<span style={{ fontSize: 11, color: S.textMuted }}>
-							{user.orgName}
+							{user.organizationName}
 						</span>
 					)}
 				</div>

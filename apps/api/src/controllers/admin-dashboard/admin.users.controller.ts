@@ -23,13 +23,13 @@ function getStringParam(value: unknown): string | undefined {
   return undefined;
 }
 
-// GET /admin/organizations/:orgId/users
+// GET /admin/organizations/:organizationId/users
 export async function getOrgUsers(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
@@ -40,7 +40,7 @@ export async function getOrgUsers(
   const is_active =
     isActiveParam === undefined ? undefined : isActiveParam === "true";
 
-  const org = await prisma.organization.findUnique({ where: { id: orgId } });
+  const org = await prisma.organization.findUnique({ where: { id: organizationId } });
   if (!org) {
     notFound(res, "Organization");
     return;
@@ -56,19 +56,19 @@ export async function getOrgUsers(
   if (role) opts.role = role;
   if (is_active !== undefined) opts.is_active = is_active;
 
-  const { data, total } = await listUsersForOrg(orgId, opts);
+  const { data, total } = await listUsersForOrg(organizationId, opts);
   res.json(buildPaginatedResponse(data, total, page, limit));
 }
 
-// GET /admin/organizations/:orgId/users/:userId
+// GET /admin/organizations/:organizationId/users/:userId
 export async function getOrgUser(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
+  const organizationId = getStringParam(req.params.organizationId);
   const userId = getStringParam(req.params.userId);
 
-  if (!orgId) {
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
@@ -77,7 +77,7 @@ export async function getOrgUser(
     return;
   }
 
-  const user = await getUserById(userId, orgId);
+  const user = await getUserById(userId, organizationId);
   if (!user) {
     notFound(res, "User");
     return;
@@ -85,15 +85,15 @@ export async function getOrgUser(
   res.json(user);
 }
 
-// POST /admin/organizations/:orgId/users
+// POST /admin/organizations/:organizationId/users
 export async function createOrgUser(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
+  const organizationId = getStringParam(req.params.organizationId);
   const { email, password, first_name, last_name, role } = req.body;
 
-  if (!orgId) {
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
@@ -121,7 +121,7 @@ export async function createOrgUser(
     first_name,
     last_name,
     role,
-    organization_id: orgId,
+    organization_id: organizationId,
   });
 
   if (result.error === "ORGANIZATION_NOT_FOUND") {
@@ -141,16 +141,16 @@ export async function createOrgUser(
   res.status(201).json(result.data);
 }
 
-// PATCH /admin/organizations/:orgId/users/:userId
+// PATCH /admin/organizations/:organizationId/users/:userId
 export async function updateOrgUser(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
+  const organizationId = getStringParam(req.params.organizationId);
   const userId = getStringParam(req.params.userId);
   const { first_name, last_name, role, is_active } = req.body;
 
-  if (!orgId) {
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
@@ -167,7 +167,7 @@ export async function updateOrgUser(
   const result = await updateUser(
     userId,
     { first_name, last_name, role, is_active },
-    orgId,
+    organizationId,
   );
   if (result.error === "USER_NOT_FOUND") {
     notFound(res, "User");
@@ -176,15 +176,15 @@ export async function updateOrgUser(
   res.json(result.data);
 }
 
-// DELETE /admin/organizations/:orgId/users/:userId  (soft delete)
+// DELETE /admin/organizations/:organizationId/users/:userId  (soft delete)
 export async function removeOrgUser(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
+  const organizationId = getStringParam(req.params.organizationId);
   const userId = getStringParam(req.params.userId);
 
-  if (!orgId) {
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
@@ -204,7 +204,7 @@ export async function removeOrgUser(
     return;
   }
 
-  const result = await deleteUser(userId, orgId);
+  const result = await deleteUser(userId, organizationId);
   if (result.error === "USER_NOT_FOUND") {
     notFound(res, "User");
     return;

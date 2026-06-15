@@ -12,7 +12,7 @@ import type { KnowledgeDocumentType } from "generated/prisma/enums.js";
 export const uploadDocument: RequestHandler = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.sub;
-    const orgId = req.user?.organizationId;
+    const organizationId = req.user?.organizationId;
     const { title, type } = req.body;
     const file = req.file;
 
@@ -22,7 +22,7 @@ export const uploadDocument: RequestHandler = asyncHandler(
 
     if (apiDocTypes.includes(type)) {
       const apiConfig = await prisma.businessApiConfig.findUnique({
-        where: { organizationId: orgId as string },
+        where: { organizationId: organizationId as string },
       });
       if (!apiConfig || !apiConfig.isVerified) {
         throw new AppError(
@@ -34,13 +34,13 @@ export const uploadDocument: RequestHandler = asyncHandler(
 
     const storagePath = await uploadToCloudinary(
       file.buffer,
-      `supportnest/${orgId}/knowledge`,
+      `supportnest/${organizationId}/knowledge`,
       `${Date.now()}-${title}`,
     );
 
     const doc = await prisma.knowledgeDocument.create({
       data: {
-        organizationId: orgId as string,
+        organizationId: organizationId as string,
         title,
         type,
         storagePath,
@@ -52,7 +52,7 @@ export const uploadDocument: RequestHandler = asyncHandler(
     await knowledgeQueue.add("process-document", {
       documentId: doc.id,
       fileUrl: storagePath,
-      orgId,
+      organizationId,
     });
 
     res.status(202).json({ documentId: doc.id, status: "PROCESSING" });
@@ -61,9 +61,9 @@ export const uploadDocument: RequestHandler = asyncHandler(
 
 export const getKnowledgeDocuments: RequestHandler = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const orgId = req.user?.organizationId;
+    const organizationId = req.user?.organizationId;
     const organization = await prisma.organization.findUnique({
-      where: { id: orgId as string },
+      where: { id: organizationId as string },
     });
 
     if (!organization) throw new AppError("organization not found", 404);
@@ -96,11 +96,11 @@ export const getKnowledgeDocuments: RequestHandler = asyncHandler(
 
 export const deleteKnowledgeDocument: RequestHandler = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const orgId = req.user?.organizationId;
+    const organizationId = req.user?.organizationId;
     const docId = req.params.docId;
 
     const organization = await prisma.organization.findUnique({
-      where: { id: orgId as string },
+      where: { id: organizationId as string },
       select: { id: true, isActive: true },
     });
 
@@ -135,7 +135,7 @@ export const deleteKnowledgeDocument: RequestHandler = asyncHandler(
 export const uploadSwaggerUrl: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
 		const userId = req.user?.sub;
-		const orgId = req.user?.organizationId;
+		const organizationId = req.user?.organizationId;
 		const { title, swaggerUrl } = req.body;
 
 		if (!swaggerUrl) throw new AppError("swaggerUrl is required", 400);
@@ -147,7 +147,7 @@ export const uploadSwaggerUrl: RequestHandler = asyncHandler(
 		}
 
 		const apiConfig = await prisma.businessApiConfig.findUnique({
-			where: { organizationId: orgId as string },
+			where: { organizationId: organizationId as string },
 		});
 		if (!apiConfig || !apiConfig.isVerified) {
 			throw new AppError(
@@ -158,7 +158,7 @@ export const uploadSwaggerUrl: RequestHandler = asyncHandler(
 
 		const doc = await prisma.knowledgeDocument.create({
 			data: {
-				organizationId: orgId as string,
+				organizationId: organizationId as string,
 				title: title || swaggerUrl,
 				type: "SWAGGER_URL",
 				storagePath: swaggerUrl,
@@ -170,7 +170,7 @@ export const uploadSwaggerUrl: RequestHandler = asyncHandler(
 		await knowledgeQueue.add("process-document", {
 			documentId: doc.id,
 			fileUrl: swaggerUrl,
-			orgId,
+			organizationId,
 		});
 
 		res.status(202).json({ documentId: doc.id, status: "PROCESSING" });

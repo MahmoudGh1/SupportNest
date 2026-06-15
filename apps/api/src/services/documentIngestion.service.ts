@@ -3,7 +3,7 @@ import { embeddings } from "src/config/embeddings.js";
 import { extractTextFromUrl } from "src/config/pdf.js";
 import bulkInsertChunks from "src/utils/bulkInsertChunks.util.js";
 
-export async function ingestDocument(fileUrl: string, documentId: string, orgId: string) {
+export async function ingestDocument(fileUrl: string, documentId: string, organizationId: string) {
 	const text = await extractTextFromUrl(fileUrl);
 
 	const chunks = await chunkText(text);
@@ -17,6 +17,6 @@ export async function ingestDocument(fileUrl: string, documentId: string, orgId:
 			chunkIndex: i,
 		})),
 		documentId,
-		orgId,
+		organizationId,
 	);
 }
