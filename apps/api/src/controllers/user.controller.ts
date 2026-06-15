@@ -95,16 +95,16 @@ export const deleteAccountController = async (req: AuthenticatedRequest, res: Re
 		const userId = req.user?.sub;
 		if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-		const { fullName, organizationName } = req.body;
+		const { fullName, orgName } = req.body;
 
 		if (!fullName?.trim()) {
 			return res.status(400).json({ error: "Your name is required to confirm deletion." });
 		}
-		if (!organizationName?.trim()) {
+		if (!orgName?.trim()) {
 			return res.status(400).json({ error: "Organization name is required to confirm deletion." });
 		}
 
-		await deleteAccountService(userId, fullName.trim(), organizationName.trim());
+		await deleteAccountService(userId, fullName.trim(), orgName.trim());
 
 		return res.status(200).json({
 			success: true,

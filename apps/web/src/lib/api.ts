@@ -633,7 +633,7 @@ export const api = {
 		return data;
 	},
 
-	deleteAccount: (data: { fullName: string; organizationName: string }) =>
+	deleteAccount: (data: { fullName: string; orgName: string }) =>
 		fetch(`${BASE_URL}/users/me`, {
 			method: "DELETE",
 			headers: { "Content-Type": "application/json" },
@@ -898,7 +898,7 @@ export const api = {
 	// ADD THIS after revokeInvitation
 	async validateInvitation(token: string): Promise<{
 		email: string;
-		organizationName: string;
+		orgName: string;
 		role: string;
 	}> {
 		const res = await fetch(`${BASE_URL}/invitations/accept/${token}`, {

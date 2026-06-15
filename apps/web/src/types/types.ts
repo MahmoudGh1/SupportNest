@@ -5,7 +5,7 @@ export interface AuthUser {
 	firstName: string;
 	lastName: string;
 	role: Role;
-	orgId: string | null;
+	organizationId: string | null;
 	orgName?: string;
 	token?: string;
 	onboarded: boolean;
@@ -154,7 +154,7 @@ export interface DeleteAccountResponse {
 
 export interface DeleteAccountInput {
 	fullName: string;
-	organizationName: string;
+	orgName: string;
 }
 
 export interface ApiKey {

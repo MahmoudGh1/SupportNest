@@ -92,7 +92,7 @@ function FormPanel() {
     const router = useRouter();
     const token = searchParams.get("token") ?? "";
 
-    const [organizationName, setorganizationName] = useState("");
+    const [orgName, setorgName] = useState("");
     const [email, setEmail] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
@@ -117,7 +117,7 @@ function FormPanel() {
             .then((data) => {
                 if (data.email) {
                     setEmail(data.email);
-                    setorganizationName(data.organizationName ?? "");
+                    setorgName(data.orgName ?? "");
                 } else {
                     setTokenError(data.message ?? "Invalid or expired invitation.");
                 }
@@ -138,7 +138,7 @@ function FormPanel() {
 
             router.push(`/register/business?userId=${userId}`);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Google sign-up failed");
+            setSubmitError(err instanceof Error ? err.message : "Google sign-up failed");
         }
     }
 
@@ -219,7 +219,7 @@ function FormPanel() {
                     Accept Invitation
                 </h1>
                 <p style={{ fontSize: 14, color: T.muted, textAlign: "center", margin: "0 0 4px" }}>
-                    You've been invited to join <strong style={{ color: T.text }}>{organizationName}</strong>
+                    You{"\'"}ve been invited to join <strong style={{ color: T.text }}>{orgName}</strong>
                 </p>
                 <p style={{ fontSize: 13, color: T.violetLight, textAlign: "center", margin: "0 0 32px" }}>
                     {email}
@@ -246,9 +246,9 @@ function FormPanel() {
                 />
 
                 <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "20px 0 4px" }}>
-                    <div style={{ flex: 1, height: 1, background: T.border }} />
+                    <div style={{ flex: 1, height: 1, background: T.darkBorder }} />
                     <span style={{ fontSize: 12, color: T.muted }}>or continue with email</span>
-                    <div style={{ flex: 1, height: 1, background: T.border }} />
+                    <div style={{ flex: 1, height: 1, background: T.darkBorder }} />
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -329,7 +329,7 @@ function BrandPanel() {
                     AI Powered Multi-Agent Customer Support Platform
                 </p>
                 <div style={{ background: T.darkSurface, border: `1px solid ${T.darkBorder}`, borderRadius: T.radiusLg, padding: "28px", textAlign: "left", width: "100%" }}>
-                    <div style={{ fontSize: 36, lineHeight: 1, color: T.violet, fontFamily: "Georgia, serif", marginBottom: 16 }}>"</div>
+                    <div style={{ fontSize: 36, lineHeight: 1, color: T.violet, fontFamily: "Georgia, serif", marginBottom: 16 }}>&quot;</div>
                     <p style={{ fontSize: 15, color: T.text, lineHeight: 1.75, margin: "0 0 24px" }}>
                         SupportNest is a game changer. Their AI handles our customers and only escalates what truly needs a human. Our team finally has time to breathe.
                     </p>

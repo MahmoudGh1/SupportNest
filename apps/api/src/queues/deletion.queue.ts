@@ -6,13 +6,13 @@ const pendingDeletions: Map<string, NodeJS.Timeout> =
   globalSymbols.pendingDeletions;
 
 export function scheduleOrgDeletion(
-  orgId: string,
+  organizationId: string,
   callback: () => Promise<void>,
   delay: number = 30 * 60 * 1000,
 ): void {
   // If a timer already exists for this Org, clear it out first
-  if (pendingDeletions.has(orgId)) {
-    clearTimeout(pendingDeletions.get(orgId)!);
+  if (pendingDeletions.has(organizationId)) {
+    clearTimeout(pendingDeletions.get(organizationId)!);
   }
 
   const timer = setTimeout(async () => {
@@ -20,27 +20,27 @@ export function scheduleOrgDeletion(
       await callback();
     } catch (error) {
       console.error(
-        `Error executing deletion callback for org ${orgId}:`,
+        `Error executing deletion callback for org ${organizationId}:`,
         error,
       );
     } finally {
       // Ensure it gets cleaned up from memory even if the callback fails
-      pendingDeletions.delete(orgId);
+      pendingDeletions.delete(organizationId);
     }
   }, delay);
 
-  pendingDeletions.set(orgId, timer);
+  pendingDeletions.set(organizationId, timer);
 }
 
-export function cancelOrgDeletion(orgId: string): boolean {
-  const timer = pendingDeletions.get(orgId);
+export function cancelOrgDeletion(organizationId: string): boolean {
+  const timer = pendingDeletions.get(organizationId);
   if (!timer) return false;
 
   clearTimeout(timer);
-  pendingDeletions.delete(orgId);
+  pendingDeletions.delete(organizationId);
   return true;
 }
 
-export function isScheduled(orgId: string): boolean {
-  return pendingDeletions.has(orgId);
+export function isScheduled(organizationId: string): boolean {
+  return pendingDeletions.has(organizationId);
 }

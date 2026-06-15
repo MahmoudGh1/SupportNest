@@ -258,7 +258,7 @@ export const userService = async (payloadToken: TokenPayload): Promise<userData>
 			lastName: user.lastName,
 			role: user.role,
 			organizationId: user.organizationId,
-			organizationName: user.organization?.name ?? null,
+			orgName: user.organization?.name ?? null,
 			currentPlanId: user.organization?.planId ?? null,
 			onboarded: Boolean(user.organizationId),
 			hasActiveSubscription: activeSubscription,

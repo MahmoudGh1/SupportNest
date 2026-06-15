@@ -671,7 +671,7 @@ export function TeamPage() {
 								letterSpacing: "-0.5px",
 							}}
 						>
-							{user?.organizationName ?? "Your"} Team
+							{user?.orgName ?? "Your"} Team
 						</h1>
 						<p style={{ fontSize: 13, color: T.textSecondary, margin: 0 }}>
 							{members.length} member{members.length !== 1 ? "s" : ""}

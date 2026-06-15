@@ -18,18 +18,18 @@ import * as knowledgeService from "src/services/knowledge.service.js";
 export const uploadDocument: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
 		const userId = req.user?.sub;
-		const orgId = req.user?.organizationId;
+		const organizationId = req.user?.organizationId;
 		const { title, type } = req.body;
 		const file = req.file;
 		if (!file) throw new AppError("No file provided", 400);
-		if (!userId || !orgId) throw new AppError("invalid upload operation", 400);
+		if (!userId || !organizationId) throw new AppError("invalid upload operation", 400);
 
 		const { document, storagePath } = await knowledgeService.uploadDocument({
 			title,
 			type,
 			file,
 			userId,
-			orgId,
+			organizationId,
 		});
 
 		res.status(200).json({ success: true, data: document });
@@ -38,9 +38,9 @@ export const uploadDocument: RequestHandler = asyncHandler(
 
 export const getKnowledgeDocuments: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
-		const orgId = req.user?.organizationId;
+		const organizationId = req.user?.organizationId;
 		const organization = await prisma.organization.findUnique({
-			where: { id: orgId as string },
+			where: { id: organizationId as string },
 		});
 
 		if (!organization) throw new AppError("organization not found", 404);
@@ -80,11 +80,11 @@ export const getKnowledgeDocuments: RequestHandler = asyncHandler(
 
 export const deleteKnowledgeDocument: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
-		const orgId = req.user?.organizationId;
+		const organizationId = req.user?.organizationId;
 		const docId = req.params.docId;
 
 		const organization = await prisma.organization.findUnique({
-			where: { id: orgId as string },
+			where: { id: organizationId as string },
 			select: { id: true, isActive: true },
 		});
 

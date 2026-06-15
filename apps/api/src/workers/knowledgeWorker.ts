@@ -31,12 +31,12 @@ export const knowledgeWorker = new Worker(
 			if (API_DOC_TYPES.includes(document.type)) {
 				await extractToolsFromDocument(
 					documentId,
-					orgId,
+					organizationId,
 					fileUrl,
 					document.type,
 				);
 			} else {
-				await ingestDocument(fileUrl, documentId, orgId, document.type);
+				await ingestDocument(fileUrl, documentId, organizationId, document.type);
 				await prisma.knowledgeDocument.update({
 					where: { id: documentId },
 					data: { status: "READY" },

@@ -101,23 +101,23 @@ router.patch("/organizations/:organizationId", updateOrganization);
 
 router.delete("/organizations/:organizationId", deleteOrganization);
 /**
- * DELETE /admin/organizations/:orgId
+ * DELETE /admin/organizations/:organizationId
  * Schedule org deletion in 30 minutes + notify org via email
  * Role: super_admin only
  */
-router.delete("/organizations/:orgId", scheduleDeleteOrganization);
+router.delete("/organizations/:organizationId", scheduleDeleteOrganization);
 
 /**
- * POST /admin/organizations/:orgId/cancel-deletion
+ * POST /admin/organizations/:organizationId/cancel-deletion
  * Cancel a scheduled deletion + notify org via email
  * Role: super_admin only
  */
-router.post("/organizations/:orgId/cancel-deletion", cancelDeleteOrganization);
+router.post("/organizations/:organizationId/cancel-deletion", cancelDeleteOrganization);
 
-router.post("/organizations/:orgId/resend-deletion-email", resendDeletionEmail);
+router.post("/organizations/:organizationId/resend-deletion-email", resendDeletionEmail);
 
 /**
- * PATCH /admin/organizations/:orgId/suspend
+ * PATCH /admin/organizations/:organizationId/suspend
  * Suspend org (sets is_active = false)
  * Role: SUPER_ADMIN
  */
@@ -128,7 +128,7 @@ router.patch("/organizations/:organizationId/suspend", suspendOrganization);
  * Re-activate a suspended org
  * Role: SUPER_ADMIN
  */
-router.patch("/organizations/:orgId/activate", activateOrganization);
+router.patch("/organizations/:organizationId/activate", activateOrganization);
 
 /**
  * GET /admin/organizations/:organizationId/tier-stats
@@ -151,10 +151,10 @@ router.get(
   getConversationById,
 );
 
-router.get("/organizations/:orgId/conversations", getOrgConversations);
+router.get("/organizations/:organizationId/conversations", getOrgConversations);
 
 router.get(
-  "/organizations/:orgId/conversations/:conversationId",
+  "/organizations/:organizationId/conversations/:conversationId",
   getConversationById,
 );
 
@@ -177,7 +177,7 @@ router.get("/organizations/:organizationId/csat", getOrgCsat);
  * Paginated escalated tickets for one org
  * Query: ?from=...&to=...&page=1&limit=20
  */
-router.get("/organizations/:orgId/escalations", getOrgEscalations);
+router.get("/organizations/:organizationId/escalations", getOrgEscalations);
 
 /**
  * GET /admin/users
@@ -229,11 +229,11 @@ router.delete(
 );
 
 /**
- * DELETE /admin/organizations/:orgId/conversations/:conversationId
+ * DELETE /admin/organizations/:organizationId/conversations/:conversationId
  * Hard delete a conversation + all its messages, logs, ticket, CSAT, analytics
  */
 router.delete(
-  "/organizations/:orgId/conversations/:conversationId",
+  "/organizations/:organizationId/conversations/:conversationId",
   deleteConversation,
 );
 

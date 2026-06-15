@@ -10,7 +10,7 @@ import bulkInsertChunks from "src/utils/bulkInsertChunks.util.js";
 export async function ingestDocument(
 	fileUrl: string,
 	documentId: string,
-	orgId: string,
+	organizationId: string,
 	type: string,
 ) {
 	/* -- the lines below is important to ensure partial chunks created is fully removed before a new retry to do a failed background job */

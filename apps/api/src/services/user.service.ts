@@ -67,7 +67,7 @@ export async function updatePasswordService(userId: string, currentPassword: str
 	return { success: true };
 }
 
-export async function deleteAccountService(userId: string, fullName: string, organizationName: string) {
+export async function deleteAccountService(userId: string, fullName: string, orgName: string) {
 	const user = await prisma.user.findUnique({
 		where: { id: userId },
 		select: {
@@ -85,7 +85,7 @@ export async function deleteAccountService(userId: string, fullName: string, org
 	if (fullName.trim() !== expectedFullName) {
 		throw new AppError("Name does not match.", 400);
 	}
-	if (!user.organization || organizationName.trim() !== user.organization.name) {
+	if (!user.organization || orgName.trim() !== user.organization.name) {
 		throw new AppError("Organization name does not match.", 400);
 	}
 

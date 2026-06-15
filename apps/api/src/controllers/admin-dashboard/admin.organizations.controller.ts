@@ -100,7 +100,7 @@ export async function getOrganizations(
 }
 
 /**
- * GET /admin/organizations/:orgId
+ * GET /admin/organizations/:organizationId
  *
  * Return detailed organization data for the specified organization id.
  */
@@ -186,7 +186,7 @@ export async function createOrganization(
 }
 
 /**
- * PATCH /admin/organizations/:orgId
+ * PATCH /admin/organizations/:organizationId
  *
  * Update allowed organization fields for the specified organization id.
  */
@@ -250,7 +250,7 @@ export async function updateOrganization(
 }
 
 /**
- * PATCH /admin/organizations/:orgId/suspend
+ * PATCH /admin/organizations/:organizationId/suspend
  *
  * Suspend an organization by setting its active flag to false.
  */
@@ -277,7 +277,7 @@ export async function suspendOrganization(
 }
 
 /**
- * PATCH /admin/organizations/:orgId/activate
+ * PATCH /admin/organizations/:organizationId/activate
  *
  * Reactivate an organization by setting its active flag to true.
  */
@@ -303,14 +303,14 @@ export async function activateOrganization(
   res.json({ message: "Organization activated." });
 }
 
-// DELETE /admin/organizations/:orgId
+// DELETE /admin/organizations/:organizationId
 export async function scheduleDeleteOrganization(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const { orgId } = req.params;
+  const { organizationId } = req.params;
 
-  const result = await scheduleOrganizationDeletion(orgId as string);
+  const result = await scheduleOrganizationDeletion(organizationId as string);
 
   if ("error" in result) {
     switch (result.error) {
@@ -340,9 +340,9 @@ export async function resendDeletionEmail(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const { orgId } = req.params;
+  const { organizationId } = req.params;
 
-  if (!isScheduled(orgId as string)) {
+  if (!isScheduled(organizationId as string)) {
     sendError(
       res,
       400,
@@ -353,7 +353,7 @@ export async function resendDeletionEmail(
   }
 
   const org = await prisma.organization.findUnique({
-    where: { id: orgId },
+    where: { id: organizationId },
     select: { id: true, name: true, email: true },
   });
   if (!org) {
@@ -375,14 +375,14 @@ export async function resendDeletionEmail(
   }
 }
 
-// POST /admin/organizations/:orgId/cancel-deletion
+// POST /admin/organizations/:organizationId/cancel-deletion
 export async function cancelDeleteOrganization(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const { orgId } = req.params;
+  const { organizationId } = req.params;
 
-  const result = await cancelOrganizationDeletion(orgId as string);
+  const result = await cancelOrganizationDeletion(organizationId as string);
 
   if ("error" in result) {
     switch (result.error) {
@@ -406,7 +406,7 @@ export async function cancelDeleteOrganization(
   });
 }
 /**
- * GET /admin/organizations/:orgId/tier-stats
+ * GET /admin/organizations/:organizationId/tier-stats
  *
  * Retrieve tier-level metrics for a specific organization, with optional date filtering.
  */
@@ -436,7 +436,7 @@ export async function getOrgTierStats(
 }
 
 /**
- * GET /admin/organizations/:orgId/conversation-stats
+ * GET /admin/organizations/:organizationId/conversation-stats
  *
  * Return conversation metrics for a specific organization, with optional date filtering.
  */
@@ -466,7 +466,7 @@ export async function getOrgConversationStats(
 }
 
 /**
- * GET /admin/organizations/:orgId/ticket-stats
+ * GET /admin/organizations/:organizationId/ticket-stats
  *
  * Retrieve ticket statistics for a specific organization, with optional date filtering.
  */
@@ -496,7 +496,7 @@ export async function getOrgTicketStats(
 }
 
 /**
- * GET /admin/organizations/:orgId/csat
+ * GET /admin/organizations/:organizationId/csat
  *
  * Return customer satisfaction summary data for a specific organization.
  */
@@ -526,7 +526,7 @@ export async function getOrgCsat(
 }
 
 /**
- * GET /admin/organizations/:orgId/escalations
+ * GET /admin/organizations/:organizationId/escalations
  *
  * List active escalation tickets for a specific organization with pagination and optional date filtering.
  */
@@ -680,9 +680,9 @@ export async function getOrgConversations(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const { orgId } = req.params;
+  const { organizationId } = req.params;
 
-  const result = await getOrgConversationsService(orgId as string);
+  const result = await getOrgConversationsService(organizationId as string);
 
   if ("error" in result) {
     notFound(res, "Organization");
@@ -696,10 +696,10 @@ export async function getConversationById(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const { orgId, conversationId } = req.params;
+  const { organizationId, conversationId } = req.params;
 
   const result = await getConversationByIdService(
-    orgId as string,
+    organizationId as string,
     conversationId as string,
   );
 
@@ -718,7 +718,7 @@ export async function getConversationById(
 }
 
 /**
- * DELETE /admin/organizations/:orgId/conversations/:conversationId
+ * DELETE /admin/organizations/:organizationId/conversations/:conversationId
  *
  * Delete a completed conversation and its related records for the specified organization.
  */
@@ -726,10 +726,10 @@ export async function deleteConversation(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const { orgId, conversationId } = req.params;
+  const { organizationId, conversationId } = req.params;
 
   const result = await deleteConversationService(
-    orgId as string,
+    organizationId as string,
     conversationId as string,
   );
 
