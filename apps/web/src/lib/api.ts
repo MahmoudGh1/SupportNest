@@ -35,8 +35,8 @@ function normalizeApiBaseUrl(rawBaseUrl?: string) {
 	return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
 }
 
-// const BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE);
-const BASE_URL = "http://localhose:3001/api/v1";
+const BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE);
+// const BASE_URL = "http://localhost:3001/api/v1";
 
 type ApiRecord = Record<string, unknown>;
 
@@ -92,7 +92,7 @@ function normalizeApiKey(input: ApiRecord): ApiKey {
 
 async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
 	const session = getSession();
-	const response = await fetch(`http://localhost:3001/api/v1/admindashboard${path}`, {
+	const response = await fetch(`${BASE_URL}/admindashboard${path}`, {
 		...init,
 		credentials: "include",
 		headers: {
@@ -110,7 +110,7 @@ async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
 	async login(email: string, password: string): Promise<LoginResponse> {
-		const res = await fetch(`http://localhost:3001/api/v1/auth/login`, {
+		const res = await fetch(`${BASE_URL}/auth/login`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ email, password }),
@@ -127,7 +127,7 @@ export const api = {
 	},
 
 	async register(data: { email: string; password: string; firstName: string; lastName: string; businessName: string; planId: string }): Promise<LoginResponse> {
-		const res = await fetch(`http://localhost:3001/api/v1/auth/register`, {
+		const res = await fetch(`${BASE_URL}/auth/register`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(data),
@@ -139,7 +139,7 @@ export const api = {
 	},
 
 	async registerPaid(data: { email: string; password: string; firstName: string; lastName: string; businessName: string; planId: string; amount: number; currency?: string; isAnnual: boolean }): Promise<LoginResponse> {
-		const res = await fetch(`http://localhost:3001/api/v1/auth/register-paid`, {
+		const res = await fetch(`${BASE_URL}/auth/register-paid`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(data),
@@ -151,7 +151,7 @@ export const api = {
 	},
 
 	async registerInitial(data: { email: string; password: string; firstName: string; lastName: string }): Promise<{ userId: string; email: string; alreadyExists: boolean }> {
-		const res = await fetch(`http://localhost:3001/api/v1/auth/register`, {
+		const res = await fetch(`${BASE_URL}/auth/register`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(data),
@@ -163,7 +163,7 @@ export const api = {
 	},
 
 	async sendVerification(userId: string, email: string): Promise<void> {
-		const res = await fetch(`http://localhost:3001/api/v1/auth/send-verification`, {
+		const res = await fetch(`${BASE_URL}/auth/send-verification`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ userId, email }),
@@ -174,7 +174,7 @@ export const api = {
 	},
 
 	async verifyEmail(userId: string, code: string): Promise<void> {
-		const res = await fetch(`http://localhost:3001/api/v1/auth/verify-email`, {
+		const res = await fetch(`${BASE_URL}/auth/verify-email`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ userId, code }),
@@ -185,7 +185,7 @@ export const api = {
 	},
 
 	async completeRegistration(data: { userId: string; businessName: string; planId: string; amount: number; currency?: string; isAnnual: boolean }): Promise<LoginResponse> {
-		const res = await fetch(`http://localhost:3001/api/v1/auth/complete-registration`, {
+		const res = await fetch(`${BASE_URL}/auth/complete-registration`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(data),
@@ -197,7 +197,7 @@ export const api = {
 	},
 
 	async registerWithGoogle(idToken: string): Promise<{ userId: string; email: string; isNewUser: boolean }> {
-		const res = await fetch(`http://localhost:3001/api/v1/auth/google-register`, {
+		const res = await fetch(`${BASE_URL}/auth/google-register`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ idToken }),
@@ -209,7 +209,7 @@ export const api = {
 	},
 
 	async getPlans(): Promise<PricingPlan[]> {
-		const res = await fetch(`http://localhost:3001/api/v1/pricing`, {
+		const res = await fetch(`${BASE_URL}/pricing`, {
 			credentials: "include",
 		});
 		const data = await res.json();
@@ -218,7 +218,7 @@ export const api = {
 	},
 
 	async getMe(): Promise<AuthUser> {
-		const res = await fetch(`http://localhost:3001/api/v1/auth/me`, {
+		const res = await fetch(`${BASE_URL}/auth/me`, {
 			credentials: "include",
 		});
 		if (!res.ok) throw new Error("No active session");
@@ -227,7 +227,7 @@ export const api = {
 	},
 
 	async refreshToken(): Promise<void> {
-		const res = await fetch(`http://localhost:3001/api/v1/auth/refresh`, {
+		const res = await fetch(`${BASE_URL}/auth/refresh`, {
 			method: "POST",
 			credentials: "include",
 		});
@@ -238,7 +238,7 @@ export const api = {
 	},
 
 	async loginWithGoogle(idToken: string): Promise<LoginResponse> {
-		const res = await fetch(`http://localhost:3001/api/v1/auth/google`, {
+		const res = await fetch(`${BASE_URL}/auth/google`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ idToken }),
@@ -251,7 +251,7 @@ export const api = {
 	},
 
 	async forgotPassword(email: string): Promise<void> {
-		const res = await fetch(`http://localhost:3001/api/v1/auth/forgot-password`, {
+		const res = await fetch(`${BASE_URL}/auth/forgot-password`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ email }),
@@ -261,7 +261,7 @@ export const api = {
 	},
 
 	async resetPassword(token: string, newPassword: string): Promise<void> {
-		const res = await fetch(`http://localhost:3001/api/v1/auth/reset-password`, {
+		const res = await fetch(`${BASE_URL}/auth/reset-password`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ token, newPassword }),
@@ -271,7 +271,7 @@ export const api = {
 	},
 
 	async completePayment(data: { pricingId: string; amount: number; currency?: string; isAnnual: boolean }): Promise<{ paymentId: string; billingPeriodEnd: string }> {
-		const res = await fetch(`http://localhost:3001/api/v1/payments/complete`, {
+		const res = await fetch(`${BASE_URL}/payments/complete`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
@@ -283,7 +283,7 @@ export const api = {
 	},
 
 	async confirmPayment(paymentId: string): Promise<{ ok: boolean }> {
-		const res = await fetch(`http://localhost:3001/api/v1/payments/confirm`, {
+		const res = await fetch(`${BASE_URL}/payments/confirm`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ paymentId }),
@@ -295,7 +295,7 @@ export const api = {
 	},
 
 	async logout(): Promise<void> {
-		await fetch(`http://localhost:3001/api/v1/auth/logout`, {
+		await fetch(`${BASE_URL}/auth/logout`, {
 			method: "POST",
 			credentials: "include",
 		});
@@ -518,7 +518,7 @@ export const api = {
 			}
 		});
 		try {
-			const response = await fetch(`http://localhost:3001/api/v1/organizations/${user.organizationId}/knowledge?${params.toString()}`, {
+			const response = await fetch(`${BASE_URL}/organizations/${user.organizationId}/knowledge?${params.toString()}`, {
 				credentials: "include",
 			});
 			if (!response.ok) throw new Error(response.statusText);
@@ -539,7 +539,7 @@ export const api = {
 		formData.append("title", input.title);
 		formData.append("type", "PDF");
 
-		const response = await fetch(`http://localhost:3001/api/v1/organizations/${user.organizationId}/knowledge`, {
+		const response = await fetch(`${BASE_URL}/organizations/${user.organizationId}/knowledge`, {
 			method: "POST",
 			body: formData,
 			credentials: "include",
@@ -558,7 +558,7 @@ export const api = {
 		if (!user) throw new Error("User not found");
 
 		try {
-			const response = await fetch(`http://localhost:3001/api/v1/organizations/${user.organizationId}/knowledge/${id}`, {
+			const response = await fetch(`${BASE_URL}/organizations/${user.organizationId}/knowledge/${id}`, {
 				method: "DELETE",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",
@@ -589,7 +589,7 @@ export const api = {
 		lastVerifiedAt?: string;
 		configured: boolean;
 	}> {
-		const res = await fetch(`http://localhost:3001/api/v1/organizations/api-config`, {
+		const res = await fetch(`${BASE_URL}/organizations/api-config`, {
 			credentials: "include",
 		});
 		const data = await res.json();
@@ -598,7 +598,7 @@ export const api = {
 	},
 
 	async saveApiConfig(input: { baseUrl: string; authType: string; authValue: string; headerName?: string }): Promise<{ id: string; isVerified: boolean }> {
-		const res = await fetch(`http://localhost:3001/api/v1/organizations/api-config`, {
+		const res = await fetch(`${BASE_URL}/organizations/api-config`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
@@ -610,7 +610,7 @@ export const api = {
 	},
 
 	async verifyApiConfig(): Promise<{ isVerified: boolean; message: string }> {
-		const res = await fetch(`http://localhost:3001/api/v1/organizations/api-config/verify`, {
+		const res = await fetch(`${BASE_URL}/organizations/api-config/verify`, {
 			method: "POST",
 			credentials: "include",
 		});
@@ -622,7 +622,7 @@ export const api = {
 	async submitSwaggerUrl(input: { title: string; swaggerUrl: string }): Promise<{ documentId: string; status: string }> {
 		const user = getSession();
 		if (!user) throw new Error("User not found");
-		const res = await fetch(`http://localhost:3001/api/v1/organizations/${user.organizationId}/documents/swagger`, {
+		const res = await fetch(`${BASE_URL}/organizations/${user.organizationId}/documents/swagger`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
@@ -634,7 +634,7 @@ export const api = {
 	},
 
 	deleteAccount: (data: { fullName: string; organizationName: string }) =>
-		fetch(`http://localhost:3001/api/v1/users/me`, {
+		fetch(`${BASE_URL}/users/me`, {
 			method: "DELETE",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
@@ -659,7 +659,7 @@ export const api = {
 			document: { title: string; type: string } | null;
 		}[];
 	}> {
-		const res = await fetch(`http://localhost:3001/api/v1/organizations/tools/all`, {
+		const res = await fetch(`${BASE_URL}/organizations/tools/all`, {
 			credentials: "include",
 		});
 		const data = await res.json();
@@ -668,7 +668,7 @@ export const api = {
 	},
 
 	async toggleOrgTool(toolId: string): Promise<{ id: string; isActive: boolean }> {
-		const res = await fetch(`http://localhost:3001/api/v1/organizations/tools/${toolId}/toggle`, {
+		const res = await fetch(`${BASE_URL}/organizations/tools/${toolId}/toggle`, {
 			method: "PATCH",
 			credentials: "include",
 		});
@@ -680,7 +680,7 @@ export const api = {
 	// ─── SETTINGS ───────────────────────────────────────────────────────────────
 
 	async getUserProfile(): Promise<{ user: UserProfile }> {
-		const res = await fetch(`http://localhost:3001/api/v1/users/me`, {
+		const res = await fetch(`${BASE_URL}/users/me`, {
 			credentials: "include",
 		});
 		const data = await res.json();
@@ -689,7 +689,7 @@ export const api = {
 	},
 
 	async updateUserProfile(input: UpdateProfileInput): Promise<{ user: UserProfile }> {
-		const res = await fetch(`http://localhost:3001/api/v1/users/me`, {
+		const res = await fetch(`${BASE_URL}/users/me`, {
 			method: "PATCH",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
@@ -705,7 +705,7 @@ export const api = {
 	},
 
 	async updatePassword(input: UpdatePasswordInput): Promise<{ success: boolean }> {
-		const res = await fetch(`http://localhost:3001/api/v1/users/me/password`, {
+		const res = await fetch(`${BASE_URL}/users/me/password`, {
 			method: "PATCH",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
@@ -720,7 +720,7 @@ export const api = {
 	},
 
 	async getOrgProfile(): Promise<{ organization: OrgProfile }> {
-		const res = await fetch(`http://localhost:3001/api/v1/organizations/me`, {
+		const res = await fetch(`${BASE_URL}/organizations/me`, {
 			credentials: "include",
 		});
 		const data = await res.json();
@@ -731,7 +731,7 @@ export const api = {
 	async updateOrgProfile(input: { name: string; email: string }): Promise<{ organization: OrgProfile }> {
 		if (!input.name.trim()) throw new Error("Organization name is required.");
 		if (!input.email.trim()) throw new Error("Organization email is required.");
-		const res = await fetch(`http://localhost:3001/api/v1/organizations/me`, {
+		const res = await fetch(`${BASE_URL}/organizations/me`, {
 			method: "PATCH",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
@@ -745,7 +745,7 @@ export const api = {
 		return { organization: normalizeOrgProfile(data) };
 	},
 	async updateWidgetConfig(input: { title: string; greetingMessage: string; accentColor: string; placeholder: string }): Promise<{ organization: OrgProfile }> {
-		const res = await fetch(`http://localhost:3001/api/v1/organizations/widget-config`, {
+		const res = await fetch(`${BASE_URL}/organizations/widget-config`, {
 			method: "PATCH",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
@@ -756,7 +756,7 @@ export const api = {
 		return { organization: normalizeOrgProfile(data) };
 	},
 	async getApiKeys(): Promise<ApiKey[]> {
-		const response = await fetch(`http://localhost:3001/api/v1/dashboard/apikey/keys`, {
+		const response = await fetch(`${BASE_URL}/dashboard/apikey/keys`, {
 			credentials: "include",
 		});
 
@@ -765,7 +765,7 @@ export const api = {
 		return Array.isArray(data) ? data.map(normalizeApiKey) : [];
 	},
 	async createApiKey(input: { name: string; allowedOrigins: string[] }): Promise<ApiKey> {
-		const response = await fetch(`http://localhost:3001/api/v1/dashboard/apikey/create`, {
+		const response = await fetch(`${BASE_URL}/dashboard/apikey/create`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
@@ -792,7 +792,7 @@ export const api = {
 		return { ...createdKey, raw_key: rawKey, name: createdKey.name || input.name };
 	},
 	async revokeApiKey(id: string) {
-		const response = await fetch(`http://localhost:3001/api/v1/dashboard/apikey/${id}/revoke`, {
+		const response = await fetch(`${BASE_URL}/dashboard/apikey/${id}/revoke`, {
 			method: "PATCH",
 			credentials: "include",
 		});
@@ -822,7 +822,7 @@ export const api = {
 		amount: number;
 		currency: string;
 	}> {
-		const res = await fetch(`http://localhost:3001/api/v1/payments/create-intention`, {
+		const res = await fetch(`${BASE_URL}/payments/create-intention`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
@@ -834,7 +834,7 @@ export const api = {
 		return body;
 	},
 	async getPaymentHistory(): Promise<Array<{ id: string; status: string }>> {
-		const res = await fetch(`http://localhost:3001/api/v1/payments/history`, {
+		const res = await fetch(`${BASE_URL}/payments/history`, {
 			credentials: "include",
 		});
 		const data = await res.json().catch(() => []);
@@ -867,7 +867,7 @@ export const api = {
 			invitedBy: { firstName: string; lastName: string };
 		}[];
 	}> {
-		const res = await fetch(`http://localhost:3001/api/v1/invitations/team`, {
+		const res = await fetch(`${BASE_URL}/invitations/team`, {
 			credentials: "include",
 		});
 		if (!res.ok) throw new Error("Failed to fetch team");
@@ -875,7 +875,7 @@ export const api = {
 	},
 
 	async sendInvitation(email: string): Promise<void> {
-		const res = await fetch(`http://localhost:3001/api/v1/invitations/invite`, {
+		const res = await fetch(`${BASE_URL}/invitations/invite`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ email }),
@@ -886,7 +886,7 @@ export const api = {
 	},
 
 	async revokeInvitation(id: string): Promise<void> {
-		const res = await fetch(`http://localhost:3001/api/v1/invitations/invitations/${id}`, {
+		const res = await fetch(`${BASE_URL}/invitations/invitations/${id}`, {
 			method: "DELETE",
 			credentials: "include",
 		});
@@ -901,7 +901,7 @@ export const api = {
 		organizationName: string;
 		role: string;
 	}> {
-		const res = await fetch(`http://localhost:3001/api/v1/invitations/accept/${token}`, {
+		const res = await fetch(`${BASE_URL}/invitations/accept/${token}`, {
 			method: "GET",
 			credentials: "include",
 		});
@@ -911,7 +911,7 @@ export const api = {
 	},
 
 	async acceptInvitation(token: string, firstName: string, lastName: string, password: string): Promise<{ message: string; email: string }> {
-		const res = await fetch(`http://localhost:3001/api/v1/invitations/accept/${token}`, {
+		const res = await fetch(`${BASE_URL}/invitations/accept/${token}`, {
 			method: "POST",
 			credentials: "include",
 			headers: { "Content-Type": "application/json" },

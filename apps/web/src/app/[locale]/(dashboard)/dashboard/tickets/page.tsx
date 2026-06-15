@@ -49,10 +49,10 @@ interface Meta {
 function normalizeApiBaseUrl(rawBaseUrl?: string) {
 	const fallback = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
 	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");
-	return /\/api\/v1$/i.test(base) ? base : `http://localhost:3001/api/v1/api/v1`;
+	return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
 }
 
-const BASE = normalizeApiBaseUrl(
+const BASE_URL = normalizeApiBaseUrl(
 	process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE,
 );
 
@@ -107,14 +107,14 @@ async function apiGetTickets(filters?: {
 	if (filters?.status) qs.set("status", filters.status);
 	if (filters?.page) qs.set("page", String(filters.page));
 	qs.set("limit", String(filters?.limit ?? 50));
-	const res = await fetch(`http://localhost:3001/api/v1/tickets?${qs}`, { credentials: "include" });
+	const res = await fetch(`${BASE_URL}/tickets?${qs}`, { credentials: "include" });
 	const json = await res.json();
 	if (!res.ok) throw new Error(json.message ?? "Failed to fetch tickets");
 	return json.data;
 }
 
 async function apiGetMessages(conversationId: string): Promise<Message[]> {
-	const res = await fetch(`http://localhost:3001/api/v1/widget/conversations/${conversationId}/messages`, {
+	const res = await fetch(`${BASE_URL}/widget/conversations/${conversationId}/messages`, {
 		credentials: "include",
 	});
 	const json = await res.json();
@@ -123,7 +123,7 @@ async function apiGetMessages(conversationId: string): Promise<Message[]> {
 }
 
 async function apiStart(id: string): Promise<Ticket> {
-	const res = await fetch(`http://localhost:3001/api/v1/tickets/${id}/start`, {
+	const res = await fetch(`${BASE_URL}/tickets/${id}/start`, {
 		method: "PATCH",
 		credentials: "include",
 	});
@@ -133,7 +133,7 @@ async function apiStart(id: string): Promise<Ticket> {
 }
 
 async function apiResolve(id: string, note: string): Promise<Ticket> {
-	const res = await fetch(`http://localhost:3001/api/v1/tickets/${id}/resolve`, {
+	const res = await fetch(`${BASE_URL}/tickets/${id}/resolve`, {
 		method: "PATCH",
 		credentials: "include",
 		headers: { "Content-Type": "application/json" },

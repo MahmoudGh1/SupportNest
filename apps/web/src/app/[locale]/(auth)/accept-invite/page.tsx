@@ -112,7 +112,7 @@ function FormPanel() {
             setPageLoading(false);
             return;
         }
-        fetch(`http://localhost:3001/api/v1/invitations/accept/${token}`)
+        fetch(`${BASE_URL}/invitations/accept/${token}`)
             .then((res) => res.json())
             .then((data) => {
                 if (data.email) {
@@ -158,7 +158,7 @@ function FormPanel() {
         setSubmitting(true);
         setSubmitError("");
         try {
-            const res = await fetch(`http://localhost:3001/api/v1/invitations/accept/${token}`, {
+            const res = await fetch(`${BASE_URL}/invitations/accept/${token}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ firstName, lastName, password }),
