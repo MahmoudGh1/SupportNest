@@ -1,30 +1,30 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-brand:        #534AB7;
-  --color-brand-light:  #7F77DD;
-  --color-brand-mid:    #AFA9EC;
-  --color-brand-faint:  #EEEDFE;
-  --color-brand-dark:   #3C3489;
-  --color-dark:         #1a1830;
-  --color-dark-mid:     #3d3a55;
-  --color-body:         #64607a;
-  --color-border:       #e8e6f0;
-  --color-bg:           #ffffff;
-  --color-bg-soft:      #fafafa;
-  --color-bg-section:   #f6f5fc;
-  --color-success:      #1D9E75;
-  --color-success-bg:   #E1F5EE;
+  --color-brand: #534ab7;
+  --color-brand-light: #7f77dd;
+  --color-brand-mid: #afa9ec;
+  --color-brand-faint: #eeedfe;
+  --color-brand-dark: #3c3489;
+  --color-dark: #1a1830;
+  --color-dark-mid: #3d3a55;
+  --color-body: #64607a;
+  --color-border: #e8e6f0;
+  --color-bg: #ffffff;
+  --color-bg-soft: #fafafa;
+  --color-bg-section: #f6f5fc;
+  --color-success: #1d9e75;
+  --color-success-bg: #e1f5ee;
   --color-success-bg-rgb: rgba(29, 158, 117, 0.18);
-  --color-warning:      #F59E0B;
-  --color-warning-bg:   #FAEEDA;
+  --color-warning: #f59e0b;
+  --color-warning-bg: #faeeda;
   --color-warning-bg-rgb: rgba(245, 158, 11, 0.16);
-  --color-danger:       #EF4444;
-  --color-danger-bg:    #FCEBEB;
+  --color-danger: #ef4444;
+  --color-danger-bg: #fcebeb;
   --color-danger-bg-rgb: rgba(239, 68, 68, 0.16);
-  --color-info:         #4F46E5;
-  --color-sidebar:      #1a1830;
-  --font-sans: 'Sora', system-ui, sans-serif;
+  --color-info: #4f46e5;
+  --color-sidebar: #1a1830;
+  --font-sans: "Sora", system-ui, sans-serif;
 }
 
 :root {
@@ -39,7 +39,7 @@
   --nav-link-hover: #0d0d0d;
   --control-bg: rgba(255, 255, 255, 0.92);
   --control-border: rgba(0, 0, 0, 0.1);
-  --btn-primary-bg: #111111;
+  --btn-primary-bg: #534ab7;
   --btn-primary-text: #ffffff;
   --card-border: #e8e6f0;
   --input-focus: rgba(83, 74, 183, 0.5);
@@ -67,7 +67,7 @@ html.dark {
   --nav-link-hover: #ffffff;
   --control-bg: rgba(26, 24, 48, 0.92);
   --control-border: rgba(255, 255, 255, 0.12);
-  --btn-primary-bg: #534AB7;
+  --btn-primary-bg: #534ab7;
   --btn-primary-text: #ffffff;
   --card-border: rgba(255, 255, 255, 0.1);
   --input-focus: rgba(175, 169, 236, 0.6);
@@ -98,7 +98,9 @@ body {
   background: var(--page-bg);
   color: var(--page-text);
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 @layer utilities {
@@ -123,5 +125,7 @@ body {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }

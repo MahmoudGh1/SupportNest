@@ -11,7 +11,7 @@ router.get(
 	"/summary",
 	authMiddleware,
 	adminMiddleware(Role.ORG_ADMIN),
-	analyticsController.summary,
+	analyticsController.getSummary,
 );
 
 export default router;

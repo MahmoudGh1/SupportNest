@@ -63,6 +63,8 @@
 			isAuthenticated = false;
 			setTimeout(connect, reconnectDelay);
 			reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+			setTimeout(connect, reconnectDelay);
+			reconnectDelay = Math.min(reconnectDelay * 2, 30000);
 		};
 
 		ws.onerror = function (err) {
@@ -87,6 +89,8 @@
 	}
 
 	// ── 4. EVENT HANDLER ───────────────────────────────────────────────────────
+	function handleEvent(msg) {
+		const { type, payload } = msg;
 	function handleEvent(msg) {
 		const { type, payload } = msg;
 

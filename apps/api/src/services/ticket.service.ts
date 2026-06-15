@@ -44,9 +44,9 @@ const ticketSelect = {
 // ─── CREATE TICKET ────────────────────────────────────────────────────────────
 // Called by: AI Tier 2 agent (auto) OR human agent (manual) from dashboard
 export async function createTicket(
-  organizationId: string,
-  conversationId: string,
-  priority: TicketPriority = "MEDIUM",
+	orgId: string,
+	conversationId: string,
+	priority: TicketPriority = "MEDIUM",
 ) {
 	// 1. Verify the conversation exists and belongs to this org
 	const conversation = await prisma.conversation.findUnique({
@@ -58,7 +58,7 @@ export async function createTicket(
 		throw new AppError("Conversation not found.", 404);
 	}
 
-	if (conversation.organizationId !== organizationId) {
+	if (conversation.organizationId !== orgId) {
 		throw new AppError(
 			"Conversation does not belong to your organization.",
 			403,
@@ -79,7 +79,7 @@ export async function createTicket(
 		prisma.ticket.create({
 			data: {
 				conversationId,
-				organizationId: organizationId,
+				organizationId: orgId,
 				status: "OPEN",
 				priority,
 			},
@@ -96,7 +96,7 @@ export async function createTicket(
 
 // ─── GET TICKETS (org-scoped, paginated, filterable) ─────────────────────────
 export async function getTickets(
-	organizationId: string,
+	orgId: string,
 	filters: {
 		status?: TicketStatus | undefined;
 		priority?: TicketPriority | undefined;
@@ -110,7 +110,7 @@ export async function getTickets(
 	const skip = (page - 1) * limit;
 
 	const where = {
-		organizationId: organizationId,
+		organizationId: orgId,
 		...(filters.status && { status: filters.status }),
 		...(filters.priority && { priority: filters.priority }),
 		...(filters.assignedToId && { assignedToId: filters.assignedToId }),
@@ -134,14 +134,14 @@ export async function getTickets(
 }
 
 // ─── GET SINGLE TICKET ────────────────────────────────────────────────────────
-export async function getTicketById(organizationId: string, ticketId: string) {
+export async function getTicketById(orgId: string, ticketId: string) {
 	const ticket = await prisma.ticket.findUnique({
 		where: { id: ticketId },
 		select: ticketSelect,
 	});
 
 	if (!ticket) throw new AppError("Ticket not found.", 404);
-	if (ticket.organizationId !== organizationId)
+	if (ticket.organizationId !== orgId)
 		throw new AppError("Access denied.", 403);
 
 	return ticket;
@@ -149,13 +149,13 @@ export async function getTicketById(organizationId: string, ticketId: string) {
 
 // ─── ASSIGN TICKET ────────────────────────────────────────────────────────────
 export async function assignTicket(
-	organizationId: string,
+	orgId: string,
 	ticketId: string,
 	assignedToId: string,
 ) {
 	const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
 	if (!ticket) throw new AppError("Ticket not found.", 404);
-	if (ticket.organizationId !== organizationId)
+	if (ticket.organizationId !== orgId)
 		throw new AppError("Access denied.", 403);
 	if (ticket.status === "RESOLVED")
 		throw new AppError("Cannot assign a resolved ticket.", 400);
@@ -167,7 +167,7 @@ export async function assignTicket(
 	});
 
 	if (!agent) throw new AppError("Agent not found.", 404);
-	if (agent.organizationId !== organizationId)
+	if (agent.organizationId !== orgId)
 		throw new AppError("Agent does not belong to your organization.", 403);
 
 	return prisma.ticket.update({
@@ -179,13 +179,13 @@ export async function assignTicket(
 
 // ─── START TICKET (OPEN → IN_PROGRESS) ───────────────────────────────────────
 export async function startTicket(
-	organizationId: string,
+	orgId: string,
 	ticketId: string,
 	agentId: string,
 ) {
 	const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
 	if (!ticket) throw new AppError("Ticket not found.", 404);
-	if (ticket.organizationId !== organizationId)
+	if (ticket.organizationId !== orgId)
 		throw new AppError("Access denied.", 403);
 	if (ticket.status === "RESOLVED")
 		throw new AppError("Ticket is already resolved.", 400);
@@ -204,13 +204,13 @@ export async function startTicket(
 
 // ─── RESOLVE TICKET ───────────────────────────────────────────────────────────
 export async function resolveTicket(
-	organizationId: string,
+	orgId: string,
 	ticketId: string,
 	resolutionNote: string | undefined,
 ) {
 	const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
 	if (!ticket) throw new AppError("Ticket not found.", 404);
-	if (ticket.organizationId !== organizationId)
+	if (ticket.organizationId !== orgId)
 		throw new AppError("Access denied.", 403);
 	if (ticket.status === "RESOLVED")
 		throw new AppError("Ticket is already resolved.", 400);

@@ -188,7 +188,7 @@ export async function runRouter(
 	if (smallTalkReply) {
 		await writeAgentLog({
 			conversationId,
-			tier: AgentTier.ROUTER,
+			tier: AgentTier.TIER0,
 			action: AgentAction.RESOLVED,
 			input: latestMessage,
 			output: "Matched small talk pattern, responded without invoking any LLM",
@@ -239,7 +239,7 @@ export async function runRouter(
 	if (routingResult.smallTalkReply) {
 		await writeAgentLog({
 			conversationId,
-			tier: AgentTier.ROUTER,
+			tier: AgentTier.TIER0,
 			action: AgentAction.RESOLVED,
 			input: latestMessage,
 			output: "Handled as small talk, no tier invoked",
@@ -316,6 +316,7 @@ export async function runRouter(
 
 		const reviewStart = Date.now();
 
+		// TODO unhandled catch error
 		const { parsed: reviewResult, tokensUsed: reviewTokens } =
 			await callRouterLLM(reviewPrompt);
 
@@ -332,13 +333,13 @@ export async function runRouter(
 		const validatedReviewDecision = validateReviewDecision(reviewDecision);
 		await writeAgentLog({
 			conversationId,
-			tier: AgentTier.ROUTER,
+			tier: verdict === "approved" ? currentTier : AgentTier.ROUTER, // RESOLVED → owning tier; REJECTED_OUTPUT → router's own call
 			action: validatedReviewDecision as AgentAction,
 			input: tierResponse.responseText,
 			output: reviewResult.reviewReason,
 			confidenceScore: tierResponse.agentLog.confidenceScore,
 			latencyMs: reviewLatency,
-			tokensUsed: reviewTokens,
+			tokensUsed: reviewTokens + (tierResponse.agentLog.tokensUsed ?? 0),
 		});
 
 		// -- Approved: return the response

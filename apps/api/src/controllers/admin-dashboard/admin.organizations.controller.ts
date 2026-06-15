@@ -19,7 +19,8 @@ import {
   deleteConversationService,
   getOrgConversationsService,
   getConversationByIdService,
-  deleteOrganizationService,
+  cancelOrganizationDeletion,
+  scheduleOrganizationDeletion,
 } from "../../services/admin-dashboard/organization.service.js";
 import {
   parsePagination,
@@ -31,6 +32,8 @@ import {
 import { parseDateRange } from "../../utils/helpers.js";
 import type { AuthenticatedRequest } from "src/types/auth.types.js";
 import prisma from "src/config/prisma.js";
+import { isScheduled } from "src/queues/deletion.queue.js";
+import { sendOrgDeletionScheduledEmail } from "src/utils/mailer.js";
 
 /**
  * Normalize a URL/query parameter value to a single string.
@@ -97,7 +100,7 @@ export async function getOrganizations(
 }
 
 /**
- * GET /admin/organizations/:organizationId
+ * GET /admin/organizations/:orgId
  *
  * Return detailed organization data for the specified organization id.
  */
@@ -183,7 +186,7 @@ export async function createOrganization(
 }
 
 /**
- * PATCH /admin/organizations/:organizationId
+ * PATCH /admin/organizations/:orgId
  *
  * Update allowed organization fields for the specified organization id.
  */
@@ -247,7 +250,7 @@ export async function updateOrganization(
 }
 
 /**
- * PATCH /admin/organizations/:organizationId/suspend
+ * PATCH /admin/organizations/:orgId/suspend
  *
  * Suspend an organization by setting its active flag to false.
  */
@@ -274,7 +277,7 @@ export async function suspendOrganization(
 }
 
 /**
- * PATCH /admin/organizations/:organizationId/activate
+ * PATCH /admin/organizations/:orgId/activate
  *
  * Reactivate an organization by setting its active flag to true.
  */
@@ -300,39 +303,110 @@ export async function activateOrganization(
   res.json({ message: "Organization activated." });
 }
 
-export async function deleteOrganization(
+// DELETE /admin/organizations/:orgId
+export async function scheduleDeleteOrganization(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const { organizationId } = req.params;
+  const { orgId } = req.params;
 
-  const result = await deleteOrganizationService(organizationId as string);
+  const result = await scheduleOrganizationDeletion(orgId as string);
 
   if ("error" in result) {
     switch (result.error) {
       case "ORG_NOT_FOUND":
         notFound(res, "Organization");
         return;
-      case "ORG_HAS_ACTIVE_CONVERSATIONS":
+      case "ALREADY_SCHEDULED":
         sendError(
           res,
           400,
-          "ORG_HAS_ACTIVE_CONVERSATIONS",
-          "Cannot delete an organization with active conversations. Close them first.",
+          "ALREADY_SCHEDULED",
+          "Organization deletion is already scheduled.",
         );
         return;
     }
   }
 
   res.json({
-    message: "Organization and all related data deleted successfully.",
-    deleted: {
-      organization_id: result.organization_id,
-    },
+    message:
+      "Organization scheduled for deletion in 30 minutes. A notification email has been sent.",
+    scheduled_at: result.scheduled_at,
+    deletes_at: result.deletes_at,
+  });
+}
+
+export async function resendDeletionEmail(
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> {
+  const { orgId } = req.params;
+
+  if (!isScheduled(orgId as string)) {
+    sendError(
+      res,
+      400,
+      "NOT_SCHEDULED",
+      "No scheduled deletion found for this organization.",
+    );
+    return;
+  }
+
+  const org = await prisma.organization.findUnique({
+    where: { id: orgId },
+    select: { id: true, name: true, email: true },
+  });
+  if (!org) {
+    notFound(res, "Organization");
+    return;
+  }
+
+  try {
+    const deletesAt = new Date(Date.now() + 30 * 60 * 1000);
+    await sendOrgDeletionScheduledEmail(org.email, org.name, deletesAt);
+    res.json({ message: "Deletion notification email resent successfully." });
+  } catch (err) {
+    sendError(
+      res,
+      500,
+      "EMAIL_FAILED",
+      "Failed to send email. Check SMTP settings.",
+    );
+  }
+}
+
+// POST /admin/organizations/:orgId/cancel-deletion
+export async function cancelDeleteOrganization(
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> {
+  const { orgId } = req.params;
+
+  const result = await cancelOrganizationDeletion(orgId as string);
+
+  if ("error" in result) {
+    switch (result.error) {
+      case "ORG_NOT_FOUND":
+        notFound(res, "Organization");
+        return;
+      case "NOT_SCHEDULED":
+        sendError(
+          res,
+          400,
+          "NOT_SCHEDULED",
+          "This organization has no scheduled deletion to cancel.",
+        );
+        return;
+    }
+  }
+
+  res.json({
+    message:
+      "Organization deletion cancelled. A confirmation email has been sent to the organization.",
   });
 }
 /**
- * GET /admin/organizations/:organizationId/tier-stats
+ * GET /admin/organizations/:orgId/tier-stats
  *
  * Retrieve tier-level metrics for a specific organization, with optional date filtering.
  */
@@ -362,7 +436,7 @@ export async function getOrgTierStats(
 }
 
 /**
- * GET /admin/organizations/:organizationId/conversation-stats
+ * GET /admin/organizations/:orgId/conversation-stats
  *
  * Return conversation metrics for a specific organization, with optional date filtering.
  */
@@ -392,7 +466,7 @@ export async function getOrgConversationStats(
 }
 
 /**
- * GET /admin/organizations/:organizationId/ticket-stats
+ * GET /admin/organizations/:orgId/ticket-stats
  *
  * Retrieve ticket statistics for a specific organization, with optional date filtering.
  */
@@ -422,7 +496,7 @@ export async function getOrgTicketStats(
 }
 
 /**
- * GET /admin/organizations/:organizationId/csat
+ * GET /admin/organizations/:orgId/csat
  *
  * Return customer satisfaction summary data for a specific organization.
  */
@@ -452,7 +526,7 @@ export async function getOrgCsat(
 }
 
 /**
- * GET /admin/organizations/:organizationId/escalations
+ * GET /admin/organizations/:orgId/escalations
  *
  * List active escalation tickets for a specific organization with pagination and optional date filtering.
  */
@@ -606,9 +680,9 @@ export async function getOrgConversations(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const { organizationId } = req.params;
+  const { orgId } = req.params;
 
-  const result = await getOrgConversationsService(organizationId as string);
+  const result = await getOrgConversationsService(orgId as string);
 
   if ("error" in result) {
     notFound(res, "Organization");
@@ -622,10 +696,10 @@ export async function getConversationById(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const { organizationId, conversationId } = req.params;
+  const { orgId, conversationId } = req.params;
 
   const result = await getConversationByIdService(
-    organizationId as string,
+    orgId as string,
     conversationId as string,
   );
 
@@ -644,7 +718,7 @@ export async function getConversationById(
 }
 
 /**
- * DELETE /admin/organizations/:organizationId/conversations/:conversationId
+ * DELETE /admin/organizations/:orgId/conversations/:conversationId
  *
  * Delete a completed conversation and its related records for the specified organization.
  */
@@ -652,10 +726,10 @@ export async function deleteConversation(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const { organizationId, conversationId } = req.params;
+  const { orgId, conversationId } = req.params;
 
   const result = await deleteConversationService(
-    organizationId as string,
+    orgId as string,
     conversationId as string,
   );
 

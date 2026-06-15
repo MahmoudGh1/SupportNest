@@ -12,7 +12,6 @@ export const knowledgeWorker = new Worker(
 	async (job) => {
 		const { documentId, fileUrl, organizationId } = job.data;
 
-
 		const document = await prisma.knowledgeDocument.findUnique({
 			where: { id: documentId },
 			select: { type: true },
@@ -30,9 +29,14 @@ export const knowledgeWorker = new Worker(
 		// 5. Store chunks + embeddings in pgvector
 		try {
 			if (API_DOC_TYPES.includes(document.type)) {
-				await extractToolsFromDocument(documentId, organizationId, fileUrl, document.type);
+				await extractToolsFromDocument(
+					documentId,
+					orgId,
+					fileUrl,
+					document.type,
+				);
 			} else {
-				await ingestDocument(fileUrl, documentId, organizationId);
+				await ingestDocument(fileUrl, documentId, orgId, document.type);
 				await prisma.knowledgeDocument.update({
 					where: { id: documentId },
 					data: { status: "READY" },
@@ -51,10 +55,19 @@ knowledgeWorker.on("completed", (job) => {
 
 knowledgeWorker.on("failed", async (job, err) => {
 	console.error(`Document ${job?.id} failed:`, err.message);
-	if (job?.data?.documentId) {
+
+	const attemptsMade = job?.attemptsMade ?? 0;
+	const maxAttempts = job?.opts?.attempts ?? 1;
+
+	if (job?.data?.documentId && attemptsMade >= maxAttempts) {
+		// only declare "FAILED" after all the attempts exhausted
 		await prisma.knowledgeDocument.update({
 			where: { id: job.data.documentId },
 			data: { status: "FAILED" },
 		});
 	}
+});
+
+knowledgeWorker.on("ready", () => {
+	console.log("[knowledgeWorker] connected and listening for jobs");
 });

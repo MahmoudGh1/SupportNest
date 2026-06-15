@@ -9,6 +9,7 @@ import notFoundHandler from "./middlewares/notFoundHandler.middleware.js";
 import { rateLimit } from "./utils/rateLimiter.util.js";
 import "./workers/knowledgeWorker.js";
 import "./workers/conversationCloseWorker.js";
+import "./workers/analyticsWorker.js";
 import conversationsRoutes from "./routes/conversations.routes.js";
 import ApiKeyRouter from "./routes/apiKey.routes.js";
 import WidgetRouter from "./routes/widget.routes.js";
@@ -31,6 +32,7 @@ import knowledgeRouter from "./routes/knowledge.routes.js";
 import tier2Router from "./routes/tier2.routes.js";
 import reportRouter from "./routes/reporter.routes.js";
 import AdminRoutes from "./routes/admin-dashboard.routes.js";
+import analyticsRouter from "./routes/analytics.routes.js";
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV || "development"}` });
 
@@ -98,7 +100,7 @@ app.use("/api/v1/tickets", ticketRouter);
 app.use("/api/v1/tier2", tier2Router);
 
 app.use("/api/v1/admindashboard", AdminRoutes);
-
+app.use("/api/v1/analytics", analyticsRouter);
 app.use(notFoundHandler);
 
 app.use(errorHandler);

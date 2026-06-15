@@ -52,7 +52,7 @@ export async function getTickets(
 	next: NextFunction,
 ): Promise<void> {
 	try {
-		const organizationId = (req.user as any).organizationId;
+		const orgId = (req.user as any).organizationId;
 
 		const result = await ticketService.getTickets(organizationId, {
 			status: req.query.status as TicketStatus | undefined,
