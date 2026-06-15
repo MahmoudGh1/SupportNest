@@ -18,10 +18,10 @@ const CheckLight = () => (
     fill="none"
     className="shrink-0 mt-0.5"
   >
-    <circle cx="7.5" cy="7.5" r="7.5" fill="#111" fillOpacity="0.08" />
+    <circle cx="7.5" cy="7.5" r="7.5" fill="#111" fillOpacity="0.25" />
     <path
       d="M4.5 7.5l2 2 4-4"
-      stroke="white"
+      stroke="#111"
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -37,10 +37,16 @@ const CheckDark = () => (
     fill="none"
     className="shrink-0 mt-0.5"
   >
-    <circle cx="7.5" cy="7.5" r="7.5" fill="currentColor" fillOpacity="0.08" />
+    <circle
+      cx="7.5"
+      cy="7.5"
+      r="7.5"
+      fill="var(--btn-primary-bg)"
+      fillOpacity="0.15"
+    />
     <path
       d="M4.5 7.5l2 2 4-4"
-      stroke="currentColor"
+      stroke="var(--btn-primary-bg)"
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -169,7 +175,7 @@ function PlanCard({
   const featureColor = isWhite ? "text-white/70" : "sn-muted";
 
   const ctaCls = isWhite
-    ? "bg-white text-[#111] hover:bg-white/90"
+    ? "bg-white text-[var(--btn-primary-bg)] hover:bg-white/90"
     : "bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] hover:opacity-90";
 
   const wrapperCls = featured
@@ -177,7 +183,7 @@ function PlanCard({
     : "rounded-2xl shadow-sm";
 
   const cardBg = isWhite
-    ? "bg-[#111]"
+    ? "bg-[var(--btn-primary-bg)]"
     : isEnterprise
       ? "sn-surface"
       : "sn-surface border";

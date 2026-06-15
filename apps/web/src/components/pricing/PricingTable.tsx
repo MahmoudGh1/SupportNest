@@ -1,8 +1,16 @@
 "use client";
 
+import Link from "next/link";
+
 /* ── icons ── */
 const Tick = ({ variant }: { variant: "light" | "dark" | "black" }) => (
-  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="flex-shrink-0">
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 18 18"
+    fill="none"
+    className="flex-shrink-0"
+  >
     <circle
       cx="9"
       cy="9"
@@ -21,7 +29,13 @@ const Tick = ({ variant }: { variant: "light" | "dark" | "black" }) => (
 );
 
 const Cross = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="flex-shrink-0 opacity-25">
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    className="flex-shrink-0 opacity-25"
+  >
     <path
       d="M5 5l6 6M11 5l-6 6"
       stroke="currentColor"
@@ -192,7 +206,7 @@ export default function PricingTable() {
           --text-table-main: #1a1830;
           --text-table-body: #53506b;
           --text-table-muted: #9e9aad;
-          --bg-btn-primary: #111111;
+          --bg-btn-primary: #534ab7;
           --text-btn-primary: #ffffff;
         }
 
@@ -206,7 +220,7 @@ export default function PricingTable() {
           --text-table-body: #aaa7c2;
           --text-table-muted: #6b678a;
           --bg-btn-primary: #ffffff;
-          --text-btn-primary: #111111;
+          --text-btn-primary:#534ab7;
         }
 
         .text-var-text-main { color: var(--text-table-main); }
@@ -241,7 +255,7 @@ export default function PricingTable() {
           </div>
 
           {/* Pro — Permanent Midnight Slate Highlight Column */}
-          <div className="px-4 py-5 text-center bg-[#11111e] border-b border-l border-black/20 dark:border-white/10 shadow-lg relative z-10">
+          <div className="px-4 py-5 text-center bg-[#534ab7] border-b border-l border-black/20 dark:border-white/10 shadow-lg relative z-10">
             <div className="flex items-center justify-center gap-1.5 mb-1">
               <p className="text-white/50 text-[11px] font-bold uppercase tracking-[0.13em]">
                 Pro
@@ -278,20 +292,23 @@ export default function PricingTable() {
                 </p>
               </div>
               <div className="bg-var-group border-l border-var-light" />
-              <div className="bg-[#0e0e1a] border-l border-black/20 dark:border-white/5" />
+              <div className="bg-[#534ab7] border-l border-black/20 dark:border-white/5" />
               <div className="bg-var-group border-l border-var-light" />
             </div>
 
             {/* Rows */}
             {group.rows.map((row, ri) => {
-              const isLast = gi === GROUPS.length - 1 && ri === group.rows.length - 1;
+              const isLast =
+                gi === GROUPS.length - 1 && ri === group.rows.length - 1;
               return (
                 <div
                   key={row.label}
                   className={`grid grid-cols-[1fr_160px_160px_160px] ${!isLast ? "border-b border-var-light" : ""} hover:bg-var-strip transition-colors group`}
                 >
                   <div className="px-6 py-4 bg-var-card group-hover:bg-var-strip flex flex-col justify-center">
-                    <p className="text-var-text-main font-medium text-[13.5px]">{row.label}</p>
+                    <p className="text-var-text-main font-medium text-[13.5px]">
+                      {row.label}
+                    </p>
                     {row.note && (
                       <p className="text-var-text-muted text-[11px] mt-0.5">
                         {row.note}
@@ -305,7 +322,7 @@ export default function PricingTable() {
                   </div>
 
                   {/* Pro */}
-                  <div className="px-4 py-4 flex items-center justify-center bg-[#11111e] border-l border-black/20 dark:border-white/5 text-white">
+                  <div className="px-4 py-4 flex items-center justify-center bg-[#534ab7] border-l border-black/20 dark:border-white/5 text-white">
                     <CellValue val={row.pro} variant="black" />
                   </div>
 
@@ -323,28 +340,28 @@ export default function PricingTable() {
         <div className="grid grid-cols-[1fr_160px_160px_160px] border-t border-var">
           <div className="px-6 py-5 bg-var-card" />
           <div className="px-4 py-5 bg-var-card border-l border-var-light flex items-center justify-center">
-            <a
+            <Link
               href="/register?plan=starter"
               className="text-[12px] font-bold bg-var-text-main text-var-card hover:opacity-90 px-4 py-2.5 rounded-full text-center w-full no-underline transition-opacity shadow-sm"
             >
               Get started
-            </a>
+            </Link>
           </div>
-          <div className="px-4 py-5 bg-[#11111e] border-l border-black/20 dark:border-white/5 flex items-center justify-center">
-            <a
+          <div className="px-4 py-5 bg-[#534ab7] border-l border-black/20 dark:border-white/5 flex items-center justify-center">
+            <Link
               href="/register?plan=pro"
               className="text-[12px] font-bold text-[#111] bg-white hover:bg-white/90 px-4 py-2.5 rounded-full text-center w-full no-underline transition-colors shadow-sm"
             >
               Start free trial
-            </a>
+            </Link>
           </div>
           <div className="px-4 py-5 bg-var-card border-l border-var-light flex items-center justify-center">
-            <a
+            <Link
               href="/contact"
               className="text-[12px] font-bold bg-var-text-main text-var-card hover:opacity-90 px-4 py-2.5 rounded-full text-center w-full no-underline transition-opacity shadow-sm"
             >
               Contact sales
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -352,11 +369,38 @@ export default function PricingTable() {
       {/* ── MOBILE ACCORDION CARD LIST ─────────────────────────────────────── */}
       <div className="block md:hidden space-y-12">
         {[
-          { name: "Starter", price: "$29", period: "/ mo", tag: null, key: "starter" as const, bg: "bg-var-card", textTheme: "text-var-text-main" },
-          { name: "Pro", price: "$79", period: "/ mo", tag: "Popular", key: "pro" as const, bg: "bg-[#11111e]", textTheme: "text-white" },
-          { name: "Enterprise", price: "Custom", period: "", tag: null, key: "enterprise" as const, bg: "bg-var-card", textTheme: "text-var-text-main" }
+          {
+            name: "Starter",
+            price: "$29",
+            period: "/ mo",
+            tag: null,
+            key: "starter" as const,
+            bg: "bg-var-card",
+            textTheme: "text-var-text-main",
+          },
+          {
+            name: "Pro",
+            price: "$79",
+            period: "/ mo",
+            tag: "Popular",
+            key: "pro" as const,
+            bg: "bg-[#534ab7]",
+            textTheme: "text-white",
+          },
+          {
+            name: "Enterprise",
+            price: "Custom",
+            period: "",
+            tag: null,
+            key: "enterprise" as const,
+            bg: "bg-var-card",
+            textTheme: "text-var-text-main",
+          },
         ].map((tier) => (
-          <div key={tier.name} className={`rounded-2xl border ${tier.key === 'pro' ? 'border-[#534AB7] ring-4 ring-[#534AB7]/10' : 'border-var'} ${tier.bg} overflow-hidden shadow-md`}>
+          <div
+            key={tier.name}
+            className={`rounded-2xl border ${tier.key === "pro" ? "border-[#534AB7] ring-4 ring-[#534AB7]/10" : "border-var"} ${tier.bg} overflow-hidden shadow-md`}
+          >
             {/* Header block */}
             <div className="p-5 text-center border-b border-var-light relative">
               {tier.tag && (
@@ -364,13 +408,21 @@ export default function PricingTable() {
                   {tier.tag}
                 </span>
               )}
-              <p className={`text-[11px] font-bold uppercase tracking-[0.13em] opacity-50 ${tier.textTheme}`}>
+              <p
+                className={`text-[11px] font-bold uppercase tracking-[0.13em] opacity-50 ${tier.textTheme}`}
+              >
                 {tier.name}
               </p>
-              <p className={`text-3xl font-extrabold tracking-tight mt-1.5 ${tier.textTheme}`}>
+              <p
+                className={`text-3xl font-extrabold tracking-tight mt-1.5 ${tier.textTheme}`}
+              >
                 {tier.price}
               </p>
-              {tier.period && <p className={`text-xs opacity-40 mt-0.5 ${tier.textTheme}`}>{tier.period}</p>}
+              {tier.period && (
+                <p className={`text-xs opacity-40 mt-0.5 ${tier.textTheme}`}>
+                  {tier.period}
+                </p>
+              )}
             </div>
 
             {/* List Metrics content inside sections */}
@@ -378,17 +430,39 @@ export default function PricingTable() {
               {GROUPS.map((group) => (
                 <div key={group.title} className="p-1">
                   <div className="px-4 py-2 bg-var-group rounded-lg my-1">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-var-text-muted">{group.title}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-var-text-muted">
+                      {group.title}
+                    </p>
                   </div>
                   <div className="divide-y divide-var-light/50">
                     {group.rows.map((row) => (
-                      <div key={row.label} className="px-4 py-3 flex items-center justify-between gap-4">
+                      <div
+                        key={row.label}
+                        className="px-4 py-3 flex items-center justify-between gap-4"
+                      >
                         <div>
-                          <p className={`text-xs font-medium ${tier.key === 'pro' ? 'text-white/90' : 'text-var-text-main'}`}>{row.label}</p>
-                          {row.note && <p className="text-[10px] text-var-text-muted mt-0.5">{row.note}</p>}
+                          <p
+                            className={`text-xs font-medium ${tier.key === "pro" ? "text-white/90" : "text-var-text-main"}`}
+                          >
+                            {row.label}
+                          </p>
+                          {row.note && (
+                            <p className="text-[10px] text-var-text-muted mt-0.5">
+                              {row.note}
+                            </p>
+                          )}
                         </div>
-                        <div className={tier.key === 'pro' ? 'text-white' : 'text-var-text-main'}>
-                          <CellValue val={row[tier.key]} variant={tier.key === 'pro' ? 'black' : 'light'} />
+                        <div
+                          className={
+                            tier.key === "pro"
+                              ? "text-white"
+                              : "text-var-text-main"
+                          }
+                        >
+                          <CellValue
+                            val={row[tier.key]}
+                            variant={tier.key === "pro" ? "black" : "light"}
+                          />
                         </div>
                       </div>
                     ))}
@@ -400,9 +474,15 @@ export default function PricingTable() {
             {/* CTA Execution footer tier context */}
             <div className="p-4 border-t border-var-light bg-black/5 dark:bg-white/5">
               <a
-                href={tier.key === "enterprise" ? "/contact" : `/register?plan=${tier.key}`}
+                href={
+                  tier.key === "enterprise"
+                    ? "/contact"
+                    : `/register?plan=${tier.key}`
+                }
                 className={`block text-center py-3 px-4 rounded-xl font-bold text-xs shadow-sm transition-opacity no-underline hover:opacity-95 ${
-                  tier.key === "pro" ? "bg-white text-[#111]" : "bg-var-text-main text-var-card"
+                  tier.key === "pro"
+                    ? "bg-white text-[#111]"
+                    : "bg-var-text-main text-var-card"
                 }`}
               >
                 {tier.key === "starter" && "Get started"}
