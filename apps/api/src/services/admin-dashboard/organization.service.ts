@@ -8,7 +8,6 @@
  * It also exposes a transactional conversation deletion helper used by the
  * admin dashboard when removing completed conversations safely.
  */
-import prisma from "src/config/prisma.js";
 import { parseDateRange, round2, safeAvg } from "../../utils/helpers.js";
 import {
   pricingSelect,
@@ -27,6 +26,7 @@ import {
   type TierStats,
 } from "src/types/admin-dashboard.types.js";
 import type { promises } from "node:dns";
+import prisma  from "../../config/prisma.js";
 
 // ─── Build tier stats from agent_logs + conversation_analytics ────────────────
 

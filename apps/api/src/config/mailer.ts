@@ -58,3 +58,20 @@ export async function sendRevocationEmail(toEmail: string, businessName: string)
 	});
 	console.log("AFTER SEND REVOKE");
 }
+
+export async function sendPendingDeletionEmail(toEmail: string, businessName: string, deletionTime: string): Promise<void> {
+	await transporter.sendMail({
+		from: `"SupportNest" <${process.env.GMAIL_USER}>`,
+		to: toEmail,
+		subject: `Notice: Your organization "${businessName}" is scheduled for deletion`,
+		html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #ef4444;">Scheduled Deletion Notice</h2>
+        <p>This is to inform you that your organization <strong>${businessName}</strong> has been scheduled for permanent deletion by a Platform Administrator.</p>
+        <p>The deletion will occur on <strong>${deletionTime}</strong> (approximately 30 minutes from now).</p>
+        <p><strong>Warning:</strong> Once deleted, all your data, including users, conversations, and configuration, will be permanently lost and cannot be recovered.</p>
+        <p style="margin-top: 24px; color: #6b7280; font-size: 14px;">If you believe this is an error, please contact support immediately.</p>
+      </div>
+    `,
+	});
+}

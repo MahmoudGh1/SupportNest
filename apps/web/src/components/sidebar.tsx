@@ -41,6 +41,13 @@ const navItems = [
 	{ icon: "settings", label: msg`Settings`, page: "settings" },
 	{ icon: "plug", label: msg`API Tools`, page: "tools" },
 	{ icon: "user-circle", label: msg`Profile`, page: "profile" },
+	// In navItems array, after "organizations":
+{
+  icon: "mail",
+  label: msg`Contact Submissions`,
+  page: "contact-submissions",
+  superAdminOnly: true,
+},
 ];
 
 interface SidebarProps {
@@ -143,7 +150,7 @@ export function Sidebar({
 					.filter((item) => {
 						if (isSuperAdmin) {
 							// For Super Admin, only show Admin, Organizations, and Profile
-							return ["admin", "organizations", "profile"].includes(item.page);
+							return ["admin", "organizations", "contact-submissions", "profile"].includes(item.page);
 						}
 						// For others, show everything EXCEPT Admin
 						return !item.superAdminOnly;

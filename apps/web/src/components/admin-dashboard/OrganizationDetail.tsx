@@ -190,11 +190,14 @@ export function OrganizationDetail({ orgId, onClose }: Props) {
 							padding: "8px 14px",
 							borderRadius: 8,
 							background: org.is_active ? S.dangerBg : S.greenBg,
-							color: org.is_active ? S.danger : S.green,
-							border: "none",
+							color: org.is_active ? S.danger : "#0F6E56",
+							border: `1px solid ${org.is_active ? S.dangerBg : S.greenBg}`,
 							fontWeight: 600,
 							fontSize: 12,
 							cursor: "pointer",
+							display: "flex",
+							alignItems: "center",
+							gap: 6,
 						}}
 						onClick={async () => {
 							try {
@@ -205,8 +208,34 @@ export function OrganizationDetail({ orgId, onClose }: Props) {
 							} catch (e: any) { alert(e.message); }
 						}}
 					>
-						<i className={`ti ti-${org.is_active ? "player-pause" : "player-play"}`} style={{ marginRight: 6 }} />
+						<i className={`ti ti-${org.is_active ? "ban" : "circle-check"}`} />
 						{org.is_active ? "Suspend" : "Activate"}
+					</button>
+					<button
+						style={{
+							padding: "8px 14px",
+							borderRadius: 8,
+							background: S.danger,
+							color: "#fff",
+							border: "none",
+							fontWeight: 600,
+							fontSize: 12,
+							cursor: "pointer",
+							display: "flex",
+							alignItems: "center",
+							gap: 6,
+						}}
+						onClick={async () => {
+							if (confirm(`Are you sure you want to permanently delete ${org.name}? This cannot be undone.`)) {
+								try {
+									await api.deleteAdminOrganization(orgId);
+									onClose();
+								} catch (e: any) { alert(e.message); }
+							}
+						}}
+					>
+						<i className="ti ti-trash" />
+						Delete
 					</button>
 				</div>
 			</div>

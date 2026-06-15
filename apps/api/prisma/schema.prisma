@@ -33,25 +33,29 @@ model Organization {
   tickets               Ticket[]
   toolDefinitions       ToolDefinition[]
   users                 User[]
-
+  scheduledDeletionAt   DateTime?
   @@map("organizations")
 }
 
 model User {
-  id                 String              @id @default(uuid()) @db.Uuid
-  organizationId     String?             @db.Uuid
-  email              String              @unique
-  passwordHash       String
-  role               Role
-  firstName          String
-  lastName           String
-  isActive           Boolean             @default(true)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  sentInvitations    Invitation[]        @relation("SentInvitations")
-  knowledgeDocuments KnowledgeDocument[]
-  assignedTickets    Ticket[]
-  organization       Organization?       @relation(fields: [organizationId], references: [id])
+  id                  String                @id @default(uuid()) @db.Uuid
+  organizationId      String?               @db.Uuid
+  email               String                @unique
+  passwordHash        String
+  role                Role
+  firstName           String
+  lastName            String
+  isActive            Boolean               @default(true)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  emailVerifiedAt     DateTime?
+  isEmailVerified     Boolean               @default(false)
+  email_verifications email_verifications[]
+  sentInvitations     Invitation[]          @relation("SentInvitations")
+  knowledgeDocuments  KnowledgeDocument[]
+  password_resets     password_resets[]
+  assignedTickets     Ticket[]
+  organization        Organization?         @relation(fields: [organizationId], references: [id])
 
   @@index([organizationId])
   @@map("users")
@@ -246,7 +250,7 @@ model DocumentChunk {
   documentId     String                @db.Uuid
   organizationId String                @db.Uuid
   content        String
-  embedding      Unsupported("vector(1536)")
+  embedding      Unsupported("vector")
   chunkIndex     Int
   metadata       Json                  @default("{}")
   createdAt      DateTime              @default(now())
@@ -373,6 +377,43 @@ model Report {
   @@map("reports")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model email_verifications {
+  id        String   @id @db.Uuid
+  userId    String   @db.Uuid
+  email     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  users     User     @relation(fields: [userId], references: [id])
+
+  @@index([email])
+  @@index([userId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model password_resets {
+  id        String   @id @db.Uuid
+  userId    String   @db.Uuid
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  used      Boolean  @default(false)
+  users     User     @relation(fields: [userId], references: [id])
+
+  @@index([token])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model contact_submissions {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  email     String
+  company   String?
+  message   String
+  createdAt DateTime @default(now())
+}
+
 enum Role {
   SUPER_ADMIN
   ORG_ADMIN
@@ -400,12 +441,12 @@ enum AgentTier {
 
 enum AgentAction {
   RESOLVED
-  ESCALATED_TO_TIER0
   ESCALATED_TO_TIER1
   ESCALATED_TO_TIER2
   ESCALATED_TO_HUMAN
   REJECTED_OUTPUT
   NO_MATCH
+  ESCALATED_TO_TIER0
 }
 
 enum TicketStatus {

@@ -241,7 +241,7 @@ export const api = {
 		return adminFetch<AdminOrganizationDetail>(`/organizations/${orgId}`);
 	},
 
-	async createAdminOrganization(data: { name: string; email: string; slug: string; plan_id?: string; widget_config?: Partial<WidgetConfig> }): Promise<AdminOrganization> {
+	async createAdminOrganization(data: { name: string; email: string; password?: string; slug: string; plan_id?: string; widget_config?: Partial<WidgetConfig> }): Promise<AdminOrganization> {
 		return adminFetch<AdminOrganization>("/organizations", {
 			method: "POST",
 			body: JSON.stringify(data),
@@ -273,6 +273,18 @@ export const api = {
 	async activateAdminOrganization(orgId: string): Promise<void> {
 		return adminFetch<void>(`/organizations/${orgId}/activate`, {
 			method: "PATCH",
+		});
+	},
+
+	async deleteAdminOrganization(orgId: string): Promise<void> {
+		return adminFetch<void>(`/organizations/${orgId}`, {
+			method: "DELETE",
+		});
+	},
+
+	async cancelDeleteAdminOrganization(orgId: string): Promise<void> {
+		return adminFetch<void>(`/organizations/${orgId}/cancel-delete`, {
+			method: "POST",
 		});
 	},
 
@@ -810,4 +822,17 @@ export const api = {
 			throw new Error("Failed to revoke invitation");
 		}
 	},
+
+// ─── CONTACT SUBMISSIONS ─────────────────────────────────────────────────────
+
+async getContactSubmissions(): Promise<{
+    id: string;
+    name: string;
+    email: string;
+    company?: string;
+    message: string;
+    createdAt: string;
+}[]> {
+    return adminFetch("/contact-submissions");
+},
 };

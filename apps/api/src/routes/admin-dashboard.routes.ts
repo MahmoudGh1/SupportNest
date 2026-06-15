@@ -6,7 +6,7 @@
  * All routes require authentication and SUPER_ADMIN authorization.
  */
 import { Router } from "express";
-
+import prisma from "../config/prisma.js";
 // Controllers
 import {
   getOverview,
@@ -27,6 +27,7 @@ import {
   getOrgConversations,
   getConversationById,
   deleteOrganization,
+  cancelDeleteOrganization,
 } from "../controllers/admin-dashboard/admin.organizations.controller.js";
 
 import {
@@ -39,7 +40,7 @@ import {
 } from "../controllers/admin-dashboard/admin.users.controller.js";
 import { authMiddleware } from "src/middlewares/auth.middleware.js";
 import { adminMiddleware } from "src/middlewares/admin.middleware.js";
-
+import { getContactSubmissions } from "../controllers/admin-dashboard/contact.controller.js";
 const router: Router = Router();
 
 // All admin routes require authentication
@@ -97,6 +98,7 @@ router.get("/organizations/:orgId", getOrganization);
 router.patch("/organizations/:orgId", updateOrganization);
 
 router.delete("/organizations/:orgId", deleteOrganization);
+router.post("/organizations/:orgId/cancel-delete", cancelDeleteOrganization);
 /**
  * PATCH /admin/organizations/:orgId/suspend
  * Suspend org (sets is_active = false)
@@ -202,4 +204,6 @@ router.delete(
   deleteConversation,
 );
 
+// GET /admin/contact-submissions
+router.get("/contact-submissions", getContactSubmissions);
 export default router;

@@ -224,6 +224,7 @@ export interface AdminOrganization {
 	slug: string;
 	email: string;
 	is_active: boolean;
+	scheduled_deletion_at?: string | null;
 	plan: AdminPlan | null;
 	created_at: string;
 	stats: AdminOrganizationStats;

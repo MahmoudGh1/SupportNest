@@ -4,9 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { S } from "@/components/ui";
+import { useAuth } from "@/context/auth-context";
 import type { AdminOrganization, AdminPlan } from "@/types/types";
 import { OrganizationDetail } from "@/components/admin-dashboard/OrganizationDetail";
-import { useAuth } from "@/context/auth-context";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function fmtDate(iso: string) {
@@ -397,7 +397,6 @@ function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error";
 const PAGE_SIZE = 10;
 
 export default function OrganizationsPage() {
-	const { user } = useAuth();
 	const router = useRouter();
 
 	const [orgs, setOrgs] = useState<AdminOrganization[]>([]);
@@ -498,10 +497,6 @@ export default function OrganizationsPage() {
 
 	const totalPages = meta?.total_pages ?? 1;
 
-	if (user?.role !== "SUPER_ADMIN") {
-		return <div style={{ padding: "2rem", textAlign: "center", color: S.danger, fontWeight: 600 }}>Access Denied</div>;
-	}
-
 	if (selectedOrgId) {
 		return (
 			<div style={{ padding: "1.5rem" }}>
@@ -519,10 +514,10 @@ export default function OrganizationsPage() {
 			<div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20, gap: 16, flexWrap: "wrap" }}>
 				<div>
 					<p style={{ fontSize: 11, fontWeight: 600, color: S.textMuted, letterSpacing: ".06em", textTransform: "uppercase", margin: "0 0 4px" }}>
-						Platform Administration
+						Tenant management
 					</p>
 					<h1 style={{ fontSize: 24, fontWeight: 750, color: S.dark, margin: 0 }}>
-						Organizations Management
+						Organizations
 					</h1>
 				</div>
 				<button onClick={() => setShowCreate(true)} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 8, border: "none", background: S.purple, color: "#fff", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}>

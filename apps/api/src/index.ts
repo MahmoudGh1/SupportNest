@@ -31,7 +31,7 @@ import knowledgeRouter from "./routes/knowledge.routes.js";
 import tier2Router from "./routes/tier2.routes.js";
 import reportRouter from "./routes/reporter.routes.js";
 import AdminRoutes from "./routes/admin-dashboard.routes.js";
-
+import contactRouter from "./routes/contactus.routes.js";
 const app = express();
 app.set("trust proxy", 1);
 const PORT = process.env.PORT || 3001;
@@ -96,6 +96,8 @@ app.use("/api/v1/tier2", tier2Router);
 
 app.use("/api/v1/admindashboard", AdminRoutes);
 
+
+app.use('/api/contact', contactRouter);
 app.use(notFoundHandler);
 
 app.use(errorHandler);
