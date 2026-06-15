@@ -23,20 +23,6 @@ export async function uploadDocument({
 }): Promise<{ document: KnowledgeDocument; storagePath: string }> {
 	validateFileMatchesType(file, type);
 
-	const apiDocTypes = ["API_DOC", "SWAGGER_URL"];
-
-	if (apiDocTypes.includes(type)) {
-		const apiConfig = await prisma.businessApiConfig.findUnique({
-			where: { organizationId: orgId },
-		});
-		if (!apiConfig || !apiConfig.isVerified) {
-			throw new AppError(
-				"You must configure and verify your API connection before uploading API documentation.",
-				400,
-			);
-		}
-	}
-
 	// --- Plan limit check ---
 	const org = await prisma.organization.findUnique({
 		where: { id: orgId },
@@ -58,6 +44,20 @@ export async function uploadDocument({
 		}
 	}
 
+	const apiDocTypes = ["API_DOC", "SWAGGER_URL"];
+
+	if (apiDocTypes.includes(type)) {
+		const apiConfig = await prisma.businessApiConfig.findUnique({
+			where: { organizationId: orgId },
+		});
+		if (!apiConfig || !apiConfig.isVerified) {
+			throw new AppError(
+				"You must configure and verify your API connection before uploading API documentation.",
+				400,
+			);
+		}
+	}
+
 	// 1. Create the DB row first, no storagePath yet
 	const doc = await prisma.knowledgeDocument.create({
 		data: {
@@ -73,10 +73,17 @@ export async function uploadDocument({
 	// 2. Upload to Cloudinary
 	const safeTitle = sanitizeForStoragePath(title) || "untitled";
 
+	// Extract the extension from the original file (e.g., ".docx", ".pdf")
+	const originalName = file.originalname || "document.docx";
+	const fileExtension = originalName.substring(originalName.lastIndexOf("."));
+	console.log("File Name:", file.originalname);
+	console.log("Buffer size in bytes:", file.buffer.length);
+	console.log("CRITICAL DEBUG: This is what is actually inside your buffer:");
+	console.log(file.buffer.toString("utf-8"));
 	const storagePath = await uploadToCloudinary(
 		file.buffer,
 		`supportnest/${orgId}/knowledge`,
-		`${Date.now()}-${safeTitle}`,
+		`${Date.now()}-${safeTitle}${fileExtension}`,
 	);
 
 	// 3. Backfill storagePath

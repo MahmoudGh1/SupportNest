@@ -1,7 +1,8 @@
 import { chunkText } from "src/config/chunker.js";
 import { extractRowsFromUrl, rowToChunkText } from "src/config/csv.js";
+import { extractTextFromDocxUrl } from "src/config/docx.js";
 import { embeddings } from "src/config/embeddings.js";
-import { extractTextFromUrl } from "src/config/pdf.js";
+import { extractTextFromPdfUrl } from "src/config/pdf.js";
 import prisma from "src/config/prisma.js";
 import AppError from "src/utils/appError.js";
 import bulkInsertChunks from "src/utils/bulkInsertChunks.util.js";
@@ -36,9 +37,16 @@ export async function ingestDocument(
 	if (type === "CSV") {
 		const rows = await extractRowsFromUrl(fileUrl);
 		chunks = rows.map(rowToChunkText);
-	} else {
-		const text = await extractTextFromUrl(fileUrl);
+	} else if (type === "DOCX") {
+		const text = await extractTextFromDocxUrl(fileUrl);
+		console.log(text);
 		chunks = await chunkText(text);
+		console.log(chunks);
+	} else if (type === "PDF") {
+		const text = await extractTextFromPdfUrl(fileUrl);
+		chunks = await chunkText(text);
+	} else {
+		chunks = [];
 	}
 
 	if (chunks.length === 0) {
@@ -46,6 +54,7 @@ export async function ingestDocument(
 	}
 
 	const vectors = await embeddings.embedDocuments(chunks);
+	console.log("length", vectors.length === chunks.length);
 
 	await bulkInsertChunks(
 		chunks.map((content, i) => ({
