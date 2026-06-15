@@ -19,7 +19,8 @@ import {
   deleteConversationService,
   getOrgConversationsService,
   getConversationByIdService,
-  deleteOrganizationService,
+  cancelOrganizationDeletion,
+  scheduleOrganizationDeletion,
 } from "../../services/admin-dashboard/organization.service.js";
 import {
   parsePagination,
@@ -31,6 +32,8 @@ import {
 import { parseDateRange } from "../../utils/helpers.js";
 import type { AuthenticatedRequest } from "src/types/auth.types.js";
 import prisma from "src/config/prisma.js";
+import { isScheduled } from "src/queues/deletion.queue.js";
+import { sendOrgDeletionScheduledEmail } from "src/utils/mailer.js";
 
 /**
  * Normalize a URL/query parameter value to a single string.
@@ -300,35 +303,106 @@ export async function activateOrganization(
   res.json({ message: "Organization activated." });
 }
 
-export async function deleteOrganization(
+// DELETE /admin/organizations/:orgId
+export async function scheduleDeleteOrganization(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
   const { orgId } = req.params;
 
-  const result = await deleteOrganizationService(orgId as string);
+  const result = await scheduleOrganizationDeletion(orgId as string);
 
   if ("error" in result) {
     switch (result.error) {
       case "ORG_NOT_FOUND":
         notFound(res, "Organization");
         return;
-      case "ORG_HAS_ACTIVE_CONVERSATIONS":
+      case "ALREADY_SCHEDULED":
         sendError(
           res,
           400,
-          "ORG_HAS_ACTIVE_CONVERSATIONS",
-          "Cannot delete an organization with active conversations. Close them first.",
+          "ALREADY_SCHEDULED",
+          "Organization deletion is already scheduled.",
         );
         return;
     }
   }
 
   res.json({
-    message: "Organization and all related data deleted successfully.",
-    deleted: {
-      organization_id: result.organization_id,
-    },
+    message:
+      "Organization scheduled for deletion in 30 minutes. A notification email has been sent.",
+    scheduled_at: result.scheduled_at,
+    deletes_at: result.deletes_at,
+  });
+}
+
+export async function resendDeletionEmail(
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> {
+  const { orgId } = req.params;
+
+  if (!isScheduled(orgId as string)) {
+    sendError(
+      res,
+      400,
+      "NOT_SCHEDULED",
+      "No scheduled deletion found for this organization.",
+    );
+    return;
+  }
+
+  const org = await prisma.organization.findUnique({
+    where: { id: orgId },
+    select: { id: true, name: true, email: true },
+  });
+  if (!org) {
+    notFound(res, "Organization");
+    return;
+  }
+
+  try {
+    const deletesAt = new Date(Date.now() + 30 * 60 * 1000);
+    await sendOrgDeletionScheduledEmail(org.email, org.name, deletesAt);
+    res.json({ message: "Deletion notification email resent successfully." });
+  } catch (err) {
+    sendError(
+      res,
+      500,
+      "EMAIL_FAILED",
+      "Failed to send email. Check SMTP settings.",
+    );
+  }
+}
+
+// POST /admin/organizations/:orgId/cancel-deletion
+export async function cancelDeleteOrganization(
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> {
+  const { orgId } = req.params;
+
+  const result = await cancelOrganizationDeletion(orgId as string);
+
+  if ("error" in result) {
+    switch (result.error) {
+      case "ORG_NOT_FOUND":
+        notFound(res, "Organization");
+        return;
+      case "NOT_SCHEDULED":
+        sendError(
+          res,
+          400,
+          "NOT_SCHEDULED",
+          "This organization has no scheduled deletion to cancel.",
+        );
+        return;
+    }
+  }
+
+  res.json({
+    message:
+      "Organization deletion cancelled. A confirmation email has been sent to the organization.",
   });
 }
 /**
