@@ -177,7 +177,7 @@ export async function processPipelineTurn({
 	const aiMessage = await prisma.message.create({
 		data: {
 			conversationId,
-			role: routerOutput.resolvedByTier === "HUMAN" ? "HUMAN_AGENT" : "AI",
+			role: "AI",
 			content: routerOutput.finalResponse,
 			tier:
 				routerOutput.resolvedByTier === "HUMAN"
