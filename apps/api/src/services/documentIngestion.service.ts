@@ -63,6 +63,6 @@ export async function ingestDocument(
 			chunkIndex: i,
 		})),
 		documentId,
-		orgId,
+		organizationId,
 	);
 }

@@ -100,9 +100,49 @@ export function ProfileSection() {
           <div style={{ fontSize: 15, fontWeight: 600, color: S.dark }}>
             {authUser.firstName} {authUser.lastName}
           </div>
-          <div style={{ fontSize: 12, color: S.textMuted, marginTop: 2 }}>
-            {authUser.email}
+          
+          {/* Email row featuring the verification badge layout */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
+            <div style={{ fontSize: 12, color: S.textMuted }}>
+              {authUser.email}
+            </div>
+            {authUser.isEmailVerified ? (
+              <span
+                style={{
+                  background: S.greenBg,
+                  color: S.green,
+                  padding: "1px 6px",
+                  borderRadius: 4,
+                  fontSize: 10,
+                  fontWeight: 600,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 3,
+                }}
+              >
+                <i className="ti ti-circle-check" style={{ fontSize: 11 }} />
+                Verified
+              </span>
+            ) : (
+              <span
+                style={{
+                  background: S.dangerBg,
+                  color: S.danger,
+                  padding: "1px 6px",
+                  borderRadius: 4,
+                  fontSize: 10,
+                  fontWeight: 600,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 3,
+                }}
+              >
+                <i className="ti ti-alert-circle" style={{ fontSize: 11 }} />
+                Not Verified
+              </span>
+            )}
           </div>
+
           <div style={{ fontSize: 11, marginTop: 4 }}>
             <span
               style={{

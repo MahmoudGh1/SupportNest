@@ -4,11 +4,7 @@
 	const CUSTOMER_TOKEN = config.customerToken || null;
 	const currentScript = document.currentScript;
 	const WIDGET_KEY = currentScript?.dataset?.widgetKey;
-<<<<<<< HEAD
-	const BASE_URL = currentScript?.dataset?.baseUrl ?? "http://localhost:3002";
-=======
 	const BASE_URL = currentScript?.dataset?.baseUrl ?? "https://api-production-e60c.up.railway.app";
->>>>>>> 9c430a9f219751b3ece3b15c12488c0f8b1f8d9f
 
 	if (!WIDGET_KEY) {
 		console.error("[SupportNest] No apiKey found in window.SupportNestConfig");
@@ -23,10 +19,7 @@
 	let isSending = false;
 	let isAuthenticated = false;
 	let isExpanded = false;
-<<<<<<< HEAD
 	let conversationId = null;
-=======
->>>>>>> 9c430a9f219751b3ece3b15c12488c0f8b1f8d9f
 
 	function getOrCreateVisitorId() {
 		var key = "sn_visitor_id";
@@ -70,6 +63,8 @@
 			isAuthenticated = false;
 			setTimeout(connect, reconnectDelay);
 			reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+			setTimeout(connect, reconnectDelay);
+			reconnectDelay = Math.min(reconnectDelay * 2, 30000);
 		};
 
 		ws.onerror = function (err) {
@@ -94,6 +89,8 @@
 	}
 
 	// ── 4. EVENT HANDLER ───────────────────────────────────────────────────────
+	function handleEvent(msg) {
+		const { type, payload } = msg;
 	function handleEvent(msg) {
 		const { type, payload } = msg;
 

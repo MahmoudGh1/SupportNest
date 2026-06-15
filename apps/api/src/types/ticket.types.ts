@@ -5,7 +5,7 @@ export interface JwtPayload {
   id: string;
   email: string;
   role: string;
-  orgId: string;
+  organizationId: string;
 }
 
 export interface AuthenticatedRequest extends Express.Request {

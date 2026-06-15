@@ -264,17 +264,18 @@ export default function PaymentCallbackClient() {
       return
     }
     api.confirmPayment(paymentId)
-      .then(() => {
+    .then(() => {
+        sessionStorage.removeItem("paymentId");
+        sessionStorage.removeItem("selectedPlan");
         setPhase("success");
         setMessage("Payment confirmed! Redirecting to your dashboard…");
         setTimeout(() => router.replace("/dashboard"), 2000);
-      })
-      .catch(() => {
+    })
+    .catch(() => {
         setPhase("failed");
         setMessage("Payment verification failed. Redirecting…");
         setTimeout(() => router.replace("/"), 2000);
-      });
-    sessionStorage.removeItem("paymentId")
+    });
   }, [params, router]);
 
   const icon =

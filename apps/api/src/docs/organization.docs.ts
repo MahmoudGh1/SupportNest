@@ -157,7 +157,7 @@
 
 /**
  * @swagger
- * /api/v1/organizations/{orgId}/knowledge:
+ * /api/v1/organizations/{organizationId}/knowledge:
  *   post:
  *     summary: Upload a knowledge base document file
  *     description: Accepts a single document file payload (via multipart/form-data), uploads the binary to cloud storage, and registers a database item to trigger the chunking pipeline.
@@ -166,7 +166,7 @@
  *       - cookieAuth: []
  *     parameters:
  *       - in: path
- *         name: orgId
+ *         name: organizationId
  *         required: true
  *         schema:
  *           type: string
@@ -221,7 +221,7 @@
  *       - cookieAuth: []
  *     parameters:
  *       - in: path
- *         name: orgId
+ *         name: organizationId
  *         required: true
  *         schema:
  *           type: string
@@ -308,7 +308,7 @@
 
 /**
  * @swagger
- * /api/v1/organizations/{orgId}/knowledge/{docId}:
+ * /api/v1/organizations/{organizationId}/knowledge/{docId}:
  *   delete:
  *     summary: Delete a knowledge base document
  *     description: Unlinks and deletes the document registry entity records along with its associated vector embeddings and tokenized chunk data.
@@ -317,7 +317,7 @@
  *       - cookieAuth: []
  *     parameters:
  *       - in: path
- *         name: orgId
+ *         name: organizationId
  *         required: true
  *         schema:
  *           type: string

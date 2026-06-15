@@ -10,6 +10,7 @@ export interface TokenPayload {
 	email: string;
 	role: string;
 	name?: string;
+	isEmailVerified?: boolean;
 	organizationId: string | null;
 }
 

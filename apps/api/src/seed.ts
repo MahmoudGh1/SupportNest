@@ -132,7 +132,7 @@ async function main() {
 
 	// console.log("✅ ToolDefinitions created");
 	// console.log("\n── COPY THESE FOR TESTING ──────────────────────");
-	// console.log("orgId:         ", org.id);
+	// console.log("organizationId:         ", org.id);
 	// console.log("widgetSecret:  ", "my-super-secret-widget-key");
 	// console.log("rawApiKey:     ", rawKey);
 }

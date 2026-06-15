@@ -5,13 +5,13 @@ const isProd = process.env.NODE_ENV === "production" ? true : false;
 export const accessCookieOptions: CookieOptions = {
 	httpOnly: true,
 	secure: isProd,
-	sameSite: "none",
+	sameSite: isProd ? "none" : "lax",
 	maxAge: 1000 * 60 * 15, // 15 minutes
 };
 
 export const refreshCookieOptions: CookieOptions = {
 	httpOnly: true,
 	secure: isProd,
-	sameSite: "none",
+	sameSite: isProd ? "none" : "lax",
 	maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
 };

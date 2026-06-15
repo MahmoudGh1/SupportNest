@@ -10,7 +10,7 @@ const API_DOC_TYPES = ["API_DOC", "SWAGGER_URL"];
 export const knowledgeWorker = new Worker(
 	"process-document",
 	async (job) => {
-		const { documentId, fileUrl, orgId } = job.data;
+		const { documentId, fileUrl, organizationId } = job.data;
 
 		const document = await prisma.knowledgeDocument.findUnique({
 			where: { id: documentId },

@@ -123,7 +123,7 @@ export function Sidebar({
 								textOverflow: "ellipsis",
 							}}
 						>
-							{user?.orgName || t`Your workspace`}
+							{user?.organizationName || t`Your workspace`}
 						</div>
 					</div>
 				)}

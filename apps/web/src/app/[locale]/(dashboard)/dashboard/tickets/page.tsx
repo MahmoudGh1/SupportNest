@@ -47,9 +47,9 @@ interface Meta {
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
 function normalizeApiBaseUrl(rawBaseUrl?: string) {
-	const fallback = "https://api-production-e60c.up.railway.app/api/v1";
+	const fallback = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
 	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");
-	return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
+	return /\/api\/v1$/i.test(base) ? base : `http://localhost:3001/api/v1/api/v1`;
 }
 
 const BASE = normalizeApiBaseUrl(
@@ -107,14 +107,14 @@ async function apiGetTickets(filters?: {
 	if (filters?.status) qs.set("status", filters.status);
 	if (filters?.page) qs.set("page", String(filters.page));
 	qs.set("limit", String(filters?.limit ?? 50));
-	const res = await fetch(`${BASE}/tickets?${qs}`, { credentials: "include" });
+	const res = await fetch(`http://localhost:3001/api/v1/tickets?${qs}`, { credentials: "include" });
 	const json = await res.json();
 	if (!res.ok) throw new Error(json.message ?? "Failed to fetch tickets");
 	return json.data;
 }
 
 async function apiGetMessages(conversationId: string): Promise<Message[]> {
-	const res = await fetch(`${BASE}/widget/conversations/${conversationId}/messages`, {
+	const res = await fetch(`http://localhost:3001/api/v1/widget/conversations/${conversationId}/messages`, {
 		credentials: "include",
 	});
 	const json = await res.json();
@@ -123,7 +123,7 @@ async function apiGetMessages(conversationId: string): Promise<Message[]> {
 }
 
 async function apiStart(id: string): Promise<Ticket> {
-	const res = await fetch(`${BASE}/tickets/${id}/start`, {
+	const res = await fetch(`http://localhost:3001/api/v1/tickets/${id}/start`, {
 		method: "PATCH",
 		credentials: "include",
 	});
@@ -133,7 +133,7 @@ async function apiStart(id: string): Promise<Ticket> {
 }
 
 async function apiResolve(id: string, note: string): Promise<Ticket> {
-	const res = await fetch(`${BASE}/tickets/${id}/resolve`, {
+	const res = await fetch(`http://localhost:3001/api/v1/tickets/${id}/resolve`, {
 		method: "PATCH",
 		credentials: "include",
 		headers: { "Content-Type": "application/json" },

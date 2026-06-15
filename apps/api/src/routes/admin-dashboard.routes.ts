@@ -86,19 +86,20 @@ router.get("/organizations", getOrganizations);
 router.post("/organizations", createOrganization);
 
 /**
- * GET /admin/organizations/:orgId
+ * GET /admin/organizations/:organizationId
  * Full org detail: info + users + tier stats + conversation stats + ticket stats + CSAT + recent escalations
  * Role: SUPER_ADMIN
  */
-router.get("/organizations/:orgId", getOrganization);
+router.get("/organizations/:organizationId", getOrganization);
 
 /**
- * PATCH /admin/organizations/:orgId
+ * PATCH /admin/organizations/:organizationId
  * Update org fields: name, email, is_active, plan_id, widget_config
  * Role: SUPER_ADMIN
  */
-router.patch("/organizations/:orgId", updateOrganization);
+router.patch("/organizations/:organizationId", updateOrganization);
 
+router.delete("/organizations/:organizationId", deleteOrganization);
 /**
  * DELETE /admin/organizations/:orgId
  * Schedule org deletion in 30 minutes + notify org via email
@@ -120,28 +121,35 @@ router.post("/organizations/:orgId/resend-deletion-email", resendDeletionEmail);
  * Suspend org (sets is_active = false)
  * Role: SUPER_ADMIN
  */
-router.patch("/organizations/:orgId/suspend", suspendOrganization);
+router.patch("/organizations/:organizationId/suspend", suspendOrganization);
 
 /**
- * PATCH /admin/organizations/:orgId/activate
+ * PATCH /admin/organizations/:organizationId/activate
  * Re-activate a suspended org
  * Role: SUPER_ADMIN
  */
 router.patch("/organizations/:orgId/activate", activateOrganization);
 
 /**
- * GET /admin/organizations/:orgId/tier-stats
+ * GET /admin/organizations/:organizationId/tier-stats
  * Tier funnel, latencies, token usage for a single org
  * Query: ?from=...&to=...
  */
-router.get("/organizations/:orgId/tier-stats", getOrgTierStats);
+router.get("/organizations/:organizationId/tier-stats", getOrgTierStats);
 
 /**
- * GET /admin/organizations/:orgId/conversation-stats
+ * GET /admin/organizations/:organizationId/conversation-stats
  * Conversation counts by status + avg resolution & response times
  * Query: ?from=...&to=...
  */
-router.get("/organizations/:orgId/conversation-stats", getOrgConversationStats);
+router.get("/organizations/:organizationId/conversation-stats", getOrgConversationStats);
+
+router.get("/organizations/:organizationId/conversations", getOrgConversations);
+
+router.get(
+  "/organizations/:organizationId/conversations/:conversationId",
+  getConversationById,
+);
 
 router.get("/organizations/:orgId/conversations", getOrgConversations);
 
@@ -151,21 +159,21 @@ router.get(
 );
 
 /**
- * GET /admin/organizations/:orgId/ticket-stats
+ * GET /admin/organizations/:organizationId/ticket-stats
  * Ticket counts by status + priority breakdown
  * Query: ?from=...&to=...
  */
-router.get("/organizations/:orgId/ticket-stats", getOrgTicketStats);
+router.get("/organizations/:organizationId/ticket-stats", getOrgTicketStats);
 
 /**
- * GET /admin/organizations/:orgId/csat
+ * GET /admin/organizations/:organizationId/csat
  * CSAT average + score distribution
  * Query: ?from=...&to=...
  */
-router.get("/organizations/:orgId/csat", getOrgCsat);
+router.get("/organizations/:organizationId/csat", getOrgCsat);
 
 /**
- * GET /admin/organizations/:orgId/escalations
+ * GET /admin/organizations/:organizationId/escalations
  * Paginated escalated tickets for one org
  * Query: ?from=...&to=...&page=1&limit=20
  */
@@ -179,37 +187,46 @@ router.get("/organizations/:orgId/escalations", getOrgEscalations);
 router.get("/users", getAllUsers);
 
 /**
- * GET /admin/organizations/:orgId/users
+ * GET /admin/organizations/:organizationId/users
  * List all users for a specific org
  * Query: ?role=support_agent&is_active=true&page=1&limit=20
  */
-router.get("/organizations/:orgId/users", getOrgUsers);
+router.get("/organizations/:organizationId/users", getOrgUsers);
 
 /**
- * GET /admin/organizations/:orgId/users/:userId
+ * GET /admin/organizations/:organizationId/users/:userId
  * Get a single user's profile + assigned open tickets
  */
-router.get("/organizations/:orgId/users/:userId", getOrgUser);
+router.get("/organizations/:organizationId/users/:userId", getOrgUser);
 
 /**
- * POST /admin/organizations/:orgId/users
+ * POST /admin/organizations/:organizationId/users
  * Create a new user (org_admin or support_agent) for an org
  * Body: { email, password, first_name, last_name, role }
  */
-router.post("/organizations/:orgId/users", createOrgUser);
+router.post("/organizations/:organizationId/users", createOrgUser);
 
 /**
- * PATCH /admin/organizations/:orgId/users/:userId
+ * PATCH /admin/organizations/:organizationId/users/:userId
  * Update user: name, role, is_active
  * Body: { first_name?, last_name?, role?, is_active? }
  */
-router.patch("/organizations/:orgId/users/:userId", updateOrgUser);
+router.patch("/organizations/:organizationId/users/:userId", updateOrgUser);
 
 /**
- * DELETE /admin/organizations/:orgId/users/:userId
+ * DELETE /admin/organizations/:organizationId/users/:userId
  * Soft-delete user (deactivate + unassign open tickets)
  */
-router.delete("/organizations/:orgId/users/:userId", removeOrgUser);
+router.delete("/organizations/:organizationId/users/:userId", removeOrgUser);
+
+/**
+ * DELETE /admin/organizations/:organizationId/conversations/:conversationId
+ * Hard delete a conversation + all its messages, logs, ticket, CSAT, analytics
+ */
+router.delete(
+  "/organizations/:organizationId/conversations/:conversationId",
+  deleteConversation,
+);
 
 /**
  * DELETE /admin/organizations/:orgId/conversations/:conversationId

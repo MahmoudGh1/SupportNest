@@ -108,12 +108,12 @@ export async function getOrganization(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
-  const detail = await getOrganizationDetail(orgId);
+  const detail = await getOrganizationDetail(organizationId);
   if (!detail) {
     notFound(res, "Organization");
     return;
@@ -194,8 +194,8 @@ export async function updateOrganization(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
@@ -217,14 +217,14 @@ export async function updateOrganization(
     return;
   }
 
-  const exists = await prisma.organization.findUnique({ where: { id: orgId } });
+  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
   if (!exists) {
     notFound(res, "Organization");
     return;
   }
 
   const org = await prisma.organization.update({
-    where: { id: orgId },
+    where: { id: organizationId },
     data: updates as any,
     include: {
       plan: { select: { id: true, name: true, priceMonthly: true } },
@@ -258,19 +258,19 @@ export async function suspendOrganization(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
-  const exists = await prisma.organization.findUnique({ where: { id: orgId } });
+  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
   if (!exists) {
     notFound(res, "Organization");
     return;
   }
 
   await prisma.organization.update({
-    where: { id: orgId },
+    where: { id: organizationId },
     data: { isActive: false },
   });
   res.json({ message: "Organization suspended." });
@@ -285,19 +285,19 @@ export async function activateOrganization(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
-  const exists = await prisma.organization.findUnique({ where: { id: orgId } });
+  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
   if (!exists) {
     notFound(res, "Organization");
     return;
   }
 
   await prisma.organization.update({
-    where: { id: orgId },
+    where: { id: organizationId },
     data: { isActive: true },
   });
   res.json({ message: "Organization activated." });
@@ -414,22 +414,22 @@ export async function getOrgTierStats(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
   const { from, to } = req.query as { from?: string; to?: string };
   const dateFilter = parseDateRange(from, to);
 
-  const exists = await prisma.organization.findUnique({ where: { id: orgId } });
+  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
   if (!exists) {
     notFound(res, "Organization");
     return;
   }
 
   const stats = await buildTierStats(
-    orgId,
+    organizationId,
     Object.keys(dateFilter).length ? dateFilter : undefined,
   );
   res.json(stats);
@@ -444,22 +444,22 @@ export async function getOrgConversationStats(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
   const { from, to } = req.query as { from?: string; to?: string };
   const dateFilter = parseDateRange(from, to);
 
-  const exists = await prisma.organization.findUnique({ where: { id: orgId } });
+  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
   if (!exists) {
     notFound(res, "Organization");
     return;
   }
 
   const stats = await buildConversationStats(
-    orgId,
+    organizationId,
     Object.keys(dateFilter).length ? dateFilter : undefined,
   );
   res.json(stats);
@@ -474,22 +474,22 @@ export async function getOrgTicketStats(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
   const { from, to } = req.query as { from?: string; to?: string };
   const dateFilter = parseDateRange(from, to);
 
-  const exists = await prisma.organization.findUnique({ where: { id: orgId } });
+  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
   if (!exists) {
     notFound(res, "Organization");
     return;
   }
 
   const stats = await buildTicketStats(
-    orgId,
+    organizationId,
     Object.keys(dateFilter).length ? dateFilter : undefined,
   );
   res.json(stats);
@@ -504,22 +504,22 @@ export async function getOrgCsat(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
   const { from, to } = req.query as { from?: string; to?: string };
   const dateFilter = parseDateRange(from, to);
 
-  const exists = await prisma.organization.findUnique({ where: { id: orgId } });
+  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
   if (!exists) {
     notFound(res, "Organization");
     return;
   }
 
   const stats = await buildCsatSummary(
-    orgId,
+    organizationId,
     Object.keys(dateFilter).length ? dateFilter : undefined,
   );
   res.json(stats);
@@ -534,8 +534,8 @@ export async function getOrgEscalations(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
@@ -543,14 +543,14 @@ export async function getOrgEscalations(
   const { from, to } = req.query as { from?: string; to?: string };
   const dateFilter = parseDateRange(from, to);
 
-  const exists = await prisma.organization.findUnique({ where: { id: orgId } });
+  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
   if (!exists) {
     notFound(res, "Organization");
     return;
   }
 
   const where = {
-    organizationId: orgId,
+    organizationId: organizationId,
     status: { in: ["OPEN", "IN_PROGRESS"] as any },
     ...(Object.keys(dateFilter).length ? { createdAt: dateFilter } : {}),
   };
