@@ -12,7 +12,6 @@ export const knowledgeWorker = new Worker(
 	async (job) => {
 		const { documentId, fileUrl, orgId } = job.data;
 
-
 		const document = await prisma.knowledgeDocument.findUnique({
 			where: { id: documentId },
 			select: { type: true },
@@ -30,7 +29,12 @@ export const knowledgeWorker = new Worker(
 		// 5. Store chunks + embeddings in pgvector
 		try {
 			if (API_DOC_TYPES.includes(document.type)) {
-				await extractToolsFromDocument(documentId, orgId, fileUrl, document.type);
+				await extractToolsFromDocument(
+					documentId,
+					orgId,
+					fileUrl,
+					document.type,
+				);
 			} else {
 				await ingestDocument(fileUrl, documentId, orgId);
 				await prisma.knowledgeDocument.update({
@@ -57,4 +61,8 @@ knowledgeWorker.on("failed", async (job, err) => {
 			data: { status: "FAILED" },
 		});
 	}
+});
+
+knowledgeWorker.on("ready", () => {
+	console.log("[knowledgeWorker] connected and listening for jobs");
 });
