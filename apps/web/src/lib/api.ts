@@ -30,12 +30,13 @@ import {
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
 function normalizeApiBaseUrl(rawBaseUrl?: string) {
-	const fallback = "https://api-production-e60c.up.railway.app/api/v1";
+	const fallback = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
 	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");
 	return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
 }
 
 const BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE);
+// const BASE_URL = "http://localhose:3001/api/v1";
 
 type ApiRecord = Record<string, unknown>;
 
@@ -116,7 +117,12 @@ export const api = {
 			credentials: "include",
 		});
 		const data = await res.json();
-		if (!res.ok) throw new Error(data.error ?? data.message ?? "Login failed");
+		if (!res.ok) {
+			const err = new Error(data.error ?? data.message ?? "Login failed") as Error & { code?: string; userId?: string };
+			err.code = data.code;
+			err.userId = data.userId;
+			throw err;
+		}
 		return { user: mapApiUser(data.result) };
 	},
 
@@ -142,6 +148,64 @@ export const api = {
 		const body = await res.json();
 		if (!res.ok) throw new Error(body.error ?? "Checkout registration failed");
 		return { user: mapApiUser(body.result) };
+	},
+
+	async registerInitial(data: { email: string; password: string; firstName: string; lastName: string }): Promise<{ userId: string; email: string; alreadyExists: boolean }> {
+		const res = await fetch(`${BASE_URL}/auth/register`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(data),
+			credentials: "include",
+		});
+		const body = await res.json();
+		if (!res.ok) throw new Error(body.error ?? "Registration failed");
+		return body;
+	},
+
+	async sendVerification(userId: string, email: string): Promise<void> {
+		const res = await fetch(`${BASE_URL}/auth/send-verification`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ userId, email }),
+			credentials: "include",
+		});
+		const body = await res.json();
+		if (!res.ok) throw new Error(body.error ?? "Failed to send verification code");
+	},
+
+	async verifyEmail(userId: string, code: string): Promise<void> {
+		const res = await fetch(`${BASE_URL}/auth/verify-email`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ userId, code }),
+			credentials: "include",
+		});
+		const body = await res.json();
+		if (!res.ok) throw new Error(body.error ?? "Invalid or expired code");
+	},
+
+	async completeRegistration(data: { userId: string; businessName: string; planId: string; amount: number; currency?: string; isAnnual: boolean }): Promise<LoginResponse> {
+		const res = await fetch(`${BASE_URL}/auth/complete-registration`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(data),
+			credentials: "include",
+		});
+		const body = await res.json();
+		if (!res.ok) throw new Error(body.error ?? "Failed to complete registration");
+		return { user: mapApiUser(body.result) };
+	},
+
+	async registerWithGoogle(idToken: string): Promise<{ userId: string; email: string; isNewUser: boolean }> {
+		const res = await fetch(`${BASE_URL}/auth/google-register`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ idToken }),
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Google registration failed");
+		return data;
 	},
 
 	async getPlans(): Promise<PricingPlan[]> {
@@ -184,6 +248,26 @@ export const api = {
 		if (!res.ok) throw new Error(data.error ?? data.message ?? "Google login failed");
 
 		return { user: mapApiUser(data.result) };
+	},
+
+	async forgotPassword(email: string): Promise<void> {
+		const res = await fetch(`${BASE_URL}/auth/forgot-password`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ email }),
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to send reset email");
+	},
+
+	async resetPassword(token: string, newPassword: string): Promise<void> {
+		const res = await fetch(`${BASE_URL}/auth/reset-password`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ token, newPassword }),
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to reset password");
 	},
 
 	async completePayment(data: { pricingId: string; amount: number; currency?: string; isAnnual: boolean }): Promise<{ paymentId: string; billingPeriodEnd: string }> {
@@ -809,5 +893,32 @@ export const api = {
 		if (!res.ok) {
 			throw new Error("Failed to revoke invitation");
 		}
+	},
+
+	// ADD THIS after revokeInvitation
+	async validateInvitation(token: string): Promise<{
+		email: string;
+		organizationName: string;
+		role: string;
+	}> {
+		const res = await fetch(`${BASE_URL}/invitations/accept/${token}`, {
+			method: "GET",
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Invalid invitation");
+		return data;
+	},
+
+	async acceptInvitation(token: string, firstName: string, lastName: string, password: string): Promise<{ message: string; email: string }> {
+		const res = await fetch(`${BASE_URL}/invitations/accept/${token}`, {
+			method: "POST",
+			credentials: "include",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ firstName, lastName, password }),
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to accept invitation");
+		return data;
 	},
 };

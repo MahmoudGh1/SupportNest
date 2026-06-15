@@ -18,8 +18,6 @@ model Organization {
   isActive              Boolean                 @default(true)
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
-  isEmailVerified       Boolean                 @default(false)
-  emailVerifiedAt       DateTime?
   apiKeys               ApiKey[]
   businessApiConfig     BusinessApiConfig?
   conversationAnalytics ConversationAnalytics[]
@@ -55,6 +53,10 @@ model User {
   knowledgeDocuments KnowledgeDocument[]
   assignedTickets    Ticket[]
   organization       Organization?       @relation(fields: [organizationId], references: [id])
+  isEmailVerified    Boolean   @default(false)
+  emailVerifiedAt    DateTime?
+  emailVerifications EmailVerification[]
+  passwordResets     PasswordReset[]
 
   @@index([organizationId])
   @@map("users")
@@ -377,13 +379,30 @@ model Report {
 }
 
 model EmailVerification {
-    id        String   @id @default(uuid())
-    userId    String
+    id        String   @id @default(uuid()) @db.Uuid
+    userId    String   @db.Uuid
     email     String
-    code      String   // 6-digit code
+    code      String
     expiresAt DateTime
     createdAt DateTime @default(now())
     user      User     @relation(fields: [userId], references: [id])
+
+    @@index([userId])
+    @@index([email])
+    @@map("email_verifications")
+}
+
+model PasswordReset {
+    id        String   @id @default(uuid()) @db.Uuid
+    userId    String   @db.Uuid
+    token     String   @unique
+    expiresAt DateTime
+    createdAt DateTime @default(now())
+    used      Boolean  @default(false)
+    user      User     @relation(fields: [userId], references: [id])
+
+    @@index([token])
+    @@map("password_resets")
 }
 
 enum Role {

@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import type { PricingPlan } from "@/types/types";
+import { PaymentRoute } from "@/components/guest-only-route.tsx";
+import { useAuth } from "@/context/auth-context";
 
 const PAYMOB_PUBLIC_KEY =
 	process.env.NEXT_PUBLIC_PAYMOB_KEY ?? "egy_pk_test_24gr1hEc6j0YheiEeIh2oailmkBszFKX";
@@ -42,6 +44,7 @@ function PaymentPageContent() {
 	const [loading, setLoading] = useState(false);
 	const [pageLoading, setPageLoading] = useState(true);
 	const [error, setError] = useState("");
+	const { user } = useAuth();
 
 	// ── Bootstrap: load plan + optionally log in ─────────────────────────────
 
@@ -131,10 +134,11 @@ function PaymentPageContent() {
 		setError("");
 
 		try {
-			const regRaw = sessionStorage.getItem("registrationData");
-			const regData = regRaw
-				? JSON.parse(regRaw) as { firstName: string; lastName: string; email: string }
-				: { firstName: "", lastName: "", email: "" };
+			const regData = {
+				firstName: user?.firstName ?? "",
+				lastName: user?.lastName ?? "",
+				email: user?.email ?? "",
+			};
 
 			const result = await api.createPaymentIntention({
 				pricingId: dbPlan.id,
@@ -644,5 +648,9 @@ function PaymentPageContent() {
 }
 
 export default function PaymentPage() {
-	return <PaymentPageContent />;
+	return (
+		<PaymentRoute>
+			<PaymentPageContent />
+		</PaymentRoute>
+	);
 }
