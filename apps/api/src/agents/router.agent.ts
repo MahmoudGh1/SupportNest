@@ -206,7 +206,6 @@ export async function runRouter(
 	// --- phase 1: routing decision
 
 	const routingPrompt = buildRoutingPrompt(latestMessage, conversationHistory);
-	// console.log(routingPrompt);
 	const routingStart = Date.now();
 
 	let routingResult: any;
@@ -247,7 +246,6 @@ export async function runRouter(
 			latencyMs: 0,
 			tokensUsed: 0,
 		});
-		console.log(routingResult);
 		return {
 			finalResponse: routingResult.smallTalkReply,
 			resolvedByTier: ResolutionTier.TIER0,
@@ -259,9 +257,6 @@ export async function runRouter(
 	const routingDecision = routingResult.routingDecision as
 		| Exclude<AgentTier, "ROUTER">
 		| "HUMAN";
-
-	console.log("routing results", routingResult);
-	// console.log("Routing decision value:", routingDecision);
 
 	// Log the routing decision
 	const validatedRoutingDecision = validateRoutingDecision(routingDecision);
@@ -285,7 +280,6 @@ export async function runRouter(
 		};
 	}
 
-	console.log(validatedRoutingDecision);
 	// -- phase 2: tier call + review loop
 
 	let currentTier = routingDecision as Exclude<
@@ -298,7 +292,6 @@ export async function runRouter(
 
 		const tierStart = Date.now();
 		const tierResponse: TierResponse = await callTier(currentTier, context);
-		console.log(tierResponse);
 		// short-circuit: customer needs to authenticate first
 		if ((tierResponse as any).loginUrl) {
 			return {
@@ -326,8 +319,6 @@ export async function runRouter(
 		const { parsed: reviewResult, tokensUsed: reviewTokens } =
 			await callRouterLLM(reviewPrompt);
 
-		console.log(reviewResult);
-
 		const reviewLatency = Date.now() - reviewStart;
 
 		const verdict = reviewResult.reviewVerdict as "approved" | "rejected";
@@ -337,7 +328,6 @@ export async function runRouter(
 				? AgentAction.RESOLVED
 				: AgentAction.REJECTED_OUTPUT;
 
-		console.log("review result", reviewResult);
 		// Log the review decision
 		const validatedReviewDecision = validateReviewDecision(reviewDecision);
 		await writeAgentLog({
