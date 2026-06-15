@@ -246,9 +246,9 @@ function FormPanel() {
                 />
 
                 <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "20px 0 4px" }}>
-                    <div style={{ flex: 1, height: 1, background: T.border }} />
+                    <div style={{ flex: 1, height: 1, background: T.darkBorder }} />
                     <span style={{ fontSize: 12, color: T.muted }}>or continue with email</span>
-                    <div style={{ flex: 1, height: 1, background: T.border }} />
+                    <div style={{ flex: 1, height: 1, background: T.darkBorder }} />
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
