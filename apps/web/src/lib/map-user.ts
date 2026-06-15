@@ -11,6 +11,8 @@ export function mapApiUser(result: {
 	currentPlanId?: string | null;
 	onboarded?: boolean;
 	hasActiveSubscription?: boolean;
+	isEmailVerified?: boolean;  
+    is_email_verified?: boolean;
 }): AuthUser {
 	return {
 		id: result.id,
@@ -23,5 +25,6 @@ export function mapApiUser(result: {
 		currentPlanId: result.currentPlanId ?? null,
 		onboarded: result.onboarded ?? Boolean(result.organizationId),
 		hasActiveSubscription: result.hasActiveSubscription ?? false,
+		isEmailVerified: result.isEmailVerified ?? false,
 	};
 }

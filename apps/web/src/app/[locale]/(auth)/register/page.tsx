@@ -726,8 +726,9 @@ export default function RegisterPage() {
 							}
 						}}
 						onError={() => setSubmitError("Google sign-up failed.")}
-						width="380"
+						width="full"
 						auto_select={false}
+						text="signup_with"
 					/>
 
 					<div style={{ display: "flex", alignItems: "center", gap: 12, margin: "20px 0 4px" }}>

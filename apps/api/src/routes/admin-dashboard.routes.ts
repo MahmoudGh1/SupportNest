@@ -96,7 +96,7 @@ router.get("/organizations/:organizationId", getOrganization);
  */
 router.patch("/organizations/:organizationId", updateOrganization);
 
-router.delete("/organizations/:orgId", deleteOrganization);
+router.delete("/organizations/:organizationId", deleteOrganization);
 /**
  * PATCH /admin/organizations/:organizationId/suspend
  * Suspend org (sets is_active = false)
@@ -125,10 +125,10 @@ router.get("/organizations/:organizationId/tier-stats", getOrgTierStats);
  */
 router.get("/organizations/:organizationId/conversation-stats", getOrgConversationStats);
 
-router.get("/organizations/:orgId/conversations", getOrgConversations);
+router.get("/organizations/:organizationId/conversations", getOrgConversations);
 
 router.get(
-  "/organizations/:orgId/conversations/:conversationId",
+  "/organizations/:organizationId/conversations/:conversationId",
   getConversationById,
 );
 
@@ -194,11 +194,11 @@ router.patch("/organizations/:organizationId/users/:userId", updateOrgUser);
 router.delete("/organizations/:organizationId/users/:userId", removeOrgUser);
 
 /**
- * DELETE /admin/organizations/:orgId/conversations/:conversationId
+ * DELETE /admin/organizations/:organizationId/conversations/:conversationId
  * Hard delete a conversation + all its messages, logs, ticket, CSAT, analytics
  */
 router.delete(
-  "/organizations/:orgId/conversations/:conversationId",
+  "/organizations/:organizationId/conversations/:conversationId",
   deleteConversation,
 );
 

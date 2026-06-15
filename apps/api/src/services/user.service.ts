@@ -31,6 +31,7 @@ export async function updateProfileService(userId: string, data: { firstName: st
 			isActive: true,
 			createdAt: true,
 			updatedAt: true,
+			isEmailVerified: true
 		},
 	});
 

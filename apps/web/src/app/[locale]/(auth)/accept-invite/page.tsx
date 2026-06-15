@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { GoogleLogin } from "@react-oauth/google";
+import { api } from "@/lib/api.ts";
 
 const T = {
     darkBg: "var(--page-bg)",
@@ -110,7 +112,7 @@ function FormPanel() {
             setPageLoading(false);
             return;
         }
-        fetch(`${BASE_URL}/invitations/accept/${token}`)
+        fetch(`http://localhost:3001/api/v1/invitations/accept/${token}`)
             .then((res) => res.json())
             .then((data) => {
                 if (data.email) {
@@ -123,6 +125,22 @@ function FormPanel() {
             .catch(() => setTokenError("Could not verify invitation. Please try again."))
             .finally(() => setPageLoading(false));
     }, [token]);
+
+    async function handleGoogleRegister(idToken: string) {
+        try {
+            const { userId, email } = await api.registerWithGoogle(idToken);
+
+            sessionStorage.setItem("registrationData", JSON.stringify({
+                firstName: "",
+                lastName: "",
+                email,
+            }));
+
+            router.push(`/register/business?userId=${userId}`);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Google sign-up failed");
+        }
+    }
 
     function validate(): boolean {
         const e: Record<string, string> = {};
@@ -140,7 +158,7 @@ function FormPanel() {
         setSubmitting(true);
         setSubmitError("");
         try {
-            const res = await fetch(`${BASE_URL}/invitations/accept/${token}`, {
+            const res = await fetch(`http://localhost:3001/api/v1/invitations/accept/${token}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ firstName, lastName, password }),
@@ -206,6 +224,32 @@ function FormPanel() {
                 <p style={{ fontSize: 13, color: T.violetLight, textAlign: "center", margin: "0 0 32px" }}>
                     {email}
                 </p>
+
+
+                {/* Google */}
+                <GoogleLogin
+                    onSuccess={async (credentialResponse) => {
+                        setSubmitError("");
+                        setSubmitting(true);
+                        try {
+                            await handleGoogleRegister(credentialResponse.credential!);
+                        } catch (e) {
+                            setSubmitError(e instanceof Error ? e.message : "Google sign-up failed.");
+                        } finally {
+                            setSubmitting(false);
+                        }
+                    }}
+                    onError={() => setSubmitError("Google sign-up failed.")}
+                    width="full"
+                    auto_select={false}
+                    text="signup_with"
+                />
+
+                <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "20px 0 4px" }}>
+                    <div style={{ flex: 1, height: 1, background: T.border }} />
+                    <span style={{ fontSize: 12, color: T.muted }}>or continue with email</span>
+                    <div style={{ flex: 1, height: 1, background: T.border }} />
+                </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                     {submitError && (

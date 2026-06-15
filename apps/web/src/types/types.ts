@@ -11,6 +11,7 @@ export interface AuthUser {
 	onboarded: boolean;
 	hasActiveSubscription?: boolean;
 	currentPlanId?: string | null;
+	isEmailVerified: boolean;
 }
 
 export enum Role {
