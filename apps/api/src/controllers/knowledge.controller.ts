@@ -12,6 +12,7 @@ import {
 	type QueryParams,
 } from "src/utils/filterBuilder.js";
 import type { KnowledgeDocumentType } from "generated/prisma/enums.js";
+import { validateFileMatchesType } from "src/utils/fileType.utils.js";
 
 export const uploadDocument: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
@@ -21,6 +22,8 @@ export const uploadDocument: RequestHandler = asyncHandler(
 		const file = req.file;
 
 		if (!file) throw new AppError("No file provided", 400);
+
+		validateFileMatchesType(file, type);
 
 		const apiDocTypes = ["API_DOC", "SWAGGER_URL"];
 
