@@ -99,7 +99,7 @@ router.get("/organizations/:organizationId", getOrganization);
  */
 router.patch("/organizations/:organizationId", updateOrganization);
 
-router.delete("/organizations/:organizationId", deleteOrganization);
+// router.delete("/organizations/:organizationId", deleteOrganization);
 /**
  * DELETE /admin/organizations/:organizationId
  * Schedule org deletion in 30 minutes + notify org via email
