@@ -2,6 +2,7 @@
 import { Worker } from "bullmq";
 import prisma from "src/config/prisma.js";
 import { redis } from "src/config/redis.js";
+import { analyticsQueue } from "src/queues/analyticsQueue.js";
 
 export const conversationCloseWorker = new Worker(
 	"conversation-close",
@@ -18,8 +19,15 @@ export const conversationCloseWorker = new Worker(
 			},
 		});
 		console.log(`[close-worker] closed conversation ${conversationId}`);
-		// TODO: enqueue analytics job here once analyticsQueue.ts exists
-		// await analyticsQueue.add('compute-analytics', { conversationId, organizationId });
+
+		await analyticsQueue.add("compute-analytics", {
+			conversationId,
+			organizationId,
+		});
 	},
 	{ connection: redis as any },
 );
+
+conversationCloseWorker.on("ready", () => {
+	console.log("[conversationCloseWorker] connected and listening for jobs");
+});
