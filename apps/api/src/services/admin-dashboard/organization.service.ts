@@ -27,6 +27,15 @@ import {
   type TierStats,
 } from "src/types/admin-dashboard.types.js";
 import type { promises } from "node:dns";
+import {
+  cancelOrgDeletion,
+  isScheduled,
+  scheduleOrgDeletion,
+} from "src/queues/deletion.queue.js";
+import {
+  sendOrgDeletionCancelledEmail,
+  sendOrgDeletionScheduledEmail,
+} from "src/utils/mailer.js";
 
 // ─── Build tier stats from agent_logs + conversation_analytics ────────────────
 
@@ -803,52 +812,90 @@ export async function deleteConversationService(
   };
 }
 
+async function hardDeleteOrg(orgId: string): Promise<void> {
+  await prisma.$transaction([
+    prisma.conversationAnalytics.deleteMany({
+      where: { organizationId: orgId },
+    }),
+    prisma.csatRating.deleteMany({ where: { organizationId: orgId } }),
+    prisma.agentLog.deleteMany({
+      where: { conversation: { organizationId: orgId } },
+    }),
+    prisma.message.deleteMany({
+      where: { conversation: { organizationId: orgId } },
+    }),
+    prisma.ticket.deleteMany({ where: { organizationId: orgId } }),
+    prisma.conversation.deleteMany({ where: { organizationId: orgId } }),
+    prisma.documentChunk.deleteMany({ where: { organizationId: orgId } }),
+    prisma.knowledgeDocument.deleteMany({ where: { organizationId: orgId } }),
+    prisma.apiKey.deleteMany({ where: { organizationId: orgId } }),
+    prisma.customer.deleteMany({ where: { organizationId: orgId } }),
+    prisma.payment.deleteMany({ where: { organizationId: orgId } }),
+    prisma.user.deleteMany({ where: { organizationId: orgId } }),
+    prisma.organization.delete({ where: { id: orgId } }),
+  ]);
 
-export async function deleteOrganizationService(
-	orgId: string,
-): Promise<DeleteOrgResult> {
-	const org = await prisma.organization.findUnique({
-		where: { id: orgId },
-		select: { id: true },
-	});
-	if (!org) return { error: "ORG_NOT_FOUND" };
-
-	// Block deletion if org has active conversations
-	const activeConversations = await prisma.conversation.count({
-		where: {
-			organizationId: orgId,
-			conversationStatus: "ACTIVE",
-		},
-	});
-	if (activeConversations > 0) return { error: "ORG_HAS_ACTIVE_CONVERSATIONS" };
-
-	// Delete in order — deepest children first
-	await prisma.$transaction([
-		prisma.conversationAnalytics.deleteMany({
-			where: { organizationId: orgId },
-		}),
-		prisma.csatRating.deleteMany({ where: { organizationId: orgId } }),
-		prisma.agentLog.deleteMany({
-			where: { conversation: { organizationId: orgId } },
-		}),
-		prisma.message.deleteMany({
-			where: { conversation: { organizationId: orgId } },
-		}),
-		prisma.ticket.deleteMany({ where: { organizationId: orgId } }),
-		prisma.conversation.deleteMany({ where: { organizationId: orgId } }),
-		prisma.documentChunk.deleteMany({ where: { organizationId: orgId } }),
-		prisma.knowledgeDocument.deleteMany({ where: { organizationId: orgId } }),
-		prisma.apiKey.deleteMany({ where: { organizationId: orgId } }),
-		prisma.customer.deleteMany({ where: { organizationId: orgId } }),
-		prisma.payment.deleteMany({ where: { organizationId: orgId } }),
-		prisma.user.deleteMany({ where: { organizationId: orgId } }),
-		prisma.organization.delete({ where: { id: orgId } }),
-	]);
-
-	return { success: true, organization_id: orgId };
+  console.log(`[Deletion] Org ${orgId} deleted successfully`);
 }
 
+export async function scheduleOrganizationDeletion(
+  orgId: string,
+): Promise<
+  | { success: true; scheduled_at: string; deletes_at: string }
+  | { error: "ORG_NOT_FOUND" | "ALREADY_SCHEDULED" }
+> {
+  const org = await prisma.organization.findUnique({
+    where: { id: orgId },
+    select: { id: true, name: true, email: true },
+  });
+  if (!org) return { error: "ORG_NOT_FOUND" };
+  if (isScheduled(orgId)) return { error: "ALREADY_SCHEDULED" };
 
+  const deletesAt = new Date(Date.now() + 30 * 60 * 1000);
+
+  // Schedule the deletion first
+  scheduleOrgDeletion(orgId, () => hardDeleteOrg(orgId));
+
+  // Send email — catch error so it never blocks the schedule
+  try {
+    await sendOrgDeletionScheduledEmail(org.email, org.name, deletesAt);
+  } catch (err) {
+    console.error("[Mailer] Failed to send deletion scheduled email:", err);
+  }
+
+  return {
+    success: true,
+    scheduled_at: new Date().toLocaleString("en-US", {
+      timeZone: "Africa/Cairo",
+      timeZoneName: "short",
+    }),
+    deletes_at: deletesAt.toLocaleString("en-US", {
+      timeZone: "Africa/Cairo",
+      timeZoneName: "short",
+    }),
+  };
+}
+export async function cancelOrganizationDeletion(
+  orgId: string,
+): Promise<{ success: true } | { error: "ORG_NOT_FOUND" | "NOT_SCHEDULED" }> {
+  const org = await prisma.organization.findUnique({
+    where: { id: orgId },
+    select: { id: true, name: true, email: true },
+  });
+  if (!org) return { error: "ORG_NOT_FOUND" };
+
+  // cancelOrgDeletion now returns true if was ever scheduled
+  const wasCancelled = cancelOrgDeletion(orgId);
+  if (!wasCancelled) return { error: "NOT_SCHEDULED" };
+
+  try {
+    await sendOrgDeletionCancelledEmail(org.email, org.name);
+  } catch (err) {
+    console.error("[Mailer] Failed to send cancellation email:", err);
+  }
+
+  return { success: true };
+}
 
 export {
   buildTierStats,

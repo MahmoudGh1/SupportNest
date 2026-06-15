@@ -26,7 +26,9 @@ import {
   deleteConversation,
   getOrgConversations,
   getConversationById,
-  deleteOrganization,
+  scheduleDeleteOrganization,
+  cancelDeleteOrganization,
+  resendDeletionEmail,
 } from "../controllers/admin-dashboard/admin.organizations.controller.js";
 
 import {
@@ -39,6 +41,7 @@ import {
 } from "../controllers/admin-dashboard/admin.users.controller.js";
 import { authMiddleware } from "src/middlewares/auth.middleware.js";
 import { adminMiddleware } from "src/middlewares/admin.middleware.js";
+import { transporter } from "src/utils/mailer.js";
 
 const router: Router = Router();
 
@@ -96,7 +99,22 @@ router.get("/organizations/:orgId", getOrganization);
  */
 router.patch("/organizations/:orgId", updateOrganization);
 
-router.delete("/organizations/:orgId", deleteOrganization);
+/**
+ * DELETE /admin/organizations/:orgId
+ * Schedule org deletion in 30 minutes + notify org via email
+ * Role: super_admin only
+ */
+router.delete("/organizations/:orgId", scheduleDeleteOrganization);
+
+/**
+ * POST /admin/organizations/:orgId/cancel-deletion
+ * Cancel a scheduled deletion + notify org via email
+ * Role: super_admin only
+ */
+router.post("/organizations/:orgId/cancel-deletion", cancelDeleteOrganization);
+
+router.post("/organizations/:orgId/resend-deletion-email", resendDeletionEmail);
+
 /**
  * PATCH /admin/organizations/:orgId/suspend
  * Suspend org (sets is_active = false)
