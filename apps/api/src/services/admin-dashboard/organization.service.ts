@@ -865,8 +865,14 @@ export async function scheduleOrganizationDeletion(
 
   return {
     success: true,
-    scheduled_at: new Date().toISOString(),
-    deletes_at: deletesAt.toISOString(),
+    scheduled_at: new Date().toLocaleString("en-US", {
+      timeZone: "Africa/Cairo",
+      timeZoneName: "short",
+    }),
+    deletes_at: deletesAt.toLocaleString("en-US", {
+      timeZone: "Africa/Cairo",
+      timeZoneName: "short",
+    }),
   };
 }
 export async function cancelOrganizationDeletion(
