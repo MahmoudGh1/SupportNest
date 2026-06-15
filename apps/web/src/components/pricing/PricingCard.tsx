@@ -37,10 +37,10 @@ const CheckDark = () => (
     fill="none"
     className="shrink-0 mt-0.5"
   >
-    <circle cx="7.5" cy="7.5" r="7.5" fill="#111" fillOpacity="0.08" />
+    <circle cx="7.5" cy="7.5" r="7.5" fill="currentColor" fillOpacity="0.08" />
     <path
       d="M4.5 7.5l2 2 4-4"
-      stroke="#111"
+      stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -78,7 +78,9 @@ function parseFeatures(features: string): string[] {
     const parsed = JSON.parse(features) as unknown;
     if (Array.isArray(parsed)) return parsed.map(formatFeatureItem);
     if (parsed && typeof parsed === "object") {
-      return Object.values(parsed as Record<string, unknown>).map(formatFeatureItem);
+      return Object.values(parsed as Record<string, unknown>).map(
+        formatFeatureItem,
+      );
     }
   } catch {
     return [features];
@@ -86,20 +88,22 @@ function parseFeatures(features: string): string[] {
   return [];
 }
 
-function mapDbPlanToCard(plan: {
-  id: string;
-  name: string;
-  priceMonthly: number;
-  maxConversations: number;
-  maxAgents: number;
-  maxKnowledgeDocuments: number;
-  features: string;
-}, index: number, total: number): Plan {
+function mapDbPlanToCard(
+  plan: {
+    id: string;
+    name: string;
+    priceMonthly: number;
+    maxConversations: number;
+    maxAgents: number;
+    maxKnowledgeDocuments: number;
+    features: string;
+  },
+  index: number,
+  total: number,
+): Plan {
   const isEnterprise =
     plan.name.toLowerCase() === "enterprise" || plan.priceMonthly <= 0;
-  const annualPrice = isEnterprise
-    ? null
-    : Math.round(plan.priceMonthly * 0.8);
+  const annualPrice = isEnterprise ? null : Math.round(plan.priceMonthly * 0.8);
   const featured = index === Math.min(1, total - 1);
 
   const defaultFeatures = [
@@ -108,8 +112,7 @@ function mapDbPlanToCard(plan: {
     `${plan.maxKnowledgeDocuments || "Unlimited"} knowledge base docs`,
   ];
   const parsedFeatures = parseFeatures(plan.features);
-  const features =
-    parsedFeatures.length > 0 ? parsedFeatures : defaultFeatures;
+  const features = parsedFeatures.length > 0 ? parsedFeatures : defaultFeatures;
 
   return {
     id: plan.id,
@@ -173,9 +176,12 @@ function PlanCard({
     ? "rounded-[22px] shadow-[0_4px_32px_rgba(0,0,0,0.13)] ring-1 ring-black/10 dark:ring-white/10"
     : "rounded-2xl shadow-sm";
 
-  const cardBg = isWhite ? "bg-[#111]" : "sn-surface border";
+  const cardBg = isWhite
+    ? "bg-[#111]"
+    : isEnterprise
+      ? "sn-surface"
+      : "sn-surface border";
 
-  // ── Handle CTA click ───────────────────────────────────────────────────────
   function handleClick() {
     if (isCurrent) return;
 
@@ -204,8 +210,15 @@ function PlanCard({
 
   return (
     <div
-      className={`relative overflow-hidden flex flex-col ${cardBg} ${wrapperCls} p-7 min-h-150`}
+      className={`relative overflow-hidden flex flex-col ${cardBg} ${wrapperCls} p-7 min-h-150 ${isEnterprise ? "ring-2 ring-[var(--btn-primary-bg)]" : ""}`}
     >
+      {/* Diagonal ribbon — only on enterprise */}
+      {isEnterprise && (
+        <div className="absolute top-[25px] right-[-36px] w-[160px] text-center py-2.5 rotate-45 text-[11px] font-black tracking-widest uppercase bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)]">
+          COMING SOON
+        </div>
+      )}
+
       <div className="relative z-10 flex flex-col h-full">
         {/* Name + badge */}
         <div className="flex items-center justify-between mb-4">
@@ -258,7 +271,7 @@ function PlanCard({
           {plan.subline(annual)}
         </p>
 
-        {/* CTA button — replaced Link with button */}
+        {/* CTA button */}
         <button
           onClick={handleClick}
           disabled={isCurrent}
