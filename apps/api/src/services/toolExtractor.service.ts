@@ -4,7 +4,7 @@ import { model } from "src/config/langChain.js";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { HttpMethod } from "generated/prisma/enums.js";
 import SwaggerParser from "@apidevtools/swagger-parser";
-import { extractTextFromUrl } from "src/config/pdf.js";
+import { extractTextFromPdfUrl } from "src/config/pdf.js";
 
 interface ExtractedTool {
 	name: string;
@@ -23,13 +23,21 @@ interface ToolParameter {
 	description: string;
 }
 
-export async function extractToolsFromDocument(documentId: string, organizationId: string, fileUrlOrSwaggerUrl: string, documentType: string): Promise<void> {
+export async function extractToolsFromDocument(
+	documentId: string,
+	organizationId: string,
+	fileUrlOrSwaggerUrl: string,
+	documentType: string,
+): Promise<void> {
 	const apiConfig = await prisma.businessApiConfig.findUnique({
 		where: { organizationId },
 	});
 
 	if (!apiConfig || !apiConfig.isVerified) {
-		throw new AppError("You must configure and verify your API connection before extracting tools.", 400);
+		throw new AppError(
+			"You must configure and verify your API connection before extracting tools.",
+			400,
+		);
 	}
 
 	let tools: ExtractedTool[] = [];
@@ -39,7 +47,10 @@ export async function extractToolsFromDocument(documentId: string, organizationI
 	} else if (documentType === "API_DOC") {
 		tools = await extractFromApiDocument(fileUrlOrSwaggerUrl);
 	} else {
-		throw new AppError(`Unsupported document type for tool extraction: ${documentType}`, 400);
+		throw new AppError(
+			`Unsupported document type for tool extraction: ${documentType}`,
+			400,
+		);
 	}
 
 	if (tools.length === 0) {
@@ -59,7 +70,10 @@ async function extractFromSwaggerUrl(url: string): Promise<ExtractedTool[]> {
 	try {
 		api = await SwaggerParser.validate(url);
 	} catch (err) {
-		throw new AppError(`Failed to parse Swagger/OpenAPI spec at ${url}. Make sure it is a valid OpenAPI JSON or YAML file.`, 400);
+		throw new AppError(
+			`Failed to parse Swagger/OpenAPI spec at ${url}. Make sure it is a valid OpenAPI JSON or YAML file.`,
+			400,
+		);
 	}
 
 	const tools: ExtractedTool[] = [];
@@ -72,9 +86,12 @@ async function extractFromSwaggerUrl(url: string): Promise<ExtractedTool[]> {
 			const operation = pathItem[method.toLowerCase()];
 			if (!operation) continue;
 
-			const name = operation.operationId ? sanitizeToolName(operation.operationId) : sanitizeToolName(`${method.toLowerCase()}_${path}`);
+			const name = operation.operationId
+				? sanitizeToolName(operation.operationId)
+				: sanitizeToolName(`${method.toLowerCase()}_${path}`);
 
-			const description = operation.summary || operation.description || `${method} ${path}`;
+			const description =
+				operation.summary || operation.description || `${method} ${path}`;
 
 			const parameters: ToolParameter[] = [];
 
@@ -90,11 +107,15 @@ async function extractFromSwaggerUrl(url: string): Promise<ExtractedTool[]> {
 			}
 
 			if (operation.requestBody) {
-				const content = operation.requestBody.content?.["application/json"] || operation.requestBody.content?.["application/x-www-form-urlencoded"];
+				const content =
+					operation.requestBody.content?.["application/json"] ||
+					operation.requestBody.content?.["application/x-www-form-urlencoded"];
 
 				if (content?.schema?.properties) {
 					const required = content.schema.required || [];
-					for (const [propName, propSchema] of Object.entries(content.schema.properties) as [string, any][]) {
+					for (const [propName, propSchema] of Object.entries(
+						content.schema.properties,
+					) as [string, any][]) {
 						parameters.push({
 							name: propName,
 							type: propSchema.type || "string",
@@ -106,7 +127,10 @@ async function extractFromSwaggerUrl(url: string): Promise<ExtractedTool[]> {
 				}
 			}
 
-			const responseSchema = operation.responses?.["200"]?.content?.["application/json"]?.schema || operation.responses?.["201"]?.content?.["application/json"]?.schema || {};
+			const responseSchema =
+				operation.responses?.["200"]?.content?.["application/json"]?.schema ||
+				operation.responses?.["201"]?.content?.["application/json"]?.schema ||
+				{};
 
 			tools.push({
 				name,
@@ -122,12 +146,17 @@ async function extractFromSwaggerUrl(url: string): Promise<ExtractedTool[]> {
 	return tools;
 }
 
-async function extractFromApiDocument(fileUrl: string): Promise<ExtractedTool[]> {
+async function extractFromApiDocument(
+	fileUrl: string,
+): Promise<ExtractedTool[]> {
 	let documentText: string;
 	try {
-		documentText = await extractTextFromUrl(fileUrl);
+		documentText = await extractTextFromPdfUrl(fileUrl);
 	} catch (err) {
-		throw new AppError("Failed to extract text from API documentation file.", 400);
+		throw new AppError(
+			"Failed to extract text from API documentation file.",
+			400,
+		);
 	}
 
 	if (!documentText || documentText.trim().length === 0) {
@@ -173,21 +202,32 @@ Example:
   }
 ]
     `),
-		new HumanMessage(`Extract all API endpoints from this documentation:\n\n${truncated}`),
+		new HumanMessage(
+			`Extract all API endpoints from this documentation:\n\n${truncated}`,
+		),
 	]);
 
-	const raw = typeof response.content === "string" ? response.content : (response.content[0] as { text: string }).text;
+	const raw =
+		typeof response.content === "string"
+			? response.content
+			: (response.content[0] as { text: string }).text;
 
 	let parsed: any[];
 	try {
 		const cleaned = raw.replace(/```json|```/g, "").trim();
 		parsed = JSON.parse(cleaned);
 	} catch {
-		throw new AppError("Failed to parse tool definitions from document. The document may not contain valid API documentation.", 400);
+		throw new AppError(
+			"Failed to parse tool definitions from document. The document may not contain valid API documentation.",
+			400,
+		);
 	}
 
 	if (!Array.isArray(parsed)) {
-		throw new AppError("Unexpected response format from extraction agent.", 500);
+		throw new AppError(
+			"Unexpected response format from extraction agent.",
+			500,
+		);
 	}
 
 	return parsed
@@ -202,8 +242,12 @@ Example:
 		}));
 }
 
-
-async function saveTools(tools: ExtractedTool[], documentId: string, organizationId: string, apiConfigId: string): Promise<void> {
+async function saveTools(
+	tools: ExtractedTool[],
+	documentId: string,
+	organizationId: string,
+	apiConfigId: string,
+): Promise<void> {
 	await prisma.toolDefinition.deleteMany({
 		where: { documentId },
 	});
@@ -234,7 +278,6 @@ async function saveTools(tools: ExtractedTool[], documentId: string, organizatio
 		},
 	});
 }
-
 
 function sanitizeToolName(name: string): string {
 	return name
