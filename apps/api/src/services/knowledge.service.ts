@@ -13,19 +13,19 @@ export async function uploadDocument({
 	type,
 	title,
 	userId,
-	orgId,
+	organizationId,
 }: {
 	file: Express.Multer.File;
 	type: KnowledgeDocumentType;
 	title: string;
 	userId: string;
-	orgId: string;
+	organizationId: string;
 }): Promise<{ document: KnowledgeDocument; storagePath: string }> {
 	validateFileMatchesType(file, type);
 
 	// --- Plan limit check ---
 	const org = await prisma.organization.findUnique({
-		where: { id: orgId },
+		where: { id: organizationId },
 		select: { plan: { select: { maxKnowledgeDocuments: true } } },
 	});
 
@@ -33,7 +33,7 @@ export async function uploadDocument({
 
 	if (maxDocs !== null && maxDocs !== undefined) {
 		const currentCount = await prisma.knowledgeDocument.count({
-			where: { organizationId: orgId },
+			where: { organizationId: organizationId },
 		});
 
 		if (currentCount >= maxDocs) {
@@ -48,7 +48,7 @@ export async function uploadDocument({
 
 	if (apiDocTypes.includes(type)) {
 		const apiConfig = await prisma.businessApiConfig.findUnique({
-			where: { organizationId: orgId },
+			where: { organizationId: organizationId },
 		});
 		if (!apiConfig || !apiConfig.isVerified) {
 			throw new AppError(
@@ -61,7 +61,7 @@ export async function uploadDocument({
 	// 1. Create the DB row first, no storagePath yet
 	const doc = await prisma.knowledgeDocument.create({
 		data: {
-			organizationId: orgId,
+			organizationId: organizationId,
 			title,
 			type,
 			storagePath: null,
@@ -82,7 +82,7 @@ export async function uploadDocument({
 	console.log(file.buffer.toString("utf-8"));
 	const storagePath = await uploadToCloudinary(
 		file.buffer,
-		`supportnest/${orgId}/knowledge`,
+		`supportnest/${organizationId}/knowledge`,
 		`${Date.now()}-${safeTitle}${fileExtension}`,
 	);
 
@@ -97,7 +97,7 @@ export async function uploadDocument({
 		await knowledgeQueue.add("process-document", {
 			documentId: updatedDoc.id,
 			fileUrl: storagePath,
-			orgId,
+			organizationId,
 		}); // await the enqueue itself
 	} catch (err) {
 		// Enqueue failed — mark the doc as failed so it doesn't sit at PROCESSING forever

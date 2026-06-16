@@ -298,8 +298,7 @@ export default function PricingTable() {
 
             {/* Rows */}
             {group.rows.map((row, ri) => {
-              const isLast =
-                gi === GROUPS.length - 1 && ri === group.rows.length - 1;
+              const isLast = gi === GROUPS.length - 1 && ri === group.rows.length - 1;
               return (
                 <div
                   key={row.label}

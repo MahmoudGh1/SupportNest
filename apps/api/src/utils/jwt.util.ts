@@ -4,7 +4,7 @@ import { AuthError } from "./appError.js";
 import dotenv from "dotenv";
 import type { IncomingHttpHeaders } from "http";
 
-dotenv.config();
+dotenv.config({ path: `.env.${process.env.NODE_ENV || "development"}` });
 
 function getJwtSecret(): string {
 	const secret = process.env.JWT_SECRET;

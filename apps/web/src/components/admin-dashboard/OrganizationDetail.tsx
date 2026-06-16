@@ -12,7 +12,7 @@ import type {
 } from "@/types/types";
 
 interface Props {
-	orgId: string;
+	organizationId: string;
 	onClose: () => void;
 }
 
@@ -140,7 +140,7 @@ function OrganizationDetailSkeleton() {
 	);
 }
 
-export function OrganizationDetail({ orgId, onClose }: Props) {
+export function OrganizationDetail({ organizationId, onClose }: Props) {
 	const [org, setOrg] = useState<AdminOrganizationDetail | null>(null);
 	const [tierStats, setTierStats] = useState<AdminTierStats | null>(null);
 	const [loading, setLoading] = useState(true);
@@ -148,14 +148,14 @@ export function OrganizationDetail({ orgId, onClose }: Props) {
 
 	useEffect(() => {
 		setLoading(true);
-		Promise.all([api.getAdminOrganization(orgId), api.getAdminOrgTierStats(orgId)])
+		Promise.all([api.getAdminOrganization(organizationId), api.getAdminOrgTierStats(organizationId)])
 			.then(([orgData, stats]) => {
 				setOrg(orgData);
 				setTierStats(stats);
 			})
 			.catch((err) => setError(err.message || "Failed to load details"))
 			.finally(() => setLoading(false));
-	}, [orgId]);
+	}, [organizationId]);
 
 	if (loading) {
 		return <OrganizationDetailSkeleton />;
@@ -198,9 +198,9 @@ export function OrganizationDetail({ orgId, onClose }: Props) {
 						}}
 						onClick={async () => {
 							try {
-								if (org.is_active) await api.suspendAdminOrganization(orgId);
-								else await api.activateAdminOrganization(orgId);
-								const updated = await api.getAdminOrganization(orgId);
+								if (org.is_active) await api.suspendAdminOrganization(organizationId);
+								else await api.activateAdminOrganization(organizationId);
+								const updated = await api.getAdminOrganization(organizationId);
 								setOrg(updated);
 							} catch (e: any) { alert(e.message); }
 						}}

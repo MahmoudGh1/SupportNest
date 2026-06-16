@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { GoogleLogin } from "@react-oauth/google";
+import { api } from "@/lib/api.ts";
 
 const T = {
     darkBg: "var(--page-bg)",
@@ -24,7 +26,7 @@ const T = {
     labelMuted: "var(--label-muted)",
 } as const;
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://api-production-e60c.up.railway.app/api/v1";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
 
 interface FieldProps {
     label: string;
@@ -90,7 +92,7 @@ function FormPanel() {
     const router = useRouter();
     const token = searchParams.get("token") ?? "";
 
-    const [orgName, setOrgName] = useState("");
+    const [orgName, setorgName] = useState("");
     const [email, setEmail] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
@@ -115,7 +117,7 @@ function FormPanel() {
             .then((data) => {
                 if (data.email) {
                     setEmail(data.email);
-                    setOrgName(data.organizationName ?? "");
+                    setorgName(data.orgName ?? "");
                 } else {
                     setTokenError(data.message ?? "Invalid or expired invitation.");
                 }
@@ -123,6 +125,22 @@ function FormPanel() {
             .catch(() => setTokenError("Could not verify invitation. Please try again."))
             .finally(() => setPageLoading(false));
     }, [token]);
+
+    async function handleGoogleRegister(idToken: string) {
+        try {
+            const { userId, email } = await api.registerWithGoogle(idToken);
+
+            sessionStorage.setItem("registrationData", JSON.stringify({
+                firstName: "",
+                lastName: "",
+                email,
+            }));
+
+            router.push(`/register/business?userId=${userId}`);
+        } catch (err) {
+            setSubmitError(err instanceof Error ? err.message : "Google sign-up failed");
+        }
+    }
 
     function validate(): boolean {
         const e: Record<string, string> = {};
@@ -201,11 +219,37 @@ function FormPanel() {
                     Accept Invitation
                 </h1>
                 <p style={{ fontSize: 14, color: T.muted, textAlign: "center", margin: "0 0 4px" }}>
-                    You've been invited to join <strong style={{ color: T.text }}>{orgName}</strong>
+                    You{"\'"}ve been invited to join <strong style={{ color: T.text }}>{orgName}</strong>
                 </p>
                 <p style={{ fontSize: 13, color: T.violetLight, textAlign: "center", margin: "0 0 32px" }}>
                     {email}
                 </p>
+
+
+                {/* Google */}
+                <GoogleLogin
+                    onSuccess={async (credentialResponse) => {
+                        setSubmitError("");
+                        setSubmitting(true);
+                        try {
+                            await handleGoogleRegister(credentialResponse.credential!);
+                        } catch (e) {
+                            setSubmitError(e instanceof Error ? e.message : "Google sign-up failed.");
+                        } finally {
+                            setSubmitting(false);
+                        }
+                    }}
+                    onError={() => setSubmitError("Google sign-up failed.")}
+                    width="full"
+                    auto_select={false}
+                    text="signup_with"
+                />
+
+                <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "20px 0 4px" }}>
+                    <div style={{ flex: 1, height: 1, background: T.darkBorder }} />
+                    <span style={{ fontSize: 12, color: T.muted }}>or continue with email</span>
+                    <div style={{ flex: 1, height: 1, background: T.darkBorder }} />
+                </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                     {submitError && (
@@ -285,7 +329,7 @@ function BrandPanel() {
                     AI Powered Multi-Agent Customer Support Platform
                 </p>
                 <div style={{ background: T.darkSurface, border: `1px solid ${T.darkBorder}`, borderRadius: T.radiusLg, padding: "28px", textAlign: "left", width: "100%" }}>
-                    <div style={{ fontSize: 36, lineHeight: 1, color: T.violet, fontFamily: "Georgia, serif", marginBottom: 16 }}>"</div>
+                    <div style={{ fontSize: 36, lineHeight: 1, color: T.violet, fontFamily: "Georgia, serif", marginBottom: 16 }}>&quot;</div>
                     <p style={{ fontSize: 15, color: T.text, lineHeight: 1.75, margin: "0 0 24px" }}>
                         SupportNest is a game changer. Their AI handles our customers and only escalates what truly needs a human. Our team finally has time to breathe.
                     </p>

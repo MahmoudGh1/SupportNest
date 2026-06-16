@@ -23,8 +23,19 @@ ${formattedHistory || "No previous messages — this is the first message."}
 "${latestMessage}"
 
 ## Available Tiers
+<<<<<<< HEAD
 - tier0: Use when the question can be answered purely from the business knowledge base (FAQs, PDFs, CSV, DOCX, documentation), OR when the message is a greeting, small talk, thanks, or has no specific support request — tier0 can respond conversationally.
 - tier1: Use when answering requires fetching live business data (orders, accounts, subscriptions, products) via external APIs, combined with KB context.
+=======
+- tier0: Use ONLY when the question can be answered 100% from static documents (FAQs, 
+  PDFs, policy docs) or the user greeting message with the same language the user talk with. The answer must not depend on any real-time or user-specific data.
+  Examples: "What are your opening hours?", "What is your return policy?"
+  
+- tier1: Use when the answer requires fetching ANY live or dynamic data via an API — 
+  even if the question sounds general. If the customer is asking "what X do you have 
+  available?" or "show me your current Y", that requires a live lookup → use tier1.
+  Examples: "What pets are available?", "What's my order status?", "Show me your inventory."
+>>>>>>> 1c2a37e059c9907c3c18d3741cfe605754f1178b
 - tier2: Use when the issue is complex, multi-step, or was not resolved by a previous tier.
 - human: Use IMMEDIATELY when any of the following are true:
     * Customer explicitly asks for a human agent

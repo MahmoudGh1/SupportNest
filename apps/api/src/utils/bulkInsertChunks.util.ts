@@ -3,7 +3,7 @@ import prisma from "src/config/prisma.js";
 export default async function bulkInsertChunks(
 	chunks: { content: string; embedding: number[]; chunkIndex: number }[],
 	documentId: string,
-	orgId: string,
+	organizationId: string,
 ) {
 	const valueStrings = chunks
 		.map(
@@ -17,7 +17,7 @@ export default async function bulkInsertChunks(
 
 	const flatValues = chunks.flatMap((chunk) => [
 		documentId,
-		orgId,
+		organizationId,
 		chunk.content,
 		`[${chunk.embedding.join(",")}]`,
 		chunk.chunkIndex,

@@ -26,7 +26,7 @@ const roleMap: Record<string, string> = {
 };
 
 export async function listUsersForOrg(
-  orgId: string,
+  organizationId: string,
   opts: {
     page: number;
     limit: number;
@@ -36,7 +36,7 @@ export async function listUsersForOrg(
   },
 ) {
   const where = {
-    organizationId: orgId,
+    organizationId: organizationId,
     ...(opts.role ? { role: opts.role as any } : {}),
     ...(opts.is_active !== undefined ? { isActive: opts.is_active } : {}),
   };
@@ -80,11 +80,11 @@ export async function listUsersForOrg(
   };
 }
 
-export async function getUserById(userId: string, orgId?: string) {
+export async function getUserById(userId: string, organizationId?: string) {
   const user = (await prisma.user.findFirst({
     where: {
       id: userId,
-      ...(orgId ? { organizationId: orgId } : {}),
+      ...(organizationId ? { organizationId: organizationId } : {}),
     },
     select: {
       id: true,
@@ -172,12 +172,12 @@ export async function createUser(body: CreateUserBody) {
 export async function updateUser(
   userId: string,
   body: UpdateUserBody,
-  orgId?: string,
+  organizationId?: string,
 ) {
   const existing = await prisma.user.findFirst({
     where: {
       id: userId,
-      ...(orgId ? { organizationId: orgId } : {}),
+      ...(organizationId ? { organizationId: organizationId } : {}),
       role: { not: "SUPER_ADMIN" }, // super admins cannot be modified through this endpoint
     },
   });
@@ -207,11 +207,11 @@ export async function updateUser(
   return { data: { ...user, updated_at: user.updatedAt.toISOString() } };
 }
 
-export async function deleteUser(userId: string, orgId?: string) {
+export async function deleteUser(userId: string, organizationId?: string) {
   const existing = await prisma.user.findFirst({
     where: {
       id: userId,
-      ...(orgId ? { organizationId: orgId } : {}),
+      ...(organizationId ? { organizationId: organizationId } : {}),
       role: { not: "SUPER_ADMIN" },
     },
   });

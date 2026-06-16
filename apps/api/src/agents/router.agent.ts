@@ -248,7 +248,6 @@ export async function runRouter(
 			latencyMs: 0,
 			tokensUsed: 0,
 		});
-
 		return {
 			finalResponse: routingResult.smallTalkReply,
 			resolvedByTier: ResolutionTier.TIER0,
@@ -266,7 +265,6 @@ export async function runRouter(
 
 	// Log the routing decision
 	const validatedRoutingDecision = validateRoutingDecision(routingDecision);
-
 	await writeAgentLog({
 		conversationId,
 		tier: AgentTier.ROUTER,
@@ -343,7 +341,6 @@ export async function runRouter(
 
 		// Log the review decision
 		const validatedReviewDecision = validateReviewDecision(reviewDecision);
-
 		await writeAgentLog({
 			conversationId,
 			tier: verdict === "approved" ? currentTier : AgentTier.ROUTER, // RESOLVED → owning tier; REJECTED_OUTPUT → router's own call

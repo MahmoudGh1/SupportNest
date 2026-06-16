@@ -30,12 +30,13 @@ import {
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
 function normalizeApiBaseUrl(rawBaseUrl?: string) {
-	const fallback = "https://api-production-e60c.up.railway.app/api/v1";
+	const fallback = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
 	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");
 	return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
 }
 
 const BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE);
+// const BASE_URL = "http://localhost:3001/api/v1";
 
 type ApiRecord = Record<string, unknown>;
 
@@ -116,7 +117,12 @@ export const api = {
 			credentials: "include",
 		});
 		const data = await res.json();
-		if (!res.ok) throw new Error(data.error ?? data.message ?? "Login failed");
+		if (!res.ok) {
+			const err = new Error(data.error ?? data.message ?? "Login failed") as Error & { code?: string; userId?: string };
+			err.code = data.code;
+			err.userId = data.userId;
+			throw err;
+		}
 		return { user: mapApiUser(data.result) };
 	},
 
@@ -142,6 +148,64 @@ export const api = {
 		const body = await res.json();
 		if (!res.ok) throw new Error(body.error ?? "Checkout registration failed");
 		return { user: mapApiUser(body.result) };
+	},
+
+	async registerInitial(data: { email: string; password: string; firstName: string; lastName: string }): Promise<{ userId: string; email: string; alreadyExists: boolean }> {
+		const res = await fetch(`${BASE_URL}/auth/register`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(data),
+			credentials: "include",
+		});
+		const body = await res.json();
+		if (!res.ok) throw new Error(body.error ?? "Registration failed");
+		return body;
+	},
+
+	async sendVerification(userId: string, email: string): Promise<void> {
+		const res = await fetch(`${BASE_URL}/auth/send-verification`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ userId, email }),
+			credentials: "include",
+		});
+		const body = await res.json();
+		if (!res.ok) throw new Error(body.error ?? "Failed to send verification code");
+	},
+
+	async verifyEmail(userId: string, code: string): Promise<void> {
+		const res = await fetch(`${BASE_URL}/auth/verify-email`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ userId, code }),
+			credentials: "include",
+		});
+		const body = await res.json();
+		if (!res.ok) throw new Error(body.error ?? "Invalid or expired code");
+	},
+
+	async completeRegistration(data: { userId: string; businessName: string; planId: string; amount: number; currency?: string; isAnnual: boolean }): Promise<LoginResponse> {
+		const res = await fetch(`${BASE_URL}/auth/complete-registration`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(data),
+			credentials: "include",
+		});
+		const body = await res.json();
+		if (!res.ok) throw new Error(body.error ?? "Failed to complete registration");
+		return { user: mapApiUser(body.result) };
+	},
+
+	async registerWithGoogle(idToken: string): Promise<{ userId: string; email: string; isNewUser: boolean }> {
+		const res = await fetch(`${BASE_URL}/auth/google-register`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ idToken }),
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Google registration failed");
+		return data;
 	},
 
 	async getPlans(): Promise<PricingPlan[]> {
@@ -186,6 +250,26 @@ export const api = {
 		return { user: mapApiUser(data.result) };
 	},
 
+	async forgotPassword(email: string): Promise<void> {
+		const res = await fetch(`${BASE_URL}/auth/forgot-password`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ email }),
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to send reset email");
+	},
+
+	async resetPassword(token: string, newPassword: string): Promise<void> {
+		const res = await fetch(`${BASE_URL}/auth/reset-password`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ token, newPassword }),
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to reset password");
+	},
+
 	async completePayment(data: { pricingId: string; amount: number; currency?: string; isAnnual: boolean }): Promise<{ paymentId: string; billingPeriodEnd: string }> {
 		const res = await fetch(`${BASE_URL}/payments/complete`, {
 			method: "POST",
@@ -217,7 +301,7 @@ export const api = {
 		});
 	},
 
-	async setupOrg(_data: OrgSetupData): Promise<{ orgId: string } & OrgSetupData> {
+	async setupOrg(_data: OrgSetupData): Promise<{ organizationId: string } & OrgSetupData> {
 		throw new Error("Organization setup is not available.");
 	},
 
@@ -237,8 +321,8 @@ export const api = {
 		return adminFetch<AdminOrganizationsResponse>(`/organizations${suffix}`);
 	},
 
-	async getAdminOrganization(orgId: string): Promise<AdminOrganizationDetail> {
-		return adminFetch<AdminOrganizationDetail>(`/organizations/${orgId}`);
+	async getAdminOrganization(organizationId: string): Promise<AdminOrganizationDetail> {
+		return adminFetch<AdminOrganizationDetail>(`/organizations/${organizationId}`);
 	},
 
 	async createAdminOrganization(data: { name: string; email: string; slug: string; plan_id?: string; widget_config?: Partial<WidgetConfig> }): Promise<AdminOrganization> {
@@ -249,7 +333,7 @@ export const api = {
 	},
 
 	async updateAdminOrganization(
-		orgId: string,
+		organizationId: string,
 		data: Partial<{
 			name: string;
 			email: string;
@@ -258,20 +342,20 @@ export const api = {
 			widget_config: Partial<WidgetConfig>;
 		}>,
 	): Promise<AdminOrganization> {
-		return adminFetch<AdminOrganization>(`/organizations/${orgId}`, {
+		return adminFetch<AdminOrganization>(`/organizations/${organizationId}`, {
 			method: "PATCH",
 			body: JSON.stringify(data),
 		});
 	},
 
-	async suspendAdminOrganization(orgId: string): Promise<void> {
-		return adminFetch<void>(`/organizations/${orgId}/suspend`, {
+	async suspendAdminOrganization(organizationId: string): Promise<void> {
+		return adminFetch<void>(`/organizations/${organizationId}/suspend`, {
 			method: "PATCH",
 		});
 	},
 
-	async activateAdminOrganization(orgId: string): Promise<void> {
-		return adminFetch<void>(`/organizations/${orgId}/activate`, {
+	async activateAdminOrganization(organizationId: string): Promise<void> {
+		return adminFetch<void>(`/organizations/${organizationId}/activate`, {
 			method: "PATCH",
 		});
 	},
@@ -296,46 +380,46 @@ export const api = {
 		return adminFetch<AdminEscalationsResponse>(`/escalations${suffix}`);
 	},
 
-	async getAdminOrgTierStats(orgId: string, params?: { from?: string; to?: string }): Promise<AdminTierStats> {
+	async getAdminOrgTierStats(organizationId: string, params?: { from?: string; to?: string }): Promise<AdminTierStats> {
 		const query = new URLSearchParams();
 		if (params?.from) query.set("from", params.from);
 		if (params?.to) query.set("to", params.to);
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminTierStats>(`/organizations/${orgId}/tier-stats${suffix}`);
+		return adminFetch<AdminTierStats>(`/organizations/${organizationId}/tier-stats${suffix}`);
 	},
 
-	async getAdminOrgConversationStats(orgId: string, params?: { from?: string; to?: string }): Promise<AdminConversationStats> {
+	async getAdminOrgConversationStats(organizationId: string, params?: { from?: string; to?: string }): Promise<AdminConversationStats> {
 		const query = new URLSearchParams();
 		if (params?.from) query.set("from", params.from);
 		if (params?.to) query.set("to", params.to);
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminConversationStats>(`/organizations/${orgId}/conversation-stats${suffix}`);
+		return adminFetch<AdminConversationStats>(`/organizations/${organizationId}/conversation-stats${suffix}`);
 	},
 
-	async getAdminOrgTicketStats(orgId: string, params?: { from?: string; to?: string }): Promise<AdminTicketStats> {
+	async getAdminOrgTicketStats(organizationId: string, params?: { from?: string; to?: string }): Promise<AdminTicketStats> {
 		const query = new URLSearchParams();
 		if (params?.from) query.set("from", params.from);
 		if (params?.to) query.set("to", params.to);
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminTicketStats>(`/organizations/${orgId}/ticket-stats${suffix}`);
+		return adminFetch<AdminTicketStats>(`/organizations/${organizationId}/ticket-stats${suffix}`);
 	},
 
-	async getAdminOrgCsat(orgId: string, params?: { from?: string; to?: string }): Promise<AdminCsatStats> {
+	async getAdminOrgCsat(organizationId: string, params?: { from?: string; to?: string }): Promise<AdminCsatStats> {
 		const query = new URLSearchParams();
 		if (params?.from) query.set("from", params.from);
 		if (params?.to) query.set("to", params.to);
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminCsatStats>(`/organizations/${orgId}/csat${suffix}`);
+		return adminFetch<AdminCsatStats>(`/organizations/${organizationId}/csat${suffix}`);
 	},
 
-	async getAdminOrgEscalations(orgId: string, params?: { from?: string; to?: string; page?: number; limit?: number }): Promise<AdminEscalationsResponse> {
+	async getAdminOrgEscalations(organizationId: string, params?: { from?: string; to?: string; page?: number; limit?: number }): Promise<AdminEscalationsResponse> {
 		const query = new URLSearchParams();
 		if (params?.from) query.set("from", params.from);
 		if (params?.to) query.set("to", params.to);
 		if (params?.page) query.set("page", String(params.page));
 		if (params?.limit) query.set("limit", String(params.limit));
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminEscalationsResponse>(`/organizations/${orgId}/escalations${suffix}`);
+		return adminFetch<AdminEscalationsResponse>(`/organizations/${organizationId}/escalations${suffix}`);
 	},
 
 	async getAdminAllUsers(params?: { role?: string; is_active?: boolean; search?: string; page?: number; limit?: number }): Promise<AdminUsersResponse> {
@@ -350,7 +434,7 @@ export const api = {
 	},
 
 	async getAdminOrgUsers(
-		orgId: string,
+		organizationId: string,
 		params?: {
 			role?: string;
 			is_active?: boolean;
@@ -364,15 +448,15 @@ export const api = {
 		if (params?.page) query.set("page", String(params.page));
 		if (params?.limit) query.set("limit", String(params.limit));
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminUsersResponse>(`/organizations/${orgId}/users${suffix}`);
+		return adminFetch<AdminUsersResponse>(`/organizations/${organizationId}/users${suffix}`);
 	},
 
-	async getAdminOrgUser(orgId: string, userId: string): Promise<AdminUser> {
-		return adminFetch<AdminUser>(`/organizations/${orgId}/users/${userId}`);
+	async getAdminOrgUser(organizationId: string, userId: string): Promise<AdminUser> {
+		return adminFetch<AdminUser>(`/organizations/${organizationId}/users/${userId}`);
 	},
 
 	async createAdminOrgUser(
-		orgId: string,
+		organizationId: string,
 		data: {
 			email: string;
 			password?: string;
@@ -381,14 +465,14 @@ export const api = {
 			role: string;
 		},
 	): Promise<AdminUser> {
-		return adminFetch<AdminUser>(`/organizations/${orgId}/users`, {
+		return adminFetch<AdminUser>(`/organizations/${organizationId}/users`, {
 			method: "POST",
 			body: JSON.stringify(data),
 		});
 	},
 
 	async updateAdminOrgUser(
-		orgId: string,
+		organizationId: string,
 		userId: string,
 		data: Partial<{
 			first_name: string;
@@ -397,14 +481,14 @@ export const api = {
 			is_active: boolean;
 		}>,
 	): Promise<AdminUser> {
-		return adminFetch<AdminUser>(`/organizations/${orgId}/users/${userId}`, {
+		return adminFetch<AdminUser>(`/organizations/${organizationId}/users/${userId}`, {
 			method: "PATCH",
 			body: JSON.stringify(data),
 		});
 	},
 
-	async removeAdminOrgUser(orgId: string, userId: string): Promise<void> {
-		return adminFetch<void>(`/organizations/${orgId}/users/${userId}`, {
+	async removeAdminOrgUser(organizationId: string, userId: string): Promise<void> {
+		return adminFetch<void>(`/organizations/${organizationId}/users/${userId}`, {
 			method: "DELETE",
 		});
 	},
@@ -434,7 +518,7 @@ export const api = {
 			}
 		});
 		try {
-			const response = await fetch(`${BASE_URL}/organizations/${user.orgId}/knowledge?${params.toString()}`, {
+			const response = await fetch(`${BASE_URL}/organizations/${user.organizationId}/knowledge?${params.toString()}`, {
 				credentials: "include",
 			});
 			if (!response.ok) throw new Error(response.statusText);
@@ -455,7 +539,7 @@ export const api = {
 		formData.append("title", input.title);
 		formData.append("type", "PDF");
 
-		const response = await fetch(`${BASE_URL}/organizations/${user.orgId}/knowledge`, {
+		const response = await fetch(`${BASE_URL}/organizations/${user.organizationId}/knowledge`, {
 			method: "POST",
 			body: formData,
 			credentials: "include",
@@ -474,7 +558,7 @@ export const api = {
 		if (!user) throw new Error("User not found");
 
 		try {
-			const response = await fetch(`${BASE_URL}/organizations/${user.orgId}/knowledge/${id}`, {
+			const response = await fetch(`${BASE_URL}/organizations/${user.organizationId}/knowledge/${id}`, {
 				method: "DELETE",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",
@@ -538,7 +622,7 @@ export const api = {
 	async submitSwaggerUrl(input: { title: string; swaggerUrl: string }): Promise<{ documentId: string; status: string }> {
 		const user = getSession();
 		if (!user) throw new Error("User not found");
-		const res = await fetch(`${BASE_URL}/organizations/${user.orgId}/documents/swagger`, {
+		const res = await fetch(`${BASE_URL}/organizations/${user.organizationId}/documents/swagger`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
@@ -549,7 +633,7 @@ export const api = {
 		return data;
 	},
 
-	deleteAccount: (data: { fullName: string; organizationName: string }) =>
+	deleteAccount: (data: { fullName: string; orgName: string }) =>
 		fetch(`${BASE_URL}/users/me`, {
 			method: "DELETE",
 			headers: { "Content-Type": "application/json" },
@@ -809,5 +893,32 @@ export const api = {
 		if (!res.ok) {
 			throw new Error("Failed to revoke invitation");
 		}
+	},
+
+	// ADD THIS after revokeInvitation
+	async validateInvitation(token: string): Promise<{
+		email: string;
+		orgName: string;
+		role: string;
+	}> {
+		const res = await fetch(`${BASE_URL}/invitations/accept/${token}`, {
+			method: "GET",
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Invalid invitation");
+		return data;
+	},
+
+	async acceptInvitation(token: string, firstName: string, lastName: string, password: string): Promise<{ message: string; email: string }> {
+		const res = await fetch(`${BASE_URL}/invitations/accept/${token}`, {
+			method: "POST",
+			credentials: "include",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ firstName, lastName, password }),
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to accept invitation");
+		return data;
 	},
 };

@@ -86,7 +86,7 @@ export async function validateInvitationService(token: string) {
 
     const DTO = {
 		email: invitation.email,
-		organizationName: invitation.organization.name,
+		orgName: invitation.organization.name,
 		role: invitation.role,
     }
 

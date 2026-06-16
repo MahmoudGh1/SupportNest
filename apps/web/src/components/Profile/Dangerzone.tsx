@@ -16,13 +16,13 @@ export function DangerZone() {
   const router = useRouter();
 
   const expectedFullName = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
-  const expectedOrgName = user?.orgName ?? "";
+  const expectedorgName = user?.orgName ?? "";
 
   const canDelete =
     nameInput.trim() === expectedFullName &&
-    orgInput.trim() === expectedOrgName &&
+    orgInput.trim() === expectedorgName &&
     expectedFullName !== "" &&
-    expectedOrgName !== "";
+    expectedorgName !== "";
 
   const handleDelete = async () => {
     if (!canDelete) return;
@@ -31,7 +31,7 @@ export function DangerZone() {
     try {
       await api.deleteAccount({
         fullName: nameInput.trim(),
-        organizationName: orgInput.trim(),
+        orgName: orgInput.trim(),
       });
       await logout();
       router.push("/login");
@@ -80,7 +80,7 @@ export function DangerZone() {
       ) : (
         <div>
           <p style={{ fontSize: 13, color: "#DC2626", margin: "0 0 10px" }}>
-            This cannot be undone. Type your full name (<strong>{expectedFullName}</strong>) and your organization's name (<strong>{expectedOrgName}</strong>) to confirm.
+            This cannot be undone. Type your full name (<strong>{expectedFullName}</strong>) and your organization's name (<strong>{expectedorgName}</strong>) to confirm.
           </p>
 
           <input

@@ -7,7 +7,7 @@
 
 /**
  * @swagger
- * /api/v1/knowledge/{orgId}/documents/swagger:
+ * /api/v1/knowledge/{organizationId}/documents/swagger:
  *   post:
  *     summary: Upload a Swagger documentation URL
  *     description: Links a functional remote Swagger endpoint to the organization's RAG framework. Requires a pre-verified API configuration connection context.
@@ -16,7 +16,7 @@
  *       - cookieAuth: []
  *     parameters:
  *       - in: path
- *         name: orgId
+ *         name: organizationId
  *         required: true
  *         schema:
  *           type: string

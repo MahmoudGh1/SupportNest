@@ -2,7 +2,8 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import crypto from "crypto";
 
-dotenv.config();
+dotenv.config({ path: `.env.${process.env.NODE_ENV || "development"}` });
+
 
 export async function hashPassword(password: string): Promise<any> {
 	return bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS));

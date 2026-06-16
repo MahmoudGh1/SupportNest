@@ -1,9 +1,11 @@
 import * as langChain from "@langchain/google-genai";
 import { PostgresSaver } from "@langchain/langgraph-checkpoint-postgres";
 import { TaskType } from "@google/generative-ai";
-import "dotenv/config";
+import dotenv from "dotenv";
 import { embeddings, GeminiEmbeddingsWithDimensions } from "./embeddings.js";
 import AppError from "src/utils/appError.js";
+
+dotenv.config({ path: `.env.${process.env.NODE_ENV || "development"}` });
 
 const apiKey = process.env.GOOGLE_API_KEY;
 if (!apiKey) throw new AppError("GOOGLE_API_KEY is not set");
