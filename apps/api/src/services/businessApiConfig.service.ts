@@ -9,10 +9,11 @@ interface SaveApiConfigInput {
 	authType: ApiAuthType;
 	authValue: string;
 	headerName?: string;
+	testEndpoint?: string;
 }
 
 export async function saveApiConfigService(input: SaveApiConfigInput) {
-	const { organizationId, baseUrl, authType, authValue, headerName } = input;
+	const { organizationId, baseUrl, authType, authValue, headerName, testEndpoint } = input;
 
 	if (authType === ApiAuthType.API_KEY && !headerName) {
 		throw new AppError("headerName is required when authType is API_KEY", 400);
@@ -33,6 +34,7 @@ export async function saveApiConfigService(input: SaveApiConfigInput) {
 			authType,
 			authValue: encryptedAuthValue,
 			headerName: headerName ?? null,
+			testEndpoint: testEndpoint ?? null,
 			isVerified: false,
 			lastVerifiedAt: null,
 		},
@@ -42,6 +44,7 @@ export async function saveApiConfigService(input: SaveApiConfigInput) {
 			authType,
 			authValue: encryptedAuthValue,
 			headerName: headerName ?? null,
+			testEndpoint: testEndpoint ?? null,
 		},
 	});
 
@@ -51,6 +54,7 @@ export async function saveApiConfigService(input: SaveApiConfigInput) {
 		authType: config.authType,
 		headerName: config.headerName,
 		isVerified: config.isVerified,
+		testEndpoint: config.testEndpoint,
 	};
 }
 
@@ -65,7 +69,7 @@ export async function getApiConfigService(organizationId: string) {
 			isVerified: true,
 			lastVerifiedAt: true,
 			createdAt: true,
-			updatedAt: true
+			updatedAt: true,
 		},
 	});
 
@@ -78,17 +82,13 @@ export async function verifyApiConfigService(organizationId: string) {
 		where: { organizationId },
 	});
 
-	if (!config)
-		throw new AppError("No API config found. Save your config first.", 404);
+	if (!config) throw new AppError("No API config found. Save your config first.", 404);
 
 	let authValue: string;
 	try {
 		authValue = decrypt(config.authValue);
 	} catch {
-		throw new AppError(
-			"Stored auth token is corrupted. Please re-save your config.",
-			500,
-		);
+		throw new AppError("Stored auth token is corrupted. Please re-save your config.", 500);
 	}
 
 	const headers: Record<string, string> = {
@@ -105,9 +105,7 @@ export async function verifyApiConfigService(organizationId: string) {
 		headers["Authorization"] = `Basic ${encoded}`;
 	}
 
-	const urlToTest = config.testEndpoint
-		? `${config.baseUrl.replace(/\/$/, "")}/${config.testEndpoint.replace(/^\//, "")}`
-		: config.baseUrl;
+	const urlToTest = config.testEndpoint ? `${config.baseUrl.replace(/\/$/, "")}/${config.testEndpoint.replace(/^\//, "")}` : config.baseUrl;
 
 	let isVerified = false;
 	let verificationError: string | null = null;
@@ -124,15 +122,20 @@ export async function verifyApiConfigService(organizationId: string) {
 
 		clearTimeout(timeout);
 
-		if (response.status >= 500) {
-			verificationError = `Your API server returned ${response.status}. Check that your server is running correctly.`;
-		} else {
+		if (response.ok) {
 			isVerified = true;
+		} else if (response.status === 401 || response.status === 403) {
+			verificationError = `Authentication failed (${response.status}). Check your token or API key is correct.`;
+		} else if (response.status === 404) {
+			verificationError = `Test endpoint not found (404). Check your testEndpoint path is correct.`;
+		} else if (response.status >= 500) {
+			verificationError = `Your API server returned ${response.status}. Check your server is running correctly.`;
+		} else {
+			verificationError = `Unexpected response: ${response.status}`;
 		}
 	} catch (err: any) {
 		if (err.name === "AbortError") {
-			verificationError =
-				"Request timed out after 8 seconds. Check your base URL is correct and your server is reachable.";
+			verificationError = "Request timed out after 8 seconds. Check your base URL is correct and your server is reachable.";
 		} else {
 			verificationError = `Could not reach your API: ${err.message}`;
 		}
@@ -143,8 +146,7 @@ export async function verifyApiConfigService(organizationId: string) {
 		data: { isVerified, lastVerifiedAt: new Date() },
 	});
 
-	if (!isVerified)
-		throw new AppError(verificationError ?? "Verification failed", 400);
+	if (!isVerified) throw new AppError(verificationError ?? "Verification failed", 400);
 
 	return {
 		isVerified: true,

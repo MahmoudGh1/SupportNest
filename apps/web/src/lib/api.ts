@@ -585,6 +585,7 @@ export const api = {
 		baseUrl?: string;
 		authType?: string;
 		headerName?: string;
+		testEndpoint?: string;
 		isVerified?: boolean;
 		lastVerifiedAt?: string;
 		configured: boolean;
@@ -597,7 +598,7 @@ export const api = {
 		return data.id ? { ...data, configured: true } : { configured: false };
 	},
 
-	async saveApiConfig(input: { baseUrl: string; authType: string; authValue: string; headerName?: string }): Promise<{ id: string; isVerified: boolean }> {
+	async saveApiConfig(input: { baseUrl: string; authType: string; authValue: string; headerName?: string; testEndpoint?: string }): Promise<{ id: string; isVerified: boolean }> {
 		const res = await fetch(`${BASE_URL}/organizations/api-config`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
