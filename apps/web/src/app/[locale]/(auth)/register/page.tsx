@@ -661,6 +661,17 @@ export default function RegisterPage() {
 			<style>{`
                 .sn-input::placeholder { color: var(--page-muted); opacity: 1; }
                 .sn-input:focus { border-color: #534AB7 !important; box-shadow: 0 0 0 3px rgba(83,74,183,0.18); }
+				.google-login-wrapper {
+					width: 100%;
+				}
+				.google-login-wrapper > div {
+					width: 100% !important;
+					max-width: 100% !important;
+				}
+				.google-login-wrapper iframe {
+					width: 100% !important;
+					max-width: 100% !important;
+				}
             `}</style>
 			<div style={{
 				minHeight: "100vh", background: T.bg,
@@ -713,23 +724,25 @@ export default function RegisterPage() {
 					</p>
 
 					{/* Google */}
-					<GoogleLogin
-						onSuccess={async (credentialResponse) => {
-							setSubmitError("");
-							setSubmitting(true);
-							try {
-								await handleGoogleRegister(credentialResponse.credential!);
-							} catch (e) {
-								setSubmitError(e instanceof Error ? e.message : "Google sign-up failed.");
-							} finally {
-								setSubmitting(false);
-							}
-						}}
-						onError={() => setSubmitError("Google sign-up failed.")}
-						width="full"
-						auto_select={false}
-						text="signup_with"
-					/>
+					<div className="google-login-wrapper">
+						<GoogleLogin
+							onSuccess={async (credentialResponse) => {
+								setSubmitError("");
+								setSubmitting(true);
+								try {
+									await handleGoogleRegister(credentialResponse.credential!);
+								} catch (e) {
+									setSubmitError(e instanceof Error ? e.message : "Google sign-up failed.");
+								} finally {
+									setSubmitting(false);
+								}
+							}}
+							onError={() => setSubmitError("Google sign-up failed.")}
+							width="1000"
+							auto_select={false}
+							text="signup_with"
+						/>
+					</div>
 
 					<div style={{ display: "flex", alignItems: "center", gap: 12, margin: "20px 0 4px" }}>
 						<div style={{ flex: 1, height: 1, background: T.border }} />
