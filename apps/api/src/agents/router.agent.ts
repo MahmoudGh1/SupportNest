@@ -232,6 +232,8 @@ export async function runRouter(
 			routingDecision: "TIER0",
 			routingReason:
 				"Fallback default — router LLM failed to return valid JSON",
+			preferLiveFollowup: false,
+			priorTierContext: null,
 		};
 	}
 
@@ -258,6 +260,9 @@ export async function runRouter(
 	const routingDecision = routingResult.routingDecision as
 		| Exclude<AgentTier, "ROUTER">
 		| "HUMAN";
+	const preferLiveFollowup = !!routingResult.preferLiveFollowup;
+	const priorTierContext: string | null =
+		routingResult.priorTierContext ?? null;
 
 	// Log the routing decision
 	const validatedRoutingDecision = validateRoutingDecision(routingDecision);
@@ -288,11 +293,18 @@ export async function runRouter(
 		Exclude<AgentTier, "ROUTER">,
 		"HUMAN"
 	>;
+
+	let pendingLiveFollowup = preferLiveFollowup; // from router's first decision
+	let tier0FallbackResponse: string | null = null;
+
 	const MAX_ATTEMPTS = 3; // tier0 -> tier1 -> tier2 -> human
 	for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
 		// Call the current tier
 
 		const tierStart = Date.now();
+
+		context.priorTierContext = tier0FallbackResponse;
+
 		const tierResponse: TierResponse = await callTier(currentTier, context);
 		// short-circuit: customer needs to authenticate first
 		if ((tierResponse as any).loginUrl) {
@@ -308,12 +320,10 @@ export async function runRouter(
 
 		// -- phase 3: Review Decision
 
-		const toolResultsSummary = tierResponse.toolResults?.join("\n\n");
 		const reviewPrompt = buildReviewPrompt(
 			latestMessage,
-			tierResponse.responseText,
+			tierResponse,
 			currentTier,
-			toolResultsSummary,
 		);
 
 		const reviewStart = Date.now();
@@ -347,9 +357,48 @@ export async function runRouter(
 
 		// -- Approved: return the response
 		if (verdict === "approved") {
+			// tier0 approved AND router flagged a live-data followup
+			if (currentTier === AgentTier.TIER0 && pendingLiveFollowup) {
+				tier0FallbackResponse = tierResponse.responseText;
+				pendingLiveFollowup = false; // only do this once
+
+				await writeAgentLog({
+					conversationId,
+					tier: AgentTier.ROUTER,
+					action: AgentAction.ESCALATED_TO_TIER1,
+					input: latestMessage,
+					output: `Tier0 answer accepted as fallback, checking tier1 for live-data improvement: ${tierResponse.responseText}`,
+					latencyMs: 0,
+					tokensUsed: 0,
+				});
+
+				currentTier = AgentTier.TIER1;
+				context.priorTierContext = tier0FallbackResponse;
+				continue; // don't return — go straight to tier1, skip normal escalation logic
+			}
+
 			return {
 				finalResponse: tierResponse.responseText,
 				resolvedByTier: currentTier,
+				approved: true,
+			};
+		}
+
+		// tier1-as-followup rejected → use tier0 fallback, don't escalate to tier2
+		if (currentTier === AgentTier.TIER1 && tier0FallbackResponse) {
+			await writeAgentLog({
+				conversationId,
+				tier: AgentTier.ROUTER,
+				action: AgentAction.RESOLVED,
+				input: latestMessage,
+				output: `Tier1 found no improvement (${reviewResult.reviewReason}). Falling back to tier0 answer.`,
+				latencyMs: 0,
+				tokensUsed: 0,
+			});
+
+			return {
+				finalResponse: tier0FallbackResponse,
+				resolvedByTier: ResolutionTier.TIER0,
 				approved: true,
 			};
 		}
@@ -358,6 +407,26 @@ export async function runRouter(
 		const next = getNextTier(currentTier);
 
 		if (next === "HUMAN") {
+			// NEW: if tier1 (the live-followup check) found nothing better,
+			// fall back to tier0's earlier answer instead of going to human
+			if (currentTier === AgentTier.TIER1 && tier0FallbackResponse) {
+				await writeAgentLog({
+					conversationId,
+					tier: AgentTier.ROUTER,
+					action: AgentAction.RESOLVED,
+					input: latestMessage,
+					output: `Tier1 found no improvement (${reviewResult.reviewReason}). Falling back to tier0 answer.`,
+					latencyMs: 0,
+					tokensUsed: 0,
+				});
+
+				return {
+					finalResponse: tier0FallbackResponse,
+					resolvedByTier: ResolutionTier.TIER0,
+					approved: true,
+				};
+			}
+
 			// Exhausted all tiers - go to human
 			await writeAgentLog({
 				conversationId,
@@ -376,6 +445,7 @@ export async function runRouter(
 				approved: true,
 			};
 		}
+
 		const escalationActionMap = {
 			TIER1: AgentAction.ESCALATED_TO_TIER1,
 			TIER2: AgentAction.ESCALATED_TO_TIER2,
