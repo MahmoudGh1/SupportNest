@@ -226,12 +226,8 @@ msgid "Logout"
 msgstr "Logout"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:105
-#~ msgid "Max 20 MB · PDF only"
-#~ msgstr "Max 20 MB · PDF only"
-
-#: src/features/knowledgebase/UploadPdfPanel.tsx:105
-msgid "Max 5 MB · PDF only"
-msgstr "Max 5 MB · PDF only"
+msgid "Max 20 MB · PDF only"
+msgstr "Max 20 MB · PDF only"
 
 #: src/components/pricing/PricingHero.tsx:44
 msgid "Monthly"
@@ -267,12 +263,8 @@ msgid "Password is required."
 msgstr "Password is required."
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:193
-#~ msgid "PDF files up to 20 MB"
-#~ msgstr "PDF files up to 20 MB"
-
-#: src/features/knowledgebase/UploadPdfPanel.tsx:193
-msgid "PDF files up to 5 MB"
-msgstr "PDF files up to 5 MB"
+msgid "PDF files up to 20 MB"
+msgstr "PDF files up to 20 MB"
 
 #: src/components/Navbar.tsx:53
 #: src/components/pricing/PricingHero.tsx:17
@@ -312,10 +304,6 @@ msgstr "Search documents..."
 msgid "See How It Works"
 msgstr "See How It Works"
 
-#: src/app/[locale]/(auth)/login/page.tsx:444
-msgid "See Plans"
-msgstr "See Plans"
-
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:19
 #: src/components/sidebar.tsx:28
 msgid "Settings"
@@ -330,8 +318,8 @@ msgid "Sign in to your account"
 msgstr "Sign in to your account"
 
 #: src/app/[locale]/(auth)/login/page.tsx:444
-#~ msgid "Sign Up"
-#~ msgstr "Sign Up"
+msgid "Sign Up"
+msgstr "Sign Up"
 
 #: src/app/[locale]/(auth)/login/page.tsx:414
 msgid "Signing in…"

@@ -18,6 +18,7 @@ model Organization {
   isActive              Boolean                 @default(true)
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
+  scheduledDeletionAt   DateTime?
   apiKeys               ApiKey[]
   businessApiConfig     BusinessApiConfig?
   conversationAnalytics ConversationAnalytics[]
@@ -33,7 +34,7 @@ model Organization {
   tickets               Ticket[]
   toolDefinitions       ToolDefinition[]
   users                 User[]
-  
+  businessTables        BusinessTable[]
 
   @@map("organizations")
 }
@@ -49,14 +50,14 @@ model User {
   isActive           Boolean             @default(true)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
+  emailVerifiedAt    DateTime?
+  isEmailVerified    Boolean             @default(false)
+  emailVerifications EmailVerification[]
   sentInvitations    Invitation[]        @relation("SentInvitations")
   knowledgeDocuments KnowledgeDocument[]
+  passwordResets     PasswordReset[]
   assignedTickets    Ticket[]
   organization       Organization?       @relation(fields: [organizationId], references: [id])
-  isEmailVerified    Boolean   @default(false)
-  emailVerifiedAt    DateTime?
-  emailVerifications EmailVerification[]
-  passwordResets     PasswordReset[]
 
   @@index([organizationId])
   @@map("users")
@@ -88,6 +89,7 @@ model ToolDefinition {
   description         String
   method              HttpMethod
   path                String
+  businessTables      BusinessTable[]
   documentId          String?            @db.Uuid
   parameters          Json
   responseSchema      Json
@@ -251,7 +253,7 @@ model DocumentChunk {
   documentId     String                @db.Uuid
   organizationId String                @db.Uuid
   content        String
-  embedding      Unsupported("vector(1536)")
+  embedding      Unsupported("vector")
   chunkIndex     Int
   metadata       Json                  @default("{}")
   createdAt      DateTime              @default(now())
@@ -379,30 +381,74 @@ model Report {
 }
 
 model EmailVerification {
-    id        String   @id @default(uuid()) @db.Uuid
-    userId    String   @db.Uuid
-    email     String
-    code      String
-    expiresAt DateTime
-    createdAt DateTime @default(now())
-    user      User     @relation(fields: [userId], references: [id])
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  email     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 
-    @@index([userId])
-    @@index([email])
-    @@map("email_verifications")
+  @@index([userId])
+  @@index([email])
+  @@map("email_verifications")
 }
 
 model PasswordReset {
-    id        String   @id @default(uuid()) @db.Uuid
-    userId    String   @db.Uuid
-    token     String   @unique
-    expiresAt DateTime
-    createdAt DateTime @default(now())
-    used      Boolean  @default(false)
-    user      User     @relation(fields: [userId], references: [id])
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  used      Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
 
-    @@index([token])
-    @@map("password_resets")
+  @@index([token])
+  @@map("password_resets")
+}
+
+model contact_submissions {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  email     String
+  company   String?
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model BusinessTable {
+  id               String             @id @default(uuid()) @db.Uuid
+  organizationId   String             @db.Uuid
+  name             String
+  endpoint         String
+  method           HttpMethod         @default(GET)
+  toolDefinitionId String?            @db.Uuid
+  columnConfig     Json               @default("[]")
+  lastFetchedAt    DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  organization     Organization       @relation(fields: [organizationId], references: [id])
+  toolDefinition   ToolDefinition?    @relation(fields: [toolDefinitionId], references: [id])
+  rows             BusinessTableRow[]
+
+  @@index([organizationId])
+  @@map("business_tables")
+}
+
+model BusinessTableRow {
+  id             String        @id @default(uuid()) @db.Uuid
+  tableId        String        @db.Uuid
+  organizationId String        @db.Uuid
+  externalId     String?
+  rowData        Json
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  table          BusinessTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  @@index([tableId])
+  @@index([organizationId])
+  @@index([tableId, externalId])
+  @@map("business_table_rows")
 }
 
 enum Role {
@@ -432,12 +478,12 @@ enum AgentTier {
 
 enum AgentAction {
   RESOLVED
-  ESCALATED_TO_TIER0
   ESCALATED_TO_TIER1
   ESCALATED_TO_TIER2
   ESCALATED_TO_HUMAN
   REJECTED_OUTPUT
   NO_MATCH
+  ESCALATED_TO_TIER0
 }
 
 enum TicketStatus {

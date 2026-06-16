@@ -6,7 +6,9 @@ import { useAuth } from "@/context/auth-context";
 import { useLingui } from "@lingui/react/macro";
 import { GoogleLogin } from "@react-oauth/google";
 import Link from "next/link";
-import { api } from "@/lib/api.ts";
+import { api } from "@/lib/api";
+import { useFetch } from "@/hooks/useFetch";
+import { useLoading } from "@/context/loading-context.tsx";
 
 const T = {
 	darkBg: "var(--page-bg)",
@@ -149,8 +151,9 @@ function FormPanel() {
 	const [email, setEmail] = useState(verifiedEmail);
 	const [password, setPassword] = useState("");
 	const [showPass, setShowPass] = useState(false);
-	const [loading, setLoading] = useState(false);
+	const { isLoading: loading } = useLoading();
 	const [error, setError] = useState("");
+	const fetchWithSpinner = useFetch();
 	const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
 	const validate = () => {
@@ -169,9 +172,8 @@ function FormPanel() {
 		}
 		setFieldErrors({});
 		setError("");
-		setLoading(true);
 		try {
-			const user = await login(email, password);
+			const user = await fetchWithSpinner(() => login(email, password));
 			if (user.role === "SUPER_ADMIN") {
 				router.push("/dashboard/admin");
 			} else {
@@ -180,27 +182,17 @@ function FormPanel() {
 		} catch (e) {
 			if ((e as Error & { code?: string }).code === "EMAIL_NOT_VERIFIED") {
 				const userId = (e as Error & { userId?: string }).userId;
-				// send verification email automatically for login flow too
 				if (userId) {
 					try {
-						await api.sendVerification(userId, email);
+						await fetchWithSpinner(() => api.sendVerification(userId, email));
 					} catch {
-						// silent — they can resend from the verify page
+						// silent
 					}
 				}
-				router.push(
-					`/verify-email?userId=${userId}&email=${encodeURIComponent(email)}&mode=login`
-				);
+				router.push(`/verify-email?userId=${userId}&email=${encodeURIComponent(email)}&mode=login`);
 				return;
 			}
-			if (e instanceof Error) {
-				setError(e.message ?? t`Invalid email or password.`);
-			} else {
-				setError("An unexpected error occurred.");
-			}
-		}
-		finally {
-			setLoading(false)
+			setError(e instanceof Error ? e.message ?? t`Invalid email or password.` : "An unexpected error occurred.");
 		}
 	};
 
@@ -268,9 +260,9 @@ function FormPanel() {
 					<GoogleLogin
 						onSuccess={async (credentialResponse) => {
 							setError("");
-							setLoading(true);
 							try {
-								await loginWithGoogle(credentialResponse.credential!);
+								await fetchWithSpinner(() => loginWithGoogle(credentialResponse.credential!));
+
 								router.push("/dashboard");
 							} catch (e) {
 								if (e instanceof Error) {
@@ -278,12 +270,10 @@ function FormPanel() {
 								} else {
 									setError("An unexpected error occurred.");
 								}
-							} finally {
-								setLoading(false);
 							}
 						}}
 						onError={() => setError(t`Google sign-in failed.`)}
-						width="380"
+						width="full"
 						auto_select={false}
 					/>
 
@@ -667,8 +657,8 @@ export default function LoginPage() {
 			`}</style>
 			<div className="login-layout">
 				<Suspense fallback={<div />}>
-                    <FormPanel />
-                </Suspense>
+					<FormPanel />
+				</Suspense>
 				<BrandPanel />
 			</div>
 		</>

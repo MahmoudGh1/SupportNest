@@ -242,7 +242,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { api } from "@/lib/api.ts";
+import { api } from "@/lib/api";
 
 type Phase = "checking" | "success" | "failed";
 

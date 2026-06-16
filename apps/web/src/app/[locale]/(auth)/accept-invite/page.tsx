@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { GoogleLogin } from "@react-oauth/google";
-import { api } from "@/lib/api.ts";
+import { api } from "@/lib/api";
+import { useFetch } from "@/hooks/useFetch";
 
 const T = {
     darkBg: "var(--page-bg)",
@@ -25,8 +26,6 @@ const T = {
     font: "'Sora', system-ui, sans-serif",
     labelMuted: "var(--label-muted)",
 } as const;
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
 
 interface FieldProps {
     label: string;
@@ -101,7 +100,7 @@ function FormPanel() {
     const [showPass, setShowPass] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [pageLoading, setPageLoading] = useState(true);
+    const fetchWithSpinner = useFetch();
     const [submitting, setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState("");
     const [tokenError, setTokenError] = useState("");
@@ -109,26 +108,20 @@ function FormPanel() {
     useEffect(() => {
         if (!token) {
             setTokenError("Invalid invitation link.");
-            setPageLoading(false);
             return;
         }
-        fetch(`${BASE_URL}/invitations/accept/${token}`)
-            .then((res) => res.json())
+        fetchWithSpinner(() => api.validateInvitation(token))
             .then((data) => {
-                if (data.email) {
-                    setEmail(data.email);
-                    setorgName(data.orgName ?? "");
-                } else {
-                    setTokenError(data.message ?? "Invalid or expired invitation.");
-                }
+                setEmail(data.email);
+                setorgName(data.orgName ?? "");
             })
-            .catch(() => setTokenError("Could not verify invitation. Please try again."))
-            .finally(() => setPageLoading(false));
+            .catch(() => setTokenError("Could not verify invitation. Please try again."));
     }, [token]);
 
     async function handleGoogleRegister(idToken: string) {
         try {
-            const { userId, email } = await api.registerWithGoogle(idToken);
+            const { userId, email } = await fetchWithSpinner(() => api.registerWithGoogle(idToken));
+
 
             sessionStorage.setItem("registrationData", JSON.stringify({
                 firstName: "",
@@ -158,29 +151,12 @@ function FormPanel() {
         setSubmitting(true);
         setSubmitError("");
         try {
-            const res = await fetch(`${BASE_URL}/invitations/accept/${token}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ firstName, lastName, password }),
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message ?? "Something went wrong");
+            await fetchWithSpinner(() => api.acceptInvitation(token, firstName, lastName, password));
             router.replace("/login?invited=true");
         } catch (err) {
             setSubmitError(err instanceof Error ? err.message : "Failed to create account");
             setSubmitting(false);
         }
-    }
-
-    if (pageLoading) {
-        return (
-            <div className="invite-form-panel">
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-                    <i className="ti ti-loader-2" style={{ fontSize: 28, color: T.violet, animation: "spin 0.8s linear infinite" }} />
-                    <p style={{ color: T.muted, fontSize: 14, margin: 0 }}>Verifying invitation…</p>
-                </div>
-            </div>
-        );
     }
 
     if (tokenError) {
