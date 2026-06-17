@@ -22,14 +22,12 @@ export default function AppControls() {
                 borderColor: "var(--control-border)",
             }}
         >
-            {/* Arrow Trigger Button */}
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-9 h-10 flex items-center justify-center border-none cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors rounded-s-2xl"
                 aria-label={isOpen ? t`Close controls` : t`Open controls`}
             >
-                {/* Pure CSS Professional Chevron */}
                 <span 
                     className={`w-2 h-2 border-b-2 border-l-2 transition-transform duration-300 transform ${
                         isOpen 
@@ -40,19 +38,16 @@ export default function AppControls() {
                 />
             </button>
 
-            {/* Expandable Controls Panel */}
             <div
                 className={`flex items-center gap-2 overflow-hidden transition-all duration-300 ${
                     isOpen ? "max-w-[200px] px-3 h-10" : "max-w-0 opacity-0 pointer-events-none"
                 }`}
             >
-                {/* Separator */}
                 <div
                     className="w-px h-4"
                     style={{ background: "var(--control-border)" }}
                 />
 
-                {/* Language Switcher */}
                 <button
                     type="button"
                     onClick={() => setLocale(locale === "en" ? "ar" : "en")}
@@ -63,13 +58,11 @@ export default function AppControls() {
                     {locale === "en" ? "العربية" : "English"}
                 </button>
 
-                {/* Separator */}
                 <div
                     className="w-px h-4"
                     style={{ background: "var(--control-border)" }}
                 />
 
-                {/* Theme Switcher */}
                 <button
                     type="button"
                     onClick={toggleTheme}
