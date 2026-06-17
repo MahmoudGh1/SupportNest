@@ -155,6 +155,7 @@ function FormPanel() {
 	const [error, setError] = useState("");
 	const fetchWithSpinner = useFetch();
 	const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+	const { refreshUser } = useAuth();
 
 	const validate = () => {
 		const errs: Record<string, string> = {};
@@ -194,7 +195,8 @@ function FormPanel() {
 			}
 			if (e.redirectTo) {
 				setError(e.message + " You will be redirected to complete your registration...");
-				setTimeout(() => router.push(e.redirectTo), 2500);
+				await refreshUser();
+				await new Promise(resolve => setTimeout(resolve, 2500));
 				return;
 			}
 			setError(e instanceof Error ? e.message ?? t`Invalid email or password.` : "An unexpected error occurred.");
@@ -270,18 +272,17 @@ function FormPanel() {
 
 								router.push("/dashboard");
 							} catch (e: any) {
-								if(e?.redirectTo){
+								if (e?.redirectTo) {
 									setError((e.message || t`Registration incomplete.`) + " " + t`You will be redirected to continue...`);
-									setTimeout(() => {
-										router.push(e.redirectTo);
-									}, 2500)
+									await refreshUser();
+									await new Promise(resolve => setTimeout(resolve, 2500));
 									return;
 								}
 
 								if (e instanceof Error) {
 									setError(e.message ?? t`Invalid email or password.`);
 								} else {
-									setError("An unexpected error occurred.");								
+									setError("An unexpected error occurred.");
 								}
 							}
 						}}

@@ -41,7 +41,7 @@ export const GoogleLoginController = async (req: Request, res: Response) => {
 		const profile = await userService(tokenPayload);
 
 		if (profile.role === "ORG_ADMIN" && (!profile.organizationId || !profile.hasActiveSubscription)) {
-			clearAuthCookies(res);
+			setAuthCookies(res, tokenPayload);
 			const redirectTo = profile.organizationId ? "/payment" : `/register/business?userId=${profile.id}`;
 			return res.status(403).json({
 				error: profile.organizationId ? "Your account does not have an active subscription. Please complete payment first." : "Please finish setting up your business and complete payment to continue.",
@@ -145,7 +145,7 @@ export const LoginController = async (req: Request, res: Response) => {
 		const profile = await userService(tokenPayload);
 
 		if (profile.role === "ORG_ADMIN" && (!profile.organizationId || !profile.hasActiveSubscription)) {
-			clearAuthCookies(res);
+			setAuthCookies(res, tokenPayload);
 			const redirectTo = profile.organizationId ? "/payment" : `/register/business?userId=${profile.id}`;
 			return res.status(403).json({
 				error: profile.organizationId ? "Your account does not have an active subscription. Please complete payment first." : "Please finish setting up your business and complete payment to continue.",
