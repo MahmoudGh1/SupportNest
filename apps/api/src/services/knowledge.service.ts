@@ -78,8 +78,6 @@ export async function uploadDocument({
 	const fileExtension = originalName.substring(originalName.lastIndexOf("."));
 	console.log("File Name:", file.originalname);
 	console.log("Buffer size in bytes:", file.buffer.length);
-	console.log("CRITICAL DEBUG: This is what is actually inside your buffer:");
-	console.log(file.buffer.toString("utf-8"));
 	const storagePath = await uploadToCloudinary(
 		file.buffer,
 		`supportnest/${organizationId}/knowledge`,

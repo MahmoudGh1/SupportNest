@@ -9,6 +9,9 @@
 		"dev:custom": "tsx watch --env-file=.env.development src/index.ts",
 		"postinstall": "prisma generate"
 	},
+	"prisma": {
+		"seed": "tsx --env-file=.env.development prisma/seed.ts"
+	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",

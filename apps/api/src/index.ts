@@ -10,6 +10,7 @@ import { rateLimit } from "./utils/rateLimiter.util.js";
 import "./workers/knowledgeWorker.js";
 import "./workers/conversationCloseWorker.js";
 import "./workers/analyticsWorker.js";
+import "./workers/reportWorker.js";
 import conversationsRoutes from "./routes/conversations.routes.js";
 import ApiKeyRouter from "./routes/apiKey.routes.js";
 import WidgetRouter from "./routes/widget.routes.js";

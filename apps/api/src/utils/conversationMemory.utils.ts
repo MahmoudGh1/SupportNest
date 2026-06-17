@@ -1,8 +1,9 @@
 import type { ConversationMessage } from "src/types/agent.types.js";
 import { redis } from "../config/redis.js";
+import { MessageRole } from "generated/prisma/enums.js";
 
 export interface MemoryMessage {
-	role: "customer" | "ai";
+	role: MessageRole;
 	content: string;
 }
 
@@ -41,8 +42,8 @@ export async function appendToMemory(
 
 		const updated: MemoryMessage[] = [
 			...existing,
-			{ role: "customer", content: customerMessage },
-			{ role: "ai", content: aiResponse },
+			{ role: MessageRole.CUSTOMER, content: customerMessage },
+			{ role: MessageRole.AI, content: aiResponse },
 		];
 
 		const trimmed = updated.slice(-MAX_MESSAGES);
