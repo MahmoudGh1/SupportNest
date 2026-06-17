@@ -33,30 +33,31 @@ model Organization {
   tickets               Ticket[]
   toolDefinitions       ToolDefinition[]
   users                 User[]
-  
+  notifications         Notification[]
 
   @@map("organizations")
 }
 
 model User {
-  id                 String              @id @default(uuid()) @db.Uuid
-  organizationId     String?             @db.Uuid
-  email              String              @unique
-  passwordHash       String
-  role               Role
-  firstName          String
-  lastName           String
-  isActive           Boolean             @default(true)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  sentInvitations    Invitation[]        @relation("SentInvitations")
-  knowledgeDocuments KnowledgeDocument[]
-  assignedTickets    Ticket[]
-  organization       Organization?       @relation(fields: [organizationId], references: [id])
-  isEmailVerified    Boolean   @default(false)
-  emailVerifiedAt    DateTime?
-  emailVerifications EmailVerification[]
-  passwordResets     PasswordReset[]
+  id                     String                  @id @default(uuid()) @db.Uuid
+  organizationId         String?                 @db.Uuid
+  email                  String                  @unique
+  passwordHash           String
+  role                   Role
+  firstName              String
+  lastName               String
+  isActive               Boolean                 @default(true)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  sentInvitations        Invitation[]            @relation("SentInvitations")
+  knowledgeDocuments     KnowledgeDocument[]
+  assignedTickets        Ticket[]
+  organization           Organization?           @relation(fields: [organizationId], references: [id])
+  isEmailVerified        Boolean                 @default(false)
+  emailVerifiedAt        DateTime?
+  emailVerifications     EmailVerification[]
+  passwordResets         PasswordReset[]
+  notificationRecipients NotificationRecipient[]
 
   @@index([organizationId])
   @@map("users")
@@ -155,7 +156,7 @@ model Conversation {
   organization       Organization           @relation(fields: [organizationId], references: [id])
   csatRating         CsatRating?
   messages           Message[]
-  reports             Report? // inverse side of Report.conversation — read-only relation
+  reports            Report? // inverse side of Report.conversation — read-only relation
   ticket             Ticket?
 
   @@index([organizationId])
@@ -247,16 +248,16 @@ model KnowledgeDocument {
 }
 
 model DocumentChunk {
-  id             String                @id @default(uuid()) @db.Uuid
-  documentId     String                @db.Uuid
-  organizationId String                @db.Uuid
+  id             String                      @id @default(uuid()) @db.Uuid
+  documentId     String                      @db.Uuid
+  organizationId String                      @db.Uuid
   content        String
   embedding      Unsupported("vector(1536)")
   chunkIndex     Int
-  metadata       Json                  @default("{}")
-  createdAt      DateTime              @default(now())
-  document       KnowledgeDocument     @relation(fields: [documentId], references: [id])
-  organization   Organization          @relation(fields: [organizationId], references: [id])
+  metadata       Json                        @default("{}")
+  createdAt      DateTime                    @default(now())
+  document       KnowledgeDocument           @relation(fields: [documentId], references: [id])
+  organization   Organization                @relation(fields: [organizationId], references: [id])
 
   @@index([documentId])
   @@index([organizationId])
@@ -360,7 +361,7 @@ model Invitation {
 model Report {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String       @db.Uuid
-  conversationId String       @db.Uuid @unique
+  conversationId String       @unique @db.Uuid
   summary        String
   issueType      String
   resolution     String
@@ -379,30 +380,73 @@ model Report {
 }
 
 model EmailVerification {
-    id        String   @id @default(uuid()) @db.Uuid
-    userId    String   @db.Uuid
-    email     String
-    code      String
-    expiresAt DateTime
-    createdAt DateTime @default(now())
-    user      User     @relation(fields: [userId], references: [id])
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  email     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 
-    @@index([userId])
-    @@index([email])
-    @@map("email_verifications")
+  @@index([userId])
+  @@index([email])
+  @@map("email_verifications")
 }
 
 model PasswordReset {
-    id        String   @id @default(uuid()) @db.Uuid
-    userId    String   @db.Uuid
-    token     String   @unique
-    expiresAt DateTime
-    createdAt DateTime @default(now())
-    used      Boolean  @default(false)
-    user      User     @relation(fields: [userId], references: [id])
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  used      Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
 
-    @@index([token])
-    @@map("password_resets")
+  @@index([token])
+  @@map("password_resets")
+}
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  organizationId String? @db.Uuid// which org this event concerns - NOT an access check, just context
+  organization    Organization?    @relation(fields: [organizationId], references: [id])
+  type            NotificationType
+  title           String
+  body            String
+  actionUrl      String?
+  metadata        Json?
+  createdAt      DateTime         @default(now())
+
+  recipients NotificationRecipient[]
+
+  @@index([organizationId])
+  @@index([type])
+}
+
+// Fan-out table: one row per (notification, recipient). This is what makes
+// "notify org_admin AND super_admin for the same event" free - no duplicated
+// content, just two rows pointing at the same Notification.
+model NotificationRecipient {
+  id        String   @id @default(uuid()) @db.Uuid
+  notificationId String @db.Uuid
+  notification    Notification @relation(fields: [notificationId], references: [id])
+  userId         String @db.Uuid
+  user            User         @relation(fields: [userId], references: [id])
+  readAt        DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@unique([notificationId, userId])
+  @@index([userId, readAt, createdAt]) // "my unread, newest first" - the hot query
+}
+
+// New table - needed for contact_us_submitted, doesn't exist anywhere yet
+model ContactSubmission {
+  id        String   @id @default(uuid()) @db.Uuid
+  name       String
+  email      String
+  message    String
+  source     String? // e.g. "marketing_site", "pricing_page"
+  createdAt DateTime @default(now())
 }
 
 enum Role {
@@ -513,4 +557,17 @@ enum HttpMethod {
   PUT
   PATCH
   DELETE
+}
+
+enum NotificationType {
+  organization_registered
+  organization_suspended
+  organization_reactivated
+  user_added
+  user_deleted
+  payment_completed
+  ticket_escalated
+  csat_submitted
+  contact_us_submitted
+  new_customer_first_contact
 }
