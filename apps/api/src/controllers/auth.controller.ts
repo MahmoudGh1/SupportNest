@@ -40,10 +40,17 @@ export const GoogleLoginController = async (req: Request, res: Response) => {
 		const tokenPayload = toTokenPayload(result);
 		const profile = await userService(tokenPayload);
 
-		if (!profile.hasActiveSubscription && profile.role == "ORG_ADMIN" && profile.organizationId) {
+		// if (!profile.hasActiveSubscription && profile.role == "ORG_ADMIN" && profile.organizationId) {
+		// 	clearAuthCookies(res);
+		// 	return res.status(403).json({
+		// 		error: "Your account does not have an active subscription. Please complete payment first.",
+		// 	});
+		// }
+
+		if (profile.role === "ORG_ADMIN" && (!profile.organizationId || !profile.hasActiveSubscription)) {
 			clearAuthCookies(res);
 			return res.status(403).json({
-				error: "Your account does not have an active subscription. Please complete payment first.",
+				error: profile.organizationId ? "Your account does not have an active subscription. Please complete payment first." : "Please finish setting up your business and complete payment to continue.",
 			});
 		}
 
@@ -139,10 +146,17 @@ export const LoginController = async (req: Request, res: Response) => {
 		const tokenPayload = toTokenPayload(result);
 		const profile = await userService(tokenPayload);
 
-		if (!profile.hasActiveSubscription && profile.role == "ORG_ADMIN" && profile.organizationId) {
+		// if (!profile.hasActiveSubscription && profile.role == "ORG_ADMIN" && profile.organizationId) {
+		// 	clearAuthCookies(res);
+		// 	return res.status(403).json({
+		// 		error: "Your account does not have an active subscription. Please complete payment first.",
+		// 	});
+		// }
+
+		if (profile.role === "ORG_ADMIN" && (!profile.organizationId || !profile.hasActiveSubscription)) {
 			clearAuthCookies(res);
 			return res.status(403).json({
-				error: "Your account does not have an active subscription. Please complete payment first.",
+				error: profile.organizationId ? "Your account does not have an active subscription. Please complete payment first." : "Please finish setting up your business and complete payment to continue.",
 			});
 		}
 
@@ -247,7 +261,7 @@ export const CompleteRegistrationController = async (req: Request, res: Response
 	try {
 		const { userId, businessName, planId, amount, currency, isAnnual } = req.body;
 		if (!userId || !businessName || !planId) {
-		// if (!userId || !businessName || !planId || amount == null) {
+			// if (!userId || !businessName || !planId || amount == null) {
 			return res.status(400).json({ error: "Missing required fields" });
 		}
 		const user = await completeRegistrationService({
@@ -302,23 +316,22 @@ export const ResetPasswordController = async (req: Request, res: Response) => {
 	}
 };
 
-
 export const GoogleRegisterController = async (req: Request, res: Response) => {
-    try {
-        const { idToken } = req.body;
-        if (!idToken) {
-            return res.status(400).json({ error: "Missing Google token" });
-        }
+	try {
+		const { idToken } = req.body;
+		if (!idToken) {
+			return res.status(400).json({ error: "Missing Google token" });
+		}
 
-        const { email, name } = await verifyGoogleToken(idToken);
-        const result = await registerWithGoogleService(email, name);
+		const { email, name } = await verifyGoogleToken(idToken);
+		const result = await registerWithGoogleService(email, name);
 
-        return res.status(200).json(result);
-    } catch (error: unknown) {
-        if (error instanceof AppError) {
-            return res.status(error.statusCode).json({ error: error.message });
-        }
-        console.error("[GoogleRegisterController]", error);
-        return res.status(500).json({ error: "Internal server error" });
-    }
+		return res.status(200).json(result);
+	} catch (error: unknown) {
+		if (error instanceof AppError) {
+			return res.status(error.statusCode).json({ error: error.message });
+		}
+		console.error("[GoogleRegisterController]", error);
+		return res.status(500).json({ error: "Internal server error" });
+	}
 };
