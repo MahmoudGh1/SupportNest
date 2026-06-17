@@ -1,7 +1,7 @@
 import prisma from "src/config/prisma.js";
 import { model } from "src/config/langChain.js";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
-import { AgentTier } from "generated/prisma/enums.js";
+import { AgentTier, MessageRole, Sentiment } from "generated/prisma/enums.js";
 import type { MemoryMessage } from "src/utils/conversationMemory.utils.js";
 
 interface ReporterInput {
@@ -19,14 +19,25 @@ interface ReportData {
 	issueType: string;
 	resolution: string;
 	language: string;
-	sentiment: "positive" | "neutral" | "negative";
+	sentiment: Sentiment;
 }
 
 export async function createReport(input: ReporterInput): Promise<void> {
-	const { conversationId, organizationId, conversationHistory, tiersVisited, wasEscalated, resolvedByAi, tokensUsed } = input;
+	const {
+		conversationId,
+		organizationId,
+		conversationHistory,
+		tiersVisited,
+		wasEscalated,
+		resolvedByAi,
+		tokensUsed,
+	} = input;
 
 	if (!conversationHistory || conversationHistory.length === 0) {
-		console.log("[Reporter] No history to report for conversation:", conversationId);
+		console.log(
+			"[Reporter] No history to report for conversation:",
+			conversationId,
+		);
 		return;
 	}
 
@@ -51,8 +62,15 @@ export async function createReport(input: ReporterInput): Promise<void> {
 	console.log("[Reporter] Report created for conversation:", conversationId);
 }
 
-async function generateReportData(conversationHistory: MemoryMessage[]): Promise<ReportData> {
-	const formattedConversation = conversationHistory.map((msg) => `${msg.role === "customer" ? "Customer" : "Agent"}: ${msg.content}`).join("\n");
+export async function generateReportData(
+	conversationHistory: MemoryMessage[],
+): Promise<ReportData> {
+	const formattedConversation = conversationHistory
+		.map(
+			(msg) =>
+				`${msg.role === MessageRole.CUSTOMER ? "Customer" : "Agent"}: ${msg.content}`,
+		)
+		.join("\n");
 
 	const response = await model.invoke([
 		new SystemMessage(`
@@ -68,10 +86,15 @@ async function generateReportData(conversationHistory: MemoryMessage[]): Promise
             "sentiment": "one of: positive, neutral, negative — based on overall customer tone"
         }
     `),
-		new HumanMessage(`Analyze this support conversation:\n\n${formattedConversation}`),
+		new HumanMessage(
+			`Analyze this support conversation:\n\n${formattedConversation}`,
+		),
 	]);
 
-	const raw = typeof response.content === "string" ? response.content : (response.content[0] as { text: string }).text;
+	const raw =
+		typeof response.content === "string"
+			? response.content
+			: (response.content[0] as { text: string }).text;
 
 	let parsed: ReportData;
 	try {

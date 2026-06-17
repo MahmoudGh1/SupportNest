@@ -155,7 +155,7 @@ model Conversation {
   organization       Organization           @relation(fields: [organizationId], references: [id])
   csatRating         CsatRating?
   messages           Message[]
-  reports            Report[]
+  reports             Report? // inverse side of Report.conversation — read-only relation
   ticket             Ticket?
 
   @@index([organizationId])
@@ -360,7 +360,7 @@ model Invitation {
 model Report {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String       @db.Uuid
-  conversationId String       @db.Uuid
+  conversationId String       @db.Uuid @unique
   summary        String
   issueType      String
   resolution     String
