@@ -48,7 +48,21 @@ function TableSkeleton() {
 }
 
 // ─── STATUS PILL ──────────────────────────────────────────────────────────────
-function StatusPill({ active }: { active: boolean }) {
+function StatusPill({ active, scheduledDeletionAt }: { active: boolean; scheduledDeletionAt?: string | null }) {
+	if (scheduledDeletionAt) {
+		return (
+			<span style={{
+				fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 999,
+				background: "#FEF2F2", // soft red
+				color: S.danger,
+				display: "inline-flex", alignItems: "center", gap: 5,
+				border: `1px solid ${S.dangerBg}`
+			}}>
+				<i className="ti ti-clock-pause" style={{ fontSize: 12 }} />
+				Deleting soon
+			</span>
+		);
+	}
 	return (
 		<span style={{
 			fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 999,
@@ -495,6 +509,19 @@ export default function OrganizationsPage() {
 		}
 	};
 
+	const handleCancelDeletion = async (org: AdminOrganization) => {
+		setActionLoading(org.id);
+		try {
+			await api.cancelDeleteAdminOrganization(org.id);
+			setToast({ msg: `Deletion of ${org.name} cancelled.`, type: "success" });
+			setOrgs(prev => prev.map(o => o.id === org.id ? { ...o, scheduled_deletion_at: null } : o));
+		} catch (err: any) {
+			setToast({ msg: err.message ?? "Action failed.", type: "error" });
+		} finally {
+			setActionLoading(null);
+		}
+	};
+
 	const totalPages = meta?.total_pages ?? 1;
 
 	if (selectedOrgId) {
@@ -615,7 +642,7 @@ export default function OrganizationsPage() {
 							<div><PlanPill plan={org.plan} /></div>
 
 							{/* Status */}
-							<div><StatusPill active={org.is_active} /></div>
+							<div><StatusPill active={org.is_active} scheduledDeletionAt={org.scheduled_deletion_at} /></div>
 
 							{/* Stats */}
 							<div style={{ display: "flex", gap: 10, fontSize: 11, color: S.textMuted }}>
@@ -628,39 +655,63 @@ export default function OrganizationsPage() {
 
 							{/* Actions */}
 							<div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }} onClick={e => e.stopPropagation()}>
-								<button
-									onClick={() => handleToggleStatus(org)}
-									disabled={actionLoading === org.id}
-									title={org.is_active ? "Suspend organization" : "Activate organization"}
-									style={{
-										padding: "6px 10px", borderRadius: 7,
-										border: `1px solid ${org.is_active ? S.dangerBg : S.greenBg}`,
-										background: org.is_active ? S.dangerBg : S.greenBg,
-										color: org.is_active ? S.danger : "#0F6E56",
-										fontSize: 11, fontWeight: 600, cursor: actionLoading === org.id ? "not-allowed" : "pointer",
-										fontFamily: "inherit", display: "flex", alignItems: "center", gap: 4,
-										opacity: actionLoading === org.id ? 0.6 : 1,
-									}}
-								>
-									{actionLoading === org.id
-										? <i className="ti ti-loader-2" style={{ fontSize: 12, animation: "spin 1s linear infinite" }} />
-										: <i className={`ti ti-${org.is_active ? "ban" : "circle-check"}`} style={{ fontSize: 12 }} />}
-									{org.is_active ? "Suspend" : "Activate"}
-								</button>
-								<button
-									onClick={() => setEditingOrg(org)}
-									title="Edit details"
-									style={{ padding: "6px 8px", borderRadius: 7, border: `1px solid ${S.border}`, background: S.surface, color: S.textSecondary, fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
-								>
-									<i className="ti ti-edit" style={{ fontSize: 14 }} />
-								</button>
-								<button
-									onClick={() => setDeletingOrg(org)}
-									title="Delete organization"
-									style={{ padding: "6px 8px", borderRadius: 7, border: `1px solid ${S.dangerBg}`, background: S.dangerBg, color: S.danger, fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
-								>
-									<i className="ti ti-trash" style={{ fontSize: 14 }} />
-								</button>
+								{org.scheduled_deletion_at ? (
+									<button
+										onClick={() => handleCancelDeletion(org)}
+										disabled={actionLoading === org.id}
+										title="Cancel scheduled deletion"
+										style={{
+											padding: "6px 10px", borderRadius: 7,
+											border: `1px solid ${S.green}`,
+											background: S.greenBg,
+											color: "#0F6E56",
+											fontSize: 11, fontWeight: 600, cursor: actionLoading === org.id ? "not-allowed" : "pointer",
+											fontFamily: "inherit", display: "flex", alignItems: "center", gap: 4,
+											opacity: actionLoading === org.id ? 0.6 : 1,
+										}}
+									>
+										{actionLoading === org.id
+											? <i className="ti ti-loader-2" style={{ fontSize: 12, animation: "spin 1s linear infinite" }} />
+											: <i className="ti ti-rotate-clockwise" style={{ fontSize: 12 }} />}
+										Cancel Delete
+									</button>
+								) : (
+									<>
+										<button
+											onClick={() => handleToggleStatus(org)}
+											disabled={actionLoading === org.id}
+											title={org.is_active ? "Suspend organization" : "Activate organization"}
+											style={{
+												padding: "6px 10px", borderRadius: 7,
+												border: `1px solid ${org.is_active ? S.dangerBg : S.greenBg}`,
+												background: org.is_active ? S.dangerBg : S.greenBg,
+												color: org.is_active ? S.danger : "#0F6E56",
+												fontSize: 11, fontWeight: 600, cursor: actionLoading === org.id ? "not-allowed" : "pointer",
+												fontFamily: "inherit", display: "flex", alignItems: "center", gap: 4,
+												opacity: actionLoading === org.id ? 0.6 : 1,
+											}}
+										>
+											{actionLoading === org.id
+												? <i className="ti ti-loader-2" style={{ fontSize: 12, animation: "spin 1s linear infinite" }} />
+												: <i className={`ti ti-${org.is_active ? "ban" : "circle-check"}`} style={{ fontSize: 12 }} />}
+											{org.is_active ? "Suspend" : "Activate"}
+										</button>
+										<button
+											onClick={() => setEditingOrg(org)}
+											title="Edit details"
+											style={{ padding: "6px 8px", borderRadius: 7, border: `1px solid ${S.border}`, background: S.surface, color: S.textSecondary, fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
+										>
+											<i className="ti ti-edit" style={{ fontSize: 14 }} />
+										</button>
+										<button
+											onClick={() => setDeletingOrg(org)}
+											title="Delete organization"
+											style={{ padding: "6px 8px", borderRadius: 7, border: `1px solid ${S.dangerBg}`, background: S.dangerBg, color: S.danger, fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
+										>
+											<i className="ti ti-trash" style={{ fontSize: 14 }} />
+										</button>
+									</>
+								)}
 								<button
 									onClick={() => setSelectedOrgId(org.id)}
 									title="View details"

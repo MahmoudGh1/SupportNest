@@ -33,7 +33,10 @@ import type { AuthenticatedRequest } from "src/types/auth.types.js";
 import prisma from "src/config/prisma.js";
 import bcrypt from "bcrypt";
 import { orgDeletionQueue } from "../../queues/orgDeletionQueue.js";
-import { sendPendingDeletionEmail } from "../../config/mailer.js";
+import {
+  sendPendingDeletionEmail,
+  sendDeletionCancelledEmail,
+} from "../../config/mailer.js";
 
 /**
  * Normalize a URL/query parameter value to a single string.
@@ -434,6 +437,19 @@ export async function cancelDeleteOrganization(
   const job = await orgDeletionQueue.getJob(`delete-${orgId}`);
   if (job) {
     await job.remove();
+  }
+
+  // Notify organization admin via email
+  try {
+    const orgInfo = await prisma.organization.findUnique({
+      where: { id: orgId },
+      select: { name: true, email: true },
+    });
+    if (orgInfo) {
+      await sendDeletionCancelledEmail(orgInfo.email, orgInfo.name);
+    }
+  } catch (e) {
+    console.error(`[Admin] Failed to send deletion cancellation email for org ${orgId}`, e);
   }
 
   res.json({ message: "Scheduled deletion cancelled successfully." });

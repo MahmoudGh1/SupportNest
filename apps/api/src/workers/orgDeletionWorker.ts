@@ -1,5 +1,5 @@
 import { Worker } from "bullmq";
-import { redisConfig } from "../config/redis.js";
+import { redis } from "../config/redis.js";
 import prisma from "../config/prisma.js";
 
 export const orgDeletionWorker = new Worker(
@@ -47,7 +47,7 @@ export const orgDeletionWorker = new Worker(
 			throw error;
 		}
 	},
-	{ connection: redisConfig },
+	{ connection: redis as any },
 );
 
 orgDeletionWorker.on("completed", (job) => {

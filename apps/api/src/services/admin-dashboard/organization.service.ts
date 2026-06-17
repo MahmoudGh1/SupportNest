@@ -427,6 +427,7 @@ export async function listOrganizations(opts: {
     slug: o.slug,
     email: o.email,
     is_active: o.isActive,
+    scheduled_deletion_at: o.scheduledDeletionAt?.toISOString() ?? null,
     plan: o.plan
       ? {
           id: o.plan.id,
@@ -494,6 +495,7 @@ export async function getOrganizationDetail(
     slug: org.slug,
     email: org.email,
     is_active: org.isActive,
+    scheduled_deletion_at: org.scheduledDeletionAt?.toISOString() ?? null,
     widget_config: org.widgetConfig as Record<string, unknown>,
     plan: org.plan
       ? {
