@@ -107,7 +107,7 @@ export async function generateReportData(
 			issueType: "other",
 			resolution: "Unknown",
 			language: "Unknown",
-			sentiment: "neutral",
+			sentiment: Sentiment.NEUTRAL,
 		};
 	}
 
