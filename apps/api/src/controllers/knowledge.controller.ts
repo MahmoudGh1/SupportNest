@@ -12,61 +12,35 @@ import {
 	type QueryParams,
 } from "src/utils/filterBuilder.js";
 import type { KnowledgeDocumentType } from "generated/prisma/enums.js";
+import { validateFileMatchesType } from "src/utils/fileType.utils.js";
+import * as knowledgeService from "src/services/knowledge.service.js";
 
 export const uploadDocument: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
 		const userId = req.user?.sub;
-		const orgId = req.user?.organizationId;
+		const organizationId = req.user?.organizationId;
 		const { title, type } = req.body;
 		const file = req.file;
-
 		if (!file) throw new AppError("No file provided", 400);
+		if (!userId || !organizationId) throw new AppError("invalid upload operation", 400);
 
-		const apiDocTypes = ["API_DOC", "SWAGGER_URL"];
-
-		if (apiDocTypes.includes(type)) {
-			const apiConfig = await prisma.businessApiConfig.findUnique({
-				where: { organizationId: orgId as string },
-			});
-			if (!apiConfig || !apiConfig.isVerified) {
-				throw new AppError(
-					"You must configure and verify your API connection before uploading API documentation.",
-					400,
-				);
-			}
-		}
-
-		const storagePath = await uploadToCloudinary(
-			file.buffer,
-			`supportnest/${orgId}/knowledge`,
-			`${Date.now()}-${title}`,
-		);
-
-		const doc = await prisma.knowledgeDocument.create({
-			data: {
-				organizationId: orgId as string,
-				title,
-				type,
-				storagePath,
-				status: "PROCESSING",
-				createdById: userId as string,
-			},
+		const { document, storagePath } = await knowledgeService.uploadDocument({
+			title,
+			type,
+			file,
+			userId,
+			organizationId,
 		});
 
-		// 3. Queue chunking + embedding job in BullMQ
-		await knowledgeQueue.add("process-document", {
-			documentId: doc.id,
-			fileUrl: storagePath,
-			orgId,
-		});
+		res.status(200).json({ success: true, data: document });
 	},
 );
 
 export const getKnowledgeDocuments: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
-		const orgId = req.user?.organizationId;
+		const organizationId = req.user?.organizationId;
 		const organization = await prisma.organization.findUnique({
-			where: { id: orgId as string },
+			where: { id: organizationId as string },
 		});
 
 		if (!organization) throw new AppError("organization not found", 404);
@@ -106,11 +80,11 @@ export const getKnowledgeDocuments: RequestHandler = asyncHandler(
 
 export const deleteKnowledgeDocument: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
-		const orgId = req.user?.organizationId;
+		const organizationId = req.user?.organizationId;
 		const docId = req.params.docId;
 
 		const organization = await prisma.organization.findUnique({
-			where: { id: orgId as string },
+			where: { id: organizationId as string },
 			select: { id: true, isActive: true },
 		});
 
@@ -153,7 +127,7 @@ export const deleteKnowledgeDocument: RequestHandler = asyncHandler(
 export const uploadSwaggerUrl: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
 		const userId = req.user?.sub;
-		const orgId = req.user?.organizationId;
+		const organizationId = req.user?.organizationId;
 		const { title, swaggerUrl } = req.body;
 
 		if (!swaggerUrl) throw new AppError("swaggerUrl is required", 400);
@@ -165,7 +139,7 @@ export const uploadSwaggerUrl: RequestHandler = asyncHandler(
 		}
 
 		const apiConfig = await prisma.businessApiConfig.findUnique({
-			where: { organizationId: orgId as string },
+			where: { organizationId: organizationId as string },
 		});
 		if (!apiConfig || !apiConfig.isVerified) {
 			throw new AppError(
@@ -176,7 +150,7 @@ export const uploadSwaggerUrl: RequestHandler = asyncHandler(
 
 		const doc = await prisma.knowledgeDocument.create({
 			data: {
-				organizationId: orgId as string,
+				organizationId: organizationId as string,
 				title: title || swaggerUrl,
 				type: "SWAGGER_URL",
 				storagePath: swaggerUrl,
@@ -188,7 +162,7 @@ export const uploadSwaggerUrl: RequestHandler = asyncHandler(
 		await knowledgeQueue.add("process-document", {
 			documentId: doc.id,
 			fileUrl: swaggerUrl,
-			orgId,
+			organizationId,
 		});
 
 		res.status(202).json({ documentId: doc.id, status: "PROCESSING" });

@@ -36,21 +36,21 @@ import prisma  from "../../config/prisma.js";
  * The result includes counts and rates for tier 0/1/2 resolution, human escalations,
  * unresolved conversations, average latency, and total tokens consumed.
  *
- * @param orgId Optional organization id filter.
+ * @param organizationId Optional organization id filter.
  * @param dateFilter Optional date range filter for analytics.
  * @returns Aggregated TierStats for the requested scope.
  */
 async function buildTierStats(
-  orgId?: string,
+  organizationId?: string,
   dateFilter?: { gte?: Date; lte?: Date },
 ): Promise<TierStats> {
   const baseWhere = {
-    ...(orgId ? { conversation: { is: { organizationId: orgId } } } : {}),
+    ...(organizationId ? { conversation: { is: { organizationId: organizationId } } } : {}),
     ...(dateFilter ? { createdAt: dateFilter } : {}),
   };
 
   const analyticsWhere = {
-    ...(orgId ? { organizationId: orgId } : {}),
+    ...(organizationId ? { organizationId: organizationId } : {}),
     ...(dateFilter ? { createdAt: dateFilter } : {}),
   };
 
@@ -130,16 +130,16 @@ async function buildTierStats(
  *
  * Includes totals, active/escalated/closed counts, and average resolution + first response times.
  *
- * @param orgId Optional organization id filter.
+ * @param organizationId Optional organization id filter.
  * @param dateFilter Optional date range filter for conversation records.
  * @returns Aggregated ConversationStats for the requested scope.
  */
 async function buildConversationStats(
-  orgId?: string,
+  organizationId?: string,
   dateFilter?: { gte?: Date; lte?: Date },
 ): Promise<ConversationStats> {
   const where = {
-    ...(orgId ? { organizationId: orgId } : {}),
+    ...(organizationId ? { organizationId: organizationId } : {}),
     ...(dateFilter ? { createdAt: dateFilter } : {}),
   };
 
@@ -157,7 +157,7 @@ async function buildConversationStats(
   ]);
 
   const analyticsWhere = {
-    ...(orgId ? { organizationId: orgId } : {}),
+    ...(organizationId ? { organizationId: organizationId } : {}),
     ...(dateFilter ? { createdAt: dateFilter } : {}),
   };
 
@@ -195,16 +195,16 @@ async function buildConversationStats(
  *
  * Includes total tickets, status-based counts, and priority distribution.
  *
- * @param orgId Optional organization id filter.
+ * @param organizationId Optional organization id filter.
  * @param dateFilter Optional date range filter for ticket records.
  * @returns Aggregated TicketStats for the requested scope.
  */
 async function buildTicketStats(
-  orgId?: string,
+  organizationId?: string,
   dateFilter?: { gte?: Date; lte?: Date },
 ): Promise<TicketStats> {
   const where = {
-    ...(orgId ? { organizationId: orgId } : {}),
+    ...(organizationId ? { organizationId: organizationId } : {}),
     ...(dateFilter ? { createdAt: dateFilter } : {}),
   };
 
@@ -235,16 +235,16 @@ async function buildTicketStats(
  *
  * Includes average score, total rating count, and score distribution.
  *
- * @param orgId Optional organization id filter.
+ * @param organizationId Optional organization id filter.
  * @param dateFilter Optional date range filter for CSAT records.
  * @returns Aggregated CsatSummary for the requested scope.
  */
 async function buildCsatSummary(
-  orgId?: string,
+  organizationId?: string,
   dateFilter?: { gte?: Date; lte?: Date },
 ): Promise<CsatSummary> {
   const where = {
-    ...(orgId ? { organizationId: orgId } : {}),
+    ...(organizationId ? { organizationId: organizationId } : {}),
     ...(dateFilter ? { createdAt: dateFilter } : {}),
   };
 
@@ -281,18 +281,18 @@ async function buildCsatSummary(
  * Returns a simplified record set containing ticket metadata, organization info,
  * assigned user details, and timestamp strings.
  *
- * @param orgId Optional organization id filter.
+ * @param organizationId Optional organization id filter.
  * @param limit Maximum number of escalation records to return.
  * @returns EscalationRecord[] ordered by creation date descending.
  */
 async function buildRecentEscalations(
-  orgId?: string,
+  organizationId?: string,
   limit = 10,
 ): Promise<EscalationRecord[]> {
   const tickets = await prisma.ticket.findMany({
     where: {
       status: { in: ["OPEN", "IN_PROGRESS"] },
-      ...(orgId ? { organizationId: orgId } : {}),
+      ...(organizationId ? { organizationId: organizationId } : {}),
     },
     orderBy: { createdAt: "desc" },
     take: limit,
@@ -376,7 +376,7 @@ export async function listOrganizations(opts: {
     prisma.organization.count({ where }),
   ]);
 
-  const orgIds = orgs.map((o) => o.id);
+  const organizationIds = orgs.map((o) => o.id);
 
   const [
     activeConvCounts,
@@ -386,18 +386,18 @@ export async function listOrganizations(opts: {
   ] = await Promise.all([
     prisma.conversation.groupBy({
       by: ["organizationId"],
-      where: { organizationId: { in: orgIds }, conversationStatus: "ACTIVE" },
+      where: { organizationId: { in: organizationIds }, conversationStatus: "ACTIVE" },
       _count: { id: true },
     }),
     prisma.ticket.groupBy({
       by: ["organizationId"],
-      where: { organizationId: { in: orgIds }, status: "OPEN" },
+      where: { organizationId: { in: organizationIds }, status: "OPEN" },
       _count: { id: true },
     }),
     prisma.ticket.groupBy({
       by: ["organizationId"],
       where: {
-        organizationId: { in: orgIds },
+        organizationId: { in: organizationIds },
         status: { in: ["OPEN", "IN_PROGRESS"] },
         conversation: { conversationStatus: "ESCALATED" },
       },
@@ -405,21 +405,21 @@ export async function listOrganizations(opts: {
     }),
     prisma.ticket.groupBy({
       by: ["organizationId"],
-      where: { organizationId: { in: orgIds }, status: "RESOLVED" },
+      where: { organizationId: { in: organizationIds }, status: "RESOLVED" },
       _count: { id: true },
     }),
   ]);
 
-  const byOrgId = <
+  const byorganizationId = <
     T extends { organizationId: string; _count: { id: number } },
   >(
     arr: T[],
   ) => Object.fromEntries(arr.map((r) => [r.organizationId, r._count.id]));
 
-  const activeConvMap = byOrgId(activeConvCounts);
-  const openTicketMap = byOrgId(openTicketCounts);
-  const escalatedTicketMap = byOrgId(escalatedTicketCounts);
-  const resolvedTicketMap = byOrgId(resolvedTicketCounts);
+  const activeConvMap = byorganizationId(activeConvCounts);
+  const openTicketMap = byorganizationId(openTicketCounts);
+  const escalatedTicketMap = byorganizationId(escalatedTicketCounts);
+  const resolvedTicketMap = byorganizationId(resolvedTicketCounts);
 
   const data: OrgSummary[] = orgs.map((o) => ({
     id: o.id,
@@ -456,14 +456,14 @@ export async function listOrganizations(opts: {
  * Includes plan data, users, counts, tier/conversation/ticket stats, CSAT summary,
  * and recent escalations.
  *
- * @param orgId Organization id to retrieve.
+ * @param organizationId Organization id to retrieve.
  * @returns OrgDetail or null if the organization is not found.
  */
 export async function getOrganizationDetail(
-  orgId: string,
+  organizationId: string,
 ): Promise<OrgDetail | null> {
   const org = await prisma.organization.findUnique({
-    where: { id: orgId },
+    where: { id: organizationId },
     include: {
       plan: {
         select: pricingSelect,
@@ -482,11 +482,11 @@ export async function getOrganizationDetail(
 
   const [tierStats, convStats, ticketStats, csatSummary, recentEscalations] =
     await Promise.all([
-      buildTierStats(orgId),
-      buildConversationStats(orgId),
-      buildTicketStats(orgId),
-      buildCsatSummary(orgId),
-      buildRecentEscalations(orgId, 5),
+      buildTierStats(organizationId),
+      buildConversationStats(organizationId),
+      buildTicketStats(organizationId),
+      buildCsatSummary(organizationId),
+      buildRecentEscalations(organizationId, 5),
     ]);
 
   return {
@@ -596,17 +596,17 @@ export async function getGlobalOverview() {
 }
 
 export async function getOrgConversationsService(
-  orgId: string,
+  organizationId: string,
 ): Promise<GetConversationsResult> {
   const org = await prisma.organization.findUnique({
-    where: { id: orgId },
+    where: { id: organizationId },
     select: { id: true },
   });
   if (!org) return { error: "ORG_NOT_FOUND" };
 
   const [conversations, total] = await Promise.all([
     prisma.conversation.findMany({
-      where: { organizationId: orgId },
+      where: { organizationId: organizationId },
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -636,7 +636,7 @@ export async function getOrgConversationsService(
         },
       },
     }),
-    prisma.conversation.count({ where: { organizationId: orgId } }),
+    prisma.conversation.count({ where: { organizationId: organizationId } }),
   ]);
 
   const data: ConversationRecord[] = conversations.map((c) => ({
@@ -662,11 +662,11 @@ export async function getOrgConversationsService(
 }
 
 export async function getConversationByIdService(
-  orgId: string,
+  organizationId: string,
   conversationId: string,
 ): Promise<GetConversationByIdResult> {
   const org = await prisma.organization.findUnique({
-    where: { id: orgId },
+    where: { id: organizationId },
     select: { id: true },
   });
   if (!org) return { error: "ORG_NOT_FOUND" };
@@ -674,7 +674,7 @@ export async function getConversationByIdService(
   const conversation = await prisma.conversation.findFirst({
     where: {
       id: conversationId,
-      organizationId: orgId,
+      organizationId: organizationId,
     },
     select: {
       id: true,
@@ -755,17 +755,17 @@ export async function getConversationByIdService(
  * Validates organization and conversation existence, prevents deletion of active conversations,
  * and removes analytics, CSAT, logs, messages, tickets, then the conversation record.
  *
- * @param orgId Organization id for ownership validation.
+ * @param organizationId Organization id for ownership validation.
  * @param conversationId Conversation id to delete.
  * @returns Result object indicating success or a specific error code.
  */
 export async function deleteConversationService(
-  orgId: string,
+  organizationId: string,
   conversationId: string,
 ): Promise<DeleteConversationResult> {
   // Check org exists
   const org = await prisma.organization.findUnique({
-    where: { id: orgId },
+    where: { id: organizationId },
     select: { id: true },
   });
   if (!org) return { error: "ORG_NOT_FOUND" };
@@ -774,7 +774,7 @@ export async function deleteConversationService(
   const conversation = await prisma.conversation.findFirst({
     where: {
       id: conversationId,
-      organizationId: orgId,
+      organizationId: organizationId,
     },
     select: {
       id: true,
@@ -801,56 +801,94 @@ export async function deleteConversationService(
   return {
     success: true,
     conversation_id: conversationId,
-    organization_id: orgId,
+    organization_id: organizationId,
   };
 }
 
+async function hardDeleteOrg(organizationId: string): Promise<void> {
+  await prisma.$transaction([
+    prisma.conversationAnalytics.deleteMany({
+      where: { organizationId: organizationId },
+    }),
+    prisma.csatRating.deleteMany({ where: { organizationId: organizationId } }),
+    prisma.agentLog.deleteMany({
+      where: { conversation: { organizationId: organizationId } },
+    }),
+    prisma.message.deleteMany({
+      where: { conversation: { organizationId: organizationId } },
+    }),
+    prisma.ticket.deleteMany({ where: { organizationId: organizationId } }),
+    prisma.conversation.deleteMany({ where: { organizationId: organizationId } }),
+    prisma.documentChunk.deleteMany({ where: { organizationId: organizationId } }),
+    prisma.knowledgeDocument.deleteMany({ where: { organizationId: organizationId } }),
+    prisma.apiKey.deleteMany({ where: { organizationId: organizationId } }),
+    prisma.customer.deleteMany({ where: { organizationId: organizationId } }),
+    prisma.payment.deleteMany({ where: { organizationId: organizationId } }),
+    prisma.user.deleteMany({ where: { organizationId: organizationId } }),
+    prisma.organization.delete({ where: { id: organizationId } }),
+  ]);
 
-export async function deleteOrganizationService(
-	orgId: string,
-): Promise<DeleteOrgResult> {
-	const org = await prisma.organization.findUnique({
-		where: { id: orgId },
-		select: { id: true },
-	});
-	if (!org) return { error: "ORG_NOT_FOUND" };
-
-	// Block deletion if org has active conversations
-	const activeConversations = await prisma.conversation.count({
-		where: {
-			organizationId: orgId,
-			conversationStatus: "ACTIVE",
-		},
-	});
-	if (activeConversations > 0) return { error: "ORG_HAS_ACTIVE_CONVERSATIONS" };
-
-	// Delete in order — deepest children first
-	await prisma.$transaction([
-		prisma.conversationAnalytics.deleteMany({
-			where: { organizationId: orgId },
-		}),
-		prisma.csatRating.deleteMany({ where: { organizationId: orgId } }),
-		prisma.agentLog.deleteMany({
-			where: { conversation: { organizationId: orgId } },
-		}),
-		prisma.message.deleteMany({
-			where: { conversation: { organizationId: orgId } },
-		}),
-		prisma.ticket.deleteMany({ where: { organizationId: orgId } }),
-		prisma.conversation.deleteMany({ where: { organizationId: orgId } }),
-		prisma.documentChunk.deleteMany({ where: { organizationId: orgId } }),
-		prisma.knowledgeDocument.deleteMany({ where: { organizationId: orgId } }),
-		prisma.apiKey.deleteMany({ where: { organizationId: orgId } }),
-		prisma.customer.deleteMany({ where: { organizationId: orgId } }),
-		prisma.payment.deleteMany({ where: { organizationId: orgId } }),
-		prisma.user.deleteMany({ where: { organizationId: orgId } }),
-		prisma.organization.delete({ where: { id: orgId } }),
-	]);
-
-	return { success: true, organization_id: orgId };
+  console.log(`[Deletion] Org ${organizationId} deleted successfully`);
 }
 
+export async function scheduleOrganizationDeletion(
+  organizationId: string,
+): Promise<
+  | { success: true; scheduled_at: string; deletes_at: string }
+  | { error: "ORG_NOT_FOUND" | "ALREADY_SCHEDULED" }
+> {
+  const org = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: { id: true, name: true, email: true },
+  });
+  if (!org) return { error: "ORG_NOT_FOUND" };
+  if (isScheduled(organizationId)) return { error: "ALREADY_SCHEDULED" };
 
+  const deletesAt = new Date(Date.now() + 30 * 60 * 1000);
+
+  // Schedule the deletion first
+  scheduleOrgDeletion(organizationId, () => hardDeleteOrg(organizationId));
+
+  // Send email — catch error so it never blocks the schedule
+  try {
+    await sendOrgDeletionScheduledEmail(org.email, org.name, deletesAt);
+  } catch (err) {
+    console.error("[Mailer] Failed to send deletion scheduled email:", err);
+  }
+
+  return {
+    success: true,
+    scheduled_at: new Date().toLocaleString("en-US", {
+      timeZone: "Africa/Cairo",
+      timeZoneName: "short",
+    }),
+    deletes_at: deletesAt.toLocaleString("en-US", {
+      timeZone: "Africa/Cairo",
+      timeZoneName: "short",
+    }),
+  };
+}
+export async function cancelOrganizationDeletion(
+  organizationId: string,
+): Promise<{ success: true } | { error: "ORG_NOT_FOUND" | "NOT_SCHEDULED" }> {
+  const org = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: { id: true, name: true, email: true },
+  });
+  if (!org) return { error: "ORG_NOT_FOUND" };
+
+  // cancelOrgDeletion now returns true if was ever scheduled
+  const wasCancelled = cancelOrgDeletion(organizationId);
+  if (!wasCancelled) return { error: "NOT_SCHEDULED" };
+
+  try {
+    await sendOrgDeletionCancelledEmail(org.email, org.name);
+  } catch (err) {
+    console.error("[Mailer] Failed to send cancellation email:", err);
+  }
+
+  return { success: true };
+}
 
 export {
   buildTierStats,

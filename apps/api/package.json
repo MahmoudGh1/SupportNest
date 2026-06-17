@@ -6,7 +6,11 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"dev": "tsx watch src/index.ts",
+		"dev:custom": "tsx watch --env-file=.env.development src/index.ts",
 		"postinstall": "prisma generate"
+	},
+	"prisma": {
+		"seed": "tsx --env-file=.env.development prisma/seed.ts"
 	},
 	"keywords": [],
 	"author": "",
@@ -32,6 +36,7 @@
 		"cloudinary": "^2.10.0",
 		"cookie-parser": "^1.4.7",
 		"cors": "^2.8.6",
+		"csv-parse": "^6.2.1",
 		"dotenv": "^17.4.2",
 		"express": "^5.2.1",
 		"express-rate-limit": "^8.5.2",
@@ -40,6 +45,7 @@
 		"ioredis": "^5.11.0",
 		"jsonwebtoken": "^9.0.3",
 		"jwt": "^0.2.0",
+		"mammoth": "^1.12.0",
 		"morgan": "^1.10.1",
 		"multer": "^2.1.1",
 		"nodemailer": "^8.0.10",

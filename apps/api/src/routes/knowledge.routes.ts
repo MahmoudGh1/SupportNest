@@ -9,11 +9,11 @@ import {
 } from "src/controllers/tool.controller.js";
 const router: Router = express.Router();
 
-// router.post("/organizations/:orgId/knowledge", authMiddleware, upload.single("file"), knowledgeController.uploadDocument);
+// router.post("/organizations/:organizationId/knowledge", authMiddleware, upload.single("file"), knowledgeController.uploadDocument);
 
-// router.get("/organizations/:orgId/knowledge", authMiddleware, knowledgeController.getKnowledgeDocuments);
+// router.get("/organizations/:organizationId/knowledge", authMiddleware, knowledgeController.getKnowledgeDocuments);
 
-// router.delete("/organizations/:orgId/knowledge/:docId", authMiddleware, knowledgeController.deleteKnowledgeDocument);
+// router.delete("/organizations/:organizationId/knowledge/:docId", authMiddleware, knowledgeController.deleteKnowledgeDocument);
 router.post(
 	"/knowledge",
 	authMiddleware,

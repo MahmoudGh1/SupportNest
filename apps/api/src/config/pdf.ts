@@ -1,6 +1,6 @@
 import { PDFParse } from "pdf-parse";
 
-export async function extractTextFromUrl(url: string): Promise<string> {
+export async function extractTextFromPdfUrl(url: string): Promise<string> {
 	const response = await fetch(url);
 	const arrayBuffer = await response.arrayBuffer();
 	const buffer = Buffer.from(arrayBuffer);

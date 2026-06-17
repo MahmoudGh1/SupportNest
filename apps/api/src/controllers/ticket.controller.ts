@@ -18,7 +18,7 @@ export async function createTicket(
 	next: NextFunction,
 ): Promise<void> {
 	try {
-		const orgId = (req.user as any).organizationId;
+		const organizationId = (req.user as any).organizationId;
 		const { conversationId, priority } = req.body as CreateTicketBody;
 
 		if (!conversationId) {
@@ -29,7 +29,7 @@ export async function createTicket(
 		}
 
 		const ticket = await ticketService.createTicket(
-			orgId,
+			organizationId,
 			conversationId,
 			priority,
 		);
@@ -52,9 +52,9 @@ export async function getTickets(
 	next: NextFunction,
 ): Promise<void> {
 	try {
-		const orgId = (req.user as any).organizationId;
+		const organizationId = (req.user as any).organizationId;
 
-		const result = await ticketService.getTickets(orgId, {
+		const result = await ticketService.getTickets(organizationId, {
 			status: req.query.status as TicketStatus | undefined,
 			priority: req.query.priority as TicketPriority | undefined,
 			assignedToId: req.query.assignedToId as string | undefined,
@@ -79,10 +79,10 @@ export async function getTicketById(
 	next: NextFunction,
 ): Promise<void> {
 	try {
-		const orgId = (req.user as any).organizationId;
+		const organizationId = (req.user as any).organizationId;
 		const ticketId = (req as Request<{ id: string }>).params.id;
 
-		const ticket = await ticketService.getTicketById(orgId, ticketId);
+		const ticket = await ticketService.getTicketById(organizationId, ticketId);
 
 		res.status(200).json({
 			success: true,
@@ -102,7 +102,7 @@ export async function assignTicket(
 	next: NextFunction,
 ): Promise<void> {
 	try {
-		const orgId = (req.user as any).organizationId;
+		const organizationId = (req.user as any).organizationId;
 		const ticketId = (req as Request<{ id: string }>).params.id;
 		const { assignedToId } = (req as Request).body as AssignTicketBody;
 
@@ -114,7 +114,7 @@ export async function assignTicket(
 		}
 
 		const ticket = await ticketService.assignTicket(
-			orgId,
+			organizationId,
 			ticketId,
 			assignedToId,
 		);
@@ -138,11 +138,15 @@ export async function startTicket(
 	next: NextFunction,
 ): Promise<void> {
 	try {
-		const orgId = (req.user as any).organizationId;
+		const organizationId = (req.user as any).organizationId;
 		const agentId = req.user!.id;
 		const ticketId = (req as Request<{ id: string }>).params.id;
 
-		const ticket = await ticketService.startTicket(orgId, ticketId, agentId);
+		const ticket = await ticketService.startTicket(
+			organizationId,
+			ticketId,
+			agentId,
+		);
 
 		res.status(200).json({
 			success: true,
@@ -162,12 +166,12 @@ export async function resolveTicket(
 	next: NextFunction,
 ): Promise<void> {
 	try {
-		const orgId = (req.user as any).organizationId;
+		const organizationId = (req.user as any).organizationId;
 		const ticketId = (req as Request<{ id: string }>).params.id;
 		const { resolutionNote } = req.body as ResolveTicketBody;
 
 		const ticket = await ticketService.resolveTicket(
-			orgId,
+			organizationId,
 			ticketId,
 			resolutionNote,
 		);

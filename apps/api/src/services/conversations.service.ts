@@ -29,6 +29,7 @@ export async function startConversation({
 	customerId,
 	apiKeyId,
 }: startConversationInput) {
+	console.log("start conversation");
 	// Resume existing active conversation if any
 	const existing = await prisma.conversation.findFirst({
 		where: { customerId, conversationStatus: ConversationStatus.ACTIVE },
@@ -177,7 +178,7 @@ export async function processPipelineTurn({
 	const aiMessage = await prisma.message.create({
 		data: {
 			conversationId,
-			role: routerOutput.resolvedByTier === "HUMAN" ? "HUMAN_AGENT" : "AI",
+			role: "AI",
 			content: routerOutput.finalResponse,
 			tier:
 				routerOutput.resolvedByTier === "HUMAN"

@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev:web": "pnpm --filter web dev",
 		"dev:api": "pnpm --filter api dev",
+		"db:studio": "pnpm --filter api exec prisma studio",
 		"dev": "turbo dev"
 	},
 	"keywords": [],

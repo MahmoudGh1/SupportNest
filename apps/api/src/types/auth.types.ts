@@ -10,6 +10,7 @@ export interface TokenPayload {
 	email: string;
 	role: string;
 	name?: string;
+	isEmailVerified?: boolean;
 	organizationId: string | null;
 }
 
@@ -63,7 +64,7 @@ export interface userData {
 	lastName: string;
 	role: string;
 	organizationId: string | null;
-	organizationName: string | null;
+	orgName: string | null;
 	currentPlanId: string | null;
 	onboarded: boolean;
 	hasActiveSubscription: boolean;

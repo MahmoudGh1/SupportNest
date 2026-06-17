@@ -19,6 +19,7 @@ export const getMeController = async (req: AuthenticatedRequest, res: Response) 
 				lastName: user.lastName,
 				role: user.role,
 				organizationId: user.organizationId,
+				isEmailVerified: user.isEmailVerified,
 			},
 		});
 	} catch {
@@ -49,7 +50,15 @@ export const updateProfileController = async (req: AuthenticatedRequest, res: Re
 		return res.status(200).json({
 			success: true,
 			message: "Profile updated successfully.",
-			result: updated,
+			result: {
+				id: updated.id,
+				email: updated.email,
+				firstName: updated.firstName,
+				lastName: updated.lastName,
+				role: updated.role,
+				organizationId: updated.organizationId,
+				isEmailVerified: updated.isEmailVerified,
+			},
 		});
 	} catch (error: any) {
 		const status = error.statusCode ?? 500;
@@ -86,16 +95,16 @@ export const deleteAccountController = async (req: AuthenticatedRequest, res: Re
 		const userId = req.user?.sub;
 		if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-		const { fullName, organizationName } = req.body;
+		const { fullName, orgName } = req.body;
 
 		if (!fullName?.trim()) {
 			return res.status(400).json({ error: "Your name is required to confirm deletion." });
 		}
-		if (!organizationName?.trim()) {
+		if (!orgName?.trim()) {
 			return res.status(400).json({ error: "Organization name is required to confirm deletion." });
 		}
 
-		await deleteAccountService(userId, fullName.trim(), organizationName.trim());
+		await deleteAccountService(userId, fullName.trim(), orgName.trim());
 
 		return res.status(200).json({
 			success: true,

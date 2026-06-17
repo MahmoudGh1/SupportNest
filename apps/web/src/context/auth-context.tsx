@@ -21,6 +21,8 @@ interface AuthState {
 	loginWithGoogle: (idToken: string) => Promise<AuthUser>;
 	logout: () => Promise<void>;
 	refreshUser: () => Promise<AuthUser | null>;
+	registerWithGoogle: (idToken: string) => Promise<{ userId: string; email: string; isNewUser: boolean }>;
+
 }
 
 const AuthCtx = createContext<AuthState | null>(null);
@@ -101,6 +103,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		return current;
 	}, []);
 
+	const registerWithGoogle = useCallback(async (idToken: string) => {
+		return await api.registerWithGoogle(idToken);
+	}, []);
+
 	const login = useCallback(async (email: string, password: string) => {
 		await api.login(email, password);
 		const current = await api.getMe();
@@ -116,7 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	}, []);
 
 	return (
-		<AuthCtx.Provider value={{ user, loading, login, loginWithGoogle, logout, refreshUser }}>
+		<AuthCtx.Provider value={{ user, loading, login, loginWithGoogle, logout, refreshUser, registerWithGoogle }}>
 			{children}
 		</AuthCtx.Provider>
 	);

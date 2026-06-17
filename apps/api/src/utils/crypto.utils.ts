@@ -14,4 +14,8 @@ function generateInviteToken(): string {
 	return `${randomBytes}`
 }
 
-export { generateApiKey, hashApiKey, generateInviteToken };
+function generateResetToken(): string {
+    return crypto.randomBytes(32).toString("hex");
+}
+
+export { generateApiKey, hashApiKey, generateInviteToken, generateResetToken };

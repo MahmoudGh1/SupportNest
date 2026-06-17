@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { useLingui } from "@lingui/react/macro";
 import { GoogleLogin } from "@react-oauth/google";
 import Link from "next/link";
+import { api } from "@/lib/api.ts";
 
 const T = {
 	darkBg: "var(--page-bg)",
@@ -139,10 +140,13 @@ function FormField({
 }
 
 function FormPanel() {
+	const searchParams = useSearchParams();
+	const justVerified = searchParams.get("verified") === "true";
+	const verifiedEmail = searchParams.get("email") ?? "";
 	const { login, loginWithGoogle } = useAuth();
 	const router = useRouter();
 	const { t } = useLingui();
-	const [email, setEmail] = useState("");
+	const [email, setEmail] = useState(verifiedEmail);
 	const [password, setPassword] = useState("");
 	const [showPass, setShowPass] = useState(false);
 	const [loading, setLoading] = useState(false);
@@ -168,22 +172,35 @@ function FormPanel() {
 		setLoading(true);
 		try {
 			const user = await login(email, password);
-			// how user.onboarded is handled frontend or backend?
-			// it gives me error
-			// router.push("/dashboard");
 			if (user.role === "SUPER_ADMIN") {
 				router.push("/dashboard/admin");
 			} else {
 				router.push("/dashboard");
 			}
 		} catch (e) {
+			if ((e as Error & { code?: string }).code === "EMAIL_NOT_VERIFIED") {
+				const userId = (e as Error & { userId?: string }).userId;
+				// send verification email automatically for login flow too
+				if (userId) {
+					try {
+						await api.sendVerification(userId, email);
+					} catch {
+						// silent — they can resend from the verify page
+					}
+				}
+				router.push(
+					`/verify-email?userId=${userId}&email=${encodeURIComponent(email)}&mode=login`
+				);
+				return;
+			}
 			if (e instanceof Error) {
 				setError(e.message ?? t`Invalid email or password.`);
 			} else {
 				setError("An unexpected error occurred.");
 			}
-		} finally {
-			setLoading(false);
+		}
+		finally {
+			setLoading(false)
 		}
 	};
 
@@ -320,6 +337,7 @@ function FormPanel() {
 						autoComplete="current-password"
 						labelRight={
 							<button
+								onClick={() => router.push("/forgot-password")}
 								style={{
 									background: "none",
 									border: "none",
@@ -648,7 +666,9 @@ export default function LoginPage() {
 				}
 			`}</style>
 			<div className="login-layout">
-				<FormPanel />
+				<Suspense fallback={<div />}>
+                    <FormPanel />
+                </Suspense>
 				<BrandPanel />
 			</div>
 		</>

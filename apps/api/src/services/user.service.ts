@@ -31,6 +31,7 @@ export async function updateProfileService(userId: string, data: { firstName: st
 			isActive: true,
 			createdAt: true,
 			updatedAt: true,
+			isEmailVerified: true
 		},
 	});
 
@@ -88,16 +89,16 @@ export async function deleteAccountService(userId: string, fullName: string, org
 		throw new AppError("Organization name does not match.", 400);
 	}
 
-	const orgId = user.organizationId;
+	const organizationId = user.organizationId;
 
-	const otherUsersCount = orgId ? await prisma.user.count({ where: { organizationId: orgId, id: { not: userId } } }) : 0;
-	const isLastUser = orgId !== null && otherUsersCount === 0;
+	const otherUsersCount = organizationId ? await prisma.user.count({ where: { organizationId: organizationId, id: { not: userId } } }) : 0;
+	const isLastUser = organizationId !== null && otherUsersCount === 0;
 
 	const ownedDocs = await prisma.knowledgeDocument.count({ where: { createdById: userId } });
 	let fallbackAdminId: string | null = null;
 	if (ownedDocs > 0 && !isLastUser) {
 		const fallbackAdmin = await prisma.user.findFirst({
-			where: { organizationId: orgId, role: "ORG_ADMIN", id: { not: userId } },
+			where: { organizationId: organizationId, role: "ORG_ADMIN", id: { not: userId } },
 			select: { id: true },
 		});
 		if (!fallbackAdmin) {
@@ -107,9 +108,9 @@ export async function deleteAccountService(userId: string, fullName: string, org
 	}
 
 	await prisma.$transaction(async (tx) => {
-		if (isLastUser && orgId) {
+		if (isLastUser && organizationId) {
 			const conversations = await tx.conversation.findMany({
-				where: { organizationId: orgId },
+				where: { organizationId: organizationId },
 				select: { id: true },
 			});
 			const conversationIds = conversations.map((c) => c.id);
@@ -122,29 +123,29 @@ export async function deleteAccountService(userId: string, fullName: string, org
 				await tx.conversationAnalytics.deleteMany({ where: { conversationId: { in: conversationIds } } });
 				await tx.ticket.deleteMany({ where: { conversationId: { in: conversationIds } } });
 			}
-			await tx.conversation.deleteMany({ where: { organizationId: orgId } });
+			await tx.conversation.deleteMany({ where: { organizationId: organizationId } });
 
-			await tx.ticket.deleteMany({ where: { organizationId: orgId } });
+			await tx.ticket.deleteMany({ where: { organizationId: organizationId } });
 
-			await tx.documentChunk.deleteMany({ where: { organizationId: orgId } });
+			await tx.documentChunk.deleteMany({ where: { organizationId: organizationId } });
 
-			await tx.toolDefinition.deleteMany({ where: { organizationId: orgId } });
+			await tx.toolDefinition.deleteMany({ where: { organizationId: organizationId } });
 
-			await tx.knowledgeDocument.deleteMany({ where: { organizationId: orgId } });
+			await tx.knowledgeDocument.deleteMany({ where: { organizationId: organizationId } });
 
-			await tx.businessApiConfig.deleteMany({ where: { organizationId: orgId } });
+			await tx.businessApiConfig.deleteMany({ where: { organizationId: organizationId } });
 
-			await tx.csatRating.deleteMany({ where: { organizationId: orgId } });
-			await tx.conversationAnalytics.deleteMany({ where: { organizationId: orgId } });
+			await tx.csatRating.deleteMany({ where: { organizationId: organizationId } });
+			await tx.conversationAnalytics.deleteMany({ where: { organizationId: organizationId } });
 
-			await tx.customer.deleteMany({ where: { organizationId: orgId } });
-			await tx.apiKey.deleteMany({ where: { organizationId: orgId } });
+			await tx.customer.deleteMany({ where: { organizationId: organizationId } });
+			await tx.apiKey.deleteMany({ where: { organizationId: organizationId } });
 
-			await tx.payment.deleteMany({ where: { organizationId: orgId } });
-			await tx.invitation.deleteMany({ where: { organizationId: orgId } });
+			await tx.payment.deleteMany({ where: { organizationId: organizationId } });
+			await tx.invitation.deleteMany({ where: { organizationId: organizationId } });
 
 			await tx.user.delete({ where: { id: userId } });
-			await tx.organization.delete({ where: { id: orgId } });
+			await tx.organization.delete({ where: { id: organizationId } });
 		} else {
 			await tx.ticket.updateMany({
 				where: { assignedToId: userId },

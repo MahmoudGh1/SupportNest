@@ -162,7 +162,7 @@
  *                 email:
  *                   type: string
  *                   example: member@acme.com
- *                 organizationName:
+ *                 orgName:
  *                   type: string
  *                   example: Acme Inc
  *       400:

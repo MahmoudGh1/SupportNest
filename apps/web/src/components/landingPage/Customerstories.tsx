@@ -1,66 +1,79 @@
-"use client"
+"use client";
 
-import { useInView } from "@/hooks/useInView"
+import { useInView } from "@/hooks/useInView";
 
 const TESTIMONIALS = [
   {
-    quote:    "SupportNest resolved 82% of our tickets automatically in the first week. Our agents now focus on what actually needs a human.",
-    name:     "Sara Ahmed",
-    role:     "Head of Support, TechFlow",
+    quote:
+      "SupportNest resolved 82% of our tickets automatically in the first week. Our agents now focus on what actually needs a human.",
+    name: "Sara Ahmed",
+    role: "Head of Support, TechFlow",
     initials: "SA",
-    color:    "#534AB7",
+    color: "#534AB7",
   },
   {
-    quote:    "Setup took 20 minutes. We uploaded our FAQ docs, embedded the widget, and the AI was answering customer questions that same day.",
-    name:     "James Carter",
-    role:     "Founder, CloudBase",
+    quote:
+      "Setup took 20 minutes. We uploaded our FAQ docs, embedded the widget, and the AI was answering customer questions that same day.",
+    name: "James Carter",
+    role: "Founder, CloudBase",
     initials: "JC",
-    color:    "#1D9E75",
+    color: "#1D9E75",
   },
   {
-    quote:    "The escalation flow is seamless. Agents get the full conversation and context — no more 'can you repeat your issue' moments.",
-    name:     "Lena Müller",
-    role:     "CX Manager, Nexus AI",
+    quote:
+      "The escalation flow is seamless. Agents get the full conversation and context — no more 'can you repeat your issue' moments.",
+    name: "Lena Müller",
+    role: "CX Manager, Nexus AI",
     initials: "LM",
-    color:    "#4F46E5",
+    color: "#4F46E5",
   },
-]
+];
 
 export default function CustomerStories() {
-  const { ref, visible } = useInView()
+  const { ref, visible } = useInView();
 
   return (
-    <section id="testimonials" className="py-[90px] px-[5%]" style={{ background: "var(--page-bg)" }}>
+    <section
+      id="testimonials"
+      className="py-16 md:py-[90px] px-4 sm:px-[5%]"
+      style={{ background: "var(--page-bg)" }}
+    >
       <div className="max-w-[1100px] mx-auto">
         {/* Heading */}
-        <div className="text-center mb-13">
+        <div className="text-center mb-10 md:mb-13">
           <div className="inline-block bg-brand-faint text-brand text-xs font-bold px-3.5 py-1 rounded-full tracking-[.08em] uppercase mb-4">
             Customer stories
           </div>
           <h2
             className="font-extrabold sn-page-text tracking-[-0.025em] m-0"
-            style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)" }}
+            style={{ fontSize: "clamp(1.6rem, 3.5vw, 2.6rem)" }}
           >
             Teams love SupportNest
           </h2>
         </div>
 
-        {/* Cards */}
-        <div ref={ref} className="grid grid-cols-3 gap-4">
+        {/* Cards: 1 col on mobile, 2 on sm, 3 on lg */}
+        <div
+          ref={ref}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+        >
           {TESTIMONIALS.map((t, i) => (
             <div
               key={t.name}
-              className="sn-surface border border-brand-mid/20 rounded-2xl px-6 py-7"
+              className="sn-surface border border-brand-mid/20 rounded-2xl px-5 sm:px-6 py-6 sm:py-7"
               style={{
-                opacity:    visible ? 1 : 0,
-                transform:  visible ? "translateY(0)" : "translateY(22px)",
+                opacity: visible ? 1 : 0,
+                transform: visible ? "translateY(0)" : "translateY(22px)",
                 transition: `all .5s ease ${(i * 0.12).toFixed(2)}s`,
               }}
             >
               {/* Stars */}
               <div className="flex gap-[3px] mb-4">
                 {[...Array(5)].map((_, j) => (
-                  <i key={j} className="ti ti-star-filled text-sm text-warning" />
+                  <i
+                    key={j}
+                    className="ti ti-star-filled text-sm text-warning"
+                  />
                 ))}
               </div>
 
@@ -77,7 +90,9 @@ export default function CustomerStories() {
                   {t.initials}
                 </div>
                 <div>
-                  <div className="text-[13px] font-bold sn-page-text">{t.name}</div>
+                  <div className="text-[13px] font-bold sn-page-text">
+                    {t.name}
+                  </div>
                   <div className="text-xs sn-muted">{t.role}</div>
                 </div>
               </div>
@@ -86,5 +101,5 @@ export default function CustomerStories() {
         </div>
       </div>
     </section>
-  )
+  );
 }

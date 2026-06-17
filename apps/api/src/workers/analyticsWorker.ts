@@ -21,8 +21,6 @@ function deriveResolvedByTier(
 ): ResolutionTier {
 	// who ultimately resolved this conversation?
 
-	const actions = logs.map((l) => l.action);
-
 	if (logs.some((l) => l.action === AgentAction.ESCALATED_TO_HUMAN))
 		return ResolutionTier.HUMAN;
 
@@ -101,7 +99,7 @@ async function processAnalyticsJob(job: Job<AnalyticsJobData>) {
 		update: {
 			resolvedByTier: resolvedByTier,
 			totalMessages: totalMessages,
-			firstResponseTimeMs: firstResponseTimeMs as number,
+			firstResponseTimeMs: firstResponseTimeMs ?? 0,
 			resolutionTimeMs: resolutionTimeMs as number,
 			escalatedToTier2: escalatedToTier2,
 			escalatedToHuman: escalatedToHuman,
@@ -114,8 +112,8 @@ async function processAnalyticsJob(job: Job<AnalyticsJobData>) {
 			organizationId: organizationId,
 			resolvedByTier: resolvedByTier,
 			totalMessages: totalMessages,
-			firstResponseTimeMs: firstResponseTimeMs as number,
-			resolutionTimeMs: resolutionTimeMs as number,
+			firstResponseTimeMs: firstResponseTimeMs ?? 0,
+			resolutionTimeMs: resolutionTimeMs ?? 0,
 			escalatedToTier2: escalatedToTier2,
 			escalatedToHuman: escalatedToHuman,
 			tokensUsed: totalTokens,
@@ -125,11 +123,15 @@ async function processAnalyticsJob(job: Job<AnalyticsJobData>) {
 }
 
 export const analyticsWorker = new Worker<AnalyticsJobData>(
-	"analytics",
+	"compute-analytics",
 	processAnalyticsJob,
 	{ connection: redis as any, concurrency: 5 },
 );
 
 analyticsWorker.on("failed", (job, err) => {
 	console.error(`[analyticsWorker] Job ${job?.id} failed:`, err.message);
+});
+
+analyticsWorker.on("ready", () => {
+	console.log("[analyticsWorker] connected and listening for jobs");
 });

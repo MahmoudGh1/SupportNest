@@ -19,7 +19,8 @@ import {
   deleteConversationService,
   getOrgConversationsService,
   getConversationByIdService,
-  deleteOrganizationService,
+  cancelOrganizationDeletion,
+  scheduleOrganizationDeletion,
 } from "../../services/admin-dashboard/organization.service.js";
 import {
   parsePagination,
@@ -104,7 +105,7 @@ export async function getOrganizations(
 }
 
 /**
- * GET /admin/organizations/:orgId
+ * GET /admin/organizations/:organizationId
  *
  * Return detailed organization data for the specified organization id.
  */
@@ -112,12 +113,12 @@ export async function getOrganization(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
-  const detail = await getOrganizationDetail(orgId);
+  const detail = await getOrganizationDetail(organizationId);
   if (!detail) {
     notFound(res, "Organization");
     return;
@@ -225,7 +226,7 @@ export async function createOrganization(
 }
 
 /**
- * PATCH /admin/organizations/:orgId
+ * PATCH /admin/organizations/:organizationId
  *
  * Update allowed organization fields for the specified organization id.
  */
@@ -233,8 +234,8 @@ export async function updateOrganization(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
@@ -256,14 +257,14 @@ export async function updateOrganization(
     return;
   }
 
-  const exists = await prisma.organization.findUnique({ where: { id: orgId } });
+  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
   if (!exists) {
     notFound(res, "Organization");
     return;
   }
 
   const org = await prisma.organization.update({
-    where: { id: orgId },
+    where: { id: organizationId },
     data: updates as any,
     include: {
       plan: { select: { id: true, name: true, priceMonthly: true } },
@@ -289,7 +290,7 @@ export async function updateOrganization(
 }
 
 /**
- * PATCH /admin/organizations/:orgId/suspend
+ * PATCH /admin/organizations/:organizationId/suspend
  *
  * Suspend an organization by setting its active flag to false.
  */
@@ -297,26 +298,26 @@ export async function suspendOrganization(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
-  const exists = await prisma.organization.findUnique({ where: { id: orgId } });
+  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
   if (!exists) {
     notFound(res, "Organization");
     return;
   }
 
   await prisma.organization.update({
-    where: { id: orgId },
+    where: { id: organizationId },
     data: { isActive: false },
   });
   res.json({ message: "Organization suspended." });
 }
 
 /**
- * PATCH /admin/organizations/:orgId/activate
+ * PATCH /admin/organizations/:organizationId/activate
  *
  * Reactivate an organization by setting its active flag to true.
  */
@@ -324,19 +325,19 @@ export async function activateOrganization(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
-  const exists = await prisma.organization.findUnique({ where: { id: orgId } });
+  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
   if (!exists) {
     notFound(res, "Organization");
     return;
   }
 
   await prisma.organization.update({
-    where: { id: orgId },
+    where: { id: organizationId },
     data: { isActive: true },
   });
   res.json({ message: "Organization activated." });
@@ -455,7 +456,7 @@ export async function cancelDeleteOrganization(
   res.json({ message: "Scheduled deletion cancelled successfully." });
 }
 /**
- * GET /admin/organizations/:orgId/tier-stats
+ * GET /admin/organizations/:organizationId/tier-stats
  *
  * Retrieve tier-level metrics for a specific organization, with optional date filtering.
  */
@@ -463,29 +464,29 @@ export async function getOrgTierStats(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
   const { from, to } = req.query as { from?: string; to?: string };
   const dateFilter = parseDateRange(from, to);
 
-  const exists = await prisma.organization.findUnique({ where: { id: orgId } });
+  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
   if (!exists) {
     notFound(res, "Organization");
     return;
   }
 
   const stats = await buildTierStats(
-    orgId,
+    organizationId,
     Object.keys(dateFilter).length ? dateFilter : undefined,
   );
   res.json(stats);
 }
 
 /**
- * GET /admin/organizations/:orgId/conversation-stats
+ * GET /admin/organizations/:organizationId/conversation-stats
  *
  * Return conversation metrics for a specific organization, with optional date filtering.
  */
@@ -493,29 +494,29 @@ export async function getOrgConversationStats(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
   const { from, to } = req.query as { from?: string; to?: string };
   const dateFilter = parseDateRange(from, to);
 
-  const exists = await prisma.organization.findUnique({ where: { id: orgId } });
+  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
   if (!exists) {
     notFound(res, "Organization");
     return;
   }
 
   const stats = await buildConversationStats(
-    orgId,
+    organizationId,
     Object.keys(dateFilter).length ? dateFilter : undefined,
   );
   res.json(stats);
 }
 
 /**
- * GET /admin/organizations/:orgId/ticket-stats
+ * GET /admin/organizations/:organizationId/ticket-stats
  *
  * Retrieve ticket statistics for a specific organization, with optional date filtering.
  */
@@ -523,29 +524,29 @@ export async function getOrgTicketStats(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
   const { from, to } = req.query as { from?: string; to?: string };
   const dateFilter = parseDateRange(from, to);
 
-  const exists = await prisma.organization.findUnique({ where: { id: orgId } });
+  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
   if (!exists) {
     notFound(res, "Organization");
     return;
   }
 
   const stats = await buildTicketStats(
-    orgId,
+    organizationId,
     Object.keys(dateFilter).length ? dateFilter : undefined,
   );
   res.json(stats);
 }
 
 /**
- * GET /admin/organizations/:orgId/csat
+ * GET /admin/organizations/:organizationId/csat
  *
  * Return customer satisfaction summary data for a specific organization.
  */
@@ -553,29 +554,29 @@ export async function getOrgCsat(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
   const { from, to } = req.query as { from?: string; to?: string };
   const dateFilter = parseDateRange(from, to);
 
-  const exists = await prisma.organization.findUnique({ where: { id: orgId } });
+  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
   if (!exists) {
     notFound(res, "Organization");
     return;
   }
 
   const stats = await buildCsatSummary(
-    orgId,
+    organizationId,
     Object.keys(dateFilter).length ? dateFilter : undefined,
   );
   res.json(stats);
 }
 
 /**
- * GET /admin/organizations/:orgId/escalations
+ * GET /admin/organizations/:organizationId/escalations
  *
  * List active escalation tickets for a specific organization with pagination and optional date filtering.
  */
@@ -583,8 +584,8 @@ export async function getOrgEscalations(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId = getStringParam(req.params.organizationId);
+  if (!organizationId) {
     badRequest(res, "Organization id is required.");
     return;
   }
@@ -592,14 +593,14 @@ export async function getOrgEscalations(
   const { from, to } = req.query as { from?: string; to?: string };
   const dateFilter = parseDateRange(from, to);
 
-  const exists = await prisma.organization.findUnique({ where: { id: orgId } });
+  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
   if (!exists) {
     notFound(res, "Organization");
     return;
   }
 
   const where = {
-    organizationId: orgId,
+    organizationId: organizationId,
     status: { in: ["OPEN", "IN_PROGRESS"] as any },
     ...(Object.keys(dateFilter).length ? { createdAt: dateFilter } : {}),
   };
@@ -729,9 +730,9 @@ export async function getOrgConversations(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const { orgId } = req.params;
+  const { organizationId } = req.params;
 
-  const result = await getOrgConversationsService(orgId as string);
+  const result = await getOrgConversationsService(organizationId as string);
 
   if ("error" in result) {
     notFound(res, "Organization");
@@ -745,10 +746,10 @@ export async function getConversationById(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const { orgId, conversationId } = req.params;
+  const { organizationId, conversationId } = req.params;
 
   const result = await getConversationByIdService(
-    orgId as string,
+    organizationId as string,
     conversationId as string,
   );
 
@@ -767,7 +768,7 @@ export async function getConversationById(
 }
 
 /**
- * DELETE /admin/organizations/:orgId/conversations/:conversationId
+ * DELETE /admin/organizations/:organizationId/conversations/:conversationId
  *
  * Delete a completed conversation and its related records for the specified organization.
  */
@@ -775,10 +776,10 @@ export async function deleteConversation(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const { orgId, conversationId } = req.params;
+  const { organizationId, conversationId } = req.params;
 
   const result = await deleteConversationService(
-    orgId as string,
+    organizationId as string,
     conversationId as string,
   );
 
