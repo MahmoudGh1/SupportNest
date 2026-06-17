@@ -4,7 +4,7 @@ import { DashboardStatsStatus, DocStatus } from "@/types/types";
 import { useEffect, useState } from "react";
 import { useLingui } from "@lingui/react/macro";
 import { t } from "@lingui/core/macro";
-import { useLoading } from "@/context/loading-context.tsx";
+import { useLoading } from "@/context/loading-context";
 
 // ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
 export const S = {

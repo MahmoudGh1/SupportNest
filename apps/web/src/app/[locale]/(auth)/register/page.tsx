@@ -79,7 +79,7 @@ export default function RegisterPage() {
 				lastName: form.lastName,
 			});
 
-			await api.sendVerification(result.userId, result.email);
+			// await api.sendVerification(result.userId, result.email);
 
 			router.push(
 				`/verify-email?userId=${result.userId}&email=${encodeURIComponent(result.email)}&mode=register`

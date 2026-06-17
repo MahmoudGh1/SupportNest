@@ -8,7 +8,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { useFetch } from "@/hooks/useFetch";
-import { useLoading } from "@/context/loading-context.tsx";
+import { useLoading } from "@/context/loading-context";
 
 const T = {
 	darkBg: "var(--page-bg)",

@@ -1,6 +1,6 @@
 import { Locale, Providers } from "@/app/providers";
 import { AuthProvider } from "@/context/auth-context";
-import { LoadingProvider } from "@/context/loading-context.tsx";
+import { LoadingProvider } from "@/context/loading-context";
 import { PlanProvider } from "@/context/plan-context";
 import { ThemeProvider } from "@/context/theme-context";
 

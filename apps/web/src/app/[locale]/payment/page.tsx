@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import type { PricingPlan } from "@/types/types";
-import { PaymentRoute } from "@/components/guest-only-route.tsx";
+import { PaymentRoute } from "@/components/guest-only-route";
 import { useAuth } from "@/context/auth-context";
 
 const PAYMOB_PUBLIC_KEY =
