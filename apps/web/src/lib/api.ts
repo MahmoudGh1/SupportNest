@@ -118,9 +118,11 @@ export const api = {
 		});
 		const data = await res.json();
 		if (!res.ok) {
-			const err = new Error(data.error ?? data.message ?? "Login failed") as Error & { code?: string; userId?: string };
+			const err = new Error(data.error ?? data.message ?? "Login failed") as Error & { code?: string; userId?: string; redirectTo?: string; userData?: {firstName: string; lastName: string; email: string;} };
 			err.code = data.code;
 			err.userId = data.userId;
+			err.redirectTo = data.redirectTo;
+			err.userData = data.userData;
 			throw err;
 		}
 		return { user: mapApiUser(data.result) };
@@ -245,7 +247,14 @@ export const api = {
 			credentials: "include",
 		});
 		const data = await res.json();
-		if (!res.ok) throw new Error(data.error ?? data.message ?? "Google login failed");
+		if (!res.ok) {
+			const err = new Error(data.error ?? data.message ?? "Google login failed") as Error & { code?: string; userId?: string; redirectTo?: string; userData?: {firstName: string; lastName: string; email: string;} };
+			err.code = data.code;
+			err.userId = data.userId;
+			err.redirectTo = data.redirectTo;
+			err.userData = data.userData;
+			throw err;
+		}
 
 		return { user: mapApiUser(data.result) };
 	},

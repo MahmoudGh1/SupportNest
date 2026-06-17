@@ -40,17 +40,17 @@ export const GoogleLoginController = async (req: Request, res: Response) => {
 		const tokenPayload = toTokenPayload(result);
 		const profile = await userService(tokenPayload);
 
-		// if (!profile.hasActiveSubscription && profile.role == "ORG_ADMIN" && profile.organizationId) {
-		// 	clearAuthCookies(res);
-		// 	return res.status(403).json({
-		// 		error: "Your account does not have an active subscription. Please complete payment first.",
-		// 	});
-		// }
-
 		if (profile.role === "ORG_ADMIN" && (!profile.organizationId || !profile.hasActiveSubscription)) {
 			clearAuthCookies(res);
+			const redirectTo = profile.organizationId ? "/payment" : `/register/business?userId=${profile.id}`;
 			return res.status(403).json({
 				error: profile.organizationId ? "Your account does not have an active subscription. Please complete payment first." : "Please finish setting up your business and complete payment to continue.",
+				redirectTo,
+				userData: {
+					firstName: profile.firstName,
+					lastName: profile.lastName,
+					email: profile.email,
+				},
 			});
 		}
 
@@ -82,8 +82,6 @@ export const RegisterController = async (req: Request, res: Response) => {
 			lastName,
 		});
 
-		// remove the loginService call entirely
-		// just return the userId so frontend can redirect to verify
 		return res.status(201).json(result);
 	} catch (error: unknown) {
 		if (error instanceof AppError) {
@@ -146,17 +144,17 @@ export const LoginController = async (req: Request, res: Response) => {
 		const tokenPayload = toTokenPayload(result);
 		const profile = await userService(tokenPayload);
 
-		// if (!profile.hasActiveSubscription && profile.role == "ORG_ADMIN" && profile.organizationId) {
-		// 	clearAuthCookies(res);
-		// 	return res.status(403).json({
-		// 		error: "Your account does not have an active subscription. Please complete payment first.",
-		// 	});
-		// }
-
 		if (profile.role === "ORG_ADMIN" && (!profile.organizationId || !profile.hasActiveSubscription)) {
 			clearAuthCookies(res);
+			const redirectTo = profile.organizationId ? "/payment" : `/register/business?userId=${profile.id}`;
 			return res.status(403).json({
 				error: profile.organizationId ? "Your account does not have an active subscription. Please complete payment first." : "Please finish setting up your business and complete payment to continue.",
+				redirectTo,
+				userData: {
+					firstName: profile.firstName,
+					lastName: profile.lastName,
+					email: profile.email,
+				},
 			});
 		}
 
