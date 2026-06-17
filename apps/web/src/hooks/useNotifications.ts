@@ -2,25 +2,20 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase-browser";
-import { NotificationRecipient } from "@/types/notification";
-
-// // Point this at however your app already attaches the JWT - an auth context,
-// // a cookie read, whatever you're using elsewhere. Centralizing it here means
-// // every request in this hook updates automatically if that changes.
-// function getAuthToken(): string | null {
-//   return typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-// }
+import type { NotificationRecipient } from "@/types/notification";
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? "https://api.supportnest.io/v1";
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
 
+// Your backend reads the JWT from the "accessToken" cookie, not a header -
+// so credentials: "include" is what actually authenticates this request.
+// No Authorization header needed here at all.
 async function apiFetch(path: string, options: RequestInit = {}) {
-  // const token = getAuthToken();
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      // ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
   });
@@ -52,7 +47,12 @@ export function useNotifications(userId: string | null) {
   const markAsRead = useCallback(async (id: string) => {
     setItems((prev) =>
       prev.map((n) =>
-        n.id === id ? { ...n, read_at: new Date().toISOString() } : n,
+        n.id === id
+          ? {
+              ...n,
+              readAt: new Date().toISOString(),
+            }
+          : n,
       ),
     );
     setUnreadCount((c) => Math.max(0, c - 1));
@@ -63,14 +63,13 @@ export function useNotifications(userId: string | null) {
     setItems((prev) =>
       prev.map((n) => ({
         ...n,
-        read_at: n.read_at ?? new Date().toISOString(),
+        readAt: n.readAt ?? new Date().toISOString(),
       })),
     );
     setUnreadCount(0);
     await apiFetch("/notifications/read-all", { method: "PATCH" });
   }, []);
 
-  // Initial load, once we have a user
   useEffect(() => {
     if (!userId || loadedOnce.current) return;
     loadedOnce.current = true;
@@ -78,8 +77,6 @@ export function useNotifications(userId: string | null) {
     fetchList();
   }, [userId, fetchUnreadCount, fetchList]);
 
-  // Realtime signal - content-free. The channel name must exactly match
-  // what the backend broadcasts to: `user:{userId}:notifications`.
   useEffect(() => {
     if (!userId) return;
     const channel = supabaseBrowser

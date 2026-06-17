@@ -12,20 +12,20 @@ export type NotificationType =
 
 export interface Notification {
   id: string;
-  organization_id: string | null;
+  organizationId: string | null;
   type: NotificationType;
   title: string;
   body: string;
-  action_url: string | null;
+  actionUrl: string | null;
   metadata: Record<string, unknown> | null;
-  created_at: string;
+  createdAt: string;
 }
 
 export interface NotificationRecipient {
   id: string;
-  notification_id: string;
-  user_id: string;
-  read_at: string | null;
-  created_at: string;
+  notificationId: string;
+  userId: string;
+  readAt: string | null;
+  createdAt: string;
   notification: Notification;
 }

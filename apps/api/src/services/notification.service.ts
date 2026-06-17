@@ -1,29 +1,37 @@
 import type { User } from "generated/prisma/browser.js";
+import { createClient } from "@supabase/supabase-js";
+import prisma from "src/config/prisma.js";
 
-const { prisma } = require("../lib/prisma");
-const { supabaseAdmin } = require("../lib/supabase");
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+);
 
 // Recipient resolution - one place that knows "who gets notified for what"
 
-async function getSuperAdmins() {
+type Recipient = Pick<User, "id">;
+
+export async function getSuperAdmins(): Promise<Recipient[]> {
   return prisma.user.findMany({
-    where: { role: "super_admin", is_active: true },
+    where: { role: "SUPER_ADMIN", isActive: true },
     select: { id: true },
   });
 }
 
-async function getOrgAdmins(organizationId: string) {
+export async function getOrgAdmins(
+  organizationId: string,
+): Promise<Recipient[]> {
   return prisma.user.findMany({
-    where: { organizationId, role: "org_admin", is_active: true },
+    where: { organizationId, role: "ORG_ADMIN", isActive: true },
     select: { id: true },
   });
 }
 
-function dedupe(users: User[]) {
+function dedupe(users: Recipient[]) {
   return [...new Map(users.map((u) => [u.id, u])).values()];
 }
 
-const NOTIFICATION_RULES = {
+export const NOTIFICATION_RULES = {
   // super_admin only
   organization_registered: async () => getSuperAdmins(),
   user_added: async () => getSuperAdmins(),
@@ -55,56 +63,56 @@ const NOTIFICATION_RULES = {
 
 // Content templates - one place that knows "what does this event say"
 
-const TEMPLATES = {
+export const TEMPLATES = {
   organization_registered: (ctx: any) => ({
     title: "New organization registered",
-    body: `${ctx.organization_name} just signed up.`,
-    action_url: `/admin/organizations/${ctx.organizationId}`,
+    body: `${ctx.organizationName} just signed up.`,
+    actionUrl: `/dashoard/admin/organizations/${ctx.organizationId}`,
   }),
   user_added: (ctx: any) => ({
     title: "New user added",
-    body: `${ctx.added_by_name} added a new ${ctx.role} to ${ctx.organization_name}.`,
-    action_url: `/admin/organizations/${ctx.organizationId}/users`,
+    body: `${ctx.added_by_name} added a new ${ctx.role} to ${ctx.organizationName}.`,
+    actionUrl: `/dashoard/admin/organizations/${ctx.organizationId}/users`,
   }),
   user_deleted: (ctx: any) => ({
     title: "User removed",
-    body: `${ctx.deleted_by_name} removed a user from ${ctx.organization_name}.`,
-    action_url: `/admin/organizations/${ctx.organizationId}/users`,
+    body: `${ctx.deletedByName} removed a user from ${ctx.organizationName}.`,
+    actionUrl: `/dashoard/admin/organizations/${ctx.organizationId}/users`,
   }),
   payment_completed: (ctx: any) => ({
     title: "Payment received",
-    body: `${ctx.organization_name} completed a payment of ${ctx.amount} ${ctx.currency}.`,
-    action_url: `/admin/organizations/${ctx.organizationId}/billing`,
+    body: `${ctx.organizationName} completed a payment of ${ctx.amount} ${ctx.currency}.`,
+    actionUrl: `/dashoard/admin/organizations/${ctx.organizationId}/billing`,
   }),
   contact_us_submitted: (ctx: any) => ({
     title: "New contact form submission",
     body: `${ctx.name} (${ctx.email}) reached out.`,
-    action_url: `/admin/contact-submissions/${ctx.contact_submission_id}`,
+    actionUrl: `/dashoard/admin/contact-submissions/${ctx.contactSubmissionId}`,
   }),
   ticket_escalated: (ctx: any) => ({
     title: "Ticket escalated to human",
-    body: `A ticket from ${ctx.organization_name} was escalated to a human agent.`,
-    action_url: `/tickets/${ctx.ticket_id}`,
+    body: `A ticket from ${ctx.organizationName} was escalated to a human agent.`,
+    actionUrl: `/tickets/${ctx.ticketId}`,
   }),
   csat_submitted: (ctx: any) => ({
     title: "New CSAT rating",
-    body: `Customer rated ${ctx.score}/5 on a ticket from ${ctx.organization_name}.`,
-    action_url: `/tickets/${ctx.ticket_id}`,
+    body: `Customer rated ${ctx.score}/5 on a ticket from ${ctx.organizationName}.`,
+    actionUrl: `/tickets/${ctx.ticketId}`,
   }),
   new_customer_first_contact: (ctx: any) => ({
     title: "New customer started a conversation",
     body: "A new customer reached out through your widget.",
-    action_url: `/customers/${ctx.customer_id}`,
+    actionUrl: `/customers/${ctx.customerId}`,
   }),
   organization_suspended: () => ({
     title: "Your account was suspended",
     body: "SupportNest has suspended your organization. Contact support for details.",
-    action_url: "/billing",
+    actionUrl: "/billing",
   }),
   organization_reactivated: () => ({
     title: "Your account is active again",
     body: "Your organization's access has been restored.",
-    action_url: "/dashboard",
+    actionUrl: "/dashboard",
   }),
 };
 
@@ -116,7 +124,7 @@ type NotificationType = keyof typeof TEMPLATES;
 // refetch over the authenticated REST API, so there's no RLS gap even though
 // auth here is custom JWT rather than Supabase Auth.
 
-async function processNotification(type: NotificationType, ctx: any) {
+export async function processNotification(type: NotificationType, ctx: any) {
   const buildContent = TEMPLATES[type];
   const resolveRecipients = NOTIFICATION_RULES[type];
   if (!buildContent || !resolveRecipients) {
@@ -126,7 +134,7 @@ async function processNotification(type: NotificationType, ctx: any) {
   const recipients = (await resolveRecipients(ctx)) as User[];
   if (recipients.length === 0) return null;
 
-  const { title, body, action_url } = buildContent(ctx);
+  const { title, body, actionUrl } = buildContent(ctx);
 
   const notification = await prisma.notification.create({
     data: {
@@ -134,31 +142,24 @@ async function processNotification(type: NotificationType, ctx: any) {
       type,
       title,
       body,
-      action_url,
+      actionUrl,
       metadata: ctx,
-      recipients: { create: recipients.map((u) => ({ user_id: u.id })) },
+      recipients: {
+        create: recipients.map((u) => ({ user: { connect: { id: u.id } } })),
+      },
     },
     include: { recipients: true },
   });
 
   await Promise.all(
     recipients.map((u) =>
-      supabaseAdmin
-        .channel(`user:${u.id}:notifications`)
-        .send({
-          type: "broadcast",
-          event: "new",
-          payload: { notification_id: notification.id },
-        }),
+      supabaseAdmin.channel(`user:${u.id}:notifications`).send({
+        type: "broadcast",
+        event: "new",
+        payload: { notificationId: notification.id },
+      }),
     ),
   );
 
   return notification;
 }
-
-module.exports = {
-  processNotification,
-  getSuperAdmins,
-  getOrgAdmins,
-  NOTIFICATION_RULES,
-};

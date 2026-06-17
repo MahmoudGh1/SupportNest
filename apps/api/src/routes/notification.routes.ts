@@ -1,51 +1,86 @@
+import type { Response, Router } from "express";
 import express from "express";
 import prisma from "src/config/prisma.js";
 import { authMiddleware } from "src/middlewares/auth.middleware.js";
-const router = express.Router();
+import type { AuthenticatedRequest } from "src/types/auth.types.js";
 
+const router: Router = express.Router();
 router.use(authMiddleware);
 
-// GET /notifications?status=unread&page=1&limit=20
-router.get("/", async (req, res) => {
-  const { status = "all", page = 1, limit = 20 } = req.query;
-  const where = {
-    user_id: req.user!.id,
-    ...(status === "unread" ? { read_at: null } : {}),
-  };
-  const recipients = await prisma.notificationRecipient.findMany({
-    where,
-    include: { notification: true },
-    orderBy: { created_at: "desc" },
-    skip: (Number(page) - 1) * Number(limit),
-    take: Number(limit),
-  });
-  res.json({ data: recipients });
-});
-
+// ✅ SPECIFIC routes first
 // GET /notifications/unread-count
-router.get("/unread-count", async (req, res) => {
-  const count = await prisma.notificationRecipient.count({
-    where: { user_id: req.user.id, read_at: null },
-  });
-  res.json({ count });
-});
+router.get(
+  "/unread-count",
+  async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.sub;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-// PATCH /notifications/:id/read
-router.patch("/:id/read", async (req, res) => {
-  await prisma.notificationRecipient.updateMany({
-    where: { id: req.params.id, user_id: req.user.id },
-    data: { read_at: new Date() },
-  });
-  res.json({ success: true });
-});
+    const count = await prisma.notificationRecipient.count({
+      where: { userId, readAt: null },
+    });
+    res.json({ count });
+  },
+);
 
 // PATCH /notifications/read-all
-router.patch("/read-all", async (req, res) => {
+router.patch("/read-all", async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user?.sub;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
   await prisma.notificationRecipient.updateMany({
-    where: { user_id: req.user.id, read_at: null },
-    data: { read_at: new Date() },
+    where: { userId, readAt: null },
+    data: { readAt: new Date() },
   });
   res.json({ success: true });
 });
 
-module.exports = router;
+// GET /notifications?status=unread&page=1&limit=20
+router.get("/", async (req: AuthenticatedRequest, res: Response) => {
+  const { status = "all", page = 1, limit = 20 } = req.query;
+  const userId = req.user?.sub;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+  const where = {
+    userId,
+    ...(status === "unread" ? { readAt: null } : {}),
+  };
+
+  const [recipients, total] = await Promise.all([
+    prisma.notificationRecipient.findMany({
+      where,
+      select: {
+        id: true,
+        createdAt: true,
+        readAt: true,
+        notification: {
+          select: { id: true, title: true, body: true, type: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      skip: (Number(page) - 1) * Number(limit),
+      take: Number(limit),
+    }),
+    prisma.notificationRecipient.count({ where }),
+  ]);
+
+  res.json({ data: recipients, total, page: Number(page) });
+});
+
+// ✅ DYNAMIC routes last
+// PATCH /notifications/:id/read
+router.patch("/:id/read", async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user?.sub;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+  const rawId = req.params.id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+  if (!id) return res.status(400).json({ error: "Invalid id" });
+
+  await prisma.notificationRecipient.updateMany({
+    where: { id, userId },
+    data: { readAt: new Date() },
+  });
+  res.json({ success: true });
+});
+
+export default router;
