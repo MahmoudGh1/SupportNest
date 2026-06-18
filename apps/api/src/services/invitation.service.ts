@@ -5,11 +5,9 @@ import { sendInvitationEmail, sendRevocationEmail } from "src/config/mailer.js";
 import { InvitationStatus, Role } from "generated/prisma/enums.js";
 import { generateInviteToken } from "src/utils/crypto.utils.js";
 
-
 function sevenDaysFromNow(): Date {
 	return new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 }
-
 
 export async function sendInvitationService(organizationId: string, invitedById: string, email: string): Promise<void> {
 	const org = await prisma.organization.findUnique({
@@ -44,7 +42,7 @@ export async function sendInvitationService(organizationId: string, invitedById:
 	console.log("1. Organization found");
 
 	console.log("2. Creating invitation");
-	
+
 	await prisma.invitation.create({
 		data: {
 			organizationId,
@@ -62,10 +60,11 @@ export async function sendInvitationService(organizationId: string, invitedById:
 
 	const inviterName = `${inviter.firstName} ${inviter.lastName}`;
 	// await sendInvitationEmail(email, org.name, inviterName, token)
-	sendInvitationEmail(email,org.name,inviterName,token).catch(err => {console.error("Invitation email failed:", err)});
+	sendInvitationEmail(email, org.name, inviterName, token).catch((err) => {
+		console.error("Invitation email failed:", err);
+	});
 	console.log("5. Email sent");
 }
-
 
 export async function validateInvitationService(token: string) {
 	const invitation = await prisma.invitation.findUnique({
@@ -84,15 +83,14 @@ export async function validateInvitationService(token: string) {
 		throw new AppError("This invitation has expired", 410);
 	}
 
-    const DTO = {
+	const DTO = {
 		email: invitation.email,
 		orgName: invitation.organization.name,
 		role: invitation.role,
-    }
+	};
 
 	return DTO;
 }
-
 
 export async function acceptInvitationService(token: string, firstName: string, lastName: string, password: string) {
 	const invitation = await prisma.invitation.findUnique({
@@ -147,7 +145,6 @@ export async function acceptInvitationService(token: string, firstName: string, 
 	};
 }
 
-
 export async function getTeamService(organizationId: string) {
 	const [members, pendingInvitations] = await Promise.all([
 		prisma.user.findMany({
@@ -187,27 +184,76 @@ export async function getTeamService(organizationId: string) {
 	return { members, pendingInvitations };
 }
 
-
 export async function revokeInvitationService(invitationId: string, organizationId: string): Promise<void> {
-    const invitation = await prisma.invitation.findUnique({
-        where: { id: invitationId },
-        include: { organization: true },
-    });
+	const invitation = await prisma.invitation.findUnique({
+		where: { id: invitationId },
+		include: { organization: true },
+	});
 
-    if (!invitation || invitation.organizationId !== organizationId) {
-        throw new AppError("Invitation not found", 404);
-    }
+	if (!invitation || invitation.organizationId !== organizationId) {
+		throw new AppError("Invitation not found", 404);
+	}
 
-    if (invitation.status !== InvitationStatus.PENDING) {
-        throw new AppError("Only pending invitations can be revoked", 400);
-    }
+	if (invitation.status === InvitationStatus.ACCEPTED) {
+		throw new AppError("Cannot revoke an already accepted invitation", 400);
+	}
 
-    await prisma.invitation.update({
-        where: { id: invitationId },
-        data: { status: InvitationStatus.EXPIRED },
-    });
+	await prisma.invitation.update({
+		where: { id: invitationId },
+		data: { status: InvitationStatus.EXPIRED },
+	});
 
-    // await sendRevocationEmail(invitation.email, invitation.organization.name)
+	// await sendRevocationEmail(invitation.email, invitation.organization.name)
 	sendRevocationEmail(invitation.email, invitation.organization.name).catch(console.error);
 	return;
+}
+
+
+
+export async function acceptInvitationWithGoogleService(token: string, googleEmail: string, name: string) {
+	const invitation = await prisma.invitation.findUnique({ where: { token } });
+
+	if (!invitation) throw new AppError("Invalid invitation link", 404);
+	if (invitation.status !== InvitationStatus.PENDING) throw new AppError("This invitation is no longer valid", 410);
+	if (invitation.expiresAt < new Date()) {
+		await prisma.invitation.update({ where: { id: invitation.id }, data: { status: InvitationStatus.EXPIRED } });
+		throw new AppError("This invitation has expired", 410);
+	}
+
+	if (invitation.email.toLowerCase() !== googleEmail.toLowerCase()) {
+		throw new AppError("This Google account does not match the invited email address", 403);
+	}
+
+	const existing = await prisma.user.findUnique({ where: { email: invitation.email } });
+	if (existing) throw new AppError("An account with this email already exists", 409);
+
+	const nameParts = name.trim().split(" ");
+	const firstName = nameParts[0] ?? "";
+	const lastName = nameParts.slice(1).join(" ") ?? "";
+
+	await prisma.$transaction(async (tx) => {
+		await tx.user.create({
+			data: {
+				email: invitation.email,
+				passwordHash: "",
+				firstName,
+				lastName,
+				role: invitation.role,
+				organizationId: invitation.organizationId,
+				isActive: true,
+				isEmailVerified: true,
+				emailVerifiedAt: new Date(),
+			},
+		});
+
+		await tx.invitation.update({
+			where: { id: invitation.id },
+			data: { status: InvitationStatus.ACCEPTED, acceptedAt: new Date() },
+		});
+	});
+
+	return {
+		message: "Account created successfully. You can now log in.",
+		email: invitation.email,
+	};
 }

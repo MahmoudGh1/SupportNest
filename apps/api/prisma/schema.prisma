@@ -18,6 +18,7 @@ model Organization {
   isActive              Boolean                 @default(true)
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
+  scheduledDeletionAt   DateTime?
   notifications         Notification[]
   apiKeys               ApiKey[]
   businessApiConfig     BusinessApiConfig?
@@ -34,30 +35,32 @@ model Organization {
   tickets               Ticket[]
   toolDefinitions       ToolDefinition[]
   users                 User[]
+  businessTables        BusinessTable[]
+  notifications         Notification[]
 
   @@map("organizations")
 }
 
 model User {
-  id                     String                  @id @default(uuid()) @db.Uuid
-  organizationId         String?                 @db.Uuid
-  email                  String                  @unique
-  passwordHash           String
-  role                   Role
-  firstName              String
-  lastName               String
-  isActive               Boolean                 @default(true)
-  createdAt              DateTime                @default(now())
-  updatedAt              DateTime                @updatedAt
-  emailVerifiedAt        DateTime?
-  isEmailVerified        Boolean                 @default(false)
+  id                 String              @id @default(uuid()) @db.Uuid
+  organizationId     String?             @db.Uuid
+  email              String              @unique
+  passwordHash       String
+  role               Role
+  firstName          String
+  lastName           String
+  isActive           Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  emailVerifiedAt    DateTime?
+  isEmailVerified    Boolean             @default(false)
+  emailVerifications EmailVerification[]
+  sentInvitations    Invitation[]        @relation("SentInvitations")
+  knowledgeDocuments KnowledgeDocument[]
+  passwordResets     PasswordReset[]
+  assignedTickets    Ticket[]
+  organization       Organization?       @relation(fields: [organizationId], references: [id])
   notificationRecipients NotificationRecipient[]
-  emailVerifications     EmailVerification[]
-  sentInvitations        Invitation[]            @relation("SentInvitations")
-  knowledgeDocuments     KnowledgeDocument[]
-  passwordResets         PasswordReset[]
-  assignedTickets        Ticket[]
-  organization           Organization?           @relation(fields: [organizationId], references: [id])
 
   @@index([organizationId])
   @@map("users")
@@ -89,6 +92,7 @@ model ToolDefinition {
   description         String
   method              HttpMethod
   path                String
+  businessTables      BusinessTable[]
   documentId          String?            @db.Uuid
   parameters          Json
   responseSchema      Json
@@ -406,6 +410,44 @@ model PasswordReset {
   @@map("password_resets")
 }
 
+model BusinessTable {
+  id               String             @id @default(uuid()) @db.Uuid
+  organizationId   String             @db.Uuid
+  name             String
+  endpoint         String
+  method           HttpMethod         @default(GET)
+  toolDefinitionId String?            @db.Uuid
+  columnConfig     Json               @default("[]")
+  lastFetchedAt    DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  organization     Organization       @relation(fields: [organizationId], references: [id])
+  toolDefinition   ToolDefinition?    @relation(fields: [toolDefinitionId], references: [id])
+  rows             BusinessTableRow[]
+
+  @@index([organizationId])
+  @@map("business_tables")
+}
+
+model BusinessTableRow {
+  id             String        @id @default(uuid()) @db.Uuid
+  tableId        String        @db.Uuid
+  organizationId String        @db.Uuid
+  externalId     String?
+  rowData        Json
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  table          BusinessTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  @@index([tableId])
+  @@index([organizationId])
+  @@index([tableId, externalId])
+  @@map("business_table_rows")
+
+  @@index([token])
+  @@map("password_resets")
+}
+
 model Notification {
   id             String                  @id @default(uuid()) @db.Uuid
   organizationId String?                 @db.Uuid
@@ -421,6 +463,7 @@ model Notification {
   @@index([organizationId])
   @@index([type])
 }
+
 
 model NotificationRecipient {
   id             String       @id @default(uuid()) @db.Uuid

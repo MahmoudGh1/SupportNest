@@ -22,6 +22,7 @@ export default function ApiToolsPanel({ onToolsExtracted }: Props) {
     const [headerName, setHeaderName] = useState("x-api-key");
     const [connectStatus, setConnectStatus] = useState<PanelStatus>("idle");
     const [connectError, setConnectError] = useState("");
+    const [testEndpoint, setTestEndpoint] = useState("");
 
     // Step 2 state
     const [swaggerUrl, setSwaggerUrl] = useState("");
@@ -37,6 +38,7 @@ export default function ApiToolsPanel({ onToolsExtracted }: Props) {
                 if (cfg.baseUrl) setBaseUrl(cfg.baseUrl);
                 if (cfg.authType) setAuthType(cfg.authType as AuthType);
                 if (cfg.headerName) setHeaderName(cfg.headerName);
+                if (cfg.testEndpoint) setTestEndpoint(cfg.testEndpoint);
                 setStep(2);
             }
         }).catch(() => { });
@@ -79,9 +81,19 @@ export default function ApiToolsPanel({ onToolsExtracted }: Props) {
             setConnectError("Header name is required for API Key auth.");
             return;
         }
+        if (!testEndpoint.trim()) {
+            setConnectError("Test endpoint is required so we can verify your token.");
+            return;
+        }
         setConnectStatus("loading");
         try {
-            await api.saveApiConfig({ baseUrl, authType, authValue, headerName: authType === "API_KEY" ? headerName : undefined });
+            await api.saveApiConfig({
+                baseUrl,
+                authType,
+                authValue,
+                headerName: authType === "API_KEY" ? headerName : undefined,
+                testEndpoint: testEndpoint.trim(),
+            });
             await api.verifyApiConfig();
             setConnectStatus("success");
             setTimeout(() => setStep(2), 800);
@@ -195,6 +207,15 @@ export default function ApiToolsPanel({ onToolsExtracted }: Props) {
                             />
                         </Field>
                     )}
+
+                    <Field label="Test Endpoint" hint="A protected endpoint we'll use to verify your token e.g. /api/users/me">
+                        <input
+                            value={testEndpoint}
+                            onChange={(e) => setTestEndpoint(e.target.value)}
+                            placeholder="/api/users/me"
+                            style={inputStyle}
+                        />
+                    </Field>
 
                     <Field label={authType === "BEARER" ? "Bearer Token" : authType === "API_KEY" ? "API Key Value" : "username:password"}>
                         <input

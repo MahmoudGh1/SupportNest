@@ -227,12 +227,8 @@ msgid "Logout"
 msgstr "تسجيل خروج"
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:105
-#~ msgid "Max 20 MB · PDF only"
-#~ msgstr "الحد الأقصى 20 ميجابايت · ملفات PDF فقط"
-
-#: src/features/knowledgebase/UploadPdfPanel.tsx:105
-msgid "Max 5 MB · PDF only"
-msgstr ""
+msgid "Max 20 MB · PDF only"
+msgstr "الحد الأقصى 20 ميجابايت · ملفات PDF فقط"
 
 #: src/components/pricing/PricingHero.tsx:44
 msgid "Monthly"
@@ -268,12 +264,8 @@ msgid "Password is required."
 msgstr "كلمة المرور مطلوبة."
 
 #: src/features/knowledgebase/UploadPdfPanel.tsx:193
-#~ msgid "PDF files up to 20 MB"
-#~ msgstr "ملفات PDF بحجم يصل إلى 20 ميجابايت"
-
-#: src/features/knowledgebase/UploadPdfPanel.tsx:193
-msgid "PDF files up to 5 MB"
-msgstr ""
+msgid "PDF files up to 20 MB"
+msgstr "ملفات PDF بحجم يصل إلى 20 ميجابايت"
 
 #: src/components/Navbar.tsx:53
 #: src/components/pricing/PricingHero.tsx:17
@@ -313,10 +305,6 @@ msgstr "البحث في المستندات..."
 msgid "See How It Works"
 msgstr "شاهد كيف يعمل"
 
-#: src/app/[locale]/(auth)/login/page.tsx:444
-msgid "See Plans"
-msgstr ""
-
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:19
 #: src/components/sidebar.tsx:28
 msgid "Settings"
@@ -331,8 +319,8 @@ msgid "Sign in to your account"
 msgstr "سجّل الدخول إلى حسابك"
 
 #: src/app/[locale]/(auth)/login/page.tsx:444
-#~ msgid "Sign Up"
-#~ msgstr "إنشاء حساب"
+msgid "Sign Up"
+msgstr "إنشاء حساب"
 
 #: src/app/[locale]/(auth)/login/page.tsx:414
 msgid "Signing in…"

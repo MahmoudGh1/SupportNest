@@ -137,8 +137,8 @@ export const registerPaidService = async ({ businessName, email, password, first
 	}
 };
 
-export const completeRegistrationService = async ({ userId, businessName, planId }: { userId: string; businessName: string; planId: string; }) => {
-// export const completeRegistrationService = async ({ userId, businessName, planId, amount, currency, isAnnual }: { userId: string; businessName: string; planId: string; amount: number; currency: string; isAnnual: boolean }) => {
+export const completeRegistrationService = async ({ userId, businessName, planId }: { userId: string; businessName: string; planId: string }) => {
+	// export const completeRegistrationService = async ({ userId, businessName, planId, amount, currency, isAnnual }: { userId: string; businessName: string; planId: string; amount: number; currency: string; isAnnual: boolean }) => {
 	const user = await prisma.user.findUnique({ where: { id: userId } });
 	if (!user) throw new AppError("User not found", 404);
 	if (!user.isEmailVerified) throw new AppError("Email not verified", 403);
@@ -187,6 +187,20 @@ export const completeRegistrationService = async ({ userId, businessName, planId
 		select: { id: true, email: true, role: true, organizationId: true, firstName: true, lastName: true, isActive: true },
 	});
 };
+
+export const loginAfterPaymentService = async ({ userId, paymentId }: { userId: string; paymentId: string }) => {
+	const user = await prisma.user.findUnique({ where: { id: userId } });
+	if (!user) throw new AppError("User not found", 404);
+	if (!user.organizationId) throw new AppError("No business set up for this user", 400);
+
+	const payment = await prisma.payment.findUnique({ where: { id: paymentId } });
+	if (!payment) throw new AppError("Payment not found", 404);
+	if (payment.organizationId !== user.organizationId) throw new AppError("Payment does not belong to this account", 403);
+	if (payment.status !== PaymentStatus.SUCCEEDED) throw new AppError("Payment has not been confirmed yet", 402);
+
+	return user;
+};
+
 
 export const loginService = async ({ email, password }: LoginInput): Promise<OraganizationDataDTO> => {
 	try {
@@ -442,11 +456,11 @@ export async function resetPasswordService(token: string, newPassword: string): 
 }
 
 
-export const registerWithGoogleService = async (email: string, name?: string): Promise<{ userId: string; email: string; isNewUser: boolean }> => {
+export const registerWithGoogleService = async (email: string, name?: string): Promise<{ userId: string; email: string; isNewUser: boolean; firstName: string; lastName: string }> => {
     const existing = await prisma.user.findUnique({ where: { email } });
 
     if (existing && existing.isEmailVerified) {
-        return { userId: existing.id, email, isNewUser: false };
+        return { userId: existing.id, email, isNewUser: false, firstName: existing.firstName, lastName: existing.lastName };
     }
 
     const nameParts = (name ?? "").trim().split(" ");
@@ -467,5 +481,5 @@ export const registerWithGoogleService = async (email: string, name?: string): P
         select: { id: true, email: true },
     });
 
-    return { userId: user.id, email, isNewUser: true };
+    return { userId: user.id, email, isNewUser: true, firstName, lastName };
 };

@@ -9,36 +9,29 @@ import { Router } from "express";
 
 // Controllers
 import {
-  getOverview,
-  getOrganizations,
-  getOrganization,
-  createOrganization,
-  updateOrganization,
-  suspendOrganization,
-  activateOrganization,
-  getOrgTierStats,
-  getOrgConversationStats,
-  getOrgTicketStats,
-  getOrgCsat,
-  getOrgEscalations,
-  getGlobalTierStats,
-  getGlobalEscalations,
-  deleteConversation,
-  getOrgConversations,
-  getConversationById,
-  scheduleDeleteOrganization,
-  cancelDeleteOrganization,
-  resendDeletionEmail,
+	getOverview,
+	getOrganizations,
+	getOrganization,
+	createOrganization,
+	updateOrganization,
+	suspendOrganization,
+	activateOrganization,
+	getOrgTierStats,
+	getOrgConversationStats,
+	getOrgTicketStats,
+	getOrgCsat,
+	getOrgEscalations,
+	getGlobalTierStats,
+	getGlobalEscalations,
+	deleteConversation,
+	getOrgConversations,
+	getConversationById,
+	scheduleDeleteOrganization,
+	cancelDeleteOrganization,
+	resendDeletionEmail,
 } from "../controllers/admin-dashboard/admin.organizations.controller.js";
 
-import {
-  getOrgUsers,
-  getOrgUser,
-  createOrgUser,
-  updateOrgUser,
-  removeOrgUser,
-  getAllUsers,
-} from "../controllers/admin-dashboard/admin.users.controller.js";
+import { getOrgUsers, getOrgUser, createOrgUser, updateOrgUser, removeOrgUser, getAllUsers } from "../controllers/admin-dashboard/admin.users.controller.js";
 import { authMiddleware } from "src/middlewares/auth.middleware.js";
 import { adminMiddleware } from "src/middlewares/admin.middleware.js";
 import { transporter } from "src/utils/mailer.js";
@@ -146,17 +139,11 @@ router.get("/organizations/:organizationId/conversation-stats", getOrgConversati
 
 router.get("/organizations/:organizationId/conversations", getOrgConversations);
 
-router.get(
-  "/organizations/:organizationId/conversations/:conversationId",
-  getConversationById,
-);
+router.get("/organizations/:organizationId/conversations/:conversationId", getConversationById);
 
 router.get("/organizations/:organizationId/conversations", getOrgConversations);
 
-router.get(
-  "/organizations/:organizationId/conversations/:conversationId",
-  getConversationById,
-);
+router.get("/organizations/:organizationId/conversations/:conversationId", getConversationById);
 
 /**
  * GET /admin/organizations/:organizationId/ticket-stats
@@ -223,18 +210,12 @@ router.delete("/organizations/:organizationId/users/:userId", removeOrgUser);
  * DELETE /admin/organizations/:organizationId/conversations/:conversationId
  * Hard delete a conversation + all its messages, logs, ticket, CSAT, analytics
  */
-router.delete(
-  "/organizations/:organizationId/conversations/:conversationId",
-  deleteConversation,
-);
+router.delete("/organizations/:organizationId/conversations/:conversationId", deleteConversation);
 
 /**
  * DELETE /admin/organizations/:organizationId/conversations/:conversationId
  * Hard delete a conversation + all its messages, logs, ticket, CSAT, analytics
  */
-router.delete(
-  "/organizations/:organizationId/conversations/:conversationId",
-  deleteConversation,
-);
+router.delete("/organizations/:organizationId/conversations/:conversationId", deleteConversation);
 
 export default router;

@@ -15,13 +15,16 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 			router.replace("/login");
 			return;
 		}
-		// if (!user.onboarded) {
-		// 	router.replace("/setup");
-		// 	return;
-		// }
+
+		if (user.role === "ORG_ADMIN" && !user.hasActiveSubscription) {
+			router.replace("/payment");
+			return;
+		}
+
 	}, [user, loading, router]);
 
 	if (loading) return <PageLoader />;
 	if (!user) return null;
+	if (user.role === "ORG_ADMIN" && !user.hasActiveSubscription) return null;
 	return <>{children}</>;
 }

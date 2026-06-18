@@ -142,11 +142,11 @@ export const api = {
 		});
 		const data = await res.json();
 		if (!res.ok) {
-			const err = new Error(
-				data.error ?? data.message ?? "Login failed",
-			) as Error & { code?: string; userId?: string };
+			const err = new Error(data.error ?? data.message ?? "Login failed") as Error & { code?: string; userId?: string; redirectTo?: string; userData?: { firstName: string; lastName: string; email: string } };
 			err.code = data.code;
 			err.userId = data.userId;
+			err.redirectTo = data.redirectTo;
+			err.userData = data.userData;
 			throw err;
 		}
 		return { user: mapApiUser(data.result) };
@@ -253,9 +253,7 @@ export const api = {
 		return { user: mapApiUser(body.result) };
 	},
 
-	async registerWithGoogle(
-		idToken: string,
-	): Promise<{ userId: string; email: string; isNewUser: boolean }> {
+	async registerWithGoogle(idToken: string): Promise<{ userId: string; email: string; isNewUser: boolean; firstName: string; lastName: string }> {
 		const res = await fetch(`${BASE_URL}/auth/google-register`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -265,6 +263,25 @@ export const api = {
 		const data = await res.json();
 		if (!res.ok) throw new Error(data.error ?? "Google registration failed");
 		return data;
+	},
+
+	async getPaymentStatus(paymentId: string): Promise<{ status: string }> {
+		const res = await fetch(`${BASE_URL}/payments/status/${paymentId}`, { credentials: "include" });
+		const body = await res.json();
+		if (!res.ok) throw new Error(body.error ?? "Failed to check payment status");
+		return body;
+	},
+
+	async loginAfterPayment(userId: string, paymentId: string): Promise<LoginResponse> {
+		const res = await fetch(`${BASE_URL}/auth/login-after-payment`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify({ userId, paymentId }),
+		});
+		const body = await res.json();
+		if (!res.ok) throw new Error(body.error ?? "Could not confirm payment");
+		return { user: mapApiUser(body.result) };
 	},
 
 	async getPlans(): Promise<PricingPlan[]> {
@@ -304,8 +321,14 @@ export const api = {
 			credentials: "include",
 		});
 		const data = await res.json();
-		if (!res.ok)
-			throw new Error(data.error ?? data.message ?? "Google login failed");
+		if (!res.ok) {
+			const err = new Error(data.error ?? data.message ?? "Google login failed") as Error & { code?: string; userId?: string; redirectTo?: string; userData?: { firstName: string; lastName: string; email: string } };
+			err.code = data.code;
+			err.userId = data.userId;
+			err.redirectTo = data.redirectTo;
+			err.userData = data.userData;
+			throw err;
+		}
 
 		return { user: mapApiUser(data.result) };
 	},
@@ -740,6 +763,7 @@ export const api = {
 		baseUrl?: string;
 		authType?: string;
 		headerName?: string;
+		testEndpoint?: string;
 		isVerified?: boolean;
 		lastVerifiedAt?: string;
 		configured: boolean;
@@ -752,12 +776,7 @@ export const api = {
 		return data.id ? { ...data, configured: true } : { configured: false };
 	},
 
-	async saveApiConfig(input: {
-		baseUrl: string;
-		authType: string;
-		authValue: string;
-		headerName?: string;
-	}): Promise<{ id: string; isVerified: boolean }> {
+	async saveApiConfig(input: { baseUrl: string; authType: string; authValue: string; headerName?: string; testEndpoint?: string }): Promise<{ id: string; isVerified: boolean }> {
 		const res = await fetch(`${BASE_URL}/organizations/api-config`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -1007,6 +1026,7 @@ export const api = {
 		return data;
 	},
 	async createPaymentIntention(data: {
+		userId: string;
 		pricingId: string;
 		amountCents: number;
 		currency?: string;
@@ -1127,6 +1147,19 @@ export const api = {
 		});
 		const data = await res.json();
 		if (!res.ok) throw new Error(data.error ?? "Failed to accept invitation");
+		return data;
+	},
+
+	async acceptInvitationWithGoogle(token: string, idToken: string): Promise<{ message: string; email: string }> {
+		const res = await fetch(`${BASE_URL}/invitations/accept/${token}/google`, {
+			method: "POST",
+			credentials: "include",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ idToken }),
+		});
+		const data = await res.json();
+		console.log("acceptInvitationWithGoogle response:", res.status, data);
+		if (!res.ok) throw new Error(data.error ?? "Failed to accept invitation with Google");
 		return data;
 	},
 };

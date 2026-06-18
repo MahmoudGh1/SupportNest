@@ -1,6 +1,6 @@
 import express, { type Router } from "express";
 import { authMiddleware } from "src/middlewares/auth.middleware.js";
-import { sendInvitationController, validateInvitationController, acceptInvitationController, getTeamController, revokeInvitationController } from "src/controllers/invitation.controller.js";
+import { sendInvitationController, validateInvitationController, acceptInvitationController, getTeamController, revokeInvitationController, acceptInvitationWithGoogleController } from "src/controllers/invitation.controller.js";
 
 const invitationRouter: Router = express.Router();
 
@@ -10,5 +10,6 @@ invitationRouter.delete("/invitations/:id", authMiddleware, revokeInvitationCont
 
 invitationRouter.get("/accept/:token", validateInvitationController);
 invitationRouter.post("/accept/:token", acceptInvitationController);
+invitationRouter.post("/accept/:token/google", acceptInvitationWithGoogleController);
 
 export default invitationRouter;

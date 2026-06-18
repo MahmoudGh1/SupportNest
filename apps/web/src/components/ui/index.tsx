@@ -1,9 +1,10 @@
 "use client";
 
 import { DashboardStatsStatus, DocStatus } from "@/types/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLingui } from "@lingui/react/macro";
 import { t } from "@lingui/core/macro";
+import { useLoading } from "@/context/loading-context";
 
 // ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
 export const S = {
@@ -277,129 +278,12 @@ export function StatusBadge({ status }: { status: DashboardStatsStatus }) {
 
 // ─── PAGE LOADER ──────────────────────────────────────────────────────────────
 export function PageLoader() {
-	return (
-		<>
-			<div
-				style={{
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					height: "100vh",
-					background: S.bg,
-				}}
-			>
-				<div style={{ textAlign: "center" }}>
-					<div
-						style={{
-							width: 40,
-							height: 40,
-							borderRadius: 10,
-							background: S.purple,
-							display: "flex",
-							alignItems: "center",
-							justifyContent: "center",
-							margin: "0 auto 16px",
-						}}
-					>
-						<i
-							className="ti ti-shield-check"
-							style={{ color: "#fff", fontSize: 20 }}
-						/>
-					</div>
-					<div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
-						{[0, 1, 2].map((i) => (
-							<div
-								key={i}
-								style={{
-									width: 7,
-									height: 7,
-									borderRadius: "50%",
-									background: S.purple,
-									animation: `pulse 1.2s ${i * 0.2}s infinite`,
-								}}
-							/>
-						))}
-					</div>
-				</div>
-			</div>
-			<style>{`@keyframes pulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}`}</style>
-		</>
-	);
-}
+	const { show, hide } = useLoading();
 
-// ─── PLACEHOLDER PAGE ─────────────────────────────────────────────────────────
-export function PlaceholderPage({
-	title,
-	icon,
-	description,
-}: {
-	title: string;
-	icon: string;
-	description: string;
-}) {
-	return (
-		<div
-			style={{
-				flex: 1,
-				background: S.bg,
-				display: "flex",
-				alignItems: "center",
-				justifyContent: "center",
-			}}
-		>
-			<div style={{ textAlign: "center", maxWidth: 340 }}>
-				<div
-					style={{
-						width: 64,
-						height: 64,
-						borderRadius: 16,
-						background: S.purpleBg,
-						display: "flex",
-						alignItems: "center",
-						justifyContent: "center",
-						margin: "0 auto 16px",
-					}}
-				>
-					<i
-						className={`ti ti-${icon}`}
-						style={{ fontSize: 30, color: S.purple }}
-					/>
-				</div>
-				<h2
-					style={{
-						fontSize: 18,
-						fontWeight: 600,
-						color: S.dark,
-						margin: "0 0 8px",
-					}}
-				>
-					{title}
-				</h2>
-				<p
-					style={{
-						fontSize: 13,
-						color: S.textMuted,
-						lineHeight: 1.6,
-						margin: 0,
-					}}
-				>
-					{description}
-				</p>
-				<div style={{ marginTop: 20 }}>
-					<span
-						style={{
-							background: S.purpleBg,
-							color: S.purple,
-							fontSize: 11,
-							fontWeight: 500,
-							padding: "4px 10px",
-							borderRadius: 6,
-						}}
-					>
-						Coming in sprint 2
-					</span>
-				</div>
-			</div>
-		</div>
-	);
+	useEffect(() => {
+		show();
+		return () => hide();
+	}, [hide, show]);
+
+	return null;
 }

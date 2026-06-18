@@ -5,8 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import type { PricingPlan } from "@/types/types";
-import { PaymentRoute } from "@/components/guest-only-route.tsx";
-import { useAuth } from "@/context/auth-context";
+// import { PaymentRoute } from "@/components/guest-only-route";
+// import { useAuth } from "@/context/auth-context";
 
 const PAYMOB_PUBLIC_KEY =
 	process.env.NEXT_PUBLIC_PAYMOB_KEY ?? "egy_pk_test_24gr1hEc6j0YheiEeIh2oailmkBszFKX";
@@ -44,7 +44,12 @@ function PaymentPageContent() {
 	const [loading, setLoading] = useState(false);
 	const [pageLoading, setPageLoading] = useState(true);
 	const [error, setError] = useState("");
-	const { user } = useAuth();
+	// const { user } = useAuth();
+	const userId = searchParams.get("userId");
+
+	useEffect(() => {
+		if (!userId) router.replace("/register");
+	}, [userId, router]);
 
 	// ── Bootstrap: load plan + optionally log in ─────────────────────────────
 
@@ -134,24 +139,41 @@ function PaymentPageContent() {
 		setError("");
 
 		try {
-			const regData = {
-				firstName: user?.firstName ?? "",
-				lastName: user?.lastName ?? "",
-				email: user?.email ?? "",
-			};
+			// const regData = {
+			// 	firstName: user?.firstName ?? "",
+			// 	lastName: user?.lastName ?? "",
+			// 	email: user?.email ?? "",
+			// };
+
+			// const result = await api.createPaymentIntention({
+			// 	pricingId: dbPlan.id,
+			// 	amountCents: getTotalToday() * 100,
+			// 	currency: "EGP",
+			// 	billingData: {
+			// 		firstName: regData.firstName,
+			// 		lastName: regData.lastName,
+			// 		email: regData.email,
+			// 		phone: phoneClean,
+			// 	},
+			// });
+
+			// window.location.href = `https://accept.paymob.com/unifiedcheckout/?publicKey=${PAYMOB_PUBLIC_KEY}&clientSecret=${result.clientSecret}`;
+
+
+			if (!userId) { setError("Session expired. Please start registration again."); setLoading(false); return; }
+
+			const stored = sessionStorage.getItem("registrationData");
+			const regData = stored ? JSON.parse(stored) : { firstName: "", lastName: "", email: "" };
 
 			const result = await api.createPaymentIntention({
+				userId,
 				pricingId: dbPlan.id,
 				amountCents: getTotalToday() * 100,
 				currency: "EGP",
-				billingData: {
-					firstName: regData.firstName,
-					lastName: regData.lastName,
-					email: regData.email,
-					phone: phoneClean,
-				},
+				billingData: { ...regData, phone: phoneClean },
 			});
 
+			sessionStorage.setItem("pendingUserId", userId);
 			window.location.href = `https://accept.paymob.com/unifiedcheckout/?publicKey=${PAYMOB_PUBLIC_KEY}&clientSecret=${result.clientSecret}`;
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Failed to initialize payment");
@@ -647,10 +669,14 @@ function PaymentPageContent() {
 	);
 }
 
+// export default function PaymentPage() {
+// 	return (
+// 		<PaymentRoute>
+// 			<PaymentPageContent />
+// 		</PaymentRoute>
+// 	);
+// }
+
 export default function PaymentPage() {
-	return (
-		<PaymentRoute>
-			<PaymentPageContent />
-		</PaymentRoute>
-	);
+	return <PaymentPageContent />;
 }
