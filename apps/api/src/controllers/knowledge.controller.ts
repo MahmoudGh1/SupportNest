@@ -1,5 +1,4 @@
 import prisma from "src/config/prisma.js";
-import { uploadToCloudinary } from "src/config/uploadToCloudinary.js";
 import AppError from "src/utils/appError.js";
 import asyncHandler from "src/utils/asyncHandler.js";
 import type { Response, RequestHandler } from "express";
@@ -11,8 +10,6 @@ import {
 	buildPagination,
 	type QueryParams,
 } from "src/utils/filterBuilder.js";
-import type { KnowledgeDocumentType } from "generated/prisma/enums.js";
-import { validateFileMatchesType } from "src/utils/fileType.utils.js";
 import * as knowledgeService from "src/services/knowledge.service.js";
 
 export const uploadDocument: RequestHandler = asyncHandler(
@@ -22,7 +19,8 @@ export const uploadDocument: RequestHandler = asyncHandler(
 		const { title, type } = req.body;
 		const file = req.file;
 		if (!file) throw new AppError("No file provided", 400);
-		if (!userId || !organizationId) throw new AppError("invalid upload operation", 400);
+		if (!userId || !organizationId)
+			throw new AppError("invalid upload operation", 400);
 
 		const { document, storagePath } = await knowledgeService.uploadDocument({
 			title,
