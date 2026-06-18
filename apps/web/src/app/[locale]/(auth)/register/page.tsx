@@ -39,14 +39,41 @@ export default function RegisterPage() {
 
 	function validate(): boolean {
 		const e: Record<string, string> = {};
-		if (!form.firstName.trim()) e.firstName = "Required";
-		if (!form.lastName.trim()) e.lastName = "Required";
-		if (!form.email.trim()) e.email = "Required";
-		else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Enter a valid email";
-		if (!form.password) e.password = "Required";
-		else if (form.password.length < 8) e.password = "At least 8 characters";
-		if (form.password !== form.confirmPassword)
+		const MAX_NAME_LENGTH = 50;
+		const nameRegex = /^[a-zA-Z\s'-]+$/;
+
+		if (!form.firstName.trim()) {
+			e.firstName = "Required";
+		} else if (form.firstName.length > MAX_NAME_LENGTH) {
+			e.firstName = `Cannot exceed ${MAX_NAME_LENGTH} characters`;
+		} else if (!nameRegex.test(form.firstName)) {
+			e.firstName = "Only letters, spaces, hyphens, and apostrophes allowed";
+		}
+
+		if (!form.lastName.trim()) {
+			e.lastName = "Required";
+		} else if (form.lastName.length > MAX_NAME_LENGTH) {
+			e.lastName = `Cannot exceed ${MAX_NAME_LENGTH} characters`;
+		} else if (!nameRegex.test(form.lastName)) {
+			e.lastName = "Only letters, spaces, hyphens, and apostrophes allowed";
+		}
+
+		if (!form.email.trim()) {
+			e.email = "Required";
+		} else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(form.email)) {
+			e.email = "Enter a valid email";
+		}
+
+		if (!form.password) {
+			e.password = "Required";
+		} else if (form.password.length < 8) {
+			e.password = "At least 8 characters";
+		}
+
+		if (form.password && form.password !== form.confirmPassword) {
 			e.confirmPassword = "Passwords don't match";
+		}
+
 		setErrors(e);
 		return Object.keys(e).length === 0;
 	}
