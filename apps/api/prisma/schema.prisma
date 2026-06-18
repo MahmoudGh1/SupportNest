@@ -409,15 +409,6 @@ model PasswordReset {
   @@map("password_resets")
 }
 
-model contact_submissions {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String
-  email     String
-  company   String?
-  message   String
-  createdAt DateTime @default(now())
-}
-
 model BusinessTable {
   id               String             @id @default(uuid()) @db.Uuid
   organizationId   String             @db.Uuid
