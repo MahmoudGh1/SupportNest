@@ -246,7 +246,7 @@ export async function revokeInvitationService(
   await enqueueNotification("user_deleted", {
     organizationId: invitation.organizationId,
     organizationName: invitation.organization?.name ?? "",
-    addedByName: inviterName,
+    deletedByName: inviterName,
   });
 
   // await sendRevocationEmail(invitation.email, invitation.organization.name)

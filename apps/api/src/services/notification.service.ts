@@ -5,8 +5,10 @@ import prisma from "src/config/prisma.js";
 const supabaseAdmin = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { autoRefreshToken: false, persistSession: false } },
 );
 
+await supabaseAdmin.realtime.setAuth(process.env.SUPABASE_SERVICE_ROLE_KEY!);
 // Recipient resolution - one place that knows "who gets notified for what"
 
 type Recipient = Pick<User, "id">;
@@ -71,23 +73,23 @@ export const TEMPLATES = {
   }),
   user_added: (ctx: any) => ({
     title: "New user added",
-    body: `${ctx.added_by_name} added a new ${ctx.role} to ${ctx.organizationName}.`,
-    actionUrl: `/dashoard/admin/organizations/${ctx.organizationId}/users`,
+    body: `${ctx.addedByName ?? ctx.added_by_name ?? "Someone"} added a new ${ctx.role ?? "user"} to ${ctx.organizationName ?? "your organization"}.`,
+    actionUrl: `/dashboard/admin/organizations/${ctx.organizationId}/users`,
   }),
   user_deleted: (ctx: any) => ({
     title: "User removed",
-    body: `${ctx.deletedByName} removed a user from ${ctx.organizationName}.`,
-    actionUrl: `/dashoard/admin/organizations/${ctx.organizationId}/users`,
+    body: `${ctx.deletedByName ?? ctx.deleted_by_name ?? "Someone"} removed a user from ${ctx.organizationName ?? "your organization"}.`,
+    actionUrl: `/dashboard/admin/organizations/${ctx.organizationId}/users`,
   }),
   payment_completed: (ctx: any) => ({
     title: "Payment received",
     body: `${ctx.organizationName} completed a payment of ${ctx.amount} ${ctx.currency}.`,
-    actionUrl: `/dashoard/admin/organizations/${ctx.organizationId}/billing`,
+    actionUrl: `/dashboard/admin/organizations/${ctx.organizationId}/billing`,
   }),
   contact_us_submitted: (ctx: any) => ({
     title: "New contact form submission",
     body: `${ctx.name} (${ctx.email}) reached out.`,
-    actionUrl: `/dashoard/admin/contact-submissions/${ctx.contactSubmissionId}`,
+    actionUrl: `/dashboard/admin/contact-submissions/${ctx.contactSubmissionId}`,
   }),
   ticket_escalated: (ctx: any) => ({
     title: "Ticket escalated to human",
@@ -153,11 +155,11 @@ export async function processNotification(type: NotificationType, ctx: any) {
 
   await Promise.all(
     recipients.map((u) =>
-      supabaseAdmin.channel(`user:${u.id}:notifications`).send({
-        type: "broadcast",
-        event: "new",
-        payload: { notificationId: notification.id },
-      }),
+      supabaseAdmin
+        .channel(`user:${u.id}:notifications`, {
+          config: { broadcast: { ack: true } },
+        })
+        .httpSend("new", { notificationId: notification.id }),
     ),
   );
 

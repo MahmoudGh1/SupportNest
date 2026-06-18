@@ -6,8 +6,11 @@ import { Bell, Check } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotifications";
 import type { NotificationRecipient } from "@/types/notification";
 
-function formatRelativeTime(iso: string): string {
-  const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+function formatRelativeTime(iso: string | null | undefined): string {
+  if (!iso) return "Unknown time";
+  const diff = Date.now() - new Date(iso).getTime();
+  if (Number.isNaN(diff)) return "Unknown time";
+  const minutes = Math.floor(diff / 60000);
   if (minutes < 1) return "just now";
   if (minutes < 60) return `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);
@@ -44,9 +47,9 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   }, [open]);
 
   function handleItemClick(item: NotificationRecipient) {
-    if (!item.read_at) markAsRead(item.id);
+    if (!item.readAt) markAsRead(item.id);
     setOpen(false);
-    if (item.notification.action_url) router.push(item.notification.action_url);
+    if (item.notification.actionUrl) router.push(item.notification.actionUrl);
   }
 
   return (
@@ -106,13 +109,13 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                   type="button"
                   onClick={() => handleItemClick(item)}
                   className={`flex w-full items-start gap-2 border-b border-slate-50 px-4 py-3 text-left transition-colors last:border-0 hover:bg-slate-50 ${
-                    !item.read_at ? "bg-indigo-50/40" : ""
+                    !item.readAt ? "bg-indigo-50/40" : ""
                   }`}
                 >
-                  {!item.read_at && (
+                  {!item.readAt && (
                     <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-indigo-500" />
                   )}
-                  <div className={item.read_at ? "pl-3.5" : ""}>
+                  <div className={item.readAt ? "pl-3.5" : ""}>
                     <p className="text-sm font-medium text-slate-900">
                       {item.notification.title}
                     </p>
@@ -120,7 +123,9 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                       {item.notification.body}
                     </p>
                     <p className="mt-1 text-xs text-slate-400">
-                      {formatRelativeTime(item.notification.created_at)}
+                      {formatRelativeTime(
+                        item.notification.createdAt ?? item.createdAt,
+                      )}
                     </p>
                   </div>
                 </button>
