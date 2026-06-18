@@ -17,7 +17,7 @@ export interface AuthUser {
 export type UploadDocumentInput = {
     file: File;
     title: string;
-    type: "PDF" | "DOCX" | "TXT" | "URL";
+    type: DocType;
 };
 
 export enum Role {
@@ -96,7 +96,7 @@ export interface UpdateWidgetConfigInput {
 
 // ─── KNOWLEDGE BASE TYPES ─────────────────────────────────────────────────────
 export type DocStatus = "PROCESSING" | "READY" | "FAILED";
-export type DocType = "PDF" | "FAQ" | "CSV" | "DOCX";
+export type DocType = "PDF" | "CSV" | "DOCX";
 
 export interface KnowledgeDocument {
 	id: string;
