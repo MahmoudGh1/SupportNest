@@ -67,7 +67,7 @@ export const handleWebhookController = async (req: Request, res: Response) => {
 		// Always return 200 quickly — Paymob retries if it doesn't get 200
 		return res.status(200).json(result);
 	} catch (error: any) {
-		// Still return 200 to stop Paymob from retrying on auth failures
+		console.error("[handleWebhookController] error:", error);
 		return res.status(200).json({ received: true });
 	}
 };

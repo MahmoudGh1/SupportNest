@@ -162,8 +162,10 @@ export const handleWebhookService = async (body: any, hmacHeader: string) => {
 	const success = body.obj?.success;
 	const pending = body.obj?.pending;
 	const intentionId = body.obj?.payment_key_claims?.extra?.intention_id;
-	const organizationId = body.obj?.payment_key_claims?.extra?.extras?.organizationId;
-	const pricingId = body.obj?.payment_key_claims?.extra?.extras?.pricingId;
+	// const organizationId = body.obj?.payment_key_claims?.extra?.extras?.organizationId;
+	// const pricingId = body.obj?.payment_key_claims?.extra?.extras?.pricingId;
+	const organizationId = body.obj?.payment_key_claims?.extra?.organizationId;
+	const pricingId = body.obj?.payment_key_claims?.extra?.pricingId;
 	const transactionId = body.obj?.id?.toString();
 	const amountCents = body.obj?.amount_cents;
 
