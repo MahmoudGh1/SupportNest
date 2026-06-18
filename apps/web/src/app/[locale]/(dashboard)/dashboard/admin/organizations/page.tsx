@@ -528,7 +528,7 @@ export default function OrganizationsPage() {
 		return (
 			<div style={{ padding: "1.5rem" }}>
 				<OrganizationDetail
-					orgId={selectedOrgId}
+					organizationId={selectedOrgId}
 					onClose={() => setSelectedOrgId(null)}
 				/>
 			</div>
