@@ -80,7 +80,13 @@ export default function RegisterPage() {
 
 	async function handleGoogleRegister(idToken: string) {
 		try {
-			const { userId, email, firstName, lastName } = await api.registerWithGoogle(idToken);
+			const { userId, email, isNewUser, firstName, lastName } = await api.registerWithGoogle(idToken);
+
+			if (!isNewUser) {
+				setSubmitError("This Google account is already registered. Redirecting to login...");
+				setTimeout(() => router.push("/login"), 1500);
+				return;
+			}
 
 			sessionStorage.setItem("registrationData", JSON.stringify({
 				firstName,

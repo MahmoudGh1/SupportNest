@@ -3,6 +3,7 @@ import type { AuthenticatedRequest } from "../types/auth.types.js";
 import { sendInvitationService, validateInvitationService, acceptInvitationService, getTeamService, revokeInvitationService } from "../services/invitation.service.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import AppError from "../utils/appError.js";
+import { verifyGoogleToken } from "src/services/auth.service.js";
 
 export const sendInvitationController: RequestHandler = asyncHandler(async (req: AuthenticatedRequest, res) => {
 	const organizationId = req.user?.organizationId;
@@ -58,4 +59,16 @@ export const revokeInvitationController: RequestHandler = asyncHandler(async (re
 
 	await revokeInvitationService(id, organizationId);
 	res.status(200).json({ message: "Invitation revoked" });
+});
+
+export const acceptInvitationWithGoogleController: RequestHandler = asyncHandler(async (req, res) => {
+	const { token } = req.params;
+	const { idToken } = req.body;
+
+	if (!idToken) throw new AppError("Missing Google token", 400);
+
+	const { email, name } = await verifyGoogleToken(idToken);
+
+	const result = await acceptInvitationWithGoogleService(token, email, name ?? "");
+	res.status(201).json(result);
 });
