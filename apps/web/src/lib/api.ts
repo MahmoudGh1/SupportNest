@@ -960,6 +960,7 @@ export const api = {
 			body: JSON.stringify({ idToken }),
 		});
 		const data = await res.json();
+		console.log("acceptInvitationWithGoogle response:", res.status, data);
 		if (!res.ok) throw new Error(data.error ?? "Failed to accept invitation with Google");
 		return data;
 	},

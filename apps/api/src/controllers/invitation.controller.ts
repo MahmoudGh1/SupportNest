@@ -1,6 +1,6 @@
 import type { Response, RequestHandler } from "express";
 import type { AuthenticatedRequest } from "../types/auth.types.js";
-import { sendInvitationService, validateInvitationService, acceptInvitationService, getTeamService, revokeInvitationService } from "../services/invitation.service.js";
+import { sendInvitationService, validateInvitationService, acceptInvitationService, getTeamService, revokeInvitationService, acceptInvitationWithGoogleService } from "../services/invitation.service.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import AppError from "../utils/appError.js";
 import { verifyGoogleToken } from "src/services/auth.service.js";
