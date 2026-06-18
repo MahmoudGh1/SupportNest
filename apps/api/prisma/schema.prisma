@@ -19,7 +19,6 @@ model Organization {
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
   scheduledDeletionAt   DateTime?
-  notifications         Notification[]
   apiKeys               ApiKey[]
   businessApiConfig     BusinessApiConfig?
   conversationAnalytics ConversationAnalytics[]
@@ -443,9 +442,6 @@ model BusinessTableRow {
   @@index([organizationId])
   @@index([tableId, externalId])
   @@map("business_table_rows")
-
-  @@index([token])
-  @@map("password_resets")
 }
 
 model Notification {
