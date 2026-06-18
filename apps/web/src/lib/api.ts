@@ -951,4 +951,16 @@ export const api = {
 		if (!res.ok) throw new Error(data.error ?? "Failed to accept invitation");
 		return data;
 	},
+
+	async acceptInvitationWithGoogle(token: string, idToken: string): Promise<{ message: string; email: string }> {
+		const res = await fetch(`${BASE_URL}/invitations/accept/${token}/google`, {
+			method: "POST",
+			credentials: "include",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ idToken }),
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to accept invitation with Google");
+		return data;
+	},
 };

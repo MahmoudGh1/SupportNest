@@ -10,5 +10,6 @@ invitationRouter.delete("/invitations/:id", authMiddleware, revokeInvitationCont
 
 invitationRouter.get("/accept/:token", validateInvitationController);
 invitationRouter.post("/accept/:token", acceptInvitationController);
+invitationRouter.post("/accept/:token/google", acceptInvitationWithGoogleController);
 
 export default invitationRouter;

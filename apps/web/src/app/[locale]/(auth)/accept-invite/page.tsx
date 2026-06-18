@@ -120,16 +120,8 @@ function FormPanel() {
 
     async function handleGoogleRegister(idToken: string) {
         try {
-            const { userId, email } = await fetchWithSpinner(() => api.registerWithGoogle(idToken));
-
-
-            sessionStorage.setItem("registrationData", JSON.stringify({
-                firstName: "",
-                lastName: "",
-                email,
-            }));
-
-            router.push(`/register/business?userId=${userId}`);
+            await fetchWithSpinner(() => api.acceptInvitationWithGoogle(token, idToken));
+            router.replace("/login?invited=true");
         } catch (err) {
             setSubmitError(err instanceof Error ? err.message : "Google sign-up failed");
         }
