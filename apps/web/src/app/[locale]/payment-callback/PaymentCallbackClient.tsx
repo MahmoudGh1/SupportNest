@@ -238,51 +238,148 @@
 // }
 
 
+// "use client";
+
+// import { useEffect, useState } from "react";
+// import { useSearchParams, useRouter } from "next/navigation";
+// import { api } from "@/lib/api";
+
+// type Phase = "checking" | "success" | "failed";
+
+// export default function PaymentCallbackClient() {
+//   const params = useSearchParams();
+//   const router = useRouter();
+//   const [phase, setPhase] = useState<Phase>("checking");
+//   const [message, setMessage] = useState("Verifying your payment…");
+
+//   useEffect(() => {
+//     const success = params.get("success") === "true";
+//     const paymentId = sessionStorage.getItem("paymentId") as string
+
+
+//     if (!success) {
+//       setPhase("failed");
+//       setMessage("Payment was not completed. Redirecting…");
+//       setTimeout(() => router.replace("/"), 2000);
+//       return
+//     }
+//     api.confirmPayment(paymentId)
+//     .then(() => {
+//         sessionStorage.removeItem("paymentId");
+//         sessionStorage.removeItem("selectedPlan");
+//         setPhase("success");
+//         setMessage("Payment confirmed! Redirecting to your dashboard…");
+//         setTimeout(() => router.replace("/dashboard"), 2000);
+//     })
+//     .catch(() => {
+//         setPhase("failed");
+//         setMessage("Payment verification failed. Redirecting…");
+//         setTimeout(() => router.replace("/"), 2000);
+//     });
+//   }, [params, router]);
+
+//   const icon =
+//     phase === "success" ? "✓" : phase === "failed" ? "✕" : null;
+
+//   const iconColor =
+//     phase === "success" ? "#1D9E75" : phase === "failed" ? "#EF4444" : "#534AB7";
+
+
+
+
+
+
+
+
+
+
+
+
+
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { api } from "@/lib/api.ts";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { api } from "@/lib/api";
+import { useAuth } from "@/context/auth-context";
 
-type Phase = "checking" | "success" | "failed";
+const POLL_INTERVAL_MS = 2500;
+const MAX_ATTEMPTS = 20;
+
+type Phase = "checking" | "success" | "failed" | "timeout";
 
 export default function PaymentCallbackClient() {
-  const params = useSearchParams();
   const router = useRouter();
+  const { refreshUser } = useAuth();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [phase, setPhase] = useState<Phase>("checking");
   const [message, setMessage] = useState("Verifying your payment…");
 
-  useEffect(() => {
-    const success = params.get("success") === "true";
-    const paymentId = sessionStorage.getItem("paymentId") as string
+  const cleanup = useCallback(() => {
+    sessionStorage.removeItem("paymentId");
+    sessionStorage.removeItem("pendingUserId");
+    sessionStorage.removeItem("selectedPlan");
+    sessionStorage.removeItem("registrationData");
+  }, []);
 
+  const poll = useCallback(async function check(attempt: number) {
+    const paymentId = sessionStorage.getItem("paymentId");
+    const userId = sessionStorage.getItem("pendingUserId");
 
-    if (!success) {
+    if (!paymentId || !userId) {
       setPhase("failed");
-      setMessage("Payment was not completed. Redirecting…");
-      setTimeout(() => router.replace("/"), 2000);
-      return
+      setMessage("No pending payment found. Redirecting…");
+      timerRef.current = setTimeout(() => router.replace("/"), 1500);
+      return;
     }
-    api.confirmPayment(paymentId)
-    .then(() => {
-        sessionStorage.removeItem("paymentId");
-        sessionStorage.removeItem("selectedPlan");
+
+    try {
+      const { status } = await api.getPaymentStatus(paymentId);
+
+      if (status === "SUCCEEDED") {
+        await api.loginAfterPayment(userId, paymentId);
+        await refreshUser();
+        cleanup();
         setPhase("success");
         setMessage("Payment confirmed! Redirecting to your dashboard…");
-        setTimeout(() => router.replace("/dashboard"), 2000);
-    })
-    .catch(() => {
+        timerRef.current = setTimeout(() => router.replace("/dashboard"), 1500);
+        return;
+      }
+
+      if (status === "FAILED") {
+        cleanup();
         setPhase("failed");
-        setMessage("Payment verification failed. Redirecting…");
-        setTimeout(() => router.replace("/"), 2000);
-    });
-  }, [params, router]);
+        setMessage("Payment was not completed. Redirecting…");
+        timerRef.current = setTimeout(() => router.replace("/"), 2000);
+        return;
+      }
 
-  const icon =
-    phase === "success" ? "✓" : phase === "failed" ? "✕" : null;
+      if (attempt < MAX_ATTEMPTS) {
+        setMessage(`Waiting for payment confirmation… (${attempt}/${MAX_ATTEMPTS})`);
+        timerRef.current = setTimeout(() => void check(attempt + 1), POLL_INTERVAL_MS);
+        return;
+      }
 
-  const iconColor =
-    phase === "success" ? "#1D9E75" : phase === "failed" ? "#EF4444" : "#534AB7";
+      setPhase("timeout");
+      setMessage("Payment confirmation timed out. Please retry or contact support.");
+    } catch {
+      if (attempt < MAX_ATTEMPTS) {
+        timerRef.current = setTimeout(() => void check(attempt + 1), POLL_INTERVAL_MS);
+        return;
+      }
+      setPhase("timeout");
+      setMessage("Could not reach the server. Please retry below.");
+    }
+  }, [router, refreshUser, cleanup]);
+
+  useEffect(() => {
+    void poll(1);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [poll]);
+
+  const icon = phase === "success" ? "✓" : phase === "failed" ? "✕" : phase === "timeout" ? "!" : null;
+
+  const iconColor = phase === "success" ? "#1D9E75" : phase === "failed" || phase === "timeout" ? "#EF4444" : "#534AB7";
 
   return (
     <div

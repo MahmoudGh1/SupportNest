@@ -20,19 +20,25 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   // Regular user on admin page → needs redirect
   const regularOnAdminPage = user && !isSuperAdmin && cleanPath.startsWith("/dashboard/admin");
-
+  
   useEffect(() => {
 	if (loading) return;
 	if (!user) { router.replace("/login"); return; }
 	if (superAdminOnWrongPage) { router.replace("/dashboard/admin"); return; }
-	if (regularOnAdminPage)    { router.replace("/dashboard"); return; }
+	if (regularOnAdminPage)    { router.replace("/dashboard"); return; }  
+  if (user.role === "ORG_ADMIN" && !user.hasActiveSubscription) {
+			router.replace("/payment");
+			return;
+		}
   }, [user, loading, router, superAdminOnWrongPage, regularOnAdminPage]);
-
+  
   // Show loader while auth is resolving
   if (loading) return <PageLoader />;
 
   // Not logged in
   if (!user) return null;
+  
+  if (user.role === "ORG_ADMIN" && !user.hasActiveSubscription) return null;
 
   // ── Block render until redirect happens ──────────────────────────────────
   // This prevents the flash — children never render if a redirect is pending
@@ -41,3 +47,6 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
+
+
+

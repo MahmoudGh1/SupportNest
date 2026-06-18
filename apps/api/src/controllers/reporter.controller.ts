@@ -36,9 +36,10 @@ export const getReportsController: RequestHandler = asyncHandler(
 export const getReportByIdController: RequestHandler = asyncHandler(
 	async (req: AuthenticatedRequest, res: Response) => {
 		const organizationId = req.user?.organizationId;
-		const { id } = req.params;
+		const id = req.params.id as string | undefined;
 
 		if (!organizationId) throw new AppError("Unauthorized", 401);
+		if (!id) throw new AppError("Report ID is required", 400);
 
 		const report = await prisma.report.findUnique({
 			where: { id },

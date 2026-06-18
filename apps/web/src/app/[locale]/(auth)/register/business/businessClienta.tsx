@@ -107,12 +107,13 @@ export default function BusinessDetailsClient() {
                 isAnnual: annual,
             });
 
-            await refreshUser();
+            // await refreshUser();
 
             sessionStorage.removeItem("pendingUserId");
             sessionStorage.removeItem("pendingEmail");
 
-            router.push("/payment");
+            // router.push("/payment");
+            router.push(`/payment?userId=${userId}`);
         } catch (err) {
             setSubmitError(
                 err instanceof Error ? err.message : "Something went wrong. Please try again."

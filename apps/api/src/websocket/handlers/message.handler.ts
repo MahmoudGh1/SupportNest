@@ -20,12 +20,12 @@ export async function handleMessageSend(
 
 	// If human escalation - create a ticket
 	if (routerOutput.resolvedByTier === "HUMAN") {
-		await ticketService.createTicket(organizationId, conversationId);
 		// + enqueue reporter job here
 		await reportQueue.add("generate-report", {
 			conversationId,
 			organizationId,
 		});
+		await ticketService.createTicket(organizationId, conversationId);
 	}
 
 	const messagePayload: any = {

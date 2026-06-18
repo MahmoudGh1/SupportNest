@@ -372,6 +372,9 @@ importers:
       resend:
         specifier: ^6.12.4
         version: 6.12.4
+      supportnest-server-sdk:
+        specifier: ^1.0.1
+        version: 1.0.1
       swagger-jsdoc:
         specifier: ^6.3.0
         version: 6.3.0(openapi-types@12.1.3)
@@ -4578,6 +4581,9 @@ packages:
         optional: true
       babel-plugin-macros:
         optional: true
+
+  supportnest-server-sdk@1.0.1:
+    resolution: {integrity: sha512-Dh//WMseZwEc1/mHbnVvwlXXdH4cDfTdaDfl8yacmdrZIH8qm/gIh1W+p2EG8n7+uQpRmuFfpao6DwrZ01CKbw==}
 
   supports-color@7.2.0:
     resolution: {integrity: sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==}
@@ -8896,6 +8902,10 @@ snapshots:
     optionalDependencies:
       '@babel/core': 7.29.7
       babel-plugin-macros: 3.1.0
+
+  supportnest-server-sdk@1.0.1:
+    dependencies:
+      jose: 6.2.3
 
   supports-color@7.2.0:
     dependencies:

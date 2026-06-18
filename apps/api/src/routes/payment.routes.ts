@@ -4,6 +4,7 @@ import {
   confirmPaymentController,
   createPaymentIntentionController,
   getPaymentHistoryController,
+  getPaymentStatusController,
   handleWebhookController,
 } from "src/controllers/payment.controller.js";
 import { authMiddleware } from "src/middlewares/auth.middleware.js";
@@ -11,12 +12,13 @@ import { authMiddleware } from "src/middlewares/auth.middleware.js";
 const router: Router = express.Router();
 // Webhook — public, no auth (Paymob calls this)
 router.post("/webhook", handleWebhookController);
+router.post("/create-intention", createPaymentIntentionController);
+router.get("/status/:paymentId", getPaymentStatusController);
 
 // Protected routes
 router.use(authMiddleware);
 
 // role org_admin ==> requireRole('org_admin')
-router.post("/create-intention", createPaymentIntentionController);
 router.post("/complete", completeCheckoutController);
 router.post("/confirm", confirmPaymentController);
 router.get("/history", getPaymentHistoryController);

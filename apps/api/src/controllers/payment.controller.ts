@@ -1,19 +1,20 @@
 import type { Request, Response } from "express";
-import { completeCheckoutService, confirmPaymentService, createPaymentIntentionService, getPaymentHistoryService, handleWebhookService } from "src/services/payment.service.js";
+import { completeCheckoutService, confirmPaymentService, createPaymentIntentionService, getPaymentHistoryService, getPaymentStatusService, handleWebhookService } from "src/services/payment.service.js";
 import type { AuthenticatedRequest } from "src/types/auth.types.js";
 import AppError from "src/utils/appError.js";
 
 export const createPaymentIntentionController = async (req: AuthenticatedRequest, res: Response) => {
 	try {
 		const organizationId = req.user?.organizationId;
-		const { pricingId, amountCents, currency, billingData } = req.body;
+		const { userId, pricingId, amountCents, currency, billingData } = req.body;
 
-		if (!organizationId || !pricingId || !amountCents || !billingData) {
+		if (!userId || !pricingId || !amountCents || !billingData) {
 			return res.status(400).json({ error: "Missing required fields" });
 		}
 
 		const result = await createPaymentIntentionService({
-			organizationId,
+			userId,
+			// organizationId,
 			pricingId,
 			amountCents,
 			currency: currency || "EGP",
@@ -66,7 +67,7 @@ export const handleWebhookController = async (req: Request, res: Response) => {
 		// Always return 200 quickly — Paymob retries if it doesn't get 200
 		return res.status(200).json(result);
 	} catch (error: any) {
-		// Still return 200 to stop Paymob from retrying on auth failures
+		console.error("[handleWebhookController] error:", error);
 		return res.status(200).json({ received: true });
 	}
 };
@@ -96,3 +97,14 @@ export async function confirmPaymentController(req: Request, res: Response) {
 		return res.status(500).json({ error: "Failed to confirm payment" });
 	}
 }
+
+export const getPaymentStatusController = async (req: Request, res: Response) => {
+	try {
+		const { paymentId } = req.params;
+		const status = await getPaymentStatusService(paymentId);
+		return res.status(200).json({ status });
+	} catch (error: unknown) {
+		if (error instanceof AppError) return res.status(error.statusCode).json({ error: error.message });
+		return res.status(500).json({ error: "Internal server error" });
+	}
+};
