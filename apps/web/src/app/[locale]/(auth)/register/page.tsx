@@ -53,11 +53,11 @@ export default function RegisterPage() {
 
 	async function handleGoogleRegister(idToken: string) {
 		try {
-			const { userId, email } = await api.registerWithGoogle(idToken);
+			const { userId, email, firstName, lastName } = await api.registerWithGoogle(idToken);
 
 			sessionStorage.setItem("registrationData", JSON.stringify({
-				firstName: "",
-				lastName: "",
+				firstName,
+				lastName,
 				email,
 			}));
 
@@ -78,6 +78,12 @@ export default function RegisterPage() {
 				firstName: form.firstName,
 				lastName: form.lastName,
 			});
+
+			sessionStorage.setItem("registrationData", JSON.stringify({
+				firstName: form.firstName,
+				lastName: form.lastName,
+				email: result.email,
+			}));
 
 			// await api.sendVerification(result.userId, result.email);
 

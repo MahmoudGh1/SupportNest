@@ -118,7 +118,7 @@ export const api = {
 		});
 		const data = await res.json();
 		if (!res.ok) {
-			const err = new Error(data.error ?? data.message ?? "Login failed") as Error & { code?: string; userId?: string; redirectTo?: string; userData?: {firstName: string; lastName: string; email: string;} };
+			const err = new Error(data.error ?? data.message ?? "Login failed") as Error & { code?: string; userId?: string; redirectTo?: string; userData?: { firstName: string; lastName: string; email: string } };
 			err.code = data.code;
 			err.userId = data.userId;
 			err.redirectTo = data.redirectTo;
@@ -198,7 +198,7 @@ export const api = {
 		return { user: mapApiUser(body.result) };
 	},
 
-	async registerWithGoogle(idToken: string): Promise<{ userId: string; email: string; isNewUser: boolean }> {
+	async registerWithGoogle(idToken: string): Promise<{ userId: string; email: string; isNewUser: boolean; firstName: string; lastName: string }> {
 		const res = await fetch(`${BASE_URL}/auth/google-register`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -208,6 +208,25 @@ export const api = {
 		const data = await res.json();
 		if (!res.ok) throw new Error(data.error ?? "Google registration failed");
 		return data;
+	},
+
+	async getPaymentStatus(paymentId: string): Promise<{ status: string }> {
+		const res = await fetch(`${BASE_URL}/payments/status/${paymentId}`, { credentials: "include" });
+		const body = await res.json();
+		if (!res.ok) throw new Error(body.error ?? "Failed to check payment status");
+		return body;
+	},
+
+	async loginAfterPayment(userId: string, paymentId: string): Promise<LoginResponse> {
+		const res = await fetch(`${BASE_URL}/auth/login-after-payment`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify({ userId, paymentId }),
+		});
+		const body = await res.json();
+		if (!res.ok) throw new Error(body.error ?? "Could not confirm payment");
+		return { user: mapApiUser(body.result) };
 	},
 
 	async getPlans(): Promise<PricingPlan[]> {
@@ -248,7 +267,7 @@ export const api = {
 		});
 		const data = await res.json();
 		if (!res.ok) {
-			const err = new Error(data.error ?? data.message ?? "Google login failed") as Error & { code?: string; userId?: string; redirectTo?: string; userData?: {firstName: string; lastName: string; email: string;} };
+			const err = new Error(data.error ?? data.message ?? "Google login failed") as Error & { code?: string; userId?: string; redirectTo?: string; userData?: { firstName: string; lastName: string; email: string } };
 			err.code = data.code;
 			err.userId = data.userId;
 			err.redirectTo = data.redirectTo;
@@ -816,6 +835,7 @@ export const api = {
 		return data;
 	},
 	async createPaymentIntention(data: {
+		userId: string;
 		pricingId: string;
 		amountCents: number;
 		currency?: string;

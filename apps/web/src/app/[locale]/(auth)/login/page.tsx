@@ -155,7 +155,7 @@ function FormPanel() {
 	const [error, setError] = useState("");
 	const fetchWithSpinner = useFetch();
 	const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-	const { refreshUser } = useAuth();
+	// const { refreshUser } = useAuth();
 
 	const validate = () => {
 		const errs: Record<string, string> = {};
@@ -195,8 +195,13 @@ function FormPanel() {
 			}
 			if (e.redirectTo) {
 				setError(e.message + " You will be redirected to complete your registration...");
-				await refreshUser();
-				await new Promise(resolve => setTimeout(resolve, 2500));
+				sessionStorage.setItem("registrationData", JSON.stringify({
+					firstName: e.userData?.firstName ?? "",
+					lastName: e.userData?.lastName ?? "",
+					email: e.userData?.email ?? email,
+				}));
+				await new Promise(resolve => setTimeout(resolve, 2000));
+				router.push(e.redirectTo);
 				return;
 			}
 			setError(e instanceof Error ? e.message ?? t`Invalid email or password.` : "An unexpected error occurred.");
@@ -272,10 +277,15 @@ function FormPanel() {
 
 								router.push("/dashboard");
 							} catch (e: any) {
-								if (e?.redirectTo) {
-									setError((e.message || t`Registration incomplete.`) + " " + t`You will be redirected to continue...`);
-									await refreshUser();
-									await new Promise(resolve => setTimeout(resolve, 2500));
+								if (e.redirectTo) {
+									setError(e.message + " You will be redirected to complete your registration...");
+									sessionStorage.setItem("registrationData", JSON.stringify({
+										firstName: e.userData?.firstName ?? "",
+										lastName: e.userData?.lastName ?? "",
+										email: e.userData?.email ?? email,
+									}));
+									await new Promise(resolve => setTimeout(resolve, 2000));
+									router.push(e.redirectTo);
 									return;
 								}
 
