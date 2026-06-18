@@ -409,8 +409,8 @@ export function OrganizationDetail({ organizationId, onClose }: Props) {
 									<td style={{ padding: "16px 20px", borderBottom: `1px solid ${S.border}` }}>
 										<span style={{ 
 											fontSize: 10, 
-											background: user.role === 'admin' ? `${S.purple}10` : S.bgSoft, 
-											color: user.role === 'admin' ? S.purple : S.textMuted,
+											background: user.role === 'SUPER_ADMIN' ? `${S.purple}10` : S.bgSoft, 
+											color: user.role === 'SUPER_ADMIN' ? S.purple : S.textMuted,
 											padding: "4px 10px", 
 											borderRadius: 8, 
 											textTransform: "uppercase", 
