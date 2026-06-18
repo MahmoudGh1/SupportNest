@@ -111,6 +111,22 @@
 				loadHistory(payload.history || []);
 				setInputDisabled(false);
 				updateStatus("online");
+
+				const rating = new RatingWidget(
+					{
+						themeColor: widgetConfig.accentColor || "#6C63FF",
+						submitEndpoint: `${BASE_URL}/api/v1/widget/conversations/${conversationId}/csat`,
+					},
+					{
+						conversationId,
+						apiKey: WIDGET_KEY,
+						customerJwt: CUSTOMER_TOKEN,
+						visitorId: getOrCreateVisitorId(),
+					},
+				);
+
+				rating.init();
+
 				break;
 			}
 			case "typing": {
@@ -663,6 +679,622 @@
 		document.head.appendChild(style);
 	}
 
+	function injectRatingWidgetStyles() {
+		const style = document.createElement("style");
+		style.textContent = `
+    /* ============================================
+   RATING COMPONENT - COMPLETE STYLES
+   All classes prefixed with .rating- to avoid conflicts
+   ============================================ */
+
+/* ---------- ROOT CONTAINER ---------- */
+.rating-widget {
+	/* Position in chat flow - sits above input */
+	position: relative;
+	width: 100%;
+	max-width: 340px;
+	padding: 12px 16px 8px 16px;
+
+	/* Flex layout for trigger alignment */
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+
+	/* Visual separation from chat */
+	border-top: 1px solid rgba(0, 0, 0, 0.06);
+	margin-top: 4px;
+
+	/* Ensures proper stacking context */
+	z-index: 10;
+}
+
+/* 
+   DESIGN DECISION: Why padding + border-top?
+   - Creates natural separation from messages
+   - Feels like a new section, not intrusive
+   - The thin border is subtle but creates visual hierarchy
+*/
+
+/* ---------- TRIGGER BUTTON ---------- */
+.rating-trigger {
+	/* Pill button design */
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+
+	/* Typography */
+	font-family: inherit; /* Matches widget font */
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--rating-theme-color, #6c63ff);
+
+	/* Button styling */
+	background: rgba(108, 99, 255, 0.08);
+	border: 2px solid var(--rating-theme-color, #6c63ff);
+	border-radius: 50px; /* Pill shape */
+	padding: 8px 18px;
+
+	/* Interactive */
+	cursor: pointer;
+	transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+	/* Accessibility */
+	outline: none;
+	user-select: none;
+}
+
+/* 
+   DESIGN DECISION: Why rgba for background?
+   - Uses theme color but with transparency
+   - Creates a subtle, modern look
+   - Works on any background color
+*/
+
+.rating-trigger:hover {
+	/* Hover effect - lift and scale */
+	transform: translateY(-2px) scale(1.02);
+
+	/* Intensify background on hover */
+	background: rgba(108, 99, 255, 0.15);
+
+	/* Slightly darker border for feedback */
+	border-color: var(--rating-theme-color, #6c63ff);
+}
+
+.rating-trigger:active {
+	/* Press effect - feels tactile */
+	transform: scale(0.96);
+}
+
+.rating-trigger:focus-visible {
+	/* Focus ring for keyboard navigation */
+	box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.3);
+}
+
+.rating-trigger-icon {
+	font-size: 16px;
+	line-height: 1;
+}
+
+.rating-trigger-text {
+	line-height: 1;
+}
+
+/* 
+   DESIGN DECISION: Why cubic-bezier(0.34, 1.56, 0.64, 1)?
+   - This is a "spring-like" easing
+   - Makes the hover feel bouncy and playful
+   - 1.56 gives it slight overshoot for energy
+*/
+
+/* ---------- RATING PANEL (Hidden by default) ---------- */
+.rating-panel {
+	/* Positioning - slides from side */
+	position: absolute;
+	bottom: 80px; /* Above the trigger button */
+	right: -16px;
+	left: 16x;
+
+	/* Start hidden with animation */
+	transform: translateX(120%) scale(0.8);
+	opacity: 0;
+	pointer-events: none;
+
+	/* Transition for smooth open/close */
+	transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+	/* Z-index to overlay chat content */
+	z-index: 20;
+}
+
+/*
+   DESIGN DECISION: Why transform: translateX(120%) scale(0.8)?
+   - 120% pushes it completely off-screen to the right
+   - scale(0.8) makes it shrink slightly during animation
+   - Combined, this creates the "bounce in from side" effect
+   - opacity: 0 ensures it's invisible when closed
+   - pointer-events: none prevents interaction when hidden
+*/
+
+/* ---------- PANEL OPEN STATE ---------- */
+.rating-panel.open {
+	/* Visible state */
+	transform: translateX(0) scale(1);
+	opacity: 1;
+	pointer-events: all;
+}
+
+/*
+   DESIGN DECISION: Why separate open state?
+   - Clean state management via JS adding/removing class
+   - Transitions handle all animation automatically
+   - No JavaScript animation needed
+*/
+
+/* ---------- PANEL CONTENT ---------- */
+.rating-content {
+	/* Card design */
+	background: #ffffff;
+	border-radius: 16px;
+	padding: 20px 24px 24px 24px;
+
+	/* Shadow for depth */
+	box-shadow:
+		0 8px 40px rgba(0, 0, 0, 0.12),
+		0 2px 8px rgba(0, 0, 0, 0.06);
+
+	/* Ensures content doesn't overflow */
+	max-width: 100%;
+
+	/* Small border for definition */
+	border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/*
+   DESIGN DECISION: Why double shadow?
+   - Large shadow (8px, 40px) creates floating effect
+   - Small shadow (2px, 8px) adds micro-depth
+   - Combined looks premium and modern
+   - rgba values keep it lightweight
+*/
+
+/* ---------- HEADER ---------- */
+.rating-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 16px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.rating-header-emoji {
+	font-size: 22px;
+	line-height: 1;
+}
+
+.rating-header-text {
+	flex: 1;
+	font-size: 16px;
+	font-weight: 600;
+	color: #1a1a2e;
+	letter-spacing: -0.2px;
+}
+
+.rating-close {
+	/* Close button - subtle X */
+	background: transparent;
+	border: none;
+	font-size: 18px;
+	color: #999;
+	cursor: pointer;
+	padding: 4px 8px;
+	border-radius: 6px;
+	transition: all 0.2s ease;
+	line-height: 1;
+}
+
+.rating-close:hover {
+	background: rgba(0, 0, 0, 0.05);
+	color: #333;
+}
+
+.rating-close:focus-visible {
+	outline: 2px solid var(--rating-theme-color, #6c63ff);
+	outline-offset: 2px;
+}
+
+/*
+   DESIGN DECISION: Why border-bottom in header?
+   - Visually separates header from stars
+   - Creates clear hierarchy
+   - Subtle enough not to be distracting
+*/
+
+/* ---------- STARS CONTAINER ---------- */
+.rating-stars {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 8px;
+	padding: 4px 0;
+	margin-bottom: 12px;
+}
+
+/* ---------- INDIVIDUAL STAR ---------- */
+.star {
+	/* SVG star button */
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	padding: 4px;
+
+	/* Size and positioning */
+	width: 44px;
+	height: 44px;
+
+	/* SVG styling via color */
+	color: #d1d5db; /* Default gray */
+	transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+	/* Accessibility */
+	outline: none;
+}
+
+/*
+   DESIGN DECISION: Why 44px x 44px?
+   - Minimum touch target size (Apple HIG, Material Design)
+   - Accessible for mobile users
+   - Stars themselves are ~32px inside with padding
+*/
+
+/* ---------- STAR STATES ---------- */
+.star svg {
+	width: 100%;
+	height: 100%;
+	display: block;
+	transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.star:hover {
+	/* Slight scale up on hover */
+	transform: scale(1.15);
+}
+
+.star:hover svg {
+	/* Preview fill with theme color */
+	fill: var(--rating-theme-color, #6c63ff);
+	color: var(--rating-theme-color, #6c63ff);
+}
+
+.star.active {
+	/* Filled state */
+	transform: scale(1);
+}
+
+.star.active svg {
+	fill: var(--rating-theme-color, #6c63ff);
+	color: var(--rating-theme-color, #6c63ff);
+}
+
+.star.active:hover {
+	transform: scale(1.1);
+}
+
+.star:focus-visible {
+	outline: 2px solid var(--rating-theme-color, #6c63ff);
+	outline-offset: 4px;
+	border-radius: 50%;
+}
+
+/*
+   DESIGN DECISION: Why both fill and color?
+   - fill controls SVG interior
+   - color controls stroke (via currentColor)
+   - Both need to match for solid stars
+   - Using var(--rating-theme-color) for theming
+*/
+
+/* ---------- STAR SPARKLE ANIMATION ---------- */
+.star.sparkle svg {
+	animation: sparkle 0.6s ease forwards;
+}
+
+@keyframes sparkle {
+	0% {
+		transform: scale(1) rotate(0deg);
+	}
+	30% {
+		transform: scale(1.3) rotate(10deg);
+	}
+	60% {
+		transform: scale(0.9) rotate(-5deg);
+	}
+	100% {
+		transform: scale(1) rotate(0deg);
+	}
+}
+
+/*
+   DESIGN DECISION: Why this sparkle animation?
+   - "Playful" micro-interaction you requested
+   - Scale+rotation = energetic feel
+   - 0.6s is snappy but not rushed
+   - Ease (default) gives natural deceleration
+*/
+
+/* ---------- FEEDBACK TEXT ---------- */
+.rating-feedback {
+	text-align: center;
+	min-height: 28px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-bottom: 4px;
+}
+
+.rating-label {
+	font-size: 14px;
+	font-weight: 500;
+	color: #6b7280;
+	transition: all 0.3s ease;
+}
+
+.rating-label.highlight {
+	color: var(--rating-theme-color, #6c63ff);
+	font-weight: 600;
+	transform: scale(1.05);
+}
+
+/*
+   DESIGN DECISION: Why min-height on feedback?
+   - Prevents layout shift when text changes
+   - Keeps stars from jumping around
+   - Better UX, no sudden movements
+*/
+
+/* ---------- THANK YOU MESSAGE ---------- */
+.rating-thankyou {
+	text-align: center;
+	padding: 12px 0 4px 0;
+	animation: fadeInUp 0.5s ease;
+}
+
+.thankyou-emoji {
+	font-size: 32px;
+	display: block;
+	margin-bottom: 6px;
+}
+
+.thankyou-text {
+	display: block;
+	font-size: 18px;
+	font-weight: 600;
+	color: #1a1a2e;
+	margin-bottom: 2px;
+}
+
+.thankyou-subtext {
+	display: block;
+	font-size: 14px;
+	color: #6b7280;
+}
+
+/* ---------- ANIMATIONS ---------- */
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/*
+   DESIGN DECISION: Why separate animations?
+   - Sparkle = playful feedback on click
+   - FadeInUp = smooth thank you reveal
+   - Each serves a different purpose
+   - Easy to modify independently
+*/
+
+/* ---------- RESPONSIVE DESIGN ---------- */
+@media (max-width: 480px) {
+	.rating-widget {
+		padding: 8px 12px 6px 12px;
+	}
+
+	.rating-trigger {
+		font-size: 13px;
+		padding: 6px 14px;
+		gap: 6px;
+	}
+
+	.rating-trigger-icon {
+		font-size: 14px;
+	}
+
+	.rating-panel {
+		bottom: 70px;
+		right: 0;
+		left: 0;
+	}
+
+	.rating-content {
+		padding: 16px 16px 20px 16px;
+		border-radius: 12px;
+	}
+
+	.star {
+		width: 38px;
+		height: 38px;
+	}
+
+	.rating-header-text {
+		font-size: 15px;
+	}
+
+	.rating-header-emoji {
+		font-size: 18px;
+	}
+
+	.rating-label {
+		font-size: 13px;
+	}
+
+	.thankyou-text {
+		font-size: 16px;
+	}
+}
+
+/*
+   DESIGN DECISION: Why 480px breakpoint?
+   - Standard mobile breakpoint
+   - Covers most phones (iPhone SE to iPhone 14)
+   - Adjusts sizing for smaller screens
+   - Keeps touch targets (38px) still accessible
+*/
+
+/* ---------- DARK MODE SUPPORT ---------- */
+@media (prefers-color-scheme: dark) {
+	.rating-content {
+		background: #1f2937;
+		border-color: rgba(255, 255, 255, 0.06);
+		box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+	}
+
+	.rating-header {
+		border-bottom-color: rgba(255, 255, 255, 0.06);
+	}
+
+	.rating-header-text {
+		color: #f3f4f6;
+	}
+
+	.rating-close {
+		color: #9ca3af;
+	}
+
+	.rating-close:hover {
+		background: rgba(255, 255, 255, 0.05);
+		color: #e5e7eb;
+	}
+
+	.rating-label {
+		color: #9ca3af;
+	}
+
+	.rating-label.highlight {
+		color: var(--rating-theme-color, #818cf8);
+	}
+
+	.star {
+		color: #4b5563;
+	}
+
+	.thankyou-text {
+		color: #f3f4f6;
+	}
+
+	.thankyou-subtext {
+		color: #9ca3af;
+	}
+
+	.rating-trigger {
+		color: var(--rating-theme-color, #818cf8);
+		background: rgba(99, 102, 241, 0.12);
+	}
+
+	.rating-trigger:hover {
+		background: rgba(99, 102, 241, 0.2);
+	}
+}
+
+/*
+   DESIGN DECISION: Why dark mode support?
+   - Future-proofing for users with system dark mode
+   - Respects user preferences
+   - Uses more muted colors in dark mode
+   - The theme color is slightly adjusted for readability
+*/
+
+/* ---------- REDUCED MOTION SUPPORT ---------- */
+@media (prefers-reduced-motion: reduce) {
+	.rating-trigger,
+	.rating-panel,
+	.star,
+	.rating-label,
+	.rating-thankyou {
+		transition-duration: 0.01ms !important;
+		animation-duration: 0.01ms !important;
+	}
+
+	.rating-trigger:hover {
+		transform: none !important;
+	}
+
+	.star:hover {
+		transform: none !important;
+	}
+
+	.star.sparkle svg {
+		animation: none !important;
+	}
+}
+
+/*
+   DESIGN DECISION: Why reduced motion?
+   - Accessibility for vestibular disorders
+   - Respects user's system preferences
+   - Removes all animations and transitions
+   - Still functional, just without motion
+*/
+
+/* ---------- CSS CUSTOM PROPERTIES ---------- */
+.rating-widget {
+	--rating-theme-color: #6c63ff; /* Default fallback */
+}
+
+.rating-trigger {
+	color: var(--rating-theme-color, #6c63ff);
+	border-color: var(--rating-theme-color, #6c63ff);
+}
+
+.rating-trigger:hover {
+	border-color: var(--rating-theme-color, #6c63ff);
+}
+
+.rating-trigger:focus-visible {
+	box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.3);
+}
+
+.star:hover svg,
+.star.active svg {
+	fill: var(--rating-theme-color, #6c63ff);
+	color: var(--rating-theme-color, #6c63ff);
+}
+
+.rating-label.highlight {
+	color: var(--rating-theme-color, #6c63ff);
+}
+
+.rating-close:focus-visible {
+	outline-color: var(--rating-theme-color, #6c63ff);
+}
+
+/*
+   DESIGN DECISION: Why CSS custom properties?
+   - Theme color passed via JavaScript
+   - Using var(--rating-theme-color, #fallback)
+   - Fallback ensures it works without JS
+   - All dynamic colors use this single variable
+*/
+
+    `;
+		document.head.appendChild(style);
+	}
 	// ── 7. BUILD DOM ───────────────────────────────────────────────────────────
 	function buildDOM() {
 		document.documentElement.style.setProperty("--sn-accent", "#5b4eff");
@@ -724,7 +1356,6 @@
       </div>
 
       <div id="sn-connecting" class="sn-visible">Establishing secure connection…</div>
-
       <div id="sn-messages">
         <div id="sn-typing">
           <div class="sn-dot"></div>
@@ -732,7 +1363,46 @@
           <div class="sn-dot"></div>
         </div>
       </div>
-
+      <div class="rating-widget">
+      <button class="rating-trigger">
+        <span class="rating-trigger-icon">⭐</span>
+        <span class="rating-trigger-text">Rate this chat</span>
+      </button>
+      <div class="rating-panel">
+        <div class="rating-content">
+          <div class="rating-header">
+            <span class="rating-header-emoji">🌟</span>
+            <span class="rating-header-text">How was your experience?</span>
+            <button class="rating-close">✕</button>
+          </div>
+          <div class="rating-stars">
+            <button class="star" data-value="1" aria-label="1 star">
+              <svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="2"/></svg>
+            </button>
+            <button class="star" data-value="2" aria-label="2 stars">
+              <svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="2"/></svg>
+            </button>
+            <button class="star" data-value="3" aria-label="3 stars">
+              <svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="2"/></svg>
+            </button>
+            <button class="star" data-value="4" aria-label="4 stars">
+              <svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="2"/></svg>
+            </button>
+            <button class="star" data-value="5" aria-label="5 stars">
+              <svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="2"/></svg>
+            </button>
+          </div>
+          <div class="rating-feedback">
+            <span class="rating-label">Select a rating</span>
+          </div>
+          <div class="rating-thankyou" hidden>
+            <span class="thankyou-emoji">🎉</span>
+            <span class="thankyou-text">Thanks for your feedback!</span>
+            <span class="thankyou-subtext">We appreciate you 💙</span>
+          </div>
+        </div>
+      </div>
+    </div>
       <div id="sn-input-row">
         <div id="sn-input-wrap">
           <textarea
@@ -998,6 +1668,7 @@
 	// ── 14. BOOT ───────────────────────────────────────────────────────────────
 	function boot() {
 		injectStyles();
+		injectRatingWidgetStyles();
 		buildDOM();
 	}
 
@@ -1005,5 +1676,546 @@
 		document.addEventListener("DOMContentLoaded", boot);
 	} else {
 		boot();
+	}
+
+	// ---------------------------------------------------------- //
+	//                    Rating Widget Class
+	// ----------------------------------------------------------//
+	/**
+	 * ============================================
+	 * RATING WIDGET - CLASS-BASED COMPONENT
+	 * ============================================
+	 *
+	 * Features:
+	 * - Click to expand/collapse
+	 * - Star hover preview with labels
+	 * - Click to rate with sparkle animation
+	 * - Auto-submit to server
+	 * - Thank you message with auto-close
+	 * - Theme color injection
+	 * - Error handling
+	 *
+	 * Usage:
+	 *   const rating = new RatingWidget({
+	 *     themeColor: '#FF6B6B',
+	 *     submitEndpoint: '/api/ratings'
+	 *   });
+	 *   rating.init();
+	 * ============================================
+	 */
+
+	class RatingWidget {
+		/**
+		 * ==========================================
+		 * CONSTRUCTOR - Initialize the component
+		 * ==========================================
+		 */
+		constructor(config = {}, requestContext = {}) {
+			// Configuration with defaults
+			this.config = {
+				themeColor: config.themeColor || "#6C63FF",
+				submitEndpoint: config.submitEndpoint || "/api/ratings",
+				autoCloseDelay: config.autoCloseDelay || 2000, // 2 seconds
+				labels: config.labels || {
+					1: "Needs improvement",
+					2: "Okay",
+					3: "Good",
+					4: "Great",
+					5: "Amazing!",
+				},
+			};
+
+			// State management
+			this.state = {
+				isOpen: false,
+				selectedRating: 0,
+				isSubmitted: false,
+				isSubmitting: false,
+			};
+
+			// DOM references (populated in init)
+			this.elements = {};
+
+			// Bind methods to maintain 'this' context
+			this.handleTriggerClick = this.handleTriggerClick.bind(this);
+			this.handleStarClick = this.handleStarClick.bind(this);
+			this.handleStarHover = this.handleStarHover.bind(this);
+			this.handleStarLeave = this.handleStarLeave.bind(this);
+			this.handleClose = this.handleClose.bind(this);
+			this.handleOutsideClick = this.handleOutsideClick.bind(this);
+			this.handleEscape = this.handleEscape.bind(this);
+
+			// Request/identity context — separate from visual config
+			this.requestContext = {
+				conversationId: requestContext.conversationId || null,
+				apiKey: requestContext.apiKey || null,
+				customerJwt: requestContext.customerJwt || null,
+				visitorId: requestContext.visitorId || null,
+			};
+
+			console.log(
+				"⭐ Rating Widget initialized with theme:",
+				this.config.themeColor,
+			);
+		}
+
+		/**
+		 * ==========================================
+		 * INIT - Find DOM elements and set up event listeners
+		 * ==========================================
+		 */
+		init() {
+			// Find all required DOM elements
+			this.elements = {
+				widget: document.querySelector(".rating-widget"),
+				trigger: document.querySelector(".rating-trigger"),
+				panel: document.querySelector(".rating-panel"),
+				close: document.querySelector(".rating-close"),
+				stars: document.querySelectorAll(".star"),
+				feedback: document.querySelector(".rating-label"),
+				thankYou: document.querySelector(".rating-thankyou"),
+				content: document.querySelector(".rating-content"),
+				starsContainer: document.querySelector(".rating-stars"),
+			};
+
+			// Validate all elements exist
+			const missingElements = Object.entries(this.elements)
+				.filter(([key, el]) => !el)
+				.map(([key]) => key);
+
+			if (missingElements.length > 0) {
+				console.error("Rating Widget: Missing elements:", missingElements);
+				return;
+			}
+
+			// Set initial theme color
+			this.applyThemeColor();
+
+			// Set up event listeners
+			this.setupEventListeners();
+
+			console.log("✅ Rating Widget ready!");
+		}
+
+		/**
+		 * ==========================================
+		 * APPLY THEME COLOR - Inject CSS variable
+		 * ==========================================
+		 */
+		applyThemeColor() {
+			const root = this.elements.widget;
+			if (root) {
+				root.style.setProperty("--rating-theme-color", this.config.themeColor);
+			}
+		}
+
+		/**
+		 * ==========================================
+		 * SETUP EVENT LISTENERS
+		 * ==========================================
+		 */
+		setupEventListeners() {
+			// Trigger button
+			this.elements.trigger.addEventListener("click", this.handleTriggerClick);
+
+			// Close button
+			this.elements.close.addEventListener("click", this.handleClose);
+
+			// Star events
+			this.elements.stars.forEach((star) => {
+				star.addEventListener("click", this.handleStarClick);
+				star.addEventListener("mouseenter", this.handleStarHover);
+				star.addEventListener("mouseleave", this.handleStarLeave);
+				star.addEventListener("touchstart", this.handleStarClick, {
+					passive: true,
+				});
+			});
+
+			// Keyboard events (Escape key)
+			document.addEventListener("keydown", this.handleEscape);
+
+			// Click outside to close (only when open)
+			document.addEventListener("click", this.handleOutsideClick);
+		}
+
+		/**
+		 * ==========================================
+		 * HANDLE TRIGGER CLICK - Open/close panel
+		 * ==========================================
+		 */
+		handleTriggerClick(e) {
+			e.stopPropagation();
+
+			if (this.state.isOpen) {
+				this.close();
+			} else {
+				this.open();
+			}
+		}
+
+		/**
+		 * ==========================================
+		 * OPEN PANEL - With bounce animation
+		 * ==========================================
+		 */
+		open() {
+			if (this.state.isOpen) return;
+
+			this.state.isOpen = true;
+			this.elements.panel.classList.add("open");
+
+			// Set initial feedback text
+			this.updateFeedback("Select a rating");
+
+			// Reset any previous submission state
+			this.elements.thankYou.hidden = true;
+			this.elements.starsContainer.style.display = "flex";
+			this.state.isSubmitted = false;
+
+			// Log for analytics
+			console.log("📊 Rating panel opened");
+		}
+
+		/**
+		 * ==========================================
+		 * CLOSE PANEL
+		 * ==========================================
+		 */
+		close() {
+			if (!this.state.isOpen) return;
+
+			this.state.isOpen = false;
+			this.elements.panel.classList.remove("open");
+
+			// Reset star selection
+			this.clearStars();
+			this.state.selectedRating = 0;
+
+			console.log("📊 Rating panel closed");
+		}
+
+		/**
+		 * ==========================================
+		 * HANDLE CLOSE BUTTON
+		 * ==========================================
+		 */
+		handleClose(e) {
+			e.stopPropagation();
+			this.close();
+		}
+
+		/**
+		 * ==========================================
+		 * HANDLE STAR CLICK - Select rating and submit
+		 * ==========================================
+		 */
+		async handleStarClick(e) {
+			// If already submitted, ignore clicks
+			if (this.state.isSubmitted) return;
+
+			// Get rating value from data attribute
+			const star = e.currentTarget;
+			const rating = parseInt(star.dataset.value, 10);
+
+			// If same star clicked, do nothing (already selected)
+			if (this.state.selectedRating === rating && this.state.isSubmitting) {
+				return;
+			}
+
+			// Update state
+			this.state.selectedRating = rating;
+			this.state.isSubmitting = true;
+
+			// Visual feedback - highlight selected stars
+			this.highlightStars(rating);
+
+			// Show sparkle animation on clicked star
+			this.sparkleStar(star);
+
+			// Update feedback label
+			this.updateFeedback(
+				this.config.labels[rating] || `${rating} stars`,
+				true,
+			);
+
+			// Submit the rating
+			try {
+				await this.submitRating(rating);
+
+				// Success!
+				this.state.isSubmitted = true;
+				this.state.isSubmitting = false;
+
+				// Show thank you message
+				this.showThankYou();
+
+				// Auto-close after delay
+				setTimeout(() => {
+					this.close();
+				}, this.config.autoCloseDelay);
+			} catch (error) {
+				// Handle error
+				this.state.isSubmitting = false;
+				console.error("❌ Rating submission failed:", error);
+				this.updateFeedback("Something went wrong. Please try again.", false);
+
+				// Allow retry after 1 second
+				setTimeout(() => {
+					this.updateFeedback(
+						this.config.labels[rating] || `${rating} stars`,
+						true,
+					);
+				}, 1500);
+			}
+		}
+
+		/**
+		 * ==========================================
+		 * HANDLE STAR HOVER - Preview rating
+		 * ==========================================
+		 */
+		handleStarHover(e) {
+			if (this.state.isSubmitted) return;
+
+			const star = e.currentTarget;
+			const rating = parseInt(star.dataset.value, 10);
+
+			// Preview fill on hover
+			this.previewStars(rating);
+
+			// Show label preview
+			this.updateFeedback(
+				this.config.labels[rating] || `${rating} stars`,
+				true,
+			);
+		}
+
+		/**
+		 * ==========================================
+		 * HANDLE STAR LEAVE - Reset preview
+		 * ==========================================
+		 */
+		handleStarLeave(e) {
+			if (this.state.isSubmitted) return;
+
+			// If nothing selected, reset to default
+			if (this.state.selectedRating === 0) {
+				this.clearStars();
+				this.updateFeedback("Select a rating", false);
+				return;
+			}
+
+			// Otherwise restore selection
+			this.highlightStars(this.state.selectedRating);
+			this.updateFeedback(
+				this.config.labels[this.state.selectedRating] ||
+					`${this.state.selectedRating} stars`,
+				true,
+			);
+		}
+
+		/**
+		 * ==========================================
+		 * HIGHLIGHT STARS - Fill stars up to rating
+		 * ==========================================
+		 */
+		highlightStars(rating) {
+			this.elements.stars.forEach((star) => {
+				const value = parseInt(star.dataset.value, 10);
+				if (value <= rating) {
+					star.classList.add("active");
+				} else {
+					star.classList.remove("active");
+				}
+			});
+		}
+
+		/**
+		 * ==========================================
+		 * PREVIEW STARS - Hover preview (no commit)
+		 * ==========================================
+		 */
+		previewStars(rating) {
+			this.elements.stars.forEach((star) => {
+				const value = parseInt(star.dataset.value, 10);
+				if (value <= rating) {
+					star.classList.add("active");
+				} else {
+					star.classList.remove("active");
+				}
+			});
+		}
+
+		/**
+		 * ==========================================
+		 * CLEAR STARS - Remove all active states
+		 * ==========================================
+		 */
+		clearStars() {
+			this.elements.stars.forEach((star) => {
+				star.classList.remove("active");
+			});
+		}
+
+		/**
+		 * ==========================================
+		 * SPARKLE STAR - Playful animation
+		 * ==========================================
+		 */
+		sparkleStar(star) {
+			// Remove any existing animation
+			star.classList.remove("sparkle");
+
+			// Trigger reflow to restart animation
+			void star.offsetWidth;
+
+			// Add animation
+			star.classList.add("sparkle");
+
+			// Remove class after animation completes
+			setTimeout(() => {
+				star.classList.remove("sparkle");
+			}, 600);
+		}
+
+		/**
+		 * ==========================================
+		 * UPDATE FEEDBACK - Change label text
+		 * ==========================================
+		 */
+		updateFeedback(text, isHighlighted = false) {
+			const label = this.elements.feedback;
+			if (!label) return;
+
+			label.textContent = text;
+
+			if (isHighlighted) {
+				label.classList.add("highlight");
+			} else {
+				label.classList.remove("highlight");
+			}
+		}
+
+		/**
+		 * ==========================================
+		 * SHOW THANK YOU - Replace stars with thanks
+		 * ==========================================
+		 */
+		showThankYou() {
+			// Hide stars
+			this.elements.starsContainer.style.display = "none";
+
+			// Hide feedback
+			this.elements.feedback.style.display = "none";
+
+			// Show thank you
+			this.elements.thankYou.hidden = false;
+		}
+
+		/**
+		 * ==========================================
+		 * SUBMIT RATING - Send to server
+		 * ==========================================
+		 */
+		async submitRating(rating) {
+			// Prepare payload
+			const payload = {
+				rating: rating,
+				timestamp: new Date().toISOString(),
+				source: "chat_widget",
+				userAgent: navigator.userAgent,
+				conversationId: this.requestContext.conversationId,
+				customerJwt: this.requestContext.customerJwt,
+				visitorId: this.requestContext.visitorId,
+			};
+
+			console.log("📤 Submitting rating:", payload);
+			// themeColor: widgetConfig.accentColor || "#6C63FF",
+			// 		submitEndpoint: `${BASE_URL}/conversations/${conversationId}/csat`,
+			// 		conversationId: conversationId,
+			// 		apiKey: WIDGET_KEY,
+			// 		customerJwt: CUSTOMER_TOKEN,
+			// 		visitorId: getOrCreateVisitorId(),
+			// Attempt submission
+			const response = await fetch(this.config.submitEndpoint, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Accept: "application/json",
+					"x-api-key": this.requestContext.apiKey,
+				},
+				body: JSON.stringify(payload),
+			});
+
+			// Check response
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}));
+				throw new Error(
+					`Server responded with ${response.status}: ${errorData.message || "Unknown error"}`,
+				);
+			}
+
+			const result = await response.json().catch(() => ({}));
+			console.log("✅ Rating submitted successfully:", result);
+
+			return result;
+		}
+
+		/**
+		 * ==========================================
+		 * HANDLE OUTSIDE CLICK - Close panel when clicking outside
+		 * ==========================================
+		 */
+		handleOutsideClick(e) {
+			// If panel isn't open, ignore
+			if (!this.state.isOpen) return;
+
+			// Get the widget container
+			const widget = this.elements.widget;
+
+			// Check if click is inside the widget
+			if (widget && !widget.contains(e.target)) {
+				this.close();
+			}
+		}
+
+		/**
+		 * ==========================================
+		 * HANDLE ESCAPE - Close panel on Escape key
+		 * ==========================================
+		 */
+		handleEscape(e) {
+			if (e.key === "Escape" && this.state.isOpen) {
+				this.close();
+				// Focus back on trigger
+				this.elements.trigger.focus();
+			}
+		}
+
+		/**
+		 * ==========================================
+		 * DESTROY - Clean up event listeners
+		 * (Optional - for single-page apps)
+		 * ==========================================
+		 */
+		destroy() {
+			// Remove all event listeners
+			this.elements.trigger.removeEventListener(
+				"click",
+				this.handleTriggerClick,
+			);
+			this.elements.close.removeEventListener("click", this.handleClose);
+
+			this.elements.stars.forEach((star) => {
+				star.removeEventListener("click", this.handleStarClick);
+				star.removeEventListener("mouseenter", this.handleStarHover);
+				star.removeEventListener("mouseleave", this.handleStarLeave);
+			});
+
+			document.removeEventListener("keydown", this.handleEscape);
+			document.removeEventListener("click", this.handleOutsideClick);
+
+			console.log("🗑️ Rating Widget destroyed");
+		}
 	}
 })();

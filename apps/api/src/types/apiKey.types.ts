@@ -1,5 +1,5 @@
 import type { Request } from "express";
-import type { Organization } from "generated/prisma/client.js";
+import type { Customer, Organization } from "generated/prisma/client.js";
 
 type UUID = string;
 
@@ -22,6 +22,7 @@ export interface ApiKey {
 }
 
 export interface AuthenticatedWidgetRequest extends Request {
-	apiKey?: ApiKey;
-	organization?: Organization;
+	apiKey: ApiKey;
+	organization: Organization;
+	customer: Customer;
 }
