@@ -50,16 +50,25 @@ export default function Contact() {
   const set = (k: keyof FormState) => (v: string) =>
     setForm((f) => ({ ...f, [k]: v }));
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.name || !form.email || !form.message) return;
-    setLoading(true);
-    // 🔁 Replace with real API call: POST /api/contact
-    setTimeout(() => {
-      setLoading(false);
-      setSent(true);
-    }, 1200);
-  };
+async function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+  setLoading(true);
+  const res = await fetch('http://localhost:3001/api/contact', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      name: form.name, 
+      email: form.email, 
+      company: form.company, 
+      message: form.message 
+    }),
+  });
+  setLoading(false);
+  if (res.ok) {
+    setSent(true);
+    setForm(INITIAL_FORM);
+  }
+}
 
   return (
     <section

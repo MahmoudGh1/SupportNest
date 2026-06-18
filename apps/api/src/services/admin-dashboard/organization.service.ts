@@ -8,7 +8,6 @@
  * It also exposes a transactional conversation deletion helper used by the
  * admin dashboard when removing completed conversations safely.
  */
-import prisma from "src/config/prisma.js";
 import { parseDateRange, round2, safeAvg } from "../../utils/helpers.js";
 import {
   pricingSelect,
@@ -27,15 +26,7 @@ import {
   type TierStats,
 } from "src/types/admin-dashboard.types.js";
 import type { promises } from "node:dns";
-import {
-  cancelOrgDeletion,
-  isScheduled,
-  scheduleOrgDeletion,
-} from "src/queues/deletion.queue.js";
-import {
-  sendOrgDeletionCancelledEmail,
-  sendOrgDeletionScheduledEmail,
-} from "src/utils/mailer.js";
+import prisma  from "../../config/prisma.js";
 
 // ─── Build tier stats from agent_logs + conversation_analytics ────────────────
 
@@ -436,6 +427,7 @@ export async function listOrganizations(opts: {
     slug: o.slug,
     email: o.email,
     is_active: o.isActive,
+    scheduled_deletion_at: o.scheduledDeletionAt?.toISOString() ?? null,
     plan: o.plan
       ? {
           id: o.plan.id,
@@ -503,6 +495,7 @@ export async function getOrganizationDetail(
     slug: org.slug,
     email: org.email,
     is_active: org.isActive,
+    scheduled_deletion_at: org.scheduledDeletionAt?.toISOString() ?? null,
     widget_config: org.widgetConfig as Record<string, unknown>,
     plan: org.plan
       ? {

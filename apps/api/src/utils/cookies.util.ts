@@ -1,6 +1,6 @@
 import type { CookieOptions } from "express";
 
-const isProd = process.env.NODE_ENV === "production" ? true : false;
+const isProd = process.env.NODE_ENV === "production";
 
 export const accessCookieOptions: CookieOptions = {
 	httpOnly: true,

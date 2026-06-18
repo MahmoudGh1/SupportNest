@@ -11,6 +11,8 @@ import "./workers/knowledgeWorker.js";
 import "./workers/conversationCloseWorker.js";
 import "./workers/analyticsWorker.js";
 import "./workers/reportWorker.js";
+import "./workers/orgDeletionWorker.js";
+import "./workers/analyticsWorker.js";
 import conversationsRoutes from "./routes/conversations.routes.js";
 import ApiKeyRouter from "./routes/apiKey.routes.js";
 import WidgetRouter from "./routes/widget.routes.js";
@@ -37,7 +39,7 @@ import analyticsRouter from "./routes/analytics.routes.js";
 import businessTableRoutes from "./routes/businessTable.routes.js"
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV || "development"}` });
-
+import contactRouter from "./routes/contactus.routes.js";
 const app = express();
 app.set("trust proxy", 1);
 const PORT = process.env.PORT || 3001;
@@ -104,6 +106,8 @@ app.use("/api/v1/tier2", tier2Router);
 
 app.use("/api/v1/admindashboard", AdminRoutes);
 app.use("/api/v1/analytics", analyticsRouter);
+
+app.use('/api/contact', contactRouter);
 app.use(notFoundHandler);
 
 app.use(errorHandler);

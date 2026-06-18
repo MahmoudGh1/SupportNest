@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { StatusBadge, S } from "@/components/ui";
-import { DashboardStats, DashboardStatsStatus, Tiers } from "@/types/types";
+import { DashboardStats, Tiers } from "@/types/types";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { ST } from "next/dist/shared/lib/utils";
 import { useLingui } from "@lingui/react";
+import { OnboardingEmptyState } from "@/components/Onboardingempty";
 
 function StatCard({
   label,
@@ -144,6 +145,7 @@ function TierBar({
 export default function OverviewPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const { i18n } = useLingui();
+  const router = useRouter();
 
   const TIER_LABELS = {
     TIER_1: t`Tier 1`,
@@ -151,16 +153,11 @@ export default function OverviewPage() {
     HUMAN: t`Human`,
   };
 
-  const STATUS_LABELS = {
-    ACTIVE: t`Active`,
-    ESCALATED: t`Escalated`,
-    CLOSED: t`Closed`,
-  };
-
   useEffect(() => {
     api.getDashboardStats().then(setStats);
   }, []);
 
+  // Loading
   if (!stats) {
     return (
       <div
@@ -178,6 +175,17 @@ export default function OverviewPage() {
         />
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       </div>
+    );
+  }
+
+  // Empty state — no conversations yet
+  if (stats.totalConversations === 0) {
+    return (
+      <OnboardingEmptyState
+        onNavigate={(page) =>
+          router.push(page === "dashboard" ? "/dashboard" : `/dashboard/${page}`)
+        }
+      />
     );
   }
 
@@ -201,7 +209,7 @@ export default function OverviewPage() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", // ← changed
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
           gap: 12,
           marginBottom: 20,
         }}
@@ -238,7 +246,7 @@ export default function OverviewPage() {
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
           gap: 12,
-        }} // ← changed
+        }}
       >
         {/* Recent conversations table */}
         <div
@@ -261,8 +269,6 @@ export default function OverviewPage() {
             <Trans>Recent Conversations</Trans>
           </p>
           <div style={{ overflowX: "auto" }}>
-            {" "}
-            {/* ← added */}
             <table
               style={{
                 width: "100%",
@@ -333,8 +339,7 @@ export default function OverviewPage() {
                 ))}
               </tbody>
             </table>
-          </div>{" "}
-          {/* ← closes overflowX wrapper */}
+          </div>
         </div>
 
         {/* Resolution by tier */}

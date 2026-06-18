@@ -15,11 +15,16 @@ export function OrganizationEditor({ onClose, onSuccess }: Props) {
 	const [form, setForm] = useState({
 		name: "",
 		email: "",
+		password: "",
 		slug: "",
 	});
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+		if (form.password.length < 6) {
+			setError("Password must be at least 6 characters");
+			return;
+		}
 		setLoading(true);
 		setError("");
 		try {
@@ -76,13 +81,25 @@ export function OrganizationEditor({ onClose, onSuccess }: Props) {
 					</div>
 
 					<div>
-						<label style={{ display: "block", fontSize: 12, fontWeight: 600, color: S.textSecondary, marginBottom: 6 }}>Email</label>
+						<label style={{ display: "block", fontSize: 12, fontWeight: 600, color: S.textSecondary, marginBottom: 6 }}>Admin Email</label>
 						<input
 							required
 							type="email"
 							value={form.email}
 							onChange={e => setForm({ ...form, email: e.target.value })}
 							placeholder="admin@acme.com"
+							style={{ width: "100%", height: 38, borderRadius: 8, border: `1px solid ${S.border}`, padding: "0 12px", fontSize: 14 }}
+						/>
+					</div>
+
+					<div>
+						<label style={{ display: "block", fontSize: 12, fontWeight: 600, color: S.textSecondary, marginBottom: 6 }}>Admin Password</label>
+						<input
+							required
+							type="password"
+							value={form.password}
+							onChange={e => setForm({ ...form, password: e.target.value })}
+							placeholder="••••••••"
 							style={{ width: "100%", height: 38, borderRadius: 8, border: `1px solid ${S.border}`, padding: "0 12px", fontSize: 14 }}
 						/>
 					</div>

@@ -424,13 +424,8 @@ export const api = {
 		);
 	},
 
-	async createAdminOrganization(data: {
-		name: string;
-		email: string;
-		slug: string;
-		plan_id?: string;
-		widget_config?: Partial<WidgetConfig>;
-	}): Promise<AdminOrganization> {
+	
+	async createAdminOrganization(data: { name: string; email: string; password?: string; slug: string; plan_id?: string; widget_config?: Partial<WidgetConfig> }): Promise<AdminOrganization> {
 		return adminFetch<AdminOrganization>("/organizations", {
 			method: "POST",
 			body: JSON.stringify(data),
@@ -462,6 +457,18 @@ export const api = {
 	async activateAdminOrganization(organizationId: string): Promise<void> {
 		return adminFetch<void>(`/organizations/${organizationId}/activate`, {
 			method: "PATCH",
+		});
+	},
+
+	async deleteAdminOrganization(orgId: string): Promise<void> {
+		return adminFetch<void>(`/organizations/${orgId}`, {
+			method: "DELETE",
+		});
+	},
+
+	async cancelDeleteAdminOrganization(orgId: string): Promise<void> {
+		return adminFetch<void>(`/organizations/${orgId}/cancel-delete`, {
+			method: "POST",
 		});
 	},
 
@@ -657,15 +664,60 @@ export const api = {
 		);
 	},
 
-	async getDashboardStats(): Promise<DashboardStats> {
-		return {
-			totalConversations: 0,
-			aiResolutionRate: 0,
-			avgResponseTime: "—",
-			csatScore: 0,
-			recentConversations: [],
-			resolutionByTier: { tier1: 0, tier2: 0, human: 0 },
-		};
+async getDashboardStats(): Promise<DashboardStats> {
+  const session = getSession();
+  const res = await fetch(`${BASE_URL}/reports/summary?range=7d`, {
+    credentials: "include",
+    headers: session?.token ? { Authorization: `Bearer ${session.token}` } : {},
+  });
+  
+  if (!res.ok) {
+    // fallback to zeros if request fails
+    return {
+      totalConversations: 0,
+      aiResolutionRate: 0,
+      avgResponseTime: "—",
+      csatScore: 0,
+      recentConversations: [],
+      resolutionByTier: { tier1: 0, tier2: 0, human: 0 },
+    };
+  }
+
+  const { data } = await res.json();
+
+  const total = data.totalConversations ?? 0;
+  const tier1 = data.resolutionByTier?.TIER1 ?? 0;
+  const tier2 = data.resolutionByTier?.TIER2 ?? 0;
+  const human = data.resolutionByTier?.HUMAN ?? 0;
+
+  const aiResolutionRate = total > 0
+    ? Math.round(((tier1 + tier2) / total) * 100)
+    : 0;
+
+  const avgMs = data.avgResolutionTimeMs ?? 0;
+  const avgResponseTime = avgMs > 0
+    ? avgMs < 60000
+      ? `${Math.round(avgMs / 1000)}s`
+      : `${Math.round(avgMs / 60000)}m`
+    : "—";
+
+  return {
+    totalConversations: total,
+    aiResolutionRate,
+    avgResponseTime,
+    csatScore: Math.round((data.csat?.average ?? 0) * 10) / 10,
+    recentConversations: [],
+    resolutionByTier: { tier1, tier2, human },
+  };
+},
+
+	async getAnalyticsSummary(range: string): Promise<AnalyticsSummary> {
+		const res = await fetch(`${BASE_URL}/analytics/summary?range=${range}`, {
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to fetch analytics");
+		return data.data;
 	},
 
 	// ─── KNOWLEDGE BASE ─────────────────────────────────────────────────────────
@@ -702,13 +754,19 @@ export const api = {
 	async uploadPdf(
 		input: UploadPdfInput,
 	): Promise<{ document: KnowledgeDocument }> {
+		return this.uploadDocument({ ...input, type: "PDF" });
+	},
+
+	async uploadDocument(
+		input: UploadDocumentInput,
+	): Promise<{ document: KnowledgeDocument }> {
 		const user = getSession();
 		if (!user) throw new Error("User not found");
 
 		const formData = new FormData();
 		formData.append("file", input.file);
 		formData.append("title", input.title);
-		formData.append("type", "PDF");
+		formData.append("type", input.type);
 
 		const response = await fetch(
 			`${BASE_URL}/organizations/${user.organizationId}/knowledge`,
@@ -1117,6 +1175,19 @@ export const api = {
 			throw new Error("Failed to revoke invitation");
 		}
 	},
+
+// ─── CONTACT SUBMISSIONS ─────────────────────────────────────────────────────
+
+async getContactSubmissions(): Promise<{
+    id: string;
+    name: string;
+    email: string;
+    company?: string;
+    message: string;
+    createdAt: string;
+}[]> {
+    return adminFetch("/contact-submissions");
+},
 
 	// ADD THIS after revokeInvitation
 	async validateInvitation(token: string): Promise<{

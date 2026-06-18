@@ -3,9 +3,10 @@ import { api } from "@/lib/api";
 import { formatBytes } from "@/lib/utils/utils";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useRef, useState } from "react";
+import { DocType } from "@/types/types";
 
-// ─── UPLOAD PDF PANEL ─────────────────────────────────────────────────────────
-export default function UploadPdfPanel({
+// ─── UPLOAD DOCUMENT PANEL ───────────────────────────────────────────────────
+export default function UploadDocumentPanel({
 	onUploaded,
 }: {
 	onUploaded: () => void;
@@ -17,15 +18,30 @@ export default function UploadPdfPanel({
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 
+	const allowedExtensions = [".pdf", ".csv", ".docx"];
+	const allowedTypes = [
+		"application/pdf",
+		"text/csv",
+		"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+	];
+
+	const getDocType = (file: File): DocType => {
+		if (file.name.endsWith(".pdf")) return "PDF";
+		if (file.name.endsWith(".csv")) return "CSV";
+		if (file.name.endsWith(".docx")) return "DOCX";
+		return "PDF"; // fallback
+	};
+
 	const handleDrop = (e: React.DragEvent) => {
 		e.preventDefault();
 		setDragging(false);
 		const dropped = e.dataTransfer.files[0];
-		if (dropped?.type === "application/pdf") {
+		if (dropped && (allowedTypes.includes(dropped.type) || allowedExtensions.some(ext => dropped.name.endsWith(ext)))) {
 			setFile(dropped);
-			if (!title) setTitle(dropped.name.replace(".pdf", ""));
+			if (!title) setTitle(dropped.name.replace(/\.[^/.]+$/, ""));
+			setError("");
 		} else {
-			setError("Only PDF files are supported.");
+			setError("Only PDF, CSV, and DOCX files are supported.");
 		}
 	};
 
@@ -33,27 +49,31 @@ export default function UploadPdfPanel({
 		const picked = e.target.files?.[0];
 		if (!picked) return;
 		setFile(picked);
-		if (!title) setTitle(picked.name.replace(".pdf", ""));
+		if (!title) setTitle(picked.name.replace(/\.[^/.]+$/, ""));
 		setError("");
 	};
 
 	const handleSubmit = async () => {
 		if (!file) {
-			setError("Please select a PDF file.");
+			setError("Please select a file.");
 			return;
 		}
 		if (!title.trim()) {
 			setError("Please enter a document title.");
 			return;
 		}
-		if (file.size > 5 * 1024 * 1024) {
-			setError("File must be under 5 MB.");
+		if (file.size > 10 * 1024 * 1024) {
+			setError("File must be under 10 MB.");
 			return;
 		}
 		setError("");
 		setLoading(true);
 		try {
-			await api.uploadPdf({ file, title: title.trim() });
+			await api.uploadDocument({ 
+				file, 
+				title: title.trim(),
+				type: getDocType(file)
+			});
 			setFile(null);
 			setTitle("");
 			onUploaded();
@@ -62,6 +82,14 @@ export default function UploadPdfPanel({
 		} finally {
 			setLoading(false);
 		}
+	};
+
+	const getIcon = () => {
+		if (!file) return "ti-file-upload";
+		if (file.name.endsWith(".pdf")) return "ti-file-type-pdf";
+		if (file.name.endsWith(".csv")) return "ti-file-type-csv";
+		if (file.name.endsWith(".docx")) return "ti-file-type-docx";
+		return "ti-file";
 	};
 
 	return (
@@ -86,23 +114,23 @@ export default function UploadPdfPanel({
 						width: 32,
 						height: 32,
 						borderRadius: 8,
-						background: "#FEF3C7",
+						background: "var(--color-brand-faint)",
 						display: "flex",
 						alignItems: "center",
 						justifyContent: "center",
 					}}
 				>
 					<i
-						className="ti ti-file-type-pdf"
-						style={{ fontSize: 17, color: "#92400E" }}
+						className={`ti ${getIcon()}`}
+						style={{ fontSize: 17, color: "var(--color-brand)" }}
 					/>
 				</div>
 				<div>
 					<div style={{ fontSize: 13, fontWeight: 600, color: S.dark }}>
-						<Trans>Upload PDF</Trans>
+						<Trans>Upload Document</Trans>
 					</div>
 					<div style={{ fontSize: 11, color: S.textMuted }}>
-						<Trans>Max 5 MB · PDF only</Trans>
+						<Trans>PDF, CSV, or DOCX · Max 10 MB</Trans>
 					</div>
 				</div>
 			</div>
@@ -130,7 +158,7 @@ export default function UploadPdfPanel({
 				<input
 					ref={inputRef}
 					type="file"
-					accept=".pdf"
+					accept=".pdf,.csv,.docx"
 					style={{ display: "none" }}
 					onChange={handleFileChange}
 				/>
@@ -147,8 +175,8 @@ export default function UploadPdfPanel({
 							className="ti ti-file-check"
 							style={{ fontSize: 20, color: S.green }}
 						/>
-						<div>
-							<div style={{ fontSize: 13, fontWeight: 500, color: S.dark }}>
+						<div style={{ textAlign: "left" }}>
+							<div style={{ fontSize: 13, fontWeight: 500, color: S.dark, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
 								{file.name}
 							</div>
 							<div style={{ fontSize: 11, color: S.textMuted }}>
@@ -187,10 +215,10 @@ export default function UploadPdfPanel({
 							}}
 						/>
 						<div style={{ fontSize: 13, color: S.dark, fontWeight: 500 }}>
-							<Trans>Drop PDF here or click to browse</Trans>
+							<Trans>Drop file here or click to browse</Trans>
 						</div>
 						<div style={{ fontSize: 11, color: S.textMuted, marginTop: 4 }}>
-							<Trans>PDF files up to 5 MB</Trans>
+							<Trans>Support for PDF, CSV, and DOCX</Trans>
 						</div>
 					</>
 				)}
@@ -224,7 +252,7 @@ export default function UploadPdfPanel({
 						fontFamily: "inherit",
 						color: S.dark,
 						outline: "none",
-						background: "#fafafa",
+						background: "var(--surface-elevated)",
 					}}
 					onFocus={(e) => (e.target.style.borderColor = S.purple)}
 					onBlur={(e) => (e.target.style.borderColor = S.border)}
@@ -288,7 +316,7 @@ export default function UploadPdfPanel({
 							className="ti ti-upload"
 							style={{ fontSize: 15 }}
 						/>{" "}
-						<Trans>Upload PDF</Trans>
+						<Trans>Upload Document</Trans>
 					</>
 				)}
 			</button>
