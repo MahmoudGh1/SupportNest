@@ -433,17 +433,17 @@ function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error";
     useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, [onClose]);
     return (
         <div style={{
-            position: "fixed", bottom: 24, right: 24, left: 24, mdLeft: "auto", zIndex: 999,
+            position: "fixed", bottom: 24, right: 24, left: 24, zIndex: 999,
             maxWidth: 360, marginLeft: "auto",
-            background: type === "success" ? S.greenBg : S.dangerBg,
-            border: `1px solid ${type === "success" ? S.green : S.danger}`,
-            color: type === "success" ? "#0F6E56" : S.danger,
+            background: type === "success"? S.greenBg: S.dangerBg,
+            border: `1px solid ${type === "success" ? S.green: S.danger}`,
+            color: type === "success"? "#0F6E56": S.danger,
             borderRadius: 10, padding: "12px 18px", fontSize: 13, fontWeight: 500,
             display: "flex", alignItems: "center", gap: 8,
             boxShadow: "0 4px 20px rgba(0,0,0,0.10)",
             animation: "slideUp .2s ease",
         }}>
-            <i className={`ti ti-${type === "success" ? "check" : "alert-circle"}`} style={{ fontSize: 16 }} />
+            <i className={`ti ti-${type === "success" ? "check": "alert-circle"}`} style={{ fontSize: 16 }} />
             <span style={{ flex: 1 }}>{msg}</span>
             <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", fontSize: 18 }}>×</button>
         </div>
