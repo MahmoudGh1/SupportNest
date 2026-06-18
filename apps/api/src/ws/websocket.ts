@@ -14,7 +14,7 @@ import { activeSockets } from "src/websocket/ws.map.js";
 import * as conversationService from "src/services/conversations.service.js";
 import * as widgetServerSdk from "src/config/widget-server-sdk.js";
 
-function send(socket: AuthenticatedSocket, envelope: WsEnvelope) {
+export function send(socket: AuthenticatedSocket, envelope: WsEnvelope) {
 	socket.send(JSON.stringify(envelope));
 }
 
@@ -147,7 +147,7 @@ async function connectionAuth(
 		apiKeyId: isKey.id,
 	};
 
-	/* WARNING: the conversation socket is not set in the activeSockets map */
+	activeSockets.set(socket.meta.conversationId, socket);
 
 	send(socket, {
 		type: "auth_ack",

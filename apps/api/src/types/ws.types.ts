@@ -7,7 +7,9 @@ export type WsEventType =
 	| "message_ai" // server → client: AI response
 	| "typing" // server → client: AI is processing
 	| "escalated" // server → client: escalation happened, ticket created
-	| "error"; // server → client: something went wrong
+	| "error" // server → client: something went wrong
+	| "conversation_closed"
+	| "conversation_started";
 
 export interface WsEnvelope {
 	type: WsEventType;

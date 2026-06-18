@@ -56,7 +56,11 @@ async function processReportJob(job: Job<ReportJobData>) {
 		throw new Error(`Conversation ${conversationId} not found`);
 	}
 
-	if (conversation.conversationStatus !== ConversationStatus.ACTIVE) {
+	const existingReport = await prisma.report.findUnique({
+		where: { conversationId },
+	});
+
+	if (existingReport) {
 		throw new AppError(
 			"a report is only generated once per escalated conversation",
 		);
