@@ -14,12 +14,6 @@ export interface AuthUser {
 	isEmailVerified: boolean;
 }
 
-export type UploadDocumentInput = {
-    file: File;
-    title: string;
-    type: DocType;
-};
-
 export enum Role {
 	SUPER_ADMIN = "SUPER_ADMIN",
 	ORG_ADMIN = "ORG_ADMIN",
