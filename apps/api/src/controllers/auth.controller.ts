@@ -355,7 +355,7 @@ export const GoogleRegisterController = async (req: Request, res: Response) => {
 			return res.status(error.statusCode).json({ error: error.message });
 		}
 		console.error("[GoogleRegisterController]", error);
-		return res.status(500).json({ error: "Internal server error" });
+		return res.status(500).json({ error: "Email is already registered!" });
 	}
 };
 
