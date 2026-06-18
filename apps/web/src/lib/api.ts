@@ -30,12 +30,15 @@ import {
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
 function normalizeApiBaseUrl(rawBaseUrl?: string) {
-	const fallback = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
+	const fallback =
+		process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
 	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");
 	return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
 }
 
-const BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE);
+const BASE_URL = normalizeApiBaseUrl(
+	process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE,
+);
 // const BASE_URL = "http://localhost:3001/api/v1";
 
 type ApiRecord = Record<string, unknown>;
@@ -50,15 +53,21 @@ function normalizeUserProfile(input: ApiRecord): UserProfile {
 		email: String(input.email ?? ""),
 		first_name: String(input.first_name ?? input.firstName ?? ""),
 		last_name: String(input.last_name ?? input.lastName ?? ""),
-		role: String(input.role ?? "org_admin").toLowerCase() as UserProfile["role"],
-		organization_id: String(input.organization_id ?? input.organizationId ?? ""),
+		role: String(
+			input.role ?? "org_admin",
+		).toLowerCase() as UserProfile["role"],
+		organization_id: String(
+			input.organization_id ?? input.organizationId ?? "",
+		),
 		is_active: Boolean(input.is_active ?? input.isActive ?? true),
 		created_at: String(input.created_at ?? input.createdAt ?? ""),
 	};
 }
 
 function normalizeOrgProfile(input: ApiRecord): OrgProfile {
-	const widget = (input.widget_config ?? input.widgetConfig ?? {}) as ApiRecord;
+	const widget = (input.widget_config ??
+		input.widgetConfig ??
+		{}) as ApiRecord;
 	return {
 		id: String(input.id ?? ""),
 		name: String(input.name ?? ""),
@@ -66,9 +75,13 @@ function normalizeOrgProfile(input: ApiRecord): OrgProfile {
 		email: String(input.email ?? ""),
 		widget_config: {
 			color: String(widget.color ?? widget.accentColor ?? "#534AB7"),
-			greeting: String(widget.greeting ?? widget.greetingMessage ?? "Hi! How can we help?"),
+			greeting: String(
+				widget.greeting ?? widget.greetingMessage ?? "Hi! How can we help?",
+			),
 			title: String(widget.title ?? "Support"),
-			position: (widget.position as OrgProfile["widget_config"]["position"]) ?? "bottom-right",
+			position:
+				(widget.position as OrgProfile["widget_config"]["position"]) ??
+				"bottom-right",
 		},
 		plan_id: String(input.plan_id ?? input.planId ?? ""),
 		is_active: Boolean(input.is_active ?? input.isActive ?? true),
@@ -82,10 +95,19 @@ function normalizeApiKey(input: ApiRecord): ApiKey {
 		id: String(input.id ?? ""),
 		name: String(input.name ?? "Default"),
 		key_prefix: String(input.key_prefix ?? input.keyPrefix ?? ""),
-		allowed_origins: Array.isArray(input.allowed_origins ?? input.allowedOrigins) ? ((input.allowed_origins ?? input.allowedOrigins) as string[]) : [],
+		allowed_origins: Array.isArray(
+			input.allowed_origins ?? input.allowedOrigins,
+		)
+			? ((input.allowed_origins ?? input.allowedOrigins) as string[])
+			: [],
 		is_active: Boolean(input.is_active ?? input.isActive ?? true),
-		last_used_at: typeof (input.last_used_at ?? input.lastUsedAt) === "string" ? String(input.last_used_at ?? input.lastUsedAt) : null,
-		created_at: String(input.created_at ?? input.createdAt ?? new Date().toISOString()),
+		last_used_at:
+			typeof (input.last_used_at ?? input.lastUsedAt) === "string"
+				? String(input.last_used_at ?? input.lastUsedAt)
+				: null,
+		created_at: String(
+			input.created_at ?? input.createdAt ?? new Date().toISOString(),
+		),
 		raw_key: typeof input.raw_key === "string" ? input.raw_key : undefined,
 	};
 }
@@ -103,7 +125,9 @@ async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
 	});
 	const data = await response.json().catch(() => ({}));
 	if (!response.ok) {
-		throw new Error(data?.error?.message ?? data?.message ?? "Admin request failed");
+		throw new Error(
+			data?.error?.message ?? data?.message ?? "Admin request failed",
+		);
 	}
 	return data as T;
 }
@@ -128,7 +152,14 @@ export const api = {
 		return { user: mapApiUser(data.result) };
 	},
 
-	async register(data: { email: string; password: string; firstName: string; lastName: string; businessName: string; planId: string }): Promise<LoginResponse> {
+	async register(data: {
+		email: string;
+		password: string;
+		firstName: string;
+		lastName: string;
+		businessName: string;
+		planId: string;
+	}): Promise<LoginResponse> {
 		const res = await fetch(`${BASE_URL}/auth/register`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -140,7 +171,17 @@ export const api = {
 		return body;
 	},
 
-	async registerPaid(data: { email: string; password: string; firstName: string; lastName: string; businessName: string; planId: string; amount: number; currency?: string; isAnnual: boolean }): Promise<LoginResponse> {
+	async registerPaid(data: {
+		email: string;
+		password: string;
+		firstName: string;
+		lastName: string;
+		businessName: string;
+		planId: string;
+		amount: number;
+		currency?: string;
+		isAnnual: boolean;
+	}): Promise<LoginResponse> {
 		const res = await fetch(`${BASE_URL}/auth/register-paid`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -152,7 +193,12 @@ export const api = {
 		return { user: mapApiUser(body.result) };
 	},
 
-	async registerInitial(data: { email: string; password: string; firstName: string; lastName: string }): Promise<{ userId: string; email: string; alreadyExists: boolean }> {
+	async registerInitial(data: {
+		email: string;
+		password: string;
+		firstName: string;
+		lastName: string;
+	}): Promise<{ userId: string; email: string; alreadyExists: boolean }> {
 		const res = await fetch(`${BASE_URL}/auth/register`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -172,7 +218,8 @@ export const api = {
 			credentials: "include",
 		});
 		const body = await res.json();
-		if (!res.ok) throw new Error(body.error ?? "Failed to send verification code");
+		if (!res.ok)
+			throw new Error(body.error ?? "Failed to send verification code");
 	},
 
 	async verifyEmail(userId: string, code: string): Promise<void> {
@@ -186,7 +233,14 @@ export const api = {
 		if (!res.ok) throw new Error(body.error ?? "Invalid or expired code");
 	},
 
-	async completeRegistration(data: { userId: string; businessName: string; planId: string; amount: number; currency?: string; isAnnual: boolean }): Promise<LoginResponse> {
+	async completeRegistration(data: {
+		userId: string;
+		businessName: string;
+		planId: string;
+		amount: number;
+		currency?: string;
+		isAnnual: boolean;
+	}): Promise<LoginResponse> {
 		const res = await fetch(`${BASE_URL}/auth/complete-registration`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -194,11 +248,14 @@ export const api = {
 			credentials: "include",
 		});
 		const body = await res.json();
-		if (!res.ok) throw new Error(body.error ?? "Failed to complete registration");
+		if (!res.ok)
+			throw new Error(body.error ?? "Failed to complete registration");
 		return { user: mapApiUser(body.result) };
 	},
 
-	async registerWithGoogle(idToken: string): Promise<{ userId: string; email: string; isNewUser: boolean }> {
+	async registerWithGoogle(
+		idToken: string,
+	): Promise<{ userId: string; email: string; isNewUser: boolean }> {
 		const res = await fetch(`${BASE_URL}/auth/google-register`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -279,7 +336,12 @@ export const api = {
 		if (!res.ok) throw new Error(data.error ?? "Failed to reset password");
 	},
 
-	async completePayment(data: { pricingId: string; amount: number; currency?: string; isAnnual: boolean }): Promise<{ paymentId: string; billingPeriodEnd: string }> {
+	async completePayment(data: {
+		pricingId: string;
+		amount: number;
+		currency?: string;
+		isAnnual: boolean;
+	}): Promise<{ paymentId: string; billingPeriodEnd: string }> {
 		const res = await fetch(`${BASE_URL}/payments/complete`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -310,7 +372,9 @@ export const api = {
 		});
 	},
 
-	async setupOrg(_data: OrgSetupData): Promise<{ organizationId: string } & OrgSetupData> {
+	async setupOrg(
+		_data: OrgSetupData,
+	): Promise<{ organizationId: string } & OrgSetupData> {
 		throw new Error("Organization setup is not available.");
 	},
 
@@ -318,7 +382,12 @@ export const api = {
 		return adminFetch<AdminOverview>("/overview");
 	},
 
-	async getAdminOrganizations(params?: { search?: string; is_active?: boolean | ""; page?: number; limit?: number }): Promise<AdminOrganizationsResponse> {
+	async getAdminOrganizations(params?: {
+		search?: string;
+		is_active?: boolean | "";
+		page?: number;
+		limit?: number;
+	}): Promise<AdminOrganizationsResponse> {
 		const query = new URLSearchParams();
 		if (params?.search) query.set("search", params.search);
 		if (params?.is_active !== undefined && params.is_active !== "") {
@@ -330,11 +399,21 @@ export const api = {
 		return adminFetch<AdminOrganizationsResponse>(`/organizations${suffix}`);
 	},
 
-	async getAdminOrganization(organizationId: string): Promise<AdminOrganizationDetail> {
-		return adminFetch<AdminOrganizationDetail>(`/organizations/${organizationId}`);
+	async getAdminOrganization(
+		organizationId: string,
+	): Promise<AdminOrganizationDetail> {
+		return adminFetch<AdminOrganizationDetail>(
+			`/organizations/${organizationId}`,
+		);
 	},
 
-	async createAdminOrganization(data: { name: string; email: string; slug: string; plan_id?: string; widget_config?: Partial<WidgetConfig> }): Promise<AdminOrganization> {
+	async createAdminOrganization(data: {
+		name: string;
+		email: string;
+		slug: string;
+		plan_id?: string;
+		widget_config?: Partial<WidgetConfig>;
+	}): Promise<AdminOrganization> {
 		return adminFetch<AdminOrganization>("/organizations", {
 			method: "POST",
 			body: JSON.stringify(data),
@@ -369,7 +448,10 @@ export const api = {
 		});
 	},
 
-	async getAdminGlobalTierStats(params?: { from?: string; to?: string }): Promise<AdminTierStats> {
+	async getAdminGlobalTierStats(params?: {
+		from?: string;
+		to?: string;
+	}): Promise<AdminTierStats> {
 		const query = new URLSearchParams();
 		if (params?.from) query.set("from", params.from);
 		if (params?.to) query.set("to", params.to);
@@ -377,7 +459,14 @@ export const api = {
 		return adminFetch<AdminTierStats>(`/tier-stats${suffix}`);
 	},
 
-	async getAdminGlobalEscalations(params?: { priority?: string; status?: string; from?: string; to?: string; page?: number; limit?: number }): Promise<AdminEscalationsResponse> {
+	async getAdminGlobalEscalations(params?: {
+		priority?: string;
+		status?: string;
+		from?: string;
+		to?: string;
+		page?: number;
+		limit?: number;
+	}): Promise<AdminEscalationsResponse> {
 		const query = new URLSearchParams();
 		if (params?.priority) query.set("priority", params.priority);
 		if (params?.status) query.set("status", params.status);
@@ -389,52 +478,84 @@ export const api = {
 		return adminFetch<AdminEscalationsResponse>(`/escalations${suffix}`);
 	},
 
-	async getAdminOrgTierStats(organizationId: string, params?: { from?: string; to?: string }): Promise<AdminTierStats> {
+	async getAdminOrgTierStats(
+		organizationId: string,
+		params?: { from?: string; to?: string },
+	): Promise<AdminTierStats> {
 		const query = new URLSearchParams();
 		if (params?.from) query.set("from", params.from);
 		if (params?.to) query.set("to", params.to);
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminTierStats>(`/organizations/${organizationId}/tier-stats${suffix}`);
+		return adminFetch<AdminTierStats>(
+			`/organizations/${organizationId}/tier-stats${suffix}`,
+		);
 	},
 
-	async getAdminOrgConversationStats(organizationId: string, params?: { from?: string; to?: string }): Promise<AdminConversationStats> {
+	async getAdminOrgConversationStats(
+		organizationId: string,
+		params?: { from?: string; to?: string },
+	): Promise<AdminConversationStats> {
 		const query = new URLSearchParams();
 		if (params?.from) query.set("from", params.from);
 		if (params?.to) query.set("to", params.to);
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminConversationStats>(`/organizations/${organizationId}/conversation-stats${suffix}`);
+		return adminFetch<AdminConversationStats>(
+			`/organizations/${organizationId}/conversation-stats${suffix}`,
+		);
 	},
 
-	async getAdminOrgTicketStats(organizationId: string, params?: { from?: string; to?: string }): Promise<AdminTicketStats> {
+	async getAdminOrgTicketStats(
+		organizationId: string,
+		params?: { from?: string; to?: string },
+	): Promise<AdminTicketStats> {
 		const query = new URLSearchParams();
 		if (params?.from) query.set("from", params.from);
 		if (params?.to) query.set("to", params.to);
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminTicketStats>(`/organizations/${organizationId}/ticket-stats${suffix}`);
+		return adminFetch<AdminTicketStats>(
+			`/organizations/${organizationId}/ticket-stats${suffix}`,
+		);
 	},
 
-	async getAdminOrgCsat(organizationId: string, params?: { from?: string; to?: string }): Promise<AdminCsatStats> {
+	async getAdminOrgCsat(
+		organizationId: string,
+		params?: { from?: string; to?: string },
+	): Promise<AdminCsatStats> {
 		const query = new URLSearchParams();
 		if (params?.from) query.set("from", params.from);
 		if (params?.to) query.set("to", params.to);
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminCsatStats>(`/organizations/${organizationId}/csat${suffix}`);
+		return adminFetch<AdminCsatStats>(
+			`/organizations/${organizationId}/csat${suffix}`,
+		);
 	},
 
-	async getAdminOrgEscalations(organizationId: string, params?: { from?: string; to?: string; page?: number; limit?: number }): Promise<AdminEscalationsResponse> {
+	async getAdminOrgEscalations(
+		organizationId: string,
+		params?: { from?: string; to?: string; page?: number; limit?: number },
+	): Promise<AdminEscalationsResponse> {
 		const query = new URLSearchParams();
 		if (params?.from) query.set("from", params.from);
 		if (params?.to) query.set("to", params.to);
 		if (params?.page) query.set("page", String(params.page));
 		if (params?.limit) query.set("limit", String(params.limit));
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminEscalationsResponse>(`/organizations/${organizationId}/escalations${suffix}`);
+		return adminFetch<AdminEscalationsResponse>(
+			`/organizations/${organizationId}/escalations${suffix}`,
+		);
 	},
 
-	async getAdminAllUsers(params?: { role?: string; is_active?: boolean; search?: string; page?: number; limit?: number }): Promise<AdminUsersResponse> {
+	async getAdminAllUsers(params?: {
+		role?: string;
+		is_active?: boolean;
+		search?: string;
+		page?: number;
+		limit?: number;
+	}): Promise<AdminUsersResponse> {
 		const query = new URLSearchParams();
 		if (params?.role) query.set("role", params.role);
-		if (params?.is_active !== undefined) query.set("is_active", String(params.is_active));
+		if (params?.is_active !== undefined)
+			query.set("is_active", String(params.is_active));
 		if (params?.search) query.set("search", params.search);
 		if (params?.page) query.set("page", String(params.page));
 		if (params?.limit) query.set("limit", String(params.limit));
@@ -453,15 +574,23 @@ export const api = {
 	): Promise<AdminUsersResponse> {
 		const query = new URLSearchParams();
 		if (params?.role) query.set("role", params.role);
-		if (params?.is_active !== undefined) query.set("is_active", String(params.is_active));
+		if (params?.is_active !== undefined)
+			query.set("is_active", String(params.is_active));
 		if (params?.page) query.set("page", String(params.page));
 		if (params?.limit) query.set("limit", String(params.limit));
 		const suffix = query.toString() ? `?${query.toString()}` : "";
-		return adminFetch<AdminUsersResponse>(`/organizations/${organizationId}/users${suffix}`);
+		return adminFetch<AdminUsersResponse>(
+			`/organizations/${organizationId}/users${suffix}`,
+		);
 	},
 
-	async getAdminOrgUser(organizationId: string, userId: string): Promise<AdminUser> {
-		return adminFetch<AdminUser>(`/organizations/${organizationId}/users/${userId}`);
+	async getAdminOrgUser(
+		organizationId: string,
+		userId: string,
+	): Promise<AdminUser> {
+		return adminFetch<AdminUser>(
+			`/organizations/${organizationId}/users/${userId}`,
+		);
 	},
 
 	async createAdminOrgUser(
@@ -490,16 +619,25 @@ export const api = {
 			is_active: boolean;
 		}>,
 	): Promise<AdminUser> {
-		return adminFetch<AdminUser>(`/organizations/${organizationId}/users/${userId}`, {
-			method: "PATCH",
-			body: JSON.stringify(data),
-		});
+		return adminFetch<AdminUser>(
+			`/organizations/${organizationId}/users/${userId}`,
+			{
+				method: "PATCH",
+				body: JSON.stringify(data),
+			},
+		);
 	},
 
-	async removeAdminOrgUser(organizationId: string, userId: string): Promise<void> {
-		return adminFetch<void>(`/organizations/${organizationId}/users/${userId}`, {
-			method: "DELETE",
-		});
+	async removeAdminOrgUser(
+		organizationId: string,
+		userId: string,
+	): Promise<void> {
+		return adminFetch<void>(
+			`/organizations/${organizationId}/users/${userId}`,
+			{
+				method: "DELETE",
+			},
+		);
 	},
 
 	async getDashboardStats(): Promise<DashboardStats> {
@@ -515,7 +653,9 @@ export const api = {
 
 	// ─── KNOWLEDGE BASE ─────────────────────────────────────────────────────────
 
-	async getKnowledgeDocs(filterState: Record<string, string | number | undefined | null>): Promise<GetKnowledgeDocsResponse | null> {
+	async getKnowledgeDocs(
+		filterState: Record<string, string | number | undefined | null>,
+	): Promise<GetKnowledgeDocsResponse | null> {
 		const user = getSession();
 		if (!user) {
 			throw new Error("User not found");
@@ -527,9 +667,12 @@ export const api = {
 			}
 		});
 		try {
-			const response = await fetch(`${BASE_URL}/organizations/${user.organizationId}/knowledge?${params.toString()}`, {
-				credentials: "include",
-			});
+			const response = await fetch(
+				`${BASE_URL}/organizations/${user.organizationId}/knowledge?${params.toString()}`,
+				{
+					credentials: "include",
+				},
+			);
 			if (!response.ok) throw new Error(response.statusText);
 
 			return response.json();
@@ -539,7 +682,9 @@ export const api = {
 		}
 	},
 
-	async uploadPdf(input: UploadPdfInput): Promise<{ document: KnowledgeDocument }> {
+	async uploadPdf(
+		input: UploadPdfInput,
+	): Promise<{ document: KnowledgeDocument }> {
 		const user = getSession();
 		if (!user) throw new Error("User not found");
 
@@ -548,11 +693,14 @@ export const api = {
 		formData.append("title", input.title);
 		formData.append("type", "PDF");
 
-		const response = await fetch(`${BASE_URL}/organizations/${user.organizationId}/knowledge`, {
-			method: "POST",
-			body: formData,
-			credentials: "include",
-		});
+		const response = await fetch(
+			`${BASE_URL}/organizations/${user.organizationId}/knowledge`,
+			{
+				method: "POST",
+				body: formData,
+				credentials: "include",
+			},
+		);
 
 		if (!response.ok) {
 			const error = await response.json().catch(() => ({}));
@@ -567,14 +715,18 @@ export const api = {
 		if (!user) throw new Error("User not found");
 
 		try {
-			const response = await fetch(`${BASE_URL}/organizations/${user.organizationId}/knowledge/${id}`, {
-				method: "DELETE",
-				headers: { "Content-Type": "application/json" },
-				credentials: "include",
-			});
+			const response = await fetch(
+				`${BASE_URL}/organizations/${user.organizationId}/knowledge/${id}`,
+				{
+					method: "DELETE",
+					headers: { "Content-Type": "application/json" },
+					credentials: "include",
+				},
+			);
 
 			const data = await response.json();
-			if (!response.ok) throw new Error(data.message || "Something went wrong");
+			if (!response.ok)
+				throw new Error(data.message || "Something went wrong");
 
 			return { success: data.success };
 		} catch (error: unknown) {
@@ -615,7 +767,10 @@ export const api = {
 			body: JSON.stringify(input),
 		});
 		const data = await res.json();
-		if (!res.ok) throw new Error(data.message ?? data.error ?? "Failed to save API config");
+		if (!res.ok)
+			throw new Error(
+				data.message ?? data.error ?? "Failed to save API config",
+			);
 		return data;
 	},
 
@@ -625,21 +780,31 @@ export const api = {
 			credentials: "include",
 		});
 		const data = await res.json();
-		if (!res.ok) throw new Error(data.message ?? data.error ?? "Verification failed");
+		if (!res.ok)
+			throw new Error(data.message ?? data.error ?? "Verification failed");
 		return data;
 	},
 
-	async submitSwaggerUrl(input: { title: string; swaggerUrl: string }): Promise<{ documentId: string; status: string }> {
+	async submitSwaggerUrl(input: {
+		title: string;
+		swaggerUrl: string;
+	}): Promise<{ documentId: string; status: string }> {
 		const user = getSession();
 		if (!user) throw new Error("User not found");
-		const res = await fetch(`${BASE_URL}/organizations/${user.organizationId}/documents/swagger`, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			credentials: "include",
-			body: JSON.stringify(input),
-		});
+		const res = await fetch(
+			`${BASE_URL}/organizations/${user.organizationId}/documents/swagger`,
+			{
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify(input),
+			},
+		);
 		const data = await res.json();
-		if (!res.ok) throw new Error(data.message ?? data.error ?? "Failed to submit Swagger URL");
+		if (!res.ok)
+			throw new Error(
+				data.message ?? data.error ?? "Failed to submit Swagger URL",
+			);
 		return data;
 	},
 
@@ -677,11 +842,16 @@ export const api = {
 		return data;
 	},
 
-	async toggleOrgTool(toolId: string): Promise<{ id: string; isActive: boolean }> {
-		const res = await fetch(`${BASE_URL}/organizations/tools/${toolId}/toggle`, {
-			method: "PATCH",
-			credentials: "include",
-		});
+	async toggleOrgTool(
+		toolId: string,
+	): Promise<{ id: string; isActive: boolean }> {
+		const res = await fetch(
+			`${BASE_URL}/organizations/tools/${toolId}/toggle`,
+			{
+				method: "PATCH",
+				credentials: "include",
+			},
+		);
 		const data = await res.json();
 		if (!res.ok) throw new Error(data.error ?? "Failed to toggle tool");
 		return data;
@@ -698,7 +868,9 @@ export const api = {
 		return { user: normalizeUserProfile(data.result) };
 	},
 
-	async updateUserProfile(input: UpdateProfileInput): Promise<{ user: UserProfile }> {
+	async updateUserProfile(
+		input: UpdateProfileInput,
+	): Promise<{ user: UserProfile }> {
 		const res = await fetch(`${BASE_URL}/users/me`, {
 			method: "PATCH",
 			headers: { "Content-Type": "application/json" },
@@ -714,7 +886,9 @@ export const api = {
 		return { user: normalizeUserProfile(data.result) };
 	},
 
-	async updatePassword(input: UpdatePasswordInput): Promise<{ success: boolean }> {
+	async updatePassword(
+		input: UpdatePasswordInput,
+	): Promise<{ success: boolean }> {
 		const res = await fetch(`${BASE_URL}/users/me/password`, {
 			method: "PATCH",
 			headers: { "Content-Type": "application/json" },
@@ -738,9 +912,13 @@ export const api = {
 		return { organization: normalizeOrgProfile(data) };
 	},
 
-	async updateOrgProfile(input: { name: string; email: string }): Promise<{ organization: OrgProfile }> {
+	async updateOrgProfile(input: {
+		name: string;
+		email: string;
+	}): Promise<{ organization: OrgProfile }> {
 		if (!input.name.trim()) throw new Error("Organization name is required.");
-		if (!input.email.trim()) throw new Error("Organization email is required.");
+		if (!input.email.trim())
+			throw new Error("Organization email is required.");
 		const res = await fetch(`${BASE_URL}/organizations/me`, {
 			method: "PATCH",
 			headers: { "Content-Type": "application/json" },
@@ -751,10 +929,16 @@ export const api = {
 			}),
 		});
 		const data = await res.json();
-		if (!res.ok) throw new Error(data.error ?? "Failed to update organization");
+		if (!res.ok)
+			throw new Error(data.error ?? "Failed to update organization");
 		return { organization: normalizeOrgProfile(data) };
 	},
-	async updateWidgetConfig(input: { title: string; greetingMessage: string; accentColor: string; placeholder: string }): Promise<{ organization: OrgProfile }> {
+	async updateWidgetConfig(input: {
+		title: string;
+		greetingMessage: string;
+		accentColor: string;
+		placeholder: string;
+	}): Promise<{ organization: OrgProfile }> {
 		const res = await fetch(`${BASE_URL}/organizations/widget-config`, {
 			method: "PATCH",
 			headers: { "Content-Type": "application/json" },
@@ -762,7 +946,8 @@ export const api = {
 			body: JSON.stringify(input),
 		});
 		const data = await res.json();
-		if (!res.ok) throw new Error(data.error ?? "Failed to update widget config");
+		if (!res.ok)
+			throw new Error(data.error ?? "Failed to update widget config");
 		return { organization: normalizeOrgProfile(data) };
 	},
 	async getApiKeys(): Promise<ApiKey[]> {
@@ -774,7 +959,10 @@ export const api = {
 		if (!response.ok) throw new Error(data.error ?? "Failed to load API keys");
 		return Array.isArray(data) ? data.map(normalizeApiKey) : [];
 	},
-	async createApiKey(input: { name: string; allowedOrigins: string[] }): Promise<ApiKey> {
+	async createApiKey(input: {
+		name: string;
+		allowedOrigins: string[];
+	}): Promise<ApiKey> {
 		const response = await fetch(`${BASE_URL}/dashboard/apikey/create`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -787,7 +975,8 @@ export const api = {
 			throw new Error(data.error ?? "Failed to create API key");
 		}
 
-		const rawKey = typeof data === "string" ? data : (data.rawKey ?? data.raw_key ?? "");
+		const rawKey =
+			typeof data === "string" ? data : (data.rawKey ?? data.raw_key ?? "");
 		const keyPrefix = rawKey.slice(0, 8);
 		const keys = await this.getApiKeys().catch(() => []);
 		const createdKey =
@@ -799,7 +988,11 @@ export const api = {
 				raw_key: rawKey,
 			});
 
-		return { ...createdKey, raw_key: rawKey, name: createdKey.name || input.name };
+		return {
+			...createdKey,
+			raw_key: rawKey,
+			name: createdKey.name || input.name,
+		};
 	},
 	async revokeApiKey(id: string) {
 		const response = await fetch(`${BASE_URL}/dashboard/apikey/${id}/revoke`, {
@@ -839,7 +1032,8 @@ export const api = {
 			body: JSON.stringify(data),
 		});
 		const body = await res.json();
-		if (!res.ok) throw new Error(body.error ?? "Failed to initialize Paymob checkout");
+		if (!res.ok)
+			throw new Error(body.error ?? "Failed to initialize Paymob checkout");
 		sessionStorage.setItem("paymentId", body?.paymentId);
 		return body;
 	},
@@ -848,7 +1042,8 @@ export const api = {
 			credentials: "include",
 		});
 		const data = await res.json().catch(() => []);
-		if (!res.ok) throw new Error(data.error ?? "Failed to load payment history");
+		if (!res.ok)
+			throw new Error(data.error ?? "Failed to load payment history");
 		if (!Array.isArray(data)) return [];
 		return data.map((item) => ({
 			id: String((item as ApiRecord).id ?? ""),
@@ -920,7 +1115,12 @@ export const api = {
 		return data;
 	},
 
-	async acceptInvitation(token: string, firstName: string, lastName: string, password: string): Promise<{ message: string; email: string }> {
+	async acceptInvitation(
+		token: string,
+		firstName: string,
+		lastName: string,
+		password: string,
+	): Promise<{ message: string; email: string }> {
 		const res = await fetch(`${BASE_URL}/invitations/accept/${token}`, {
 			method: "POST",
 			credentials: "include",

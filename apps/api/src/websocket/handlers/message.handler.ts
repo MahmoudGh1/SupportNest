@@ -1,3 +1,4 @@
+import { reportQueue } from "src/queues/reportQueue.js";
 import * as conversationService from "src/services/conversations.service.js";
 import * as ticketService from "src/services/ticket.service.js";
 import type { WsSendMessagePayload } from "src/types/ws.types.js";
@@ -20,6 +21,11 @@ export async function handleMessageSend(
 	// If human escalation - create a ticket
 	if (routerOutput.resolvedByTier === "HUMAN") {
 		await ticketService.createTicket(organizationId, conversationId);
+		// + enqueue reporter job here
+		await reportQueue.add("generate-report", {
+			conversationId,
+			organizationId,
+		});
 	}
 
 	const messagePayload: any = {

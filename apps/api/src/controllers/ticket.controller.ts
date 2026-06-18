@@ -142,7 +142,11 @@ export async function startTicket(
 		const agentId = req.user!.id;
 		const ticketId = (req as Request<{ id: string }>).params.id;
 
-		const ticket = await ticketService.startTicket(organizationId, ticketId, agentId);
+		const ticket = await ticketService.startTicket(
+			organizationId,
+			ticketId,
+			agentId,
+		);
 
 		res.status(200).json({
 			success: true,

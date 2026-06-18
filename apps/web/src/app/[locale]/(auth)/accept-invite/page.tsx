@@ -203,23 +203,25 @@ function FormPanel() {
 
 
                 {/* Google */}
-                <GoogleLogin
-                    onSuccess={async (credentialResponse) => {
-                        setSubmitError("");
-                        setSubmitting(true);
-                        try {
-                            await handleGoogleRegister(credentialResponse.credential!);
-                        } catch (e) {
-                            setSubmitError(e instanceof Error ? e.message : "Google sign-up failed.");
-                        } finally {
-                            setSubmitting(false);
-                        }
-                    }}
-                    onError={() => setSubmitError("Google sign-up failed.")}
-                    width="full"
-                    auto_select={false}
-                    text="signup_with"
-                />
+                <div className="google-login-wrapper">
+                    <GoogleLogin
+                        onSuccess={async (credentialResponse) => {
+                            setSubmitError("");
+                            setSubmitting(true);
+                            try {
+                                await handleGoogleRegister(credentialResponse.credential!);
+                            } catch (e) {
+                                setSubmitError(e instanceof Error ? e.message : "Google sign-up failed.");
+                            } finally {
+                                setSubmitting(false);
+                            }
+                        }}
+                        onError={() => setSubmitError("Google sign-up failed.")}
+                        width="1000"
+                        auto_select={false}
+                        text="signup_with"
+                    />
+                </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "20px 0 4px" }}>
                     <div style={{ flex: 1, height: 1, background: T.darkBorder }} />
@@ -328,6 +330,18 @@ export default function AcceptInvitePage() {
     return (
         <>
             <style>{`
+                .google-login-wrapper {
+					width: 100%;
+				}
+				.google-login-wrapper > div {
+					width: 100% !important;
+					max-width: 100% !important;
+				}
+				.google-login-wrapper iframe {
+					width: 100% !important;
+					max-width: 100% !important;
+				}
+                
                 @keyframes spin { to { transform: rotate(360deg); } }
                 * { box-sizing: border-box; }
 

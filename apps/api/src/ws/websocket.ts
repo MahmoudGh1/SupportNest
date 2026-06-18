@@ -22,6 +22,7 @@ async function connectionAuth(
 	payload: Record<string, any>,
 	req: IncomingMessage,
 ) {
+	console.log("connectionAuth start");
 	const { apiKey, customerJwt, visitorId } = payload;
 
 	if (!apiKey) {
@@ -46,9 +47,12 @@ async function connectionAuth(
 				message: "Invalid API key. your organizations is not authorized.",
 			},
 		});
+
 		socket.close();
 		return;
 	}
+
+	console.log("Key exists");
 
 	//TODO : stolen api keys would work at the current state
 
@@ -124,6 +128,8 @@ async function connectionAuth(
 		customerId: customer.id,
 		apiKeyId: isKey.id,
 	});
+
+	console.log("conversation started or resumed");
 
 	const conversationMemory = await prisma.message.findMany({
 		where: { conversationId: conversation.id },
