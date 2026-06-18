@@ -17,33 +17,9 @@ function verifyHmac(body: any, hmacHeader: string): boolean {
 		const obj = body.obj || {};
 
 		// Paymob concatenates specific fields in this exact order
-		const hmacString = [
-			obj.amount_cents,
-			obj.created_at,
-			obj.currency,
-			obj.error_occured,
-			obj.has_parent_transaction,
-			obj.id,
-			obj.integration_id,
-			obj.is_3d_secure,
-			obj.is_auth,
-			obj.is_capture,
-			obj.is_refunded,
-			obj.is_standalone_payment,
-			obj.is_voided,
-			obj.order?.id,
-			obj.owner,
-			obj.pending,
-			obj.source_data?.pan,
-			obj.source_data?.sub_type,
-			obj.source_data?.type,
-			obj.success,
-		].join("");
+		const hmacString = [obj.amount_cents, obj.created_at, obj.currency, obj.error_occured, obj.has_parent_transaction, obj.id, obj.integration_id, obj.is_3d_secure, obj.is_auth, obj.is_capture, obj.is_refunded, obj.is_standalone_payment, obj.is_voided, obj.order?.id, obj.owner, obj.pending, obj.source_data?.pan, obj.source_data?.sub_type, obj.source_data?.type, obj.success].join("");
 
-		const computedHmac = crypto
-			.createHmac("sha512", PAYMOB_HMAC_SECRET)
-			.update(hmacString)
-			.digest("hex");
+		const computedHmac = crypto.createHmac("sha512", PAYMOB_HMAC_SECRET).update(hmacString).digest("hex");
 
 		return computedHmac === hmacHeader;
 	} catch (err) {
@@ -53,7 +29,8 @@ function verifyHmac(body: any, hmacHeader: string): boolean {
 }
 
 interface CreateIntentionInput {
-	organizationId: string;
+	userId: string;
+	// organizationId?: string;
 	pricingId: string;
 	amountCents: number; // amount in cents e.g. 50000 = 500 EGP
 	currency: string; // 'EGP'
@@ -75,20 +52,17 @@ async function assertNoActiveSubscription(organizationId: string) {
 	});
 
 	if (active) {
-		throw new AppError(
-			"You already have an active subscription for this billing period",
-			409,
-		);
+		throw new AppError("You already have an active subscription for this billing period", 409);
 	}
 }
 
-export const createPaymentIntentionService = async ({
-	organizationId,
-	pricingId,
-	amountCents,
-	currency,
-	billingData,
-}: CreateIntentionInput) => {
+export const createPaymentIntentionService = async ({ userId, pricingId, amountCents, currency, billingData }: CreateIntentionInput) => {
+	const user = await prisma.user.findUnique({ where: { id: userId } });
+
+	if (!user || !user.organizationId) throw new AppError("Account not set up", 404);
+
+	const organizationId = user.organizationId;
+
 	// 1. Verify org exists
 	const org = await prisma.organization.findUnique({
 		where: { id: organizationId, isActive: true },
@@ -188,8 +162,7 @@ export const handleWebhookService = async (body: any, hmacHeader: string) => {
 	const success = body.obj?.success;
 	const pending = body.obj?.pending;
 	const intentionId = body.obj?.payment_key_claims?.extra?.intention_id;
-	const organizationId =
-		body.obj?.payment_key_claims?.extra?.extras?.organizationId;
+	const organizationId = body.obj?.payment_key_claims?.extra?.extras?.organizationId;
 	const pricingId = body.obj?.payment_key_claims?.extra?.extras?.pricingId;
 	const transactionId = body.obj?.id?.toString();
 	const amountCents = body.obj?.amount_cents;
@@ -257,13 +230,7 @@ interface CompleteCheckoutInput {
 	isAnnual: boolean;
 }
 
-export const completeCheckoutService = async ({
-	organizationId,
-	pricingId,
-	amount,
-	currency,
-	isAnnual,
-}: CompleteCheckoutInput) => {
+export const completeCheckoutService = async ({ organizationId, pricingId, amount, currency, isAnnual }: CompleteCheckoutInput) => {
 	await assertNoActiveSubscription(organizationId);
 
 	const pricing = await prisma.pricing.findFirst({
@@ -273,9 +240,7 @@ export const completeCheckoutService = async ({
 
 	const periodDays = isAnnual ? 365 : 30;
 	const now = new Date();
-	const billingPeriodEnd = new Date(
-		now.getTime() + periodDays * 24 * 60 * 60 * 1000,
-	);
+	const billingPeriodEnd = new Date(now.getTime() + periodDays * 24 * 60 * 60 * 1000);
 
 	const payment = await prisma.$transaction(async (tx) => {
 		const created = await tx.payment.create({
@@ -307,9 +272,7 @@ export const completeCheckoutService = async ({
 	};
 };
 
-export const getPaymentHistoryService = async (
-	organizationId: string,
-): Promise<any> => {
+export const getPaymentHistoryService = async (organizationId: string): Promise<any> => {
 	const payments = await prisma.payment.findMany({
 		where: { organizationId },
 		include: {
@@ -341,4 +304,10 @@ export async function confirmPaymentService(paymentId: string) {
 	});
 
 	return { ok: true };
+}
+
+export async function getPaymentStatusService(paymentId: string): Promise<string> {
+	const payment = await prisma.payment.findUnique({ where: { id: paymentId }, select: { status: true } });
+	if (!payment) throw new AppError("Payment not found", 404);
+	return payment.status;
 }
