@@ -18,6 +18,7 @@ model Organization {
   isActive              Boolean                 @default(true)
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
+  scheduledDeletionAt   DateTime?
   apiKeys               ApiKey[]
   businessApiConfig     BusinessApiConfig?
   conversationAnalytics ConversationAnalytics[]
@@ -33,30 +34,31 @@ model Organization {
   tickets               Ticket[]
   toolDefinitions       ToolDefinition[]
   users                 User[]
+  businessTables        BusinessTable[]
   notifications         Notification[]
 
   @@map("organizations")
 }
 
 model User {
-  id                     String                  @id @default(uuid()) @db.Uuid
-  organizationId         String?                 @db.Uuid
-  email                  String                  @unique
-  passwordHash           String
-  role                   Role
-  firstName              String
-  lastName               String
-  isActive               Boolean                 @default(true)
-  createdAt              DateTime                @default(now())
-  updatedAt              DateTime                @updatedAt
-  sentInvitations        Invitation[]            @relation("SentInvitations")
-  knowledgeDocuments     KnowledgeDocument[]
-  assignedTickets        Ticket[]
-  organization           Organization?           @relation(fields: [organizationId], references: [id])
-  isEmailVerified        Boolean                 @default(false)
-  emailVerifiedAt        DateTime?
-  emailVerifications     EmailVerification[]
-  passwordResets         PasswordReset[]
+  id                 String              @id @default(uuid()) @db.Uuid
+  organizationId     String?             @db.Uuid
+  email              String              @unique
+  passwordHash       String
+  role               Role
+  firstName          String
+  lastName           String
+  isActive           Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  emailVerifiedAt    DateTime?
+  isEmailVerified    Boolean             @default(false)
+  emailVerifications EmailVerification[]
+  sentInvitations    Invitation[]        @relation("SentInvitations")
+  knowledgeDocuments KnowledgeDocument[]
+  passwordResets     PasswordReset[]
+  assignedTickets    Ticket[]
+  organization       Organization?       @relation(fields: [organizationId], references: [id])
   notificationRecipients NotificationRecipient[]
 
   @@index([organizationId])
@@ -89,6 +91,7 @@ model ToolDefinition {
   description         String
   method              HttpMethod
   path                String
+  businessTables      BusinessTable[]
   documentId          String?            @db.Uuid
   parameters          Json
   responseSchema      Json
@@ -156,7 +159,7 @@ model Conversation {
   organization       Organization           @relation(fields: [organizationId], references: [id])
   csatRating         CsatRating?
   messages           Message[]
-  reports            Report? // inverse side of Report.conversation — read-only relation
+  reports            Report?
   ticket             Ticket?
 
   @@index([organizationId])
@@ -248,16 +251,16 @@ model KnowledgeDocument {
 }
 
 model DocumentChunk {
-  id             String                      @id @default(uuid()) @db.Uuid
-  documentId     String                      @db.Uuid
-  organizationId String                      @db.Uuid
+  id             String                @id @default(uuid()) @db.Uuid
+  documentId     String                @db.Uuid
+  organizationId String                @db.Uuid
   content        String
   embedding      Unsupported("vector(1536)")
   chunkIndex     Int
-  metadata       Json                        @default("{}")
-  createdAt      DateTime                    @default(now())
-  document       KnowledgeDocument           @relation(fields: [documentId], references: [id])
-  organization   Organization                @relation(fields: [organizationId], references: [id])
+  metadata       Json                  @default("{}")
+  createdAt      DateTime              @default(now())
+  document       KnowledgeDocument     @relation(fields: [documentId], references: [id])
+  organization   Organization          @relation(fields: [organizationId], references: [id])
 
   @@index([documentId])
   @@index([organizationId])
@@ -406,46 +409,77 @@ model PasswordReset {
   @@map("password_resets")
 }
 
-model Notification {
-  id        String   @id @default(uuid()) @db.Uuid
-  organizationId String? @db.Uuid// which org this event concerns - NOT an access check, just context
-  organization    Organization?    @relation(fields: [organizationId], references: [id])
-  type            NotificationType
-  title           String
-  body            String
-  actionUrl      String?
-  metadata        Json?
-  createdAt      DateTime         @default(now())
+model BusinessTable {
+  id               String             @id @default(uuid()) @db.Uuid
+  organizationId   String             @db.Uuid
+  name             String
+  endpoint         String
+  method           HttpMethod         @default(GET)
+  toolDefinitionId String?            @db.Uuid
+  columnConfig     Json               @default("[]")
+  lastFetchedAt    DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  organization     Organization       @relation(fields: [organizationId], references: [id])
+  toolDefinition   ToolDefinition?    @relation(fields: [toolDefinitionId], references: [id])
+  rows             BusinessTableRow[]
 
-  recipients NotificationRecipient[]
+  @@index([organizationId])
+  @@map("business_tables")
+}
+
+model BusinessTableRow {
+  id             String        @id @default(uuid()) @db.Uuid
+  tableId        String        @db.Uuid
+  organizationId String        @db.Uuid
+  externalId     String?
+  rowData        Json
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  table          BusinessTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  @@index([tableId])
+  @@index([organizationId])
+  @@index([tableId, externalId])
+  @@map("business_table_rows")
+}
+
+model Notification {
+  id             String                  @id @default(uuid()) @db.Uuid
+  organizationId String?                 @db.Uuid
+  type           NotificationType
+  title          String
+  body           String
+  actionUrl      String?
+  metadata       Json?
+  createdAt      DateTime                @default(now())
+  organization   Organization?           @relation(fields: [organizationId], references: [id])
+  recipients     NotificationRecipient[]
 
   @@index([organizationId])
   @@index([type])
 }
 
-// Fan-out table: one row per (notification, recipient). This is what makes
-// "notify org_admin AND super_admin for the same event" free - no duplicated
-// content, just two rows pointing at the same Notification.
+
 model NotificationRecipient {
-  id        String   @id @default(uuid()) @db.Uuid
-  notificationId String @db.Uuid
-  notification    Notification @relation(fields: [notificationId], references: [id])
-  userId         String @db.Uuid
-  user            User         @relation(fields: [userId], references: [id])
-  readAt        DateTime?
+  id             String       @id @default(uuid()) @db.Uuid
+  notificationId String       @db.Uuid
+  userId         String       @db.Uuid
+  readAt         DateTime?
   createdAt      DateTime     @default(now())
+  notification   Notification @relation(fields: [notificationId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
 
   @@unique([notificationId, userId])
-  @@index([userId, readAt, createdAt]) // "my unread, newest first" - the hot query
+  @@index([userId, readAt, createdAt])
 }
 
-// New table - needed for contact_us_submitted, doesn't exist anywhere yet
 model ContactSubmission {
   id        String   @id @default(uuid()) @db.Uuid
-  name       String
-  email      String
-  message    String
-  source     String? // e.g. "marketing_site", "pricing_page"
+  name      String
+  email     String
+  message   String
+  source    String?
   createdAt DateTime @default(now())
 }
 
@@ -476,12 +510,12 @@ enum AgentTier {
 
 enum AgentAction {
   RESOLVED
-  ESCALATED_TO_TIER0
   ESCALATED_TO_TIER1
   ESCALATED_TO_TIER2
   ESCALATED_TO_HUMAN
   REJECTED_OUTPUT
   NO_MATCH
+  ESCALATED_TO_TIER0
 }
 
 enum TicketStatus {

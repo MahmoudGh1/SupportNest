@@ -1,9 +1,10 @@
 "use client";
 
 import { DashboardStatsStatus, DocStatus } from "@/types/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLingui } from "@lingui/react/macro";
 import { t } from "@lingui/core/macro";
+import { useLoading } from "@/context/loading-context";
 
 // ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
 export const S = {
@@ -12,7 +13,6 @@ export const S = {
 	purpleDark: "#3C3489",
 	dark: "var(--page-text)",
 	darkMid: "var(--surface-elevated)",
-
 
 	brand: "#534AB7",
 	white: "#ffffff",
@@ -277,54 +277,14 @@ export function StatusBadge({ status }: { status: DashboardStatsStatus }) {
 
 // ─── PAGE LOADER ──────────────────────────────────────────────────────────────
 export function PageLoader() {
-	return (
-		<>
-			<div
-				style={{
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					height: "100vh",
-					background: S.bg,
-				}}
-			>
-				<div style={{ textAlign: "center" }}>
-					<div
-						style={{
-							width: 40,
-							height: 40,
-							borderRadius: 10,
-							background: S.purple,
-							display: "flex",
-							alignItems: "center",
-							justifyContent: "center",
-							margin: "0 auto 16px",
-						}}
-					>
-						<i
-							className="ti ti-shield-check"
-							style={{ color: "#fff", fontSize: 20 }}
-						/>
-					</div>
-					<div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
-						{[0, 1, 2].map((i) => (
-							<div
-								key={i}
-								style={{
-									width: 7,
-									height: 7,
-									borderRadius: "50%",
-									background: S.purple,
-									animation: `pulse 1.2s ${i * 0.2}s infinite`,
-								}}
-							/>
-						))}
-					</div>
-				</div>
-			</div>
-			<style>{`@keyframes pulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}`}</style>
-		</>
-	);
+	const { show, hide } = useLoading();
+
+	useEffect(() => {
+		show();
+		return () => hide();
+	}, [hide, show]);
+
+	return null;
 }
 
 // ─── PLACEHOLDER PAGE ─────────────────────────────────────────────────────────

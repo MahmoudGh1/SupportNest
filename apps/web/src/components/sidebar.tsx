@@ -41,6 +41,13 @@ const navItems = [
 	{ icon: "settings", label: msg`Settings`, page: "settings" },
 	{ icon: "plug", label: msg`API Tools`, page: "tools" },
 	{ icon: "user-circle", label: msg`Profile`, page: "profile" },
+	// In navItems array, after "organizations":
+{
+  icon: "mail",
+  label: msg`Contact Submissions`,
+  page: "contact-submissions",
+  superAdminOnly: true,
+},
 ];
 
 interface SidebarProps {
@@ -61,6 +68,7 @@ export function Sidebar({
 		? `${user.firstName?.[0]}${user.lastName?.[0]}`.toUpperCase()
 		: "U";
 	const isSuperAdmin = String(user?.role).toUpperCase() === Role.SUPER_ADMIN;
+	const isSupportAgent = String(user?.role).toUpperCase() === Role.SUPPORT_AGENT;
 
 	return (
 		<div
@@ -143,9 +151,13 @@ export function Sidebar({
 					.filter((item) => {
 						if (isSuperAdmin) {
 							// For Super Admin, only show Admin, Organizations, and Profile
-							return ["admin", "organizations", "profile"].includes(item.page);
+							return ["admin", "organizations", "contact-submissions", "profile"].includes(item.page);
 						}
-						// For others, show everything EXCEPT Admin
+						if (isSupportAgent) {
+							// For Support Agent, show Overview, Tickets, and Profile
+							return ["dashboard", "tickets", "profile"].includes(item.page);
+						}
+						// For others (ORG_ADMIN), show everything EXCEPT Admin
 						return !item.superAdminOnly;
 					})
 					.map((item) => {

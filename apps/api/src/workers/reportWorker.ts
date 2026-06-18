@@ -3,7 +3,8 @@ import { redis } from "../config/redis.js";
 import type { ReportJobData } from "src/types/report.types.js";
 import prisma from "src/config/prisma.js";
 import { generateReportData } from "src/services/reporter.service.js";
-import { AgentTier } from "generated/prisma/enums.js";
+import { AgentTier, ConversationStatus } from "generated/prisma/enums.js";
+import AppError from "src/utils/appError.js";
 
 async function getConversationUsageStats(conversationId: string) {
 	// fetch agentLogs related
@@ -53,6 +54,12 @@ async function processReportJob(job: Job<ReportJobData>) {
 
 	if (!conversation) {
 		throw new Error(`Conversation ${conversationId} not found`);
+	}
+
+	if (conversation.conversationStatus !== ConversationStatus.ACTIVE) {
+		throw new AppError(
+			"a report is only generated once per escalated conversation",
+		);
 	}
 
 	// -- // Reverse so the llm reads them from oldest to newest

@@ -21,7 +21,7 @@ interface AuthState {
 	loginWithGoogle: (idToken: string) => Promise<AuthUser>;
 	logout: () => Promise<void>;
 	refreshUser: () => Promise<AuthUser | null>;
-	registerWithGoogle: (idToken: string) => Promise<{ userId: string; email: string; isNewUser: boolean }>;
+	registerWithGoogle: (idToken: string) => Promise<{ userId: string; email: string; isNewUser: boolean; firstName: string; lastName: string }>;
 
 }
 

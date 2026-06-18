@@ -1,5 +1,6 @@
 import { Locale, Providers } from "@/app/providers";
 import { AuthProvider } from "@/context/auth-context";
+import { LoadingProvider } from "@/context/loading-context";
 import { PlanProvider } from "@/context/plan-context";
 import { ThemeProvider } from "@/context/theme-context";
 
@@ -16,7 +17,9 @@ export default async function LocaleLayout({
 		<ThemeProvider>
 			<PlanProvider>
 				<AuthProvider>
-					<Providers locale={locale as Locale}>{children}</Providers>
+					<LoadingProvider>
+						<Providers locale={locale as Locale}>{children}</Providers>
+					</LoadingProvider>
 				</AuthProvider>
 			</PlanProvider>
 		</ThemeProvider>

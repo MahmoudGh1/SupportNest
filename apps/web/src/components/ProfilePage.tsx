@@ -11,7 +11,10 @@ import { useAuth } from "@/context/auth-context";
 
 export default function ProfilePage() {
   const { user } = useAuth();
-  const isSuperAdmin = String(user?.role).toUpperCase() === "SUPER_ADMIN";
+  const role = String(user?.role).toUpperCase();
+  const isSuperAdmin = role === "SUPER_ADMIN";
+  const isSupportAgent = role === "SUPPORT_AGENT";
+  const hideApiKeys = isSuperAdmin || isSupportAgent;
 
   const [tab, setTab] = useState<"profile" | "apikeys">("profile");
 
@@ -46,17 +49,17 @@ export default function ProfilePage() {
             color: S.dark,
           }}
         >
-          {isSuperAdmin ? "Profile" : "Profile & API Keys"}
+          {hideApiKeys ? "Profile" : "Profile & API Keys"}
         </h2>
         <p style={{ margin: 0, fontSize: 13, color: S.textMuted }}>
-          {isSuperAdmin
+          {hideApiKeys
             ? "Manage your account details."
             : "Manage your account details and widget authentication keys."}
         </p>
       </div>
 
-      {/* ── Tab switcher — hide API Keys for Super Admin ── */}
-      {!isSuperAdmin && (
+      {/* ── Tab switcher — hide API Keys if role restricted ── */}
+      {!hideApiKeys && (
         <div
           style={{
             display: "inline-flex",
@@ -80,7 +83,7 @@ export default function ProfilePage() {
       )}
 
       {/* ── Profile tab — always visible ── */}
-      {(tab === "profile" || isSuperAdmin) && (
+      {(tab === "profile" || hideApiKeys) && (
         <>
           <ProfileSection />
           <PasswordSection />
@@ -89,7 +92,7 @@ export default function ProfilePage() {
       )}
 
       {/* ── API Keys tab — org admins only ── */}
-      {tab === "apikeys" && !isSuperAdmin && (
+      {tab === "apikeys" && !hideApiKeys && (
         <>
           <ApiKeysSection />
           <Section

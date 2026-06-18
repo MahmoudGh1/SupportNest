@@ -261,21 +261,99 @@ export const loginService = async ({
       throw new AppError("Wrong Email or Password", 401);
     }
 
-    if (!user.isEmailVerified) {
-      const err = new AppError("EMAIL_NOT_VERIFIED", 403) as AppError & {
-        userId: string;
-      };
-      err.userId = user.id;
-      throw err;
-    }
+export const completeRegistrationService = async ({ userId, businessName, planId }: { userId: string; businessName: string; planId: string }) => {
+	// export const completeRegistrationService = async ({ userId, businessName, planId, amount, currency, isAnnual }: { userId: string; businessName: string; planId: string; amount: number; currency: string; isAnnual: boolean }) => {
+	const user = await prisma.user.findUnique({ where: { id: userId } });
+	if (!user) throw new AppError("User not found", 404);
+	if (!user.isEmailVerified) throw new AppError("Email not verified", 403);
 
-    const { passwordHash: _password, ...dataDTO } = user;
+	const widgetSecret = await generateSecret(32);
+	const orgSlug = slugify(businessName);
 
-    return dataDTO;
-  } catch (err) {
-    console.log(err);
-    throw err;
-  }
+	// const periodDays = isAnnual ? 365 : 30;
+	// const billingPeriodStart = new Date();
+	// const billingPeriodEnd = new Date(billingPeriodStart.getTime() + periodDays * 24 * 60 * 60 * 1000);
+
+	await prisma.$transaction(async (tx) => {
+		const org = await tx.organization.create({
+			data: {
+				name: businessName,
+				slug: orgSlug,
+				email: user.email,
+				widgetSecret,
+				isActive: true,
+				planId,
+			},
+		});
+
+		await tx.user.update({
+			where: { id: userId },
+			data: { organizationId: org.id },
+		});
+
+		// await tx.payment.create({
+		// 	data: {
+		// 		organizationId: org.id,
+		// 		pricingId: planId,
+		// 		amount,
+		// 		currency,
+		// 		status: PaymentStatus.SUCCEEDED,
+		// 		paymentProvider: "checkout",
+		// 		providerPaymentId: `checkout_${org.id}_${Date.now()}`,
+		// 		billingPeriodStart,
+		// 		billingPeriodEnd,
+		// 	},
+		// });
+	});
+
+	return prisma.user.findUnique({
+		where: { id: userId },
+		select: { id: true, email: true, role: true, organizationId: true, firstName: true, lastName: true, isActive: true },
+	});
+};
+
+export const loginAfterPaymentService = async ({ userId, paymentId }: { userId: string; paymentId: string }) => {
+	const user = await prisma.user.findUnique({ where: { id: userId } });
+	if (!user) throw new AppError("User not found", 404);
+	if (!user.organizationId) throw new AppError("No business set up for this user", 400);
+
+	const payment = await prisma.payment.findUnique({ where: { id: paymentId } });
+	if (!payment) throw new AppError("Payment not found", 404);
+	if (payment.organizationId !== user.organizationId) throw new AppError("Payment does not belong to this account", 403);
+	if (payment.status !== PaymentStatus.SUCCEEDED) throw new AppError("Payment has not been confirmed yet", 402);
+
+	return user;
+};
+
+
+export const loginService = async ({ email, password }: LoginInput): Promise<OraganizationDataDTO> => {
+	try {
+		const normalizedEmail = email.trim().toLowerCase();
+		const user = await prisma.user.findUnique({
+			where: { email: normalizedEmail },
+		});
+		if (!user) {
+			throw new AppError("Wrong Email or Password", 401);
+		}
+
+		const passwordCheck = await comparePassword(password, user.passwordHash);
+		if (!passwordCheck) {
+			throw new AppError("Wrong Email or Password", 401);
+		}
+
+		if (!user.isEmailVerified) {
+			const err = new AppError("EMAIL_NOT_VERIFIED", 403) as AppError & { userId: string };
+			err.userId = user.id;
+			throw err;
+		}
+
+		const { passwordHash: _password, ...dataDTO } = user;
+
+		return dataDTO;
+	} catch (err) {
+		console.log(err);
+		throw err;
+	}
 };
 
 export async function hasActiveSubscription(
@@ -520,33 +598,31 @@ export async function resetPasswordService(
   ]);
 }
 
-export const registerWithGoogleService = async (
-  email: string,
-  name?: string,
-): Promise<{ userId: string; email: string; isNewUser: boolean }> => {
-  const existing = await prisma.user.findUnique({ where: { email } });
 
-  if (existing && existing.isEmailVerified) {
-    return { userId: existing.id, email, isNewUser: false };
-  }
+export const registerWithGoogleService = async (email: string, name?: string): Promise<{ userId: string; email: string; isNewUser: boolean; firstName: string; lastName: string }> => {
+    const existing = await prisma.user.findUnique({ where: { email } });
 
-  const nameParts = (name ?? "").trim().split(" ");
-  const firstName = nameParts[0] ?? "";
-  const lastName = nameParts.slice(1).join(" ") ?? "";
+    if (existing && existing.isEmailVerified) {
+        return { userId: existing.id, email, isNewUser: false, firstName: existing.firstName, lastName: existing.lastName };
+    }
 
-  const user = await prisma.user.create({
-    data: {
-      email,
-      passwordHash: "",
-      role: Role.ORG_ADMIN,
-      firstName,
-      lastName,
-      isActive: true,
-      isEmailVerified: true,
-      emailVerifiedAt: new Date(),
-    },
-    select: { id: true, email: true },
-  });
+    const nameParts = (name ?? "").trim().split(" ");
+    const firstName = nameParts[0] ?? "";
+    const lastName = nameParts.slice(1).join(" ") ?? "";
 
-  return { userId: user.id, email, isNewUser: true };
+    const user = await prisma.user.create({
+        data: {
+            email,
+            passwordHash: "",
+            role: Role.ORG_ADMIN,
+            firstName,
+            lastName,
+            isActive: true,
+            isEmailVerified: true,
+            emailVerifiedAt: new Date(),
+        },
+        select: { id: true, email: true },
+    });
+
+    return { userId: user.id, email, isNewUser: true, firstName, lastName };
 };

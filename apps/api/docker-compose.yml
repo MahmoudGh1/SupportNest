@@ -12,14 +12,39 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data # This links container data to your host machine
+      - postgres_data:/var/lib/postgresql/data
+  
+  postgreSQL:
+    image: postgres:18
+    container_name: support-postgresql
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: support_platform
+    ports:
+      - "5432:5432"
 
-  supportnest-redis:
-    image: redis:7
-    container_name: supportnest-redis
+  redis:
+    image: redis:8.6
+    container_name: support_redis
     restart: always
     ports:
       - "6379:6379"
+  
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: ngrok-tunnel
+    restart: unless-stopped
+    environment:
+      NGROK_AUTHTOKEN: 3FISc5ORWv4zyRXlSJTJjERzQvD_5dzfSL4DhMtcxHXhtpT64
+    command:
+      - "http"
+      - "host.docker.internal:3001"
+    ports:
+      - "4040:4040"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   pgdata: # This keeps your database data safe permanently

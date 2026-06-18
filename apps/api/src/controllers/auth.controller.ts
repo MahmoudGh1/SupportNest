@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { completeRegistrationService, forgotPasswordService, loginService, registerPaidService, registerService, registerWithGoogleService, resetPasswordService, sendVerificationService, userService, verifyEmailService } from "src/services/auth.service.js";
+import { completeRegistrationService, forgotPasswordService, loginAfterPaymentService, loginService, registerPaidService, registerService, registerWithGoogleService, resetPasswordService, sendVerificationService, userService, verifyEmailService } from "src/services/auth.service.js";
 import type { AuthenticatedRequest, TokenPayload } from "src/types/auth.types.js";
 import { generateTokenPair, verifyRefreshToken } from "src/utils/jwt.util.js";
 import AppError from "src/utils/appError.js";
@@ -40,10 +40,26 @@ export const GoogleLoginController = async (req: Request, res: Response) => {
 		const tokenPayload = toTokenPayload(result);
 		const profile = await userService(tokenPayload);
 
-		if (!profile.hasActiveSubscription && profile.role == "ORG_ADMIN" && profile.organizationId) {
-			clearAuthCookies(res);
+		// if (profile.role === "ORG_ADMIN" && (!profile.organizationId || !profile.hasActiveSubscription)) {
+		// 	setAuthCookies(res, tokenPayload);
+		// 	const redirectTo = profile.organizationId ? "/payment" : `/register/business?userId=${profile.id}`;
+		// 	return res.status(403).json({
+		// 		error: profile.organizationId ? "Your account does not have an active subscription. Please complete payment first." : "Please finish setting up your business and complete payment to continue.",
+		// 		redirectTo,
+		// 		userData: {
+		// 			firstName: profile.firstName,
+		// 			lastName: profile.lastName,
+		// 			email: profile.email,
+		// 		},
+		// 	});
+		// }
+
+		if (profile.role === "ORG_ADMIN" && (!profile.organizationId || !profile.hasActiveSubscription)) {
+			const redirectTo = profile.organizationId ? `/payment?userId=${profile.id}` : `/register/business?userId=${profile.id}`;
 			return res.status(403).json({
-				error: "Your account does not have an active subscription. Please complete payment first.",
+				error: profile.organizationId ? "Your account does not have an active subscription. Please complete payment first." : "Please finish setting up your business and complete payment to continue.",
+				redirectTo,
+				userData: { userId: profile.id, firstName: profile.firstName, lastName: profile.lastName, email: profile.email },
 			});
 		}
 
@@ -75,8 +91,6 @@ export const RegisterController = async (req: Request, res: Response) => {
 			lastName,
 		});
 
-		// remove the loginService call entirely
-		// just return the userId so frontend can redirect to verify
 		return res.status(201).json(result);
 	} catch (error: unknown) {
 		if (error instanceof AppError) {
@@ -139,10 +153,26 @@ export const LoginController = async (req: Request, res: Response) => {
 		const tokenPayload = toTokenPayload(result);
 		const profile = await userService(tokenPayload);
 
-		if (!profile.hasActiveSubscription && profile.role == "ORG_ADMIN" && profile.organizationId) {
-			clearAuthCookies(res);
+		// if (profile.role === "ORG_ADMIN" && (!profile.organizationId || !profile.hasActiveSubscription)) {
+		// 	setAuthCookies(res, tokenPayload);
+		// 	const redirectTo = profile.organizationId ? "/payment" : `/register/business?userId=${profile.id}`;
+		// 	return res.status(403).json({
+		// 		error: profile.organizationId ? "Your account does not have an active subscription. Please complete payment first." : "Please finish setting up your business and complete payment to continue.",
+		// 		redirectTo,
+		// 		userData: {
+		// 			firstName: profile.firstName,
+		// 			lastName: profile.lastName,
+		// 			email: profile.email,
+		// 		},
+		// 	});
+		// }
+
+		if (profile.role === "ORG_ADMIN" && (!profile.organizationId || !profile.hasActiveSubscription)) {
+			const redirectTo = profile.organizationId ? `/payment?userId=${profile.id}` : `/register/business?userId=${profile.id}`;
 			return res.status(403).json({
-				error: "Your account does not have an active subscription. Please complete payment first.",
+				error: profile.organizationId ? "Your account does not have an active subscription. Please complete payment first." : "Please finish setting up your business and complete payment to continue.",
+				redirectTo,
+				userData: { userId: profile.id, firstName: profile.firstName, lastName: profile.lastName, email: profile.email },
 			});
 		}
 
@@ -247,9 +277,12 @@ export const CompleteRegistrationController = async (req: Request, res: Response
 	try {
 		const { userId, businessName, planId, amount, currency, isAnnual } = req.body;
 		if (!userId || !businessName || !planId) {
-		// if (!userId || !businessName || !planId || amount == null) {
+			// if (!userId || !businessName || !planId || amount == null) {
 			return res.status(400).json({ error: "Missing required fields" });
 		}
+
+		console.log(userId, businessName, planId)
+
 		const user = await completeRegistrationService({
 			userId,
 			businessName,
@@ -258,9 +291,13 @@ export const CompleteRegistrationController = async (req: Request, res: Response
 			// currency: currency || "EGP",
 			// isAnnual: Boolean(isAnnual),
 		});
-		const tokenPayload = toTokenPayload(user!);
-		setAuthCookies(res, tokenPayload);
-		const profile = await userService(tokenPayload);
+		console.log(user)
+
+		// const tokenPayload = toTokenPayload(user!);
+		// setAuthCookies(res, tokenPayload);
+		// const profile = await userService(tokenPayload);
+		const profile = await userService(toTokenPayload(user!));
+		console.log(profile)
 		return res.status(201).json({ result: profile });
 	} catch (error) {
 		if (error instanceof AppError) return res.status(error.statusCode).json({ error: error.message });
@@ -302,23 +339,43 @@ export const ResetPasswordController = async (req: Request, res: Response) => {
 	}
 };
 
-
 export const GoogleRegisterController = async (req: Request, res: Response) => {
-    try {
-        const { idToken } = req.body;
-        if (!idToken) {
-            return res.status(400).json({ error: "Missing Google token" });
-        }
+	try {
+		const { idToken } = req.body;
+		if (!idToken) {
+			return res.status(400).json({ error: "Missing Google token" });
+		}
 
-        const { email, name } = await verifyGoogleToken(idToken);
-        const result = await registerWithGoogleService(email, name);
+		const { email, name } = await verifyGoogleToken(idToken);
+		const result = await registerWithGoogleService(email, name);
 
-        return res.status(200).json(result);
-    } catch (error: unknown) {
-        if (error instanceof AppError) {
-            return res.status(error.statusCode).json({ error: error.message });
-        }
-        console.error("[GoogleRegisterController]", error);
-        return res.status(500).json({ error: "Internal server error" });
-    }
+		return res.status(200).json(result);
+	} catch (error: unknown) {
+		if (error instanceof AppError) {
+			return res.status(error.statusCode).json({ error: error.message });
+		}
+		console.error("[GoogleRegisterController]", error);
+		return res.status(500).json({ error: "Email is already registered!" });
+	}
+};
+
+
+export const LoginAfterPaymentController = async (req: Request, res: Response) => {
+	try {
+		const { userId, paymentId } = req.body;
+		if (!userId || !paymentId) {
+			return res.status(400).json({ error: "Missing userId or paymentId" });
+		}
+
+		const user = await loginAfterPaymentService({ userId, paymentId });
+
+		const tokenPayload = toTokenPayload(user);
+		setAuthCookies(res, tokenPayload);
+		const profile = await userService(tokenPayload);
+
+		return res.status(200).json({ result: profile });
+	} catch (error) {
+		if (error instanceof AppError) return res.status(error.statusCode).json({ error: error.message });
+		return res.status(500).json({ error: "Internal server error" });
+	}
 };

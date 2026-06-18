@@ -11,6 +11,8 @@ import "./workers/knowledgeWorker.js";
 import "./workers/conversationCloseWorker.js";
 import "./workers/analyticsWorker.js";
 import "./workers/reportWorker.js";
+import "./workers/orgDeletionWorker.js";
+import "./workers/analyticsWorker.js";
 import conversationsRoutes from "./routes/conversations.routes.js";
 import ApiKeyRouter from "./routes/apiKey.routes.js";
 import WidgetRouter from "./routes/widget.routes.js";
@@ -35,9 +37,10 @@ import reportRouter from "./routes/reporter.routes.js";
 import AdminRoutes from "./routes/admin-dashboard.routes.js";
 import analyticsRouter from "./routes/analytics.routes.js";
 import NotificationRouter from "./routes/notification.routes.js";
+import businessTableRoutes from "./routes/businessTable.routes.js"
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV || "development"}` });
-
+import contactRouter from "./routes/contactus.routes.js";
 const app = express();
 app.set("trust proxy", 1);
 const PORT = process.env.PORT || 3001;
@@ -91,6 +94,7 @@ app.use("/api/v1/widget", WidgetRouter);
 app.use("/api/v1/organizations/api-config", businessApiConfigRouter);
 app.use("/api/v1/organizations", OrganizationRoutes);
 app.use("/api/v1/reports", reportRouter);
+app.use("/api/v1/tables", businessTableRoutes);
 
 app.use("/api/v1/widget/conversations", conversationsRoutes);
 
@@ -103,8 +107,9 @@ app.use("/api/v1/tier2", tier2Router);
 
 app.use("/api/v1/admindashboard", AdminRoutes);
 app.use("/api/v1/analytics", analyticsRouter);
-app.use("/api/v1/analytics", analyticsRouter);
 app.use("/api/v1/notifications", NotificationRouter);
+
+app.use('/api/contact', contactRouter);
 app.use(notFoundHandler);
 
 app.use(errorHandler);

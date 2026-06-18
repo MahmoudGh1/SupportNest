@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { S } from "../ui";
 import { api } from "@/lib/api";
-import { useAuth } from "@/context/auth-context.tsx";
+import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
 
 export function DangerZone() {

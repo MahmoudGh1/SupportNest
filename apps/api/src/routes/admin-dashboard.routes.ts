@@ -6,7 +6,7 @@
  * All routes require authentication and SUPER_ADMIN authorization.
  */
 import { Router } from "express";
-
+import prisma from "../config/prisma.js";
 // Controllers
 import {
   getOverview,
@@ -26,23 +26,14 @@ import {
   deleteConversation,
   getOrgConversations,
   getConversationById,
-  scheduleDeleteOrganization,
+  deleteOrganization,
   cancelDeleteOrganization,
-  resendDeletionEmail,
 } from "../controllers/admin-dashboard/admin.organizations.controller.js";
 
-import {
-  getOrgUsers,
-  getOrgUser,
-  createOrgUser,
-  updateOrgUser,
-  removeOrgUser,
-  getAllUsers,
-} from "../controllers/admin-dashboard/admin.users.controller.js";
+import { getOrgUsers, getOrgUser, createOrgUser, updateOrgUser, removeOrgUser, getAllUsers } from "../controllers/admin-dashboard/admin.users.controller.js";
 import { authMiddleware } from "src/middlewares/auth.middleware.js";
 import { adminMiddleware } from "src/middlewares/admin.middleware.js";
-import { transporter } from "src/utils/mailer.js";
-
+import { getContactSubmissions } from "../controllers/admin-dashboard/contact.controller.js";
 const router: Router = Router();
 
 // All admin routes require authentication
@@ -99,23 +90,8 @@ router.get("/organizations/:organizationId", getOrganization);
  */
 router.patch("/organizations/:organizationId", updateOrganization);
 
-// router.delete("/organizations/:organizationId", deleteOrganization);
-/**
- * DELETE /admin/organizations/:organizationId
- * Schedule org deletion in 30 minutes + notify org via email
- * Role: super_admin only
- */
-router.delete("/organizations/:organizationId", scheduleDeleteOrganization);
-
-/**
- * POST /admin/organizations/:organizationId/cancel-deletion
- * Cancel a scheduled deletion + notify org via email
- * Role: super_admin only
- */
-router.post("/organizations/:organizationId/cancel-deletion", cancelDeleteOrganization);
-
-router.post("/organizations/:organizationId/resend-deletion-email", resendDeletionEmail);
-
+router.delete("/organizations/:organizationId", deleteOrganization);
+router.post("/organizations/:organizationId/cancel-delete", cancelDeleteOrganization);
 /**
  * PATCH /admin/organizations/:organizationId/suspend
  * Suspend org (sets is_active = false)
@@ -146,17 +122,11 @@ router.get("/organizations/:organizationId/conversation-stats", getOrgConversati
 
 router.get("/organizations/:organizationId/conversations", getOrgConversations);
 
-router.get(
-  "/organizations/:organizationId/conversations/:conversationId",
-  getConversationById,
-);
+router.get("/organizations/:organizationId/conversations/:conversationId", getConversationById);
 
 router.get("/organizations/:organizationId/conversations", getOrgConversations);
 
-router.get(
-  "/organizations/:organizationId/conversations/:conversationId",
-  getConversationById,
-);
+router.get("/organizations/:organizationId/conversations/:conversationId", getConversationById);
 
 /**
  * GET /admin/organizations/:organizationId/ticket-stats
@@ -223,18 +193,14 @@ router.delete("/organizations/:organizationId/users/:userId", removeOrgUser);
  * DELETE /admin/organizations/:organizationId/conversations/:conversationId
  * Hard delete a conversation + all its messages, logs, ticket, CSAT, analytics
  */
-router.delete(
-  "/organizations/:organizationId/conversations/:conversationId",
-  deleteConversation,
-);
+router.delete("/organizations/:organizationId/conversations/:conversationId", deleteConversation);
 
 /**
  * DELETE /admin/organizations/:organizationId/conversations/:conversationId
  * Hard delete a conversation + all its messages, logs, ticket, CSAT, analytics
  */
-router.delete(
-  "/organizations/:organizationId/conversations/:conversationId",
-  deleteConversation,
-);
+router.delete("/organizations/:organizationId/conversations/:conversationId", deleteConversation);
 
+// GET /admin/contact-submissions
+router.get("/contact-submissions", getContactSubmissions);
 export default router;
