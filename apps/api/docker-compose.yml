@@ -1,16 +1,16 @@
-services:
-  postgres:
-    image: pgvector/pgvector:pg17
-    container_name: prisma-postgres
+version: "3.8"
 
+services:
+  supportnest-postgres:
+    image: pgvector/pgvector:pg17
+    container_name: supportnest-postgres
+    restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: appdb
-
+      POSTGRES_PASSWORD: supportnest
+      POSTGRES_DB: supportnest
     ports:
-      - "5434:5432"
-
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
   
@@ -47,4 +47,4 @@ services:
       - "host.docker.internal:host-gateway"
 
 volumes:
-  postgres_data:
+  pgdata: # This keeps your database data safe permanently

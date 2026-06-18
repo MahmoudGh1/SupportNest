@@ -29,6 +29,7 @@ export async function startConversation({
 	customerId,
 	apiKeyId,
 }: startConversationInput) {
+	console.log("start conversation");
 	// Resume existing active conversation if any
 	const existing = await prisma.conversation.findFirst({
 		where: { customerId, conversationStatus: ConversationStatus.ACTIVE },

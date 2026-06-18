@@ -34,7 +34,6 @@ export type TierResponse = {
 		confidenceScore: number; // 0.0 - 1.0
 		tokensUsed?: number;
 	};
-	toolResults?: string[];
 };
 
 // A single message in the conversation history passed to the router
@@ -52,6 +51,7 @@ export type PipelineContext = {
 	customerId: string;
 	latestMessage: string;
 	conversationHistory: ConversationMessage[];
+	priorTierContext?: string | null;
 };
 
 // What the router returns after the full cycle (routing + tier call + review)

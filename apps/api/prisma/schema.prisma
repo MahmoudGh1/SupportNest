@@ -35,6 +35,7 @@ model Organization {
   toolDefinitions       ToolDefinition[]
   users                 User[]
   businessTables        BusinessTable[]
+  notifications         Notification[]
 
   @@map("organizations")
 }
@@ -58,6 +59,7 @@ model User {
   passwordResets     PasswordReset[]
   assignedTickets    Ticket[]
   organization       Organization?       @relation(fields: [organizationId], references: [id])
+  notificationRecipients NotificationRecipient[]
 
   @@index([organizationId])
   @@map("users")
@@ -157,7 +159,7 @@ model Conversation {
   organization       Organization           @relation(fields: [organizationId], references: [id])
   csatRating         CsatRating?
   messages           Message[]
-  reports            Report[]
+  reports            Report? // inverse side of Report.conversation — read-only relation
   ticket             Ticket?
 
   @@index([organizationId])
@@ -249,16 +251,16 @@ model KnowledgeDocument {
 }
 
 model DocumentChunk {
-  id             String                @id @default(uuid()) @db.Uuid
-  documentId     String                @db.Uuid
-  organizationId String                @db.Uuid
+  id             String                      @id @default(uuid()) @db.Uuid
+  documentId     String                      @db.Uuid
+  organizationId String                      @db.Uuid
   content        String
   embedding      Unsupported("vector")
   chunkIndex     Int
-  metadata       Json                  @default("{}")
-  createdAt      DateTime              @default(now())
-  document       KnowledgeDocument     @relation(fields: [documentId], references: [id])
-  organization   Organization          @relation(fields: [organizationId], references: [id])
+  metadata       Json                        @default("{}")
+  createdAt      DateTime                    @default(now())
+  document       KnowledgeDocument           @relation(fields: [documentId], references: [id])
+  organization   Organization                @relation(fields: [organizationId], references: [id])
 
   @@index([documentId])
   @@index([organizationId])
@@ -362,7 +364,7 @@ model Invitation {
 model Report {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String       @db.Uuid
-  conversationId String       @db.Uuid
+  conversationId String       @unique @db.Uuid
   summary        String
   issueType      String
   resolution     String
@@ -449,6 +451,49 @@ model BusinessTableRow {
   @@index([organizationId])
   @@index([tableId, externalId])
   @@map("business_table_rows")
+
+  @@index([token])
+  @@map("password_resets")
+}
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  organizationId String? @db.Uuid// which org this event concerns - NOT an access check, just context
+  organization    Organization?    @relation(fields: [organizationId], references: [id])
+  type            NotificationType
+  title           String
+  body            String
+  actionUrl      String?
+  metadata        Json?
+  createdAt      DateTime         @default(now())
+
+  recipients NotificationRecipient[]
+
+  @@index([organizationId])
+  @@index([type])
+}
+
+
+model NotificationRecipient {
+  id        String   @id @default(uuid()) @db.Uuid
+  notificationId String @db.Uuid
+  notification    Notification @relation(fields: [notificationId], references: [id])
+  userId         String @db.Uuid
+  user            User         @relation(fields: [userId], references: [id])
+  readAt        DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@unique([notificationId, userId])
+  @@index([userId, readAt, createdAt]) // "my unread, newest first" - the hot query
+}
+
+model ContactSubmission {
+  id        String   @id @default(uuid()) @db.Uuid
+  name       String
+  email      String
+  message    String
+  source     String? // e.g. "marketing_site", "pricing_page"
+  createdAt DateTime @default(now())
 }
 
 enum Role {
@@ -559,4 +604,17 @@ enum HttpMethod {
   PUT
   PATCH
   DELETE
+}
+
+enum NotificationType {
+  organization_registered
+  organization_suspended
+  organization_reactivated
+  user_added
+  user_deleted
+  payment_completed
+  ticket_escalated
+  csat_submitted
+  contact_us_submitted
+  new_customer_first_contact
 }

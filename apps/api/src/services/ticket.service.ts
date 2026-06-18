@@ -136,15 +136,30 @@ export async function getTickets(
 // ─── GET SINGLE TICKET ────────────────────────────────────────────────────────
 export async function getTicketById(organizationId: string, ticketId: string) {
 	const ticket = await prisma.ticket.findUnique({
-		where: { id: ticketId },
-		select: ticketSelect,
+		where: { id: ticketId, organizationId },
+		include: {
+			conversation: {
+				include: { reports: true },
+			},
+			assignedTo: true,
+		},
 	});
 
-	if (!ticket) throw new AppError("Ticket not found.", 404);
-	if (ticket.organizationId !== organizationId)
-		throw new AppError("Access denied.", 403);
+	if (!ticket) {
+		// existing not-found handling
+		throw new AppError("ticket not found");
+	}
 
-	return ticket;
+	const { conversation, ...ticketFields } = ticket;
+	const { reports, ...conversationFields } = conversation;
+
+	const ticketData = {
+		...ticketFields,
+		reports, // flattened, top-level
+		conversation: conversationFields,
+	};
+
+	return ticketData;
 }
 
 // ─── ASSIGN TICKET ────────────────────────────────────────────────────────────
