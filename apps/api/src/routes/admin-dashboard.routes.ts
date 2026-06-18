@@ -97,8 +97,8 @@ router.get("/organizations/:organizationId", getOrganization);
  */
 router.patch("/organizations/:organizationId", updateOrganization);
 
-router.delete("/organizations/:orgId", deleteOrganization);
-router.post("/organizations/:orgId/cancel-delete", cancelDeleteOrganization);
+router.delete("/organizations/:organizationId", deleteOrganization);
+router.post("/organizations/:organizationId/cancel-delete", cancelDeleteOrganization);
 /**
  * PATCH /admin/organizations/:organizationId/suspend
  * Suspend org (sets is_active = false)

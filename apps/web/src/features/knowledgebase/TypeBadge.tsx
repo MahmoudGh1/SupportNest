@@ -8,6 +8,8 @@ export default function TypeBadge({ type }: { type: DocType }) {
 		FAQ: { bg: "var(--color-brand-faint)", color: "var(--color-brand)", icon: "link" },
 		SWAGGER: { bg: "var(--color-info)", color: "var(--color-info)", icon: "bolt" },
 		OPENAPI: { bg: "var(--color-info)", color: "var(--color-info)", icon: "bolt" },
+		CSV: { bg: "#e0f2fe", color: "#0369a1", icon: "file-type-csv" },
+		DOCX: { bg: "#eef2ff", color: "#4338ca", icon: "file-type-docx" },
 	};
 
 	const fallback = { bg: "var(--surface)", color: "var(--page-text)", icon: "file-text" };

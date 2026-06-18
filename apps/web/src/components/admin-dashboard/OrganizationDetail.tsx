@@ -120,6 +120,9 @@ function OrganizationDetailSkeleton() {
 }
 
 export function OrganizationDetail({ organizationId, onClose }: Props) {
+	// alias so all existing action buttons that reference `orgId` keep working
+	const orgId = organizationId;
+
 	const [org, setOrg] = useState<AdminOrganizationDetail | null>(null);
 	const [tierStats, setTierStats] = useState<AdminTierStats | null>(null);
 	const [loading, setLoading] = useState(true);

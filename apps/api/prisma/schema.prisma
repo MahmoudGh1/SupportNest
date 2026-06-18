@@ -33,7 +33,8 @@ model Organization {
   tickets               Ticket[]
   toolDefinitions       ToolDefinition[]
   users                 User[]
-  scheduledDeletionAt   DateTime?  notifications         Notification[]
+  scheduledDeletionAt   DateTime? 
+  notifications         Notification[]
 
   @@map("organizations")
 }

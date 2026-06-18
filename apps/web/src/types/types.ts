@@ -90,7 +90,7 @@ export interface UpdateWidgetConfigInput {
 
 // ─── KNOWLEDGE BASE TYPES ─────────────────────────────────────────────────────
 export type DocStatus = "PROCESSING" | "READY" | "FAILED";
-export type DocType = "PDF" | "FAQ";
+export type DocType = "PDF" | "FAQ" | "CSV" | "DOCX";
 
 export interface KnowledgeDocument {
 	id: string;
@@ -107,6 +107,12 @@ export interface KnowledgeDocument {
 	createdBy: string;
 	createdAt: string;
 	updatedAt: string;
+}
+
+export interface UploadDocumentInput {
+	file: File;
+	title: string;
+	type: DocType;
 }
 
 export interface UploadPdfInput {
@@ -334,5 +340,21 @@ export interface AdminOrganizationsResponse {
 		page: number;
 		limit: number;
 		total_pages: number;
+	};
+}
+
+export interface AnalyticsSummary {
+	totalConversations: number;
+	resolutionByTier: {
+		TIER0: number;
+		TIER1: number;
+		TIER2: number;
+		HUMAN: number;
+		UNRESOLVED: number;
+	};
+	escalationRate: number;
+	avgResolutionTimeMs: number;
+	csat: {
+		average: number;
 	};
 }

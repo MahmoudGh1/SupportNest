@@ -352,14 +352,14 @@ export async function deleteOrganization(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId  = getStringParam(req.params.organizationId );
+  if (!organizationId ) {
     badRequest(res, "Organization id is required.");
     return;
   }
 
   const org = await prisma.organization.findUnique({
-    where: { id: orgId },
+    where: { id: organizationId  },
     select: { id: true, name: true, email: true },
   });
 
@@ -371,15 +371,15 @@ export async function deleteOrganization(
   const deletionAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
 
   await prisma.organization.update({
-    where: { id: orgId },
+    where: { id: organizationId  },
     data: { scheduledDeletionAt: deletionAt },
   });
 
   // Schedule background hard-delete job via BullMQ
   await orgDeletionQueue.add(
     "delete",
-    { orgId },
-    { delay: 30 * 60 * 1000, jobId: `delete-${orgId}` },
+    { orgId: organizationId  },
+    { delay: 30 * 60 * 1000, jobId: `delete-${organizationId }` },
   );
 
   // Notify organization admin via email
@@ -408,14 +408,14 @@ export async function cancelDeleteOrganization(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const orgId = getStringParam(req.params.orgId);
-  if (!orgId) {
+  const organizationId  = getStringParam(req.params.organizationId);
+  if (!organizationId ) {
     badRequest(res, "Organization id is required.");
     return;
   }
 
   const org = await prisma.organization.findUnique({
-    where: { id: orgId },
+    where: { id: organizationId  },
     select: { id: true, scheduledDeletionAt: true },
   });
 
@@ -430,12 +430,12 @@ export async function cancelDeleteOrganization(
   }
 
   await prisma.organization.update({
-    where: { id: orgId },
+    where: { id: organizationId  },
     data: { scheduledDeletionAt: null },
   });
 
   // Cancel background job
-  const job = await orgDeletionQueue.getJob(`delete-${orgId}`);
+  const job = await orgDeletionQueue.getJob(`delete-${organizationId }`);
   if (job) {
     await job.remove();
   }
@@ -443,14 +443,14 @@ export async function cancelDeleteOrganization(
   // Notify organization admin via email
   try {
     const orgInfo = await prisma.organization.findUnique({
-      where: { id: orgId },
+      where: { id: organizationId  },
       select: { name: true, email: true },
     });
     if (orgInfo) {
       await sendDeletionCancelledEmail(orgInfo.email, orgInfo.name);
     }
   } catch (e) {
-    console.error(`[Admin] Failed to send deletion cancellation email for org ${orgId}`, e);
+    console.error(`[Admin] Failed to send deletion cancellation email for org ${organizationId }`, e);
   }
 
   res.json({ message: "Scheduled deletion cancelled successfully." });

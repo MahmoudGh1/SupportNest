@@ -13,7 +13,7 @@ export default function OrganizationDetailPage() {
 	return (
 		<div style={{ padding: "1.5rem" }}>
 			<OrganizationDetail
-				orgId={id}
+				organizationId={id}
 				onClose={() => router.push("/dashboard/organizations")}
 			/>
 		</div>
