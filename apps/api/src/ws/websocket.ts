@@ -12,6 +12,7 @@ import { verifyToken } from "src/utils/jwt.util.js";
 import { handleMessageSend } from "src/websocket/handlers/message.handler.js";
 import { activeSockets } from "src/websocket/ws.map.js";
 import * as conversationService from "src/services/conversations.service.js";
+import * as widgetServerSdk from "src/config/widget-server-sdk.js";
 
 function send(socket: AuthenticatedSocket, envelope: WsEnvelope) {
 	socket.send(JSON.stringify(envelope));
@@ -24,6 +25,8 @@ async function connectionAuth(
 ) {
 	console.log("connectionAuth start");
 	const { apiKey, customerJwt, visitorId } = payload;
+
+	console.log(apiKey, customerJwt, visitorId);
 
 	if (!apiKey) {
 		send(socket, {
@@ -40,6 +43,7 @@ async function connectionAuth(
 		where: { keyHash },
 		include: { organization: true },
 	});
+
 	if (!isKey || !isKey.isActive || !isKey.organizationId) {
 		send(socket, {
 			type: "error",
@@ -69,38 +73,36 @@ async function connectionAuth(
 	let customer = null;
 
 	if (customerJwt) {
-		let customerPayload: any = verifyToken(
-			customerJwt,
+		let customerPayload: any = await widgetServerSdk.verifyToken(
 			isKey.organization.widgetSecret,
+			customerJwt,
+			(err: any) => {
+				send(socket, {
+					type: "error",
+					payload: { message: err.message || "not a valid customerJwt" },
+				});
+				socket.close();
+				return;
+			},
 		);
 
-		if (!customerPayload) {
-			send(socket, {
-				type: "error",
-				payload: { message: "not a valid customerJwt" },
-			});
-			socket.close();
-			return;
-		}
-
-		const { externalId, email, name } = customerPayload;
+		const { userId, email } = customerPayload;
 
 		customer = await prisma.customer.upsert({
 			where: {
 				organizationId_externalId: {
 					organizationId: isKey.organizationId,
-					externalId: externalId,
+					externalId: userId,
 				},
 			},
 			update: {
 				email: email ?? undefined,
-				name: name ?? undefined,
 			},
 			create: {
 				organizationId: isKey.organizationId,
-				externalId,
+				externalId: userId,
 				email: email ?? null,
-				name: name ?? null,
+				name: null,
 				isAnonymous: false,
 			},
 		});

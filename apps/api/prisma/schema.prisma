@@ -18,6 +18,7 @@ model Organization {
   isActive              Boolean                 @default(true)
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
+  notifications         Notification[]
   apiKeys               ApiKey[]
   businessApiConfig     BusinessApiConfig?
   conversationAnalytics ConversationAnalytics[]
@@ -33,7 +34,6 @@ model Organization {
   tickets               Ticket[]
   toolDefinitions       ToolDefinition[]
   users                 User[]
-  notifications         Notification[]
 
   @@map("organizations")
 }
@@ -49,15 +49,15 @@ model User {
   isActive               Boolean                 @default(true)
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
+  emailVerifiedAt        DateTime?
+  isEmailVerified        Boolean                 @default(false)
+  notificationRecipients NotificationRecipient[]
+  emailVerifications     EmailVerification[]
   sentInvitations        Invitation[]            @relation("SentInvitations")
   knowledgeDocuments     KnowledgeDocument[]
+  passwordResets         PasswordReset[]
   assignedTickets        Ticket[]
   organization           Organization?           @relation(fields: [organizationId], references: [id])
-  isEmailVerified        Boolean                 @default(false)
-  emailVerifiedAt        DateTime?
-  emailVerifications     EmailVerification[]
-  passwordResets         PasswordReset[]
-  notificationRecipients NotificationRecipient[]
 
   @@index([organizationId])
   @@map("users")
@@ -156,7 +156,7 @@ model Conversation {
   organization       Organization           @relation(fields: [organizationId], references: [id])
   csatRating         CsatRating?
   messages           Message[]
-  reports            Report? // inverse side of Report.conversation — read-only relation
+  reports            Report?
   ticket             Ticket?
 
   @@index([organizationId])
@@ -248,16 +248,16 @@ model KnowledgeDocument {
 }
 
 model DocumentChunk {
-  id             String                      @id @default(uuid()) @db.Uuid
-  documentId     String                      @db.Uuid
-  organizationId String                      @db.Uuid
+  id             String                @id @default(uuid()) @db.Uuid
+  documentId     String                @db.Uuid
+  organizationId String                @db.Uuid
   content        String
-  embedding      Unsupported("vector(1536)")
+  embedding      Unsupported("vector")
   chunkIndex     Int
-  metadata       Json                        @default("{}")
-  createdAt      DateTime                    @default(now())
-  document       KnowledgeDocument           @relation(fields: [documentId], references: [id])
-  organization   Organization                @relation(fields: [organizationId], references: [id])
+  metadata       Json                  @default("{}")
+  createdAt      DateTime              @default(now())
+  document       KnowledgeDocument     @relation(fields: [documentId], references: [id])
+  organization   Organization          @relation(fields: [organizationId], references: [id])
 
   @@index([documentId])
   @@index([organizationId])
@@ -407,45 +407,40 @@ model PasswordReset {
 }
 
 model Notification {
-  id        String   @id @default(uuid()) @db.Uuid
-  organizationId String? @db.Uuid// which org this event concerns - NOT an access check, just context
-  organization    Organization?    @relation(fields: [organizationId], references: [id])
-  type            NotificationType
-  title           String
-  body            String
+  id             String                  @id @default(uuid()) @db.Uuid
+  organizationId String?                 @db.Uuid
+  type           NotificationType
+  title          String
+  body           String
   actionUrl      String?
-  metadata        Json?
-  createdAt      DateTime         @default(now())
-
-  recipients NotificationRecipient[]
+  metadata       Json?
+  createdAt      DateTime                @default(now())
+  organization   Organization?           @relation(fields: [organizationId], references: [id])
+  recipients     NotificationRecipient[]
 
   @@index([organizationId])
   @@index([type])
 }
 
-// Fan-out table: one row per (notification, recipient). This is what makes
-// "notify org_admin AND super_admin for the same event" free - no duplicated
-// content, just two rows pointing at the same Notification.
 model NotificationRecipient {
-  id        String   @id @default(uuid()) @db.Uuid
-  notificationId String @db.Uuid
-  notification    Notification @relation(fields: [notificationId], references: [id])
-  userId         String @db.Uuid
-  user            User         @relation(fields: [userId], references: [id])
-  readAt        DateTime?
+  id             String       @id @default(uuid()) @db.Uuid
+  notificationId String       @db.Uuid
+  userId         String       @db.Uuid
+  readAt         DateTime?
   createdAt      DateTime     @default(now())
+  notification   Notification @relation(fields: [notificationId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
 
   @@unique([notificationId, userId])
-  @@index([userId, readAt, createdAt]) // "my unread, newest first" - the hot query
+  @@index([userId, readAt, createdAt])
 }
 
-// New table - needed for contact_us_submitted, doesn't exist anywhere yet
 model ContactSubmission {
   id        String   @id @default(uuid()) @db.Uuid
-  name       String
-  email      String
-  message    String
-  source     String? // e.g. "marketing_site", "pricing_page"
+  name      String
+  email     String
+  message   String
+  source    String?
   createdAt DateTime @default(now())
 }
 
@@ -476,12 +471,12 @@ enum AgentTier {
 
 enum AgentAction {
   RESOLVED
-  ESCALATED_TO_TIER0
   ESCALATED_TO_TIER1
   ESCALATED_TO_TIER2
   ESCALATED_TO_HUMAN
   REJECTED_OUTPUT
   NO_MATCH
+  ESCALATED_TO_TIER0
 }
 
 enum TicketStatus {
