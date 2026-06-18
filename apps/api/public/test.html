@@ -33,7 +33,7 @@
 				.then((data) => {
 					window.SupportNest.init({
 						widgetKey: "[your unique widget key]",
-						customerToken: data.token,
+						customerToken: data.token ?? null,
 					});
 				});
 		</script>
