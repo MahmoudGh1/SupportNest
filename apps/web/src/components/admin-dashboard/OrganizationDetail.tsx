@@ -415,7 +415,7 @@ export function OrganizationDetail({ organizationId, onClose }: Props) {
 											borderRadius: 8, 
 											textTransform: "uppercase", 
 											fontWeight: 800, 
-											border: `1px solid ${user.role === 'admin' ? `${S.purple}20` : S.border}`
+											border: `1px solid ${user.role === 'SUPER_ADMIN' ? `${S.purple}20` : S.border}`
 										}}>{user.role}</span>
 									</td>
 									<td style={{ padding: "16px 20px", textAlign: "right", fontSize: 15, color: S.dark, borderBottom: `1px solid ${S.border}`, fontWeight: 750 }}>{user.assigned_tickets_count}</td>
