@@ -115,9 +115,29 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 const Server = createServer(app);
-const wss = new WebSocketServer({ server: Server, path: "/widget/ws" });
+
+// 1. Tell ws NOT to hijack the server automatically (Prevents the Pending bug)
+const wss = new WebSocketServer({ noServer: true });
 setupWebSocket(wss);
 
-Server.listen(Number(PORT), "0.0.0.0", () => {
-  console.log("Server is running on port:", PORT);
+// 2. Safely parse the dynamic Railway port
+const listenPort = process.env.PORT ? Number(process.env.PORT) : 3000;
+
+Server.listen(listenPort, "0.0.0.0", () => {
+  console.log("Server is running on port:", listenPort);
+});
+
+// 3. Manually handle the connection upgrade cleanly
+Server.on("upgrade", (request, socket, head) => {
+  // Extract path safely from the incoming request URL
+  const { pathname } = new URL(request.url, `http://${request.headers.host}`);
+
+  if (pathname === "/widget/ws") {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit("connection", ws, request);
+    });
+  } else {
+    // Drop any unexpected network connections gracefully
+    socket.destroy();
+  }
 });
