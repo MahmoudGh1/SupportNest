@@ -6,8 +6,10 @@ import { useAuth } from "@/context/auth-context";
 import { UpdateProfileInput } from "@/types/profile";
 import { Section } from "./Ui";
 import { Btn, Input, S } from "../ui";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export function ProfileSection() {
+  const { t } = useLingui();
   const { user: authUser } = useAuth();
 
   const [form, setForm] = useState<UpdateProfileInput>({
@@ -48,14 +50,9 @@ export function ProfileSection() {
 
   if (!authUser)
     return (
-      <Section title="Profile Information">
-        <div
-          style={{ textAlign: "center", padding: "1.5rem", color: S.textMuted }}
-        >
-          <i
-            className="ti ti-loader-2"
-            style={{ fontSize: 20, animation: "spin 1s linear infinite" }}
-          />
+      <Section title={t`Profile Information`}>
+        <div style={{ textAlign: "center", padding: "1.5rem", color: S.textMuted }}>
+          <i className="ti ti-loader-2" style={{ fontSize: 20, animation: "spin 1s linear infinite" }} />
           <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
         </div>
       </Section>
@@ -66,143 +63,119 @@ export function ProfileSection() {
 
   return (
     <Section
-      title="Profile Information"
-      subtitle="Update your personal details and login email."
+      title={t`Profile Information`}
+      subtitle={t`Update your personal details and login email.`}
     >
-      <div
-        style={{
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 16,
+        marginBottom: 24,
+        paddingBottom: 20,
+        borderBottom: `0.5px solid ${S.border}`,
+      }}>
+        <div style={{
+          width: 56,
+          height: 56,
+          borderRadius: "50%",
+          background: S.purple,
           display: "flex",
           alignItems: "center",
-          gap: 16,
-          marginBottom: 24,
-          paddingBottom: 20,
-          borderBottom: `0.5px solid ${S.border}`,
-        }}
-      >
-        <div
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: "50%",
-            background: S.purple,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 20,
-            fontWeight: 700,
-            color: "#fff",
-            flexShrink: 0,
-          }}
-        >
+          justifyContent: "center",
+          fontSize: 20,
+          fontWeight: 700,
+          color: "#fff",
+          flexShrink: 0,
+        }}>
           {initials}
         </div>
         <div>
           <div style={{ fontSize: 15, fontWeight: 600, color: S.dark }}>
             {authUser.firstName} {authUser.lastName}
           </div>
-          
-          {/* Email row featuring the verification badge layout */}
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
-            <div style={{ fontSize: 12, color: S.textMuted }}>
-              {authUser.email}
-            </div>
+            <div style={{ fontSize: 12, color: S.textMuted }}>{authUser.email}</div>
             {authUser.isEmailVerified ? (
-              <span
-                style={{
-                  background: S.greenBg,
-                  color: S.green,
-                  padding: "1px 6px",
-                  borderRadius: 4,
-                  fontSize: 10,
-                  fontWeight: 600,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 3,
-                }}
-              >
+              <span style={{
+                background: S.greenBg,
+                color: S.green,
+                padding: "1px 6px",
+                borderRadius: 4,
+                fontSize: 10,
+                fontWeight: 600,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 3,
+              }}>
                 <i className="ti ti-circle-check" style={{ fontSize: 11 }} />
-                Verified
+                <Trans>Verified</Trans>
               </span>
             ) : (
-              <span
-                style={{
-                  background: S.dangerBg,
-                  color: S.danger,
-                  padding: "1px 6px",
-                  borderRadius: 4,
-                  fontSize: 10,
-                  fontWeight: 600,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 3,
-                }}
-              >
+              <span style={{
+                background: S.dangerBg,
+                color: S.danger,
+                padding: "1px 6px",
+                borderRadius: 4,
+                fontSize: 10,
+                fontWeight: 600,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 3,
+              }}>
                 <i className="ti ti-alert-circle" style={{ fontSize: 11 }} />
-                Not Verified
+                <Trans>Not Verified</Trans>
               </span>
             )}
           </div>
-
           <div style={{ fontSize: 11, marginTop: 4 }}>
-            <span
-              style={{
-                background: S.purpleBg,
-                color: S.purple,
-                padding: "2px 8px",
-                borderRadius: 5,
-                fontSize: 10,
-                fontWeight: 600,
-              }}
-            >
+            <span style={{
+              background: S.purpleBg,
+              color: S.purple,
+              padding: "2px 8px",
+              borderRadius: 5,
+              fontSize: 10,
+              fontWeight: 600,
+            }}>
               {authUser.role?.replace("_", " ").toUpperCase()}
             </span>
           </div>
         </div>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 12,
-          marginBottom: 12,
-        }}
-      >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
         <Input
-          label="First name"
+          label={t`First name`}
           value={form.first_name}
           onChange={set("first_name")}
-          placeholder="First name"
+          placeholder={t`First name`}
           icon="user"
         />
         <Input
-          label="Last name"
+          label={t`Last name`}
           value={form.last_name}
           onChange={set("last_name")}
-          placeholder="Last name"
+          placeholder={t`Last name`}
         />
       </div>
       <Input
-        label="Email"
+        label={t`Email`}
         type="email"
         value={form.email}
         onChange={set("email")}
-        placeholder="you@company.com"
+        placeholder={t`you@company.com`}
         icon="mail"
       />
 
       {error && (
-        <div
-          style={{
-            background: "#FCEBEB",
-            border: "1px solid #FCA5A5",
-            borderRadius: 8,
-            padding: "10px 14px",
-            fontSize: 13,
-            color: S.danger,
-            marginBottom: 12,
-          }}
-        >
+        <div style={{
+          background: "#FCEBEB",
+          border: "1px solid #FCA5A5",
+          borderRadius: 8,
+          padding: "10px 14px",
+          fontSize: 13,
+          color: S.danger,
+          marginBottom: 12,
+        }}>
           {error}
         </div>
       )}
@@ -211,10 +184,10 @@ export function ProfileSection() {
         <Btn loading={loading} onClick={handleSave}>
           {saved ? (
             <>
-              <i className="ti ti-check" style={{ fontSize: 15 }} /> Saved
+              <i className="ti ti-check" style={{ fontSize: 15 }} /> <Trans>Saved</Trans>
             </>
           ) : (
-            "Save changes"
+            <Trans>Save changes</Trans>
           )}
         </Btn>
       </div>

@@ -1,17 +1,17 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { S } from "@/components/ui";
-import { useAuth } from "@/context/auth-context";
 import type { AdminOrganization, AdminPlan } from "@/types/types";
 import { OrganizationDetail } from "@/components/admin-dashboard/OrganizationDetail";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { useLingui as useLinguiCore } from "@lingui/react";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
-function fmtDate(iso: string) {
+function fmtDate(iso: string, locale: string) {
 	if (!iso) return "—";
-	return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+	return new Date(iso).toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" });
 }
 
 // ─── SKELETON ─────────────────────────────────────────────────────────────────
@@ -53,13 +53,13 @@ function StatusPill({ active, scheduledDeletionAt }: { active: boolean; schedule
 		return (
 			<span style={{
 				fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 999,
-				background: "#FEF2F2", // soft red
+				background: "#FEF2F2",
 				color: S.danger,
 				display: "inline-flex", alignItems: "center", gap: 5,
 				border: `1px solid ${S.dangerBg}`
 			}}>
 				<i className="ti ti-clock-pause" style={{ fontSize: 12 }} />
-				Deleting soon
+				<Trans>Deleting soon</Trans>
 			</span>
 		);
 	}
@@ -71,14 +71,14 @@ function StatusPill({ active, scheduledDeletionAt }: { active: boolean; schedule
 			display: "inline-flex", alignItems: "center", gap: 5,
 		}}>
 			<span style={{ width: 6, height: 6, borderRadius: "50%", background: active ? S.green : S.danger }} />
-			{active ? "Active" : "Suspended"}
+			{active ? <Trans>Active</Trans> : <Trans>Suspended</Trans>}
 		</span>
 	);
 }
 
 // ─── PLAN PILL ────────────────────────────────────────────────────────────────
 function PlanPill({ plan }: { plan: AdminPlan | null }) {
-	if (!plan) return <span style={{ fontSize: 12, color: S.textMuted }}>No plan</span>;
+	if (!plan) return <span style={{ fontSize: 12, color: S.textMuted }}><Trans>No plan</Trans></span>;
 	return (
 		<span style={{ fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 999, background: S.purpleBg, color: S.purple }}>
 			{plan.name}
@@ -88,6 +88,7 @@ function PlanPill({ plan }: { plan: AdminPlan | null }) {
 
 // ─── CREATE ORG MODAL ─────────────────────────────────────────────────────────
 function CreateOrgModal({ onClose, onCreated, plans }: { onClose: () => void; onCreated: (org: AdminOrganization) => void; plans: AdminPlan[] }) {
+	const { t } = useLingui();
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
@@ -105,13 +106,13 @@ function CreateOrgModal({ onClose, onCreated, plans }: { onClose: () => void; on
 
 	const validate = () => {
 		const e: Record<string, string> = {};
-		if (!name.trim()) e.name = "Organization name is required.";
-		if (!email.trim()) e.email = "Email is required.";
-		else if (!/\S+@\S+\.\S+/.test(email)) e.email = "Enter a valid email.";
-		if (!password.trim()) e.password = "Password is required.";
-		else if (password.length < 6) e.password = "Minimum 6 characters.";
-		if (!slug.trim()) e.slug = "Slug is required.";
-		else if (!/^[a-z0-9-]+$/.test(slug)) e.slug = "Lowercase letters, numbers, and hyphens only.";
+		if (!name.trim()) e.name = t`Organization name is required.`;
+		if (!email.trim()) e.email = t`Email is required.`;
+		else if (!/\S+@\S+\.\S+/.test(email)) e.email = t`Enter a valid email.`;
+		if (!password.trim()) e.password = t`Password is required.`;
+		else if (password.length < 6) e.password = t`Minimum 6 characters.`;
+		if (!slug.trim()) e.slug = t`Slug is required.`;
+		else if (!/^[a-z0-9-]+$/.test(slug)) e.slug = t`Lowercase letters, numbers, and hyphens only.`;
 		return e;
 	};
 
@@ -130,7 +131,7 @@ function CreateOrgModal({ onClose, onCreated, plans }: { onClose: () => void; on
 			});
 			onCreated(org);
 		} catch (err: any) {
-			setErrors({ form: err.message ?? "Failed to create organization." });
+			setErrors({ form: err.message ?? t`Failed to create organization.` });
 		} finally {
 			setLoading(false);
 		}
@@ -148,8 +149,8 @@ function CreateOrgModal({ onClose, onCreated, plans }: { onClose: () => void; on
 			<div style={{ background: S.surface, borderRadius: 16, width: "100%", maxWidth: 460, padding: "2rem", boxShadow: "0 24px 80px rgba(0,0,0,0.18)" }}>
 				<div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 22 }}>
 					<div>
-						<h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: S.dark }}>New organization</h3>
-						<p style={{ margin: "4px 0 0", fontSize: 12, color: S.textMuted }}>Create a new tenant and admin user.</p>
+						<h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: S.dark }}><Trans>New organization</Trans></h3>
+						<p style={{ margin: "4px 0 0", fontSize: 12, color: S.textMuted }}><Trans>Create a new tenant and admin user.</Trans></p>
 					</div>
 					<button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: S.textMuted, fontSize: 20, lineHeight: 1 }}>×</button>
 				</div>
@@ -161,41 +162,37 @@ function CreateOrgModal({ onClose, onCreated, plans }: { onClose: () => void; on
 				)}
 
 				<div style={{ marginBottom: 14 }}>
-					<label style={{ display: "block", fontSize: 12, fontWeight: 500, color: S.dark, marginBottom: 5 }}>Organization name</label>
-					<input value={name} onChange={e => handleNameChange(e.target.value)} placeholder="Acme Corp" style={fieldStyle(!!errors.name)} />
+					<label style={{ display: "block", fontSize: 12, fontWeight: 500, color: S.dark, marginBottom: 5 }}><Trans>Organization name</Trans></label>
+					<input value={name} onChange={e => handleNameChange(e.target.value)} placeholder={t`Acme Corp`} style={fieldStyle(!!errors.name)} />
 					{errors.name && <p style={{ fontSize: 11, color: S.danger, margin: "4px 0 0" }}>{errors.name}</p>}
 				</div>
 
 				<div style={{ marginBottom: 14 }}>
-					<label style={{ display: "block", fontSize: 12, fontWeight: 500, color: S.dark, marginBottom: 5 }}>Admin email</label>
+					<label style={{ display: "block", fontSize: 12, fontWeight: 500, color: S.dark, marginBottom: 5 }}><Trans>Admin email</Trans></label>
 					<input value={email} onChange={e => setEmail(e.target.value)} type="email" placeholder="admin@acme.com" style={fieldStyle(!!errors.email)} />
 					{errors.email && <p style={{ fontSize: 11, color: S.danger, margin: "4px 0 0" }}>{errors.email}</p>}
 				</div>
 
 				<div style={{ marginBottom: 14 }}>
-					<label style={{ display: "block", fontSize: 12, fontWeight: 500, color: S.dark, marginBottom: 5 }}>Admin password</label>
+					<label style={{ display: "block", fontSize: 12, fontWeight: 500, color: S.dark, marginBottom: 5 }}><Trans>Admin password</Trans></label>
 					<input value={password} onChange={e => setPassword(e.target.value)} type="password" placeholder="••••••••" style={fieldStyle(!!errors.password)} />
 					{errors.password && <p style={{ fontSize: 11, color: S.danger, margin: "4px 0 0" }}>{errors.password}</p>}
 				</div>
 
 				<div style={{ marginBottom: 14 }}>
-					<label style={{ display: "block", fontSize: 12, fontWeight: 500, color: S.dark, marginBottom: 5 }}>Slug</label>
+					<label style={{ display: "block", fontSize: 12, fontWeight: 500, color: S.dark, marginBottom: 5 }}><Trans>Slug</Trans></label>
 					<input value={slug} onChange={e => setSlug(slugify(e.target.value))} placeholder="acme-corp" style={{ ...fieldStyle(!!errors.slug), fontFamily: "monospace" }} />
 					{errors.slug ? (
 						<p style={{ fontSize: 11, color: S.danger, margin: "4px 0 0" }}>{errors.slug}</p>
 					) : (
-						<p style={{ fontSize: 11, color: S.textMuted, margin: "4px 0 0" }}>URL-safe identifier — lowercase, hyphens only.</p>
+						<p style={{ fontSize: 11, color: S.textMuted, margin: "4px 0 0" }}><Trans>URL-safe identifier — lowercase, hyphens only.</Trans></p>
 					)}
 				</div>
 
 				<div style={{ marginBottom: 22 }}>
-					<label style={{ display: "block", fontSize: 12, fontWeight: 500, color: S.dark, marginBottom: 5 }}>Subscription Plan</label>
-					<select
-						value={planId}
-						onChange={e => setPlanId(e.target.value)}
-						style={fieldStyle(false)}
-					>
-						<option value="">Select a plan (optional)</option>
+					<label style={{ display: "block", fontSize: 12, fontWeight: 500, color: S.dark, marginBottom: 5 }}><Trans>Subscription Plan</Trans></label>
+					<select value={planId} onChange={e => setPlanId(e.target.value)} style={fieldStyle(false)}>
+						<option value="">{t`Select a plan (optional)`}</option>
 						{plans.map(p => (
 							<option key={p.id} value={p.id}>{p.name}</option>
 						))}
@@ -204,11 +201,11 @@ function CreateOrgModal({ onClose, onCreated, plans }: { onClose: () => void; on
 
 				<div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
 					<button onClick={onClose} style={{ padding: "9px 18px", borderRadius: 8, border: `1.5px solid ${S.border}`, background: "transparent", color: S.textSecondary, fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}>
-						Cancel
+						<Trans>Cancel</Trans>
 					</button>
 					<button onClick={handleCreate} disabled={loading} style={{ padding: "9px 18px", borderRadius: 8, border: "none", background: loading ? S.purpleLight : S.purple, color: "#fff", fontSize: 13, fontWeight: 500, cursor: loading ? "not-allowed" : "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 8 }}>
 						{loading && <i className="ti ti-loader-2" style={{ fontSize: 14, animation: "spin 1s linear infinite" }} />}
-						Create organization
+						<Trans>Create organization</Trans>
 					</button>
 				</div>
 				<style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
@@ -219,6 +216,7 @@ function CreateOrgModal({ onClose, onCreated, plans }: { onClose: () => void; on
 
 // ─── EDIT ORG MODAL ───────────────────────────────────────────────────────────
 function EditOrgModal({ org, onClose, onUpdated, plans }: { org: AdminOrganization; onClose: () => void; onUpdated: (org: AdminOrganization) => void; plans: AdminPlan[] }) {
+	const { t } = useLingui();
 	const [name, setName] = useState(org.name);
 	const [email, setEmail] = useState(org.email);
 	const [planId, setPlanId] = useState(org.plan?.id ?? "");
@@ -227,9 +225,9 @@ function EditOrgModal({ org, onClose, onUpdated, plans }: { org: AdminOrganizati
 
 	const validate = () => {
 		const e: Record<string, string> = {};
-		if (!name.trim()) e.name = "Organization name is required.";
-		if (!email.trim()) e.email = "Email is required.";
-		else if (!/\S+@\S+\.\S+/.test(email)) e.email = "Enter a valid email.";
+		if (!name.trim()) e.name = t`Organization name is required.`;
+		if (!email.trim()) e.email = t`Email is required.`;
+		else if (!/\S+@\S+\.\S+/.test(email)) e.email = t`Enter a valid email.`;
 		return e;
 	};
 
@@ -246,7 +244,7 @@ function EditOrgModal({ org, onClose, onUpdated, plans }: { org: AdminOrganizati
 			});
 			onUpdated(updated);
 		} catch (err: any) {
-			setErrors({ form: err.message ?? "Failed to update organization." });
+			setErrors({ form: err.message ?? t`Failed to update organization.` });
 		} finally {
 			setLoading(false);
 		}
@@ -264,8 +262,8 @@ function EditOrgModal({ org, onClose, onUpdated, plans }: { org: AdminOrganizati
 			<div style={{ background: S.surface, borderRadius: 16, width: "100%", maxWidth: 460, padding: "2rem", boxShadow: "0 24px 80px rgba(0,0,0,0.18)" }}>
 				<div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 22 }}>
 					<div>
-						<h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: S.dark }}>Edit organization</h3>
-						<p style={{ margin: "4px 0 0", fontSize: 12, color: S.textMuted }}>Update details for {org.name}.</p>
+						<h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: S.dark }}><Trans>Edit organization</Trans></h3>
+						<p style={{ margin: "4px 0 0", fontSize: 12, color: S.textMuted }}><Trans>Update details for {org.name}.</Trans></p>
 					</div>
 					<button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: S.textMuted, fontSize: 20, lineHeight: 1 }}>×</button>
 				</div>
@@ -277,25 +275,21 @@ function EditOrgModal({ org, onClose, onUpdated, plans }: { org: AdminOrganizati
 				)}
 
 				<div style={{ marginBottom: 14 }}>
-					<label style={{ display: "block", fontSize: 12, fontWeight: 500, color: S.dark, marginBottom: 5 }}>Organization name</label>
-					<input value={name} onChange={e => setName(e.target.value)} placeholder="Acme Corp" style={fieldStyle(!!errors.name)} />
+					<label style={{ display: "block", fontSize: 12, fontWeight: 500, color: S.dark, marginBottom: 5 }}><Trans>Organization name</Trans></label>
+					<input value={name} onChange={e => setName(e.target.value)} placeholder={t`Acme Corp`} style={fieldStyle(!!errors.name)} />
 					{errors.name && <p style={{ fontSize: 11, color: S.danger, margin: "4px 0 0" }}>{errors.name}</p>}
 				</div>
 
 				<div style={{ marginBottom: 14 }}>
-					<label style={{ display: "block", fontSize: 12, fontWeight: 500, color: S.dark, marginBottom: 5 }}>Contact email</label>
+					<label style={{ display: "block", fontSize: 12, fontWeight: 500, color: S.dark, marginBottom: 5 }}><Trans>Contact email</Trans></label>
 					<input value={email} onChange={e => setEmail(e.target.value)} type="email" placeholder="contact@acme.com" style={fieldStyle(!!errors.email)} />
 					{errors.email && <p style={{ fontSize: 11, color: S.danger, margin: "4px 0 0" }}>{errors.email}</p>}
 				</div>
 
 				<div style={{ marginBottom: 22 }}>
-					<label style={{ display: "block", fontSize: 12, fontWeight: 500, color: S.dark, marginBottom: 5 }}>Subscription Plan</label>
-					<select
-						value={planId}
-						onChange={e => setPlanId(e.target.value)}
-						style={fieldStyle(false)}
-					>
-						<option value="">Select a plan</option>
+					<label style={{ display: "block", fontSize: 12, fontWeight: 500, color: S.dark, marginBottom: 5 }}><Trans>Subscription Plan</Trans></label>
+					<select value={planId} onChange={e => setPlanId(e.target.value)} style={fieldStyle(false)}>
+						<option value="">{t`Select a plan`}</option>
 						{plans.map(p => (
 							<option key={p.id} value={p.id}>{p.name}</option>
 						))}
@@ -304,11 +298,11 @@ function EditOrgModal({ org, onClose, onUpdated, plans }: { org: AdminOrganizati
 
 				<div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
 					<button onClick={onClose} style={{ padding: "9px 18px", borderRadius: 8, border: `1.5px solid ${S.border}`, background: "transparent", color: S.textSecondary, fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}>
-						Cancel
+						<Trans>Cancel</Trans>
 					</button>
 					<button onClick={handleUpdate} disabled={loading} style={{ padding: "9px 18px", borderRadius: 8, border: "none", background: loading ? S.purpleLight : S.purple, color: "#fff", fontSize: 13, fontWeight: 500, cursor: loading ? "not-allowed" : "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 8 }}>
 						{loading && <i className="ti ti-loader-2" style={{ fontSize: 14, animation: "spin 1s linear infinite" }} />}
-						Save changes
+						<Trans>Save changes</Trans>
 					</button>
 				</div>
 			</div>
@@ -318,6 +312,7 @@ function EditOrgModal({ org, onClose, onUpdated, plans }: { org: AdminOrganizati
 
 // ─── DELETE CONFIRM MODAL ─────────────────────────────────────────────────────
 function DeleteConfirmModal({ org, onClose, onDeleted }: { org: AdminOrganization; onClose: () => void; onDeleted: () => void }) {
+	const { t } = useLingui();
 	const [loading, setLoading] = useState(false);
 	const [confirmName, setConfirmName] = useState("");
 
@@ -328,7 +323,7 @@ function DeleteConfirmModal({ org, onClose, onDeleted }: { org: AdminOrganizatio
 			await api.deleteAdminOrganization(org.id);
 			onDeleted();
 		} catch (err: any) {
-			alert(err.message ?? "Failed to delete organization.");
+			alert(err.message ?? t`Failed to delete organization.`);
 		} finally {
 			setLoading(false);
 		}
@@ -340,14 +335,16 @@ function DeleteConfirmModal({ org, onClose, onDeleted }: { org: AdminOrganizatio
 				<div style={{ width: 48, height: 48, borderRadius: 12, background: S.dangerBg, color: S.danger, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 18 }}>
 					<i className="ti ti-alert-triangle" style={{ fontSize: 24 }} />
 				</div>
-				<h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: S.dark }}>Delete organization?</h3>
+				<h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: S.dark }}><Trans>Delete organization?</Trans></h3>
 				<p style={{ margin: "8px 0 20px", fontSize: 14, color: S.textMuted, lineHeight: 1.5 }}>
-					This will permanently delete <strong>{org.name}</strong> and all associated data, including users, conversations, and settings. This action cannot be undone.
+					<Trans>
+						This will permanently delete <strong>{org.name}</strong> and all associated data, including users, conversations, and settings. This action cannot be undone.
+					</Trans>
 				</p>
 
 				<div style={{ marginBottom: 20 }}>
 					<label style={{ display: "block", fontSize: 12, fontWeight: 500, color: S.dark, marginBottom: 5 }}>
-						Type <strong>{org.name}</strong> to confirm
+						<Trans>Type <strong>{org.name}</strong> to confirm</Trans>
 					</label>
 					<input
 						value={confirmName}
@@ -364,7 +361,7 @@ function DeleteConfirmModal({ org, onClose, onDeleted }: { org: AdminOrganizatio
 
 				<div style={{ display: "flex", gap: 10 }}>
 					<button onClick={onClose} style={{ flex: 1, padding: "10px", borderRadius: 8, border: `1.5px solid ${S.border}`, background: "transparent", color: S.textSecondary, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-						Cancel
+						<Trans>Cancel</Trans>
 					</button>
 					<button
 						onClick={handleDelete}
@@ -377,7 +374,7 @@ function DeleteConfirmModal({ org, onClose, onDeleted }: { org: AdminOrganizatio
 							fontFamily: "inherit"
 						}}
 					>
-						{loading ? "Deleting..." : "Delete Permanently"}
+						{loading ? <Trans>Deleting...</Trans> : <Trans>Delete Permanently</Trans>}
 					</button>
 				</div>
 			</div>
@@ -387,7 +384,7 @@ function DeleteConfirmModal({ org, onClose, onDeleted }: { org: AdminOrganizatio
 
 // ─── TOAST ────────────────────────────────────────────────────────────────────
 function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error"; onClose: () => void }) {
-	useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, [onClose]);
+	useEffect(() => { const timer = setTimeout(onClose, 3500); return () => clearTimeout(timer); }, [onClose]);
 	return (
 		<div style={{
 			position: "fixed", bottom: 24, right: 24, zIndex: 999,
@@ -411,7 +408,10 @@ function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error";
 const PAGE_SIZE = 10;
 
 export default function OrganizationsPage() {
-	const router = useRouter();
+	const { t } = useLingui();
+	// Get the active locale for date formatting
+	const { i18n } = useLinguiCore();
+	const locale = i18n.locale;
 
 	const [orgs, setOrgs] = useState<AdminOrganization[]>([]);
 	const [plans, setPlans] = useState<AdminPlan[]>([]);
@@ -454,11 +454,14 @@ export default function OrganizationsPage() {
 			setOrgs(res.data);
 			setMeta(res.meta);
 		} catch (err: any) {
-			setError(err.message ?? "Failed to load organizations.");
+			setError(err.message ?? t`Failed to load overview stats`);
 		} finally {
 			setLoading(false);
 		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [search, statusFilter, page]);
+	// NOTE: `t` is intentionally omitted — it's a stable Lingui macro reference
+	// and including it would cause infinite re-fetches on every render.
 
 	useEffect(() => {
 		fetchOrgs();
@@ -467,26 +470,26 @@ export default function OrganizationsPage() {
 
 	// debounce search
 	useEffect(() => {
-		const t = setTimeout(() => { setPage(1); setSearch(searchInput); }, 400);
-		return () => clearTimeout(t);
+		const timer = setTimeout(() => { setPage(1); setSearch(searchInput); }, 400);
+		return () => clearTimeout(timer);
 	}, [searchInput]);
 
 	const handleCreated = (org: AdminOrganization) => {
 		setShowCreate(false);
-		setToast({ msg: `${org.name} created.`, type: "success" });
+		setToast({ msg: t`${org.name} created.`, type: "success" });
 		fetchOrgs();
 	};
 
 	const handleUpdated = (org: AdminOrganization) => {
 		setEditingOrg(null);
-		setToast({ msg: `${org.name} updated.`, type: "success" });
+		setToast({ msg: t`${org.name} updated.`, type: "success" });
 		fetchOrgs();
 	};
 
 	const handleDeleted = () => {
-		const name = deletingOrg?.name;
+		const name = deletingOrg?.name ?? "";
 		setDeletingOrg(null);
-		setToast({ msg: `${name} deleted.`, type: "success" });
+		setToast({ msg: t`${name} deleted.`, type: "success" });
 		if (selectedOrgId) setSelectedOrgId(null);
 		fetchOrgs();
 	};
@@ -496,14 +499,14 @@ export default function OrganizationsPage() {
 		try {
 			if (org.is_active) {
 				await api.suspendAdminOrganization(org.id);
-				setToast({ msg: `${org.name} suspended.`, type: "success" });
+				setToast({ msg: t`${org.name} suspended.`, type: "success" });
 			} else {
 				await api.activateAdminOrganization(org.id);
-				setToast({ msg: `${org.name} activated.`, type: "success" });
+				setToast({ msg: t`${org.name} activated.`, type: "success" });
 			}
 			setOrgs(prev => prev.map(o => o.id === org.id ? { ...o, is_active: !o.is_active } : o));
 		} catch (err: any) {
-			setToast({ msg: err.message ?? "Action failed.", type: "error" });
+			setToast({ msg: err.message ?? t`Action failed.`, type: "error" });
 		} finally {
 			setActionLoading(null);
 		}
@@ -513,10 +516,10 @@ export default function OrganizationsPage() {
 		setActionLoading(org.id);
 		try {
 			await api.cancelDeleteAdminOrganization(org.id);
-			setToast({ msg: `Deletion of ${org.name} cancelled.`, type: "success" });
+			setToast({ msg: t`Deletion of ${org.name} cancelled.`, type: "success" });
 			setOrgs(prev => prev.map(o => o.id === org.id ? { ...o, scheduled_deletion_at: null } : o));
 		} catch (err: any) {
-			setToast({ msg: err.message ?? "Action failed.", type: "error" });
+			setToast({ msg: err.message ?? t`Action failed.`, type: "error" });
 		} finally {
 			setActionLoading(null);
 		}
@@ -524,11 +527,17 @@ export default function OrganizationsPage() {
 
 	const totalPages = meta?.total_pages ?? 1;
 
+	const STATUS_OPTIONS = [
+		{ label: t`All Status`, value: "" as const },
+		{ label: t`Active`, value: "true" as const },
+		{ label: t`Suspended`, value: "false" as const },
+	];
+
 	if (selectedOrgId) {
 		return (
 			<div style={{ padding: "1.5rem" }}>
 				<OrganizationDetail
-					orgId={selectedOrgId}
+					organizationId={selectedOrgId}
 					onClose={() => setSelectedOrgId(null)}
 				/>
 			</div>
@@ -541,16 +550,51 @@ export default function OrganizationsPage() {
 			<div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20, gap: 16, flexWrap: "wrap" }}>
 				<div>
 					<p style={{ fontSize: 11, fontWeight: 600, color: S.textMuted, letterSpacing: ".06em", textTransform: "uppercase", margin: "0 0 4px" }}>
-						Tenant management
+						<Trans>Tenant management</Trans>
 					</p>
 					<h1 style={{ fontSize: 24, fontWeight: 750, color: S.dark, margin: 0 }}>
-						Organizations
+						<Trans>Organizations</Trans>
 					</h1>
 				</div>
 				<button onClick={() => setShowCreate(true)} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 8, border: "none", background: S.purple, color: "#fff", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}>
 					<i className="ti ti-plus" style={{ fontSize: 16 }} />
-					New organization
+					<Trans>New organization</Trans>
 				</button>
+			</div>
+
+			{/* Stats row */}
+			<div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
+				<div style={{ background: S.surface, border: `0.5px solid ${S.border}`, borderRadius: 10, padding: "14px 20px", minWidth: 140 }}>
+					<div style={{ fontSize: 11, color: S.textMuted, fontWeight: 600, marginBottom: 4 }}><Trans>Platform Status</Trans></div>
+					<div style={{ fontSize: 13, fontWeight: 700, color: "#0F6E56" }}><Trans>All Systems Operational</Trans></div>
+				</div>
+				<div style={{ background: S.surface, border: `0.5px solid ${S.border}`, borderRadius: 10, padding: "14px 20px", minWidth: 140 }}>
+					<div style={{ fontSize: 11, color: S.textMuted, fontWeight: 600, marginBottom: 4 }}><Trans>Total Organizations</Trans></div>
+					<div style={{ fontSize: 20, fontWeight: 750, color: S.dark }}>{meta?.total ?? "—"}</div>
+				</div>
+				<div style={{ background: S.surface, border: `0.5px solid ${S.border}`, borderRadius: 10, padding: "14px 20px", minWidth: 140 }}>
+					<div style={{ fontSize: 11, color: S.textMuted, fontWeight: 600, marginBottom: 4 }}><Trans>Active Organizations</Trans></div>
+					<div style={{ fontSize: 20, fontWeight: 750, color: S.dark }}>{orgs.filter(o => o.is_active).length}</div>
+				</div>
+				<div style={{ background: S.surface, border: `0.5px solid ${S.border}`, borderRadius: 10, padding: "14px 20px", minWidth: 140 }}>
+					<div style={{ fontSize: 11, color: S.textMuted, fontWeight: 600, marginBottom: 4 }}><Trans>Total Users</Trans></div>
+					<div style={{ fontSize: 20, fontWeight: 750, color: S.dark }}>{orgs.reduce((a, o) => a + (o.stats?.total_users ?? 0), 0)}</div>
+				</div>
+				<div style={{ background: S.surface, border: `0.5px solid ${S.border}`, borderRadius: 10, padding: "14px 20px", minWidth: 140 }}>
+					<div style={{ fontSize: 11, color: S.textMuted, fontWeight: 600, marginBottom: 4 }}><Trans>Total Tickets</Trans></div>
+					<div style={{ fontSize: 20, fontWeight: 750, color: S.dark }}>{orgs.reduce((a, o) => a + (o.stats?.total_tickets ?? 0), 0)}</div>
+				</div>
+				<div style={{ background: S.surface, border: `0.5px solid ${S.border}`, borderRadius: 10, padding: "14px 20px", minWidth: 140 }}>
+					<div style={{ fontSize: 11, color: S.textMuted, fontWeight: 600, marginBottom: 4 }}><Trans>Escalated Tickets</Trans></div>
+					<div style={{ fontSize: 20, fontWeight: 750, color: S.dark }}>{orgs.reduce((a, o) => a + (o.stats?.escalated_tickets ?? 0), 0)}</div>
+				</div>
+			</div>
+
+			{/* Welcome */}
+			<div style={{ marginBottom: 20 }}>
+				<h2 style={{ fontSize: 18, fontWeight: 700, color: S.dark, margin: 0 }}>
+					<Trans>Welcome back, Super Admin</Trans>
+				</h2>
 			</div>
 
 			{/* Filters */}
@@ -560,18 +604,14 @@ export default function OrganizationsPage() {
 					<input
 						value={searchInput}
 						onChange={e => setSearchInput(e.target.value)}
-						placeholder="Search by name, slug, or email…"
+						placeholder={t`Search organizations by name or slug...`}
 						style={{ width: "100%", boxSizing: "border-box", height: 38, padding: "0 12px 0 36px", border: `1.5px solid ${S.border}`, borderRadius: 8, fontSize: 13, fontFamily: "inherit", color: S.dark, outline: "none", background: S.surface }}
 					/>
 				</div>
 				<div style={{ display: "flex", gap: 4, background: S.surface, border: `0.5px solid ${S.border}`, borderRadius: 8, padding: 4 }}>
-					{[
-						{ label: "All", value: "" as const },
-						{ label: "Active", value: "true" as const },
-						{ label: "Suspended", value: "false" as const },
-					].map(opt => (
+					{STATUS_OPTIONS.map(opt => (
 						<button
-							key={opt.label}
+							key={opt.value}
 							onClick={() => { setStatusFilter(opt.value); setPage(1); }}
 							style={{
 								padding: "7px 14px", borderRadius: 6, border: "none", cursor: "pointer", fontFamily: "inherit",
@@ -597,21 +637,23 @@ export default function OrganizationsPage() {
 					<div style={{ width: 52, height: 52, borderRadius: 14, background: S.purpleBg, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
 						<i className="ti ti-building-skyscraper" style={{ fontSize: 26, color: S.purple }} />
 					</div>
-					<p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: S.dark }}>No organizations found</p>
+					<p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: S.dark }}><Trans>No organizations found</Trans></p>
 					<p style={{ margin: "6px 0 0", fontSize: 12, color: S.textMuted }}>
-						{search || statusFilter ? "Try adjusting your search or filters." : "Create your first organization to get started."}
+						{search || statusFilter
+							? <Trans>No organizations match your search.</Trans>
+							: <Trans>Create your first organization to get started.</Trans>}
 					</p>
 				</div>
 			) : (
 				<div style={{ background: S.surface, borderRadius: 12, border: `0.5px solid ${S.border}`, overflow: "hidden" }}>
 					{/* Table header */}
 					<div style={{ display: "grid", gridTemplateColumns: "1.8fr 0.8fr 0.8fr 1.2fr 0.8fr 1.6fr", gap: 12, padding: "12px 20px", borderBottom: `0.5px solid ${S.border}`, fontSize: 11, fontWeight: 600, color: S.textMuted, letterSpacing: ".04em", textTransform: "uppercase" }}>
-						<div>Organization</div>
-						<div>Plan</div>
-						<div>Status</div>
-						<div>Stats</div>
-						<div>Created</div>
-						<div style={{ textAlign: "right" }}>Actions</div>
+						<div><Trans>Organization</Trans></div>
+						<div><Trans>Plan</Trans></div>
+						<div><Trans>Status</Trans></div>
+						<div><Trans>Stats</Trans></div>
+						<div><Trans>Joined Date</Trans></div>
+						<div style={{ textAlign: "right" }}><Trans>Actions</Trans></div>
 					</div>
 
 					{orgs.map((org, i) => (
@@ -646,12 +688,12 @@ export default function OrganizationsPage() {
 
 							{/* Stats */}
 							<div style={{ display: "flex", gap: 10, fontSize: 11, color: S.textMuted }}>
-								<span title="Users"><i className="ti ti-users" style={{ fontSize: 12, marginRight: 2 }} />{org.stats?.total_users ?? 0}</span>
-								<span title="Tickets"><i className="ti ti-ticket" style={{ fontSize: 12, marginRight: 2 }} />{org.stats?.total_tickets ?? 0}</span>
+								<span title={t`Users`}><i className="ti ti-users" style={{ fontSize: 12, marginRight: 2 }} />{org.stats?.total_users ?? 0}</span>
+								<span title={t`Tickets`}><i className="ti ti-ticket" style={{ fontSize: 12, marginRight: 2 }} />{org.stats?.total_tickets ?? 0}</span>
 							</div>
 
-							{/* Created */}
-							<div style={{ fontSize: 12, color: S.textMuted }}>{fmtDate(org.created_at)}</div>
+							{/* Joined Date */}
+							<div style={{ fontSize: 12, color: S.textMuted }}>{fmtDate(org.created_at, locale)}</div>
 
 							{/* Actions */}
 							<div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }} onClick={e => e.stopPropagation()}>
@@ -659,7 +701,7 @@ export default function OrganizationsPage() {
 									<button
 										onClick={() => handleCancelDeletion(org)}
 										disabled={actionLoading === org.id}
-										title="Cancel scheduled deletion"
+										title={t`Cancel scheduled deletion`}
 										style={{
 											padding: "6px 10px", borderRadius: 7,
 											border: `1px solid ${S.green}`,
@@ -673,14 +715,14 @@ export default function OrganizationsPage() {
 										{actionLoading === org.id
 											? <i className="ti ti-loader-2" style={{ fontSize: 12, animation: "spin 1s linear infinite" }} />
 											: <i className="ti ti-rotate-clockwise" style={{ fontSize: 12 }} />}
-										Cancel Delete
+										<Trans>Cancel Delete</Trans>
 									</button>
 								) : (
 									<>
 										<button
 											onClick={() => handleToggleStatus(org)}
 											disabled={actionLoading === org.id}
-											title={org.is_active ? "Suspend organization" : "Activate organization"}
+											title={org.is_active ? t`Suspend organization` : t`Activate organization`}
 											style={{
 												padding: "6px 10px", borderRadius: 7,
 												border: `1px solid ${org.is_active ? S.dangerBg : S.greenBg}`,
@@ -694,18 +736,18 @@ export default function OrganizationsPage() {
 											{actionLoading === org.id
 												? <i className="ti ti-loader-2" style={{ fontSize: 12, animation: "spin 1s linear infinite" }} />
 												: <i className={`ti ti-${org.is_active ? "ban" : "circle-check"}`} style={{ fontSize: 12 }} />}
-											{org.is_active ? "Suspend" : "Activate"}
+											{org.is_active ? <Trans>Suspend</Trans> : <Trans>Activate</Trans>}
 										</button>
 										<button
 											onClick={() => setEditingOrg(org)}
-											title="Edit details"
+											title={t`Edit details`}
 											style={{ padding: "6px 8px", borderRadius: 7, border: `1px solid ${S.border}`, background: S.surface, color: S.textSecondary, fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
 										>
 											<i className="ti ti-edit" style={{ fontSize: 14 }} />
 										</button>
 										<button
 											onClick={() => setDeletingOrg(org)}
-											title="Delete organization"
+											title={t`Delete organization`}
 											style={{ padding: "6px 8px", borderRadius: 7, border: `1px solid ${S.dangerBg}`, background: S.dangerBg, color: S.danger, fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
 										>
 											<i className="ti ti-trash" style={{ fontSize: 14 }} />
@@ -714,7 +756,7 @@ export default function OrganizationsPage() {
 								)}
 								<button
 									onClick={() => setSelectedOrgId(org.id)}
-									title="View details"
+									title={t`View Organization Details`}
 									style={{ padding: "6px 8px", borderRadius: 7, border: `1px solid ${S.border}`, background: S.surface, color: S.textSecondary, fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
 								>
 									<i className="ti ti-chevron-right" style={{ fontSize: 14 }} />
@@ -729,7 +771,7 @@ export default function OrganizationsPage() {
 			{meta && totalPages > 1 && (
 				<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>
 					<span style={{ fontSize: 12, color: S.textMuted }}>
-						Showing {(meta.page - 1) * meta.limit + 1}–{Math.min(meta.page * meta.limit, meta.total)} of {meta.total}
+						<Trans>Showing {(meta.page - 1) * meta.limit + 1}–{Math.min(meta.page * meta.limit, meta.total)} of {meta.total}</Trans>
 					</span>
 					<div style={{ display: "flex", gap: 6 }}>
 						<button
@@ -737,17 +779,17 @@ export default function OrganizationsPage() {
 							disabled={page <= 1}
 							style={{ padding: "6px 12px", borderRadius: 7, border: `1px solid ${S.border}`, background: "transparent", color: S.textSecondary, fontSize: 12, cursor: page <= 1 ? "not-allowed" : "pointer", fontFamily: "inherit", opacity: page <= 1 ? 0.5 : 1 }}
 						>
-							Previous
+							<Trans>Previous</Trans>
 						</button>
 						<span style={{ display: "flex", alignItems: "center", padding: "0 8px", fontSize: 12, color: S.textMuted }}>
-							Page {page} of {totalPages}
+							<Trans>Page {page} of {totalPages}</Trans>
 						</span>
 						<button
 							onClick={() => setPage(p => Math.min(totalPages, p + 1))}
 							disabled={page >= totalPages}
 							style={{ padding: "6px 12px", borderRadius: 7, border: `1px solid ${S.border}`, background: "transparent", color: S.textSecondary, fontSize: 12, cursor: page >= totalPages ? "not-allowed" : "pointer", fontFamily: "inherit", opacity: page >= totalPages ? 0.5 : 1 }}
 						>
-							Next
+							<Trans>Next</Trans>
 						</button>
 					</div>
 				</div>

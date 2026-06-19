@@ -2,47 +2,55 @@
 
 import { useState } from "react";
 import { useInView } from "@/hooks/useInView";
-
-const CHANNELS = [
-  {
-    icon: "ti-mail",
-    label: "Email us",
-    val: "hello@supportnest.ai",
-    color: "#534AB7",
-  },
-  {
-    icon: "ti-brand-twitter",
-    label: "Twitter",
-    val: "@supportnest",
-    color: "#1DA1F2",
-  },
-  {
-    icon: "ti-brand-linkedin",
-    label: "LinkedIn",
-    val: "SupportNest",
-    color: "#0A66C2",
-  },
-];
-
-type FormState = {
-  name: string;
-  email: string;
-  company: string;
-  message: string;
-};
-
-const INITIAL_FORM: FormState = {
-  name: "",
-  email: "",
-  company: "",
-  message: "",
-};
-
-const INPUT_CLS =
-  "w-full box-border px-3.5 py-2.5 text-sm border-[1.5px] border-border rounded-lg outline-none font-[inherit] sn-page-text bg-surface transition-colors duration-150 focus:border-brand";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { useContext } from "react";
+import { LocaleContext } from "@/context/local-context";
 
 export default function Contact() {
+  const { t } = useLingui();
   const { ref, visible } = useInView();
+  const locale = useContext(LocaleContext)?.locale ?? "en";
+  const fmt = (val: number) =>
+    new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en").format(val);
+
+  const CHANNELS = [
+    {
+      icon: "ti-mail",
+      label: t`Email us`,
+      val: "hello@supportnest.ai",
+      color: "#534AB7",
+    },
+    {
+      icon: "ti-brand-twitter",
+      label: t`Twitter`,
+      val: "@supportnest",
+      color: "#1DA1F2",
+    },
+    {
+      icon: "ti-brand-linkedin",
+      label: t`LinkedIn`,
+      val: "SupportNest",
+      color: "#0A66C2",
+    },
+  ];
+
+  type FormState = {
+    name: string;
+    email: string;
+    company: string;
+    message: string;
+  };
+
+  const INITIAL_FORM: FormState = {
+    name: "",
+    email: "",
+    company: "",
+    message: "",
+  };
+
+  const INPUT_CLS =
+    "w-full box-border px-3.5 py-2.5 text-sm border-[1.5px] border-border rounded-lg outline-none font-[inherit] sn-page-text bg-surface transition-colors duration-150 focus:border-brand";
+
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -50,25 +58,25 @@ export default function Contact() {
   const set = (k: keyof FormState) => (v: string) =>
     setForm((f) => ({ ...f, [k]: v }));
 
-async function handleSubmit(e: React.FormEvent) {
-  e.preventDefault();
-  setLoading(true);
-  const res = await fetch('http://localhost:3001/api/contact', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ 
-      name: form.name, 
-      email: form.email, 
-      company: form.company, 
-      message: form.message 
-    }),
-  });
-  setLoading(false);
-  if (res.ok) {
-    setSent(true);
-    setForm(INITIAL_FORM);
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    const res = await fetch("http://localhost:3001/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: form.name,
+        email: form.email,
+        company: form.company,
+        message: form.message,
+      }),
+    });
+    setLoading(false);
+    if (res.ok) {
+      setSent(true);
+      setForm(INITIAL_FORM);
+    }
   }
-}
 
   return (
     <section
@@ -77,24 +85,24 @@ async function handleSubmit(e: React.FormEvent) {
       style={{ background: "var(--surface-elevated)" }}
     >
       <div className="max-w-[1100px] mx-auto">
-        {/* Heading */}
         <div className="text-center mb-10 md:mb-13">
           <div className="inline-block bg-brand-faint text-brand text-xs font-bold px-3.5 py-1 rounded-full tracking-[.08em] uppercase mb-4">
-            Get in touch
+            <Trans>Get in touch</Trans>
           </div>
           <h2
             className="font-extrabold sn-page-text tracking-[-0.025em] mb-3 mt-0"
             style={{ fontSize: "clamp(1.6rem, 3.5vw, 2.6rem)" }}
           >
-            We&apos;d love to hear from you
+            <Trans>We&apos;d love to hear from you</Trans>
           </h2>
           <p className="text-sm sm:text-base sn-muted">
-            Questions, demos, or custom enterprise plans — we reply within 24
-            hours.
+            <Trans>
+              Questions, demos, or custom enterprise plans — we reply within{" "}
+              {fmt(24)} hours.
+            </Trans>
           </p>
         </div>
 
-        {/* Grid: stacks on mobile, side-by-side on lg+ */}
         <div
           ref={ref}
           className="grid grid-cols-1 lg:grid-cols-[1fr_1.6fr] gap-6 sm:gap-8"
@@ -108,11 +116,13 @@ async function handleSubmit(e: React.FormEvent) {
           <div className="flex flex-col gap-4">
             <div className="bg-white dark:bg-surface border-[1.5px] border-[#e8e6f0] dark:border-border rounded-2xl p-5 sm:p-7">
               <h3 className="text-base font-bold text-[#1a1830] dark:text-page-text mt-0 mb-1.5">
-                Talk to sales
+                <Trans>Talk to sales</Trans>
               </h3>
               <p className="text-[13px] text-[#64607a] dark:text-muted leading-[1.7] mt-0 mb-5">
-                Interested in SupportNest for your team? We&apos;ll walk you
-                through a live demo and tailor a plan for your use case.
+                <Trans>
+                  Interested in SupportNest for your team? We&apos;ll walk you
+                  through a live demo and tailor a plan for your use case.
+                </Trans>
               </p>
               <div className="flex flex-col gap-3.5">
                 {CHANNELS.map((ch) => (
@@ -139,11 +149,10 @@ async function handleSubmit(e: React.FormEvent) {
               </div>
             </div>
 
-            {/* Reply-time badge */}
             <div className="bg-[#E1F5EE] border-[1.5px] border-[#1D9E75]/20 rounded-xl px-[18px] py-3.5 flex items-center gap-2.5">
               <div className="w-2 h-2 rounded-full bg-[#1D9E75] shrink-0" />
               <span className="text-[13px] text-[#0F6E56] font-semibold">
-                Average reply time: under 4 hours
+                <Trans>Average reply time: under {fmt(4)} hours</Trans>
               </span>
             </div>
           </div>
@@ -156,36 +165,35 @@ async function handleSubmit(e: React.FormEvent) {
                   <i className="ti ti-check text-[26px] text-[#1D9E75]" />
                 </div>
                 <h3 className="text-lg font-bold text-[#1a1830] dark:text-page-text mb-2">
-                  Message sent!
+                  <Trans>Message sent!</Trans>
                 </h3>
                 <p className="text-sm text-[#64607a] dark:text-muted">
-                  We&apos;ll get back to you within 24 hours.
+                  <Trans>We&apos;ll get back to you within {fmt(24)} hours.</Trans>
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
-                {/* Name + Email: stacks on mobile, side-by-side on sm+ */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div>
                     <label className="block text-[13px] font-medium text-[#1a1830] dark:text-page-text mb-1.5">
-                      Your name *
+                      <Trans>Your name *</Trans>
                     </label>
                     <input
                       value={form.name}
                       onChange={(e) => set("name")(e.target.value)}
-                      placeholder="Mohamed Rashad"
+                      placeholder={t`Mohamed Rashad`}
                       className={INPUT_CLS}
                     />
                   </div>
                   <div>
                     <label className="block text-[13px] font-medium text-[#1a1830] dark:text-page-text mb-1.5">
-                      Work email *
+                      <Trans>Work email *</Trans>
                     </label>
                     <input
                       type="email"
                       value={form.email}
                       onChange={(e) => set("email")(e.target.value)}
-                      placeholder="you@company.com"
+                      placeholder={t`you@company.com`}
                       className={INPUT_CLS}
                     />
                   </div>
@@ -193,24 +201,24 @@ async function handleSubmit(e: React.FormEvent) {
 
                 <div>
                   <label className="block text-[13px] font-medium text-[#1a1830] dark:text-page-text mb-1.5">
-                    Company
+                    <Trans>Company</Trans>
                   </label>
                   <input
                     value={form.company}
                     onChange={(e) => set("company")(e.target.value)}
-                    placeholder="Acme Corp"
+                    placeholder={t`Acme Corp`}
                     className={INPUT_CLS}
                   />
                 </div>
 
                 <div>
                   <label className="block text-[13px] font-medium text-[#1a1830] dark:text-page-text mb-1.5">
-                    Message *
+                    <Trans>Message *</Trans>
                   </label>
                   <textarea
                     value={form.message}
                     onChange={(e) => set("message")(e.target.value)}
-                    placeholder="Tell us about your team size, current support setup, and what you're hoping to solve..."
+                    placeholder={t`Tell us about your team size, current support setup, and what you're hoping to solve...`}
                     rows={4}
                     className={`${INPUT_CLS} resize-y min-h-[100px]`}
                   />
@@ -222,10 +230,11 @@ async function handleSubmit(e: React.FormEvent) {
                   className="w-full bg-[#534AB7] hover:bg-[#7F77DD] disabled:opacity-70 text-white text-sm font-semibold py-3 px-5 rounded-[10px] border-none cursor-pointer font-[inherit] transition-colors flex items-center justify-center gap-2"
                 >
                   {loading ? (
-                    "Sending…"
+                    <Trans>Sending…</Trans>
                   ) : (
                     <>
-                      <i className="ti ti-send text-base" /> Send message
+                      <i className="ti ti-send text-base" />{" "}
+                      <Trans>Send message</Trans>
                     </>
                   )}
                 </button>
