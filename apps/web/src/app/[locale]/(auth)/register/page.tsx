@@ -232,7 +232,7 @@ export default function RegisterPage() {
 								}
 							}}
 							onError={() => setSubmitError("Google sign-up failed.")}
-							width="full"
+							width="390"
 							auto_select={false}
 							text="signup_with"
 						/>
