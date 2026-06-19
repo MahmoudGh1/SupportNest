@@ -179,7 +179,6 @@ export const completeRegistrationService = async ({
   businessName: string;
   planId: string;
 }) => {
-  // export const completeRegistrationService = async ({ userId, businessName, planId, amount, currency, isAnnual }: { userId: string; businessName: string; planId: string; amount: number; currency: string; isAnnual: boolean }) => {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw new AppError("User not found", 404);
   if (!user.isEmailVerified) throw new AppError("Email not verified", 403);
@@ -187,9 +186,6 @@ export const completeRegistrationService = async ({
   const widgetSecret = await generateSecret(32);
   const orgSlug = slugify(businessName);
 
-  // const periodDays = isAnnual ? 365 : 30;
-  // const billingPeriodStart = new Date();
-  // const billingPeriodEnd = new Date(billingPeriodStart.getTime() + periodDays * 24 * 60 * 60 * 1000);
   let createdOrgId: string | undefined = "";
   await prisma.$transaction(async (tx) => {
     const org = await tx.organization.create({
@@ -208,20 +204,6 @@ export const completeRegistrationService = async ({
       where: { id: userId },
       data: { organizationId: org.id },
     });
-
-    // await tx.payment.create({
-    // 	data: {
-    // 		organizationId: org.id,
-    // 		pricingId: planId,
-    // 		amount,
-    // 		currency,
-    // 		status: PaymentStatus.SUCCEEDED,
-    // 		paymentProvider: "checkout",
-    // 		providerPaymentId: `checkout_${org.id}_${Date.now()}`,
-    // 		billingPeriodStart,
-    // 		billingPeriodEnd,
-    // 	},
-    // });
   });
 
   await enqueueNotification("organization_registered", {
@@ -241,57 +223,6 @@ export const completeRegistrationService = async ({
       isActive: true,
     },
   });
-};
-
-export const completeRegistrationService = async ({ userId, businessName, planId }: { userId: string; businessName: string; planId: string }) => {
-	// export const completeRegistrationService = async ({ userId, businessName, planId, amount, currency, isAnnual }: { userId: string; businessName: string; planId: string; amount: number; currency: string; isAnnual: boolean }) => {
-	const user = await prisma.user.findUnique({ where: { id: userId } });
-	if (!user) throw new AppError("User not found", 404);
-	if (!user.isEmailVerified) throw new AppError("Email not verified", 403);
-
-	const widgetSecret = await generateSecret(32);
-	const orgSlug = slugify(businessName);
-
-	// const periodDays = isAnnual ? 365 : 30;
-	// const billingPeriodStart = new Date();
-	// const billingPeriodEnd = new Date(billingPeriodStart.getTime() + periodDays * 24 * 60 * 60 * 1000);
-
-	await prisma.$transaction(async (tx) => {
-		const org = await tx.organization.create({
-			data: {
-				name: businessName,
-				slug: orgSlug,
-				email: user.email,
-				widgetSecret,
-				isActive: true,
-				planId,
-			},
-		});
-
-		await tx.user.update({
-			where: { id: userId },
-			data: { organizationId: org.id },
-		});
-
-		// await tx.payment.create({
-		// 	data: {
-		// 		organizationId: org.id,
-		// 		pricingId: planId,
-		// 		amount,
-		// 		currency,
-		// 		status: PaymentStatus.SUCCEEDED,
-		// 		paymentProvider: "checkout",
-		// 		providerPaymentId: `checkout_${org.id}_${Date.now()}`,
-		// 		billingPeriodStart,
-		// 		billingPeriodEnd,
-		// 	},
-		// });
-	});
-
-	return prisma.user.findUnique({
-		where: { id: userId },
-		select: { id: true, email: true, role: true, organizationId: true, firstName: true, lastName: true, isActive: true },
-	});
 };
 
 export const loginAfterPaymentService = async ({ userId, paymentId }: { userId: string; paymentId: string }) => {
