@@ -14,12 +14,6 @@ export interface AuthUser {
 	isEmailVerified: boolean;
 }
 
-export type UploadDocumentInput = {
-    file: File;
-    title: string;
-    type: "PDF" | "DOCX" | "TXT" | "URL";
-};
-
 export enum Role {
 	SUPER_ADMIN = "SUPER_ADMIN",
 	ORG_ADMIN = "ORG_ADMIN",
@@ -96,7 +90,7 @@ export interface UpdateWidgetConfigInput {
 
 // ─── KNOWLEDGE BASE TYPES ─────────────────────────────────────────────────────
 export type DocStatus = "PROCESSING" | "READY" | "FAILED";
-export type DocType = "PDF" | "FAQ" | "CSV" | "DOCX";
+export type DocType = "PDF" | "CSV" | "DOCX";
 
 export interface KnowledgeDocument {
 	id: string;
