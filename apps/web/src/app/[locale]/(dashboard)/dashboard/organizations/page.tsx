@@ -14,25 +14,24 @@ function fmtDate(iso: string) {
     return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-// ─── RESPONSIVE STYLES (MEDIA INJECTOR) ────────────────────────────────────────
+// ─── RESPONSIVE STYLES ────────────────────────────────────────────────────────
 function ResponsiveStyles() {
     return (
         <style>{`
             @keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
             @keyframes spin { to { transform: rotate(360deg) } }
             @keyframes slideUp { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
-            
-            /* Responsive Utilities */
+
             .org-grid {
                 display: grid;
-                grid-template-columns: 1.8fr 0.8fr 0.8fr 1.2fr 0.8fr 1.6fr;
+                grid-template-columns: 1.8fr 0.8fr 0.8fr 1.2fr 1.6fr;
                 gap: 12px;
                 padding: 14px 20px;
                 align-items: center;
             }
             .org-header-grid {
                 display: grid;
-                grid-template-columns: 1.8fr 0.8fr 0.8fr 1.2fr 0.8fr 1.6fr;
+                grid-template-columns: 1.8fr 0.8fr 0.8fr 1.2fr 1.6fr;
                 gap: 12px;
                 padding: 12px 20px;
             }
@@ -433,7 +432,7 @@ function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error";
     useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, [onClose]);
     return (
         <div style={{
-            position: "fixed", bottom: 24, right: 24, left: 24, mdLeft: "auto", zIndex: 999,
+            position: "fixed", bottom: 24, right: 24, left: 24, zIndex: 999,
             maxWidth: 360, marginLeft: "auto",
             background: type === "success" ? S.greenBg : S.dangerBg,
             border: `1px solid ${type === "success" ? S.green : S.danger}`,
@@ -586,7 +585,7 @@ export default function OrganizationsPage() {
                 </button>
             </div>
 
-            {/* Filters Layout */}
+            {/* Filters */}
             <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
                 <div style={{ position: "relative", flex: "1 1 240px" }}>
                     <i className="ti ti-search" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: S.textMuted, fontSize: 15 }} />
@@ -597,7 +596,7 @@ export default function OrganizationsPage() {
                         style={{ width: "100%", boxSizing: "border-box", height: 38, padding: "0 12px 0 36px", border: `1.5px solid ${S.border}`, borderRadius: 8, fontSize: 13, fontFamily: "inherit", color: S.dark, outline: "none", background: S.surface }}
                     />
                 </div>
-                <div style={{ display: "flex", gap: 4, background: S.surface, border: `0.5px solid ${S.border}`, borderRadius: 8, padding: 4, width: "auto", overflowX: "auto" }}>
+                <div style={{ display: "flex", gap: 4, background: S.surface, border: `0.5px solid ${S.border}`, borderRadius: 8, padding: 4, overflowX: "auto" }}>
                     {[
                         { label: "All", value: "" as const },
                         { label: "Active", value: "true" as const },
@@ -631,18 +630,17 @@ export default function OrganizationsPage() {
                 </div>
             ) : (
                 <div style={{ background: S.surface, borderRadius: 12, border: `0.5px solid ${S.border}`, overflow: "hidden" }}>
-                    
-                    {/* Desktop Headers */}
+
+                    {/* Desktop Header */}
                     <div className="org-header-grid" style={{ borderBottom: `0.5px solid ${S.border}`, fontSize: 11, fontWeight: 600, color: S.textMuted, letterSpacing: ".04em", textTransform: "uppercase" }}>
                         <div>Organization</div>
                         <div>Plan</div>
                         <div>Status</div>
-                        <div>Stats</div>
                         <div>Created</div>
                         <div style={{ textAlign: "right" }}>Actions</div>
                     </div>
 
-                    {/* Dynamic Responsive List / Rows */}
+                    {/* Rows */}
                     {orgs.map((org) => (
                         <div
                             key={org.id}
@@ -650,60 +648,50 @@ export default function OrganizationsPage() {
                             className="org-grid"
                             style={{
                                 borderBottom: `0.5px solid ${S.border}`, background: S.surface,
-                                transition: "background .15s"
+                                transition: "background .15s", cursor: "pointer",
                             }}
                         >
-                            {/* Organization Metadata */}
+                            {/* Organization name + slug */}
                             <div style={{ minWidth: 0, width: "100%" }}>
                                 <div style={{ fontSize: 14, fontWeight: 600, color: S.dark, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{org.name}</div>
                                 <div style={{ fontSize: 12, color: S.textMuted, fontFamily: "monospace", marginTop: 2 }}>{org.slug}</div>
                             </div>
 
-                            {/* Subscription Plan */}
+                            {/* Plan */}
                             <div className="org-responsive-row">
                                 <span className="org-cell-label" style={{ display: "none" }}>Plan</span>
                                 <PlanPill plan={org.plan} />
                             </div>
 
-                            {/* Active Status */}
+                            {/* Status */}
                             <div className="org-responsive-row">
                                 <span className="org-cell-label" style={{ display: "none" }}>Status</span>
                                 <StatusPill active={org.is_active} />
                             </div>
 
-                            {/* Usage Analytics */}
-                            <div className="org-responsive-row" style={{ fontSize: 12, color: S.textSecondary }}>
-                                <span className="org-cell-label" style={{ display: "none" }}>Usage</span>
-                                <div>
-                                    Users: <strong>{org.metrics?.total_users ?? 0}</strong>
-                                    <span style={{ margin: "0 6px", color: S.border }} className="org-cell-label-inline">|</span> 
-                                    Convs: {org.metrics?.total_conversations ?? 0}
-                                </div>
-                            </div>
-
-                            {/* Timestamp */}
+                            {/* Created date */}
                             <div className="org-responsive-row" style={{ fontSize: 13, color: S.textSecondary }}>
                                 <span className="org-cell-label" style={{ display: "none" }}>Created</span>
                                 {fmtDate(org.created_at)}
                             </div>
 
-                            {/* Row Action Handles */}
+                            {/* Actions */}
                             <div className="org-actions-wrapper" style={{ display: "flex", gap: 8, justifyContent: "flex-end" }} onClick={(e) => e.stopPropagation()}>
-                                <button 
-                                    onClick={() => handleToggleStatus(org)} 
+                                <button
+                                    onClick={() => handleToggleStatus(org)}
                                     disabled={actionLoading === org.id}
                                     style={{ padding: "6px 10px", borderRadius: 6, border: `1.5px solid ${S.border}`, background: "transparent", color: org.is_active ? S.danger : S.green, fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}
                                 >
                                     {actionLoading === org.id ? "..." : org.is_active ? "Suspend" : "Activate"}
                                 </button>
-                                <button 
-                                    onClick={() => setEditingOrg(org)} 
+                                <button
+                                    onClick={() => setEditingOrg(org)}
                                     style={{ padding: "6px 10px", borderRadius: 6, border: `1.5px solid ${S.border}`, background: "transparent", color: S.textSecondary, fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}
                                 >
                                     Edit
                                 </button>
-                                <button 
-                                    onClick={() => setDeletingOrg(org)} 
+                                <button
+                                    onClick={() => setDeletingOrg(org)}
                                     style={{ padding: "6px 10px", borderRadius: 6, border: "none", background: S.dangerBg, color: S.danger, fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}
                                 >
                                     Delete
@@ -712,22 +700,22 @@ export default function OrganizationsPage() {
                         </div>
                     ))}
 
-                    {/* Pagination Controls Footer */}
+                    {/* Pagination */}
                     {totalPages > 1 && (
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 20px", background: "var(--surface-muted, #fafafa)", gap: 12, flexWrap: "wrap" }}>
                             <span style={{ fontSize: 12, color: S.textMuted }}>
                                 Page {page} of {totalPages}
                             </span>
                             <div style={{ display: "flex", gap: 6 }}>
-                                <button 
-                                    disabled={page === 1} 
+                                <button
+                                    disabled={page === 1}
                                     onClick={() => setPage(p => Math.max(p - 1, 1))}
                                     style={{ padding: "6px 12px", borderRadius: 6, border: `1.5px solid ${S.border}`, background: S.surface, color: page === 1 ? S.textMuted : S.textSecondary, fontSize: 12, fontWeight: 500, cursor: "pointer" }}
                                 >
                                     Prev
                                 </button>
-                                <button 
-                                    disabled={page === totalPages} 
+                                <button
+                                    disabled={page === totalPages}
                                     onClick={() => setPage(p => Math.min(p + 1, totalPages))}
                                     style={{ padding: "6px 12px", borderRadius: 6, border: `1.5px solid ${S.border}`, background: S.surface, color: page === totalPages ? S.textMuted : S.textSecondary, fontSize: 12, fontWeight: 500, cursor: "pointer" }}
                                 >
@@ -739,7 +727,7 @@ export default function OrganizationsPage() {
                 </div>
             )}
 
-            {/* Overlays */}
+            {/* Modals */}
             {showCreate && <CreateOrgModal plans={plans} onClose={() => setShowCreate(false)} onCreated={handleCreated} />}
             {editingOrg && <EditOrgModal org={editingOrg} plans={plans} onClose={() => setEditingOrg(null)} onUpdated={handleUpdated} />}
             {deletingOrg && <DeleteConfirmModal org={deletingOrg} onClose={() => setDeletingOrg(null)} onDeleted={handleDeleted} />}

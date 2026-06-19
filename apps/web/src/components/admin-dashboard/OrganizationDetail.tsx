@@ -409,13 +409,13 @@ export function OrganizationDetail({ organizationId, onClose }: Props) {
 									<td style={{ padding: "16px 20px", borderBottom: `1px solid ${S.border}` }}>
 										<span style={{ 
 											fontSize: 10, 
-											background: user.role === 'admin' ? `${S.purple}10` : S.bgSoft, 
-											color: user.role === 'admin' ? S.purple : S.textMuted,
+											background: user.role === 'ADMIN' ? `${S.purple}10` : S.bgSoft, 
+											color: user.role === 'ADMIN' ? S.purple : S.textMuted,
 											padding: "4px 10px", 
 											borderRadius: 8, 
 											textTransform: "uppercase", 
 											fontWeight: 800, 
-											border: `1px solid ${user.role === 'admin' ? `${S.purple}20` : S.border}`
+											border: `1px solid ${user.role === 'ADMIN' ? `${S.purple}20` : S.border}`
 										}}>{user.role}</span>
 									</td>
 									<td style={{ padding: "16px 20px", textAlign: "right", fontSize: 15, color: S.dark, borderBottom: `1px solid ${S.border}`, fontWeight: 750 }}>{user.assigned_tickets_count}</td>
