@@ -243,24 +243,6 @@ export const completeRegistrationService = async ({
   });
 };
 
-export const loginService = async ({
-  email,
-  password,
-}: LoginInput): Promise<OraganizationDataDTO> => {
-  try {
-    const normalizedEmail = email.trim().toLowerCase();
-    const user = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
-    });
-    if (!user) {
-      throw new AppError("Wrong Email or Password", 401);
-    }
-
-    const passwordCheck = await comparePassword(password, user.passwordHash);
-    if (!passwordCheck) {
-      throw new AppError("Wrong Email or Password", 401);
-    }
-
 export const completeRegistrationService = async ({ userId, businessName, planId }: { userId: string; businessName: string; planId: string }) => {
 	// export const completeRegistrationService = async ({ userId, businessName, planId, amount, currency, isAnnual }: { userId: string; businessName: string; planId: string; amount: number; currency: string; isAnnual: boolean }) => {
 	const user = await prisma.user.findUnique({ where: { id: userId } });
