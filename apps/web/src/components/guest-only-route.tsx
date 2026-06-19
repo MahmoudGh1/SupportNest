@@ -6,25 +6,47 @@ import { useAuth } from "@/context/auth-context";
 import { PageLoader } from "@/components/ui";
 
 /** Redirect authenticated users away from login/register. */
+// export function GuestAuthRoute({ children }: { children: React.ReactNode }) {
+//     const { user, loading } = useAuth();
+//     const router = useRouter();
+
+//     useEffect(() => {
+//         if (loading) return;
+//         // Only redirect to dashboard if fully onboarded AND has active subscription
+//         if (user && user.onboarded && user.hasActiveSubscription) {
+//             router.replace("/dashboard");
+//         }
+//         // If logged in but no subscription yet, send them to payment
+//         if (user && user.onboarded && !user.hasActiveSubscription) {
+//             router.replace("/payment");
+//         }
+//     }, [user, loading, router]);
+
+//     if (loading) return <PageLoader />;
+//     if (user && user.onboarded && user.hasActiveSubscription) return null;
+//     if (user && user.onboarded && !user.hasActiveSubscription) return null;
+//     return <>{children}</>;
+// }
+
 export function GuestAuthRoute({ children }: { children: React.ReactNode }) {
     const { user, loading } = useAuth();
     const router = useRouter();
 
+    // Only ORG_ADMIN accounts are gated by subscription status.
+    // Invited team members (SUPPORT_AGENT) and SUPER_ADMIN never need to pay.
+    const needsPayment = user?.role === "ORG_ADMIN" && !user.hasActiveSubscription;
+
     useEffect(() => {
-        if (loading) return;
-        // Only redirect to dashboard if fully onboarded AND has active subscription
-        if (user && user.onboarded && user.hasActiveSubscription) {
-            router.replace("/dashboard");
+        if (loading || !user || !user.onboarded) return;
+        if (needsPayment) {
+            router.replace(`/payment?userId=${user.id}`);
+            return;
         }
-        // If logged in but no subscription yet, send them to payment
-        if (user && user.onboarded && !user.hasActiveSubscription) {
-            router.replace("/payment");
-        }
-    }, [user, loading, router]);
+        router.replace("/dashboard");
+    }, [user, loading, needsPayment, router]);
 
     if (loading) return <PageLoader />;
-    if (user && user.onboarded && user.hasActiveSubscription) return null;
-    if (user && user.onboarded && !user.hasActiveSubscription) return null;
+    if (user && user.onboarded) return null;
     return <>{children}</>;
 }
 
