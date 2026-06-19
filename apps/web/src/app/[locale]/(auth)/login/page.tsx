@@ -145,7 +145,7 @@ function FormPanel() {
 	const searchParams = useSearchParams();
 	const justVerified = searchParams.get("verified") === "true";
 	const verifiedEmail = searchParams.get("email") ?? "";
-	const { login, loginWith } = useAuth();
+	const { login, loginWithGoogle } = useAuth();
 	const router = useRouter();
 	const { t } = useLingui();
 	const [email, setEmail] = useState(verifiedEmail);
