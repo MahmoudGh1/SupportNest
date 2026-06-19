@@ -106,6 +106,7 @@ export function ProfileSection() {
             <div style={{ fontSize: 12, color: S.textMuted }}>
               {authUser.email}
             </div>
+            {console.log("authUser", authUser.isEmailVerified)}
             {authUser.isEmailVerified ? (
               <span
                 style={{
