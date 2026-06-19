@@ -1,6 +1,10 @@
 import { Embeddings } from "@langchain/core/embeddings";
 import { GoogleGenAI } from "@google/genai";
 
+if(!process.env.GOOGLE_API_KEY){
+	console.log("Something went Wrong. Google API Key not found");
+}
+
 export class GeminiEmbeddingsWithDimensions extends Embeddings {
 	private ai: GoogleGenAI;
 	private outputDimensionality: number;
