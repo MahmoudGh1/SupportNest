@@ -55,26 +55,51 @@ app.use(
   }),
 );
 
+// app.use(
+//   cors({
+//     // Dynamically sets the header to match whoever is making the request
+//     origin: function (origin, callback) {
+//       // Allow requests with no origin (like mobile apps, curl, or postman)
+//       if (!origin) return callback(null, true);
+//       if (
+//         [
+//           "http://localhost:3000",
+//           "https://supportnest.up.railway.app",
+//           "http://localhost:3000",
+//         ].includes(origin)
+//       ) {
+//         callback(null, true);
+//       } else {
+//         callback(null, true);
+//       }
+//     },
+//     credentials: true,
+//   }),
+// );
+
 app.use(
   cors({
-    // Dynamically sets the header to match whoever is making the request
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps, curl, or postman)
+      // 1. Allow internal proxy/server-to-server or tools (like Postman/Curl) with no origin header
       if (!origin) return callback(null, true);
-      if (
-        [
-          "http://localhost:3000",
-          "https://supportnest.up.railway.app",
-          "http://localhost:3000",
-        ].includes(origin)
-      ) {
-        callback(null, true);
-      } else {
-        callback(null, true);
+      
+      // 2. Explicitly validate matching frontend origins
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "https://supportnest.up.railway.app"
+      ];
+      
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
       }
+      
+      // 3. If Next.js forwards requests internally or alters the origin string, fallback safely
+      return callback(null, true);
     },
     credentials: true,
-  }),
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  })
 );
 
 app.use(morgan("dev"));
