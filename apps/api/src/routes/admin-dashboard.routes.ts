@@ -6,36 +6,34 @@
  * All routes require authentication and SUPER_ADMIN authorization.
  */
 import { Router } from "express";
-
+import prisma from "../config/prisma.js";
 // Controllers
 import {
-	getOverview,
-	getOrganizations,
-	getOrganization,
-	createOrganization,
-	updateOrganization,
-	suspendOrganization,
-	activateOrganization,
-	getOrgTierStats,
-	getOrgConversationStats,
-	getOrgTicketStats,
-	getOrgCsat,
-	getOrgEscalations,
-	getGlobalTierStats,
-	getGlobalEscalations,
-	deleteConversation,
-	getOrgConversations,
-	getConversationById,
-	scheduleDeleteOrganization,
-	cancelDeleteOrganization,
-	resendDeletionEmail,
+  getOverview,
+  getOrganizations,
+  getOrganization,
+  createOrganization,
+  updateOrganization,
+  suspendOrganization,
+  activateOrganization,
+  getOrgTierStats,
+  getOrgConversationStats,
+  getOrgTicketStats,
+  getOrgCsat,
+  getOrgEscalations,
+  getGlobalTierStats,
+  getGlobalEscalations,
+  deleteConversation,
+  getOrgConversations,
+  getConversationById,
+  deleteOrganization,
+  cancelDeleteOrganization,
 } from "../controllers/admin-dashboard/admin.organizations.controller.js";
 
 import { getOrgUsers, getOrgUser, createOrgUser, updateOrgUser, removeOrgUser, getAllUsers } from "../controllers/admin-dashboard/admin.users.controller.js";
 import { authMiddleware } from "src/middlewares/auth.middleware.js";
 import { adminMiddleware } from "src/middlewares/admin.middleware.js";
-import { transporter } from "src/utils/mailer.js";
-
+import { getContactSubmissions } from "../controllers/admin-dashboard/contact.controller.js";
 const router: Router = Router();
 
 // All admin routes require authentication
@@ -92,23 +90,8 @@ router.get("/organizations/:organizationId", getOrganization);
  */
 router.patch("/organizations/:organizationId", updateOrganization);
 
-// router.delete("/organizations/:organizationId", deleteOrganization);
-/**
- * DELETE /admin/organizations/:organizationId
- * Schedule org deletion in 30 minutes + notify org via email
- * Role: super_admin only
- */
-router.delete("/organizations/:organizationId", scheduleDeleteOrganization);
-
-/**
- * POST /admin/organizations/:organizationId/cancel-deletion
- * Cancel a scheduled deletion + notify org via email
- * Role: super_admin only
- */
-router.post("/organizations/:organizationId/cancel-deletion", cancelDeleteOrganization);
-
-router.post("/organizations/:organizationId/resend-deletion-email", resendDeletionEmail);
-
+router.delete("/organizations/:organizationId", deleteOrganization);
+router.post("/organizations/:organizationId/cancel-delete", cancelDeleteOrganization);
 /**
  * PATCH /admin/organizations/:organizationId/suspend
  * Suspend org (sets is_active = false)
@@ -218,4 +201,6 @@ router.delete("/organizations/:organizationId/conversations/:conversationId", de
  */
 router.delete("/organizations/:organizationId/conversations/:conversationId", deleteConversation);
 
+// GET /admin/contact-submissions
+router.get("/contact-submissions", getContactSubmissions);
 export default router;

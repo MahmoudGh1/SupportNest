@@ -147,10 +147,10 @@ const DocumentList = ({
 												fontSize: 12,
 											}}
 										>
-											{doc.type === "PDF" ? (
+											{["PDF", "CSV", "DOCX"].includes(doc.type) ? (
 												<div>
 													<div>{formatBytes(doc.metadata.fileSize)}</div>
-													{doc.metadata.pageCount ? (
+													{doc.type === "PDF" && doc.metadata.pageCount ? (
 														<div>{doc.metadata.pageCount} pages</div>
 													) : null}
 												</div>
@@ -282,8 +282,8 @@ const DocumentList = ({
 										<TypeBadge type={doc.type} />
 										<StatusBadge status={doc.status} />
 										<span style={{ fontSize: 11, color: "var(--page-muted)" }}>
-											{doc.type === "PDF"
-												? `${formatBytes(doc.metadata.fileSize)}${doc.metadata.pageCount ? ` · ${doc.metadata.pageCount} pages` : ""}`
+											{["PDF", "CSV", "DOCX"].includes(doc.type)
+												? `${formatBytes(doc.metadata.fileSize)}${doc.type === "PDF" && doc.metadata.pageCount ? ` · ${doc.metadata.pageCount} pages` : ""}`
 												: doc.metadata.faqCategory || "—"}
 										</span>
 									</div>

@@ -35,6 +35,7 @@ model Organization {
   toolDefinitions       ToolDefinition[]
   users                 User[]
   businessTables        BusinessTable[]
+  notifications         Notification[]
 
   @@map("organizations")
 }
@@ -58,6 +59,7 @@ model User {
   passwordResets     PasswordReset[]
   assignedTickets    Ticket[]
   organization       Organization?       @relation(fields: [organizationId], references: [id])
+  notificationRecipients NotificationRecipient[]
 
   @@index([organizationId])
   @@map("users")
@@ -157,7 +159,7 @@ model Conversation {
   organization       Organization           @relation(fields: [organizationId], references: [id])
   csatRating         CsatRating?
   messages           Message[]
-  reports            Report[]
+  reports            Report?
   ticket             Ticket?
 
   @@index([organizationId])
@@ -253,7 +255,7 @@ model DocumentChunk {
   documentId     String                @db.Uuid
   organizationId String                @db.Uuid
   content        String
-  embedding      Unsupported("vector")
+  embedding      Unsupported("vector(1536)")
   chunkIndex     Int
   metadata       Json                  @default("{}")
   createdAt      DateTime              @default(now())
@@ -362,7 +364,7 @@ model Invitation {
 model Report {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String       @db.Uuid
-  conversationId String       @db.Uuid
+  conversationId String       @unique @db.Uuid
   summary        String
   issueType      String
   resolution     String
@@ -407,15 +409,6 @@ model PasswordReset {
   @@map("password_resets")
 }
 
-model contact_submissions {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String
-  email     String
-  company   String?
-  message   String
-  createdAt DateTime @default(now())
-}
-
 model BusinessTable {
   id               String             @id @default(uuid()) @db.Uuid
   organizationId   String             @db.Uuid
@@ -449,6 +442,45 @@ model BusinessTableRow {
   @@index([organizationId])
   @@index([tableId, externalId])
   @@map("business_table_rows")
+}
+
+model Notification {
+  id             String                  @id @default(uuid()) @db.Uuid
+  organizationId String?                 @db.Uuid
+  type           NotificationType
+  title          String
+  body           String
+  actionUrl      String?
+  metadata       Json?
+  createdAt      DateTime                @default(now())
+  organization   Organization?           @relation(fields: [organizationId], references: [id])
+  recipients     NotificationRecipient[]
+
+  @@index([organizationId])
+  @@index([type])
+}
+
+
+model NotificationRecipient {
+  id             String       @id @default(uuid()) @db.Uuid
+  notificationId String       @db.Uuid
+  userId         String       @db.Uuid
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+  notification   Notification @relation(fields: [notificationId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
+
+  @@unique([notificationId, userId])
+  @@index([userId, readAt, createdAt])
+}
+
+model ContactSubmission {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  email     String
+  message   String
+  source    String?
+  createdAt DateTime @default(now())
 }
 
 enum Role {
@@ -559,4 +591,17 @@ enum HttpMethod {
   PUT
   PATCH
   DELETE
+}
+
+enum NotificationType {
+  organization_registered
+  organization_suspended
+  organization_reactivated
+  user_added
+  user_deleted
+  payment_completed
+  ticket_escalated
+  csat_submitted
+  contact_us_submitted
+  new_customer_first_contact
 }

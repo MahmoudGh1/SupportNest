@@ -22,8 +22,26 @@ export function Section({
       }}
     >
       <div style={{ marginBottom: 20 }}>
-        <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: S.dark }}>
+        <h3
+          style={{
+            margin: 0,
+            fontSize: 15,
+            fontWeight: 600,
+            color: S.dark,
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
           {title}
+          {
+            <a
+              style={{ fontSize: "12px" }}
+              href="https://www.npmjs.com/package/supportnest-server-sdk"
+              target="_blank"
+            >
+              more details
+            </a>
+          }
         </h3>
         {subtitle && (
           <p style={{ margin: "4px 0 0", fontSize: 12, color: S.textMuted }}>

@@ -14,7 +14,6 @@ export const S = {
 	dark: "var(--page-text)",
 	darkMid: "var(--surface-elevated)",
 
-
 	brand: "#534AB7",
 	white: "#ffffff",
 	surface: "var(--surface)",
@@ -286,4 +285,81 @@ export function PageLoader() {
 	}, [hide, show]);
 
 	return null;
+}
+
+// ─── PLACEHOLDER PAGE ─────────────────────────────────────────────────────────
+export function PlaceholderPage({
+	title,
+	icon,
+	description,
+}: {
+	title: string;
+	icon: string;
+	description: string;
+}) {
+	return (
+		<div
+			style={{
+				flex: 1,
+				background: S.bg,
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+			}}
+		>
+			<div style={{ textAlign: "center", maxWidth: 340 }}>
+				<div
+					style={{
+						width: 64,
+						height: 64,
+						borderRadius: 16,
+						background: S.purpleBg,
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+						margin: "0 auto 16px",
+					}}
+				>
+					<i
+						className={`ti ti-${icon}`}
+						style={{ fontSize: 30, color: S.purple }}
+					/>
+				</div>
+				<h2
+					style={{
+						fontSize: 18,
+						fontWeight: 600,
+						color: S.dark,
+						margin: "0 0 8px",
+					}}
+				>
+					{title}
+				</h2>
+				<p
+					style={{
+						fontSize: 13,
+						color: S.textMuted,
+						lineHeight: 1.6,
+						margin: 0,
+					}}
+				>
+					{description}
+				</p>
+				<div style={{ marginTop: 20 }}>
+					<span
+						style={{
+							background: S.purpleBg,
+							color: S.purple,
+							fontSize: 11,
+							fontWeight: 500,
+							padding: "4px 10px",
+							borderRadius: 6,
+						}}
+					>
+						Coming in sprint 2
+					</span>
+				</div>
+			</div>
+		</div>
+	);
 }

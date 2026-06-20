@@ -32,8 +32,12 @@ import {
 import { parseDateRange } from "../../utils/helpers.js";
 import type { AuthenticatedRequest } from "src/types/auth.types.js";
 import prisma from "src/config/prisma.js";
-import { isScheduled } from "src/queues/deletion.queue.js";
-import { sendOrgDeletionScheduledEmail } from "src/utils/mailer.js";
+import bcrypt from "bcrypt";
+import { orgDeletionQueue } from "../../queues/orgDeletionQueue.js";
+import {
+  sendPendingDeletionEmail,
+  sendDeletionCancelledEmail,
+} from "../../config/mailer.js";
 
 /**
  * Normalize a URL/query parameter value to a single string.
@@ -75,9 +79,10 @@ export async function getOrganizations(
 ): Promise<void> {
   const { page, limit, skip } = parsePagination(req.query);
   const search = getStringParam(req.query.search as string);
+  const is_active_raw = getStringParam(req.query.is_active as string) || getStringParam(req.query.isActive as string);
   const is_active =
-    req.query.isActive !== undefined
-      ? getStringParam(req.query.isActive as string) === "true"
+    is_active_raw !== undefined
+      ? is_active_raw === "true"
       : undefined;
 
   const params: {
@@ -130,10 +135,10 @@ export async function createOrganization(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const { name, email, slug, plan_id, widget_config } = req.body;
+  const { name, email, password, slug, plan_id, widget_config } = req.body;
 
-  if (!name || !email || !slug) {
-    badRequest(res, "name, email, and slug are required.");
+  if (!name || !email || !slug || !password) {
+    badRequest(res, "name, email, slug, and password are required.");
     return;
   }
 
@@ -150,38 +155,73 @@ export async function createOrganization(
     return;
   }
 
+  const emailConflict = await prisma.user.findUnique({
+    where: { email },
+  });
+  if (emailConflict) {
+    sendError(
+      res,
+      409,
+      "EMAIL_CONFLICT",
+      "A user with this email already exists.",
+    );
+    return;
+  }
+
   const crypto = await import("crypto");
   const widgetSecret = crypto.randomBytes(32).toString("hex");
 
-  const org = await prisma.organization.create({
-    data: {
-      name,
-      email,
-      slug,
-      widgetSecret,
-      widgetConfig: widget_config ?? {},
-      planId: plan_id ?? null,
-      isActive: true,
-    },
-    include: {
-      plan: { select: { id: true, name: true, priceMonthly: true } },
-    },
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  const result = await prisma.$transaction(async (tx) => {
+    const org = await tx.organization.create({
+      data: {
+        name,
+        email,
+        slug,
+        widgetSecret,
+        widgetConfig: widget_config ?? {},
+        planId: plan_id as string,
+        isActive: true,
+      },
+      include: {
+        plan: { select: { id: true, name: true, priceMonthly: true } },
+      },
+    });
+
+    const user = await tx.user.create({
+      data: {
+        email,
+        passwordHash,
+        role: "ORG_ADMIN",
+        firstName: name,
+        lastName: "Admin",
+        organizationId: org.id,
+        isActive: true,
+      },
+    });
+
+    return { org, user };
   });
 
   res.status(201).json({
-    id: org.id,
-    name: org.name,
-    slug: org.slug,
-    email: org.email,
-    is_active: org.isActive,
-    plan: org.plan
+    id: result.org.id,
+    name: result.org.name,
+    slug: result.org.slug,
+    email: result.org.email,
+    is_active: result.org.isActive,
+    plan: result.org.plan
       ? {
-          id: org.plan.id,
-          name: org.plan.name,
-          price_monthly: Number(org.plan.priceMonthly),
+          id: result.org.plan.id,
+          name: result.org.plan.name,
+          price_monthly: Number(result.org.plan.priceMonthly),
         }
       : null,
-    created_at: org.createdAt.toISOString(),
+    created_at: result.org.createdAt.toISOString(),
+    admin_user: {
+      id: result.user.id,
+      email: result.user.email,
+    },
   });
 }
 
@@ -303,107 +343,117 @@ export async function activateOrganization(
   res.json({ message: "Organization activated." });
 }
 
-// DELETE /admin/organizations/:organizationId
-export async function scheduleDeleteOrganization(
+/**
+ * DELETE /admin/organizations/:orgId
+ *
+ * Schedule an organization for deletion in 30 minutes and notify its administrator.
+ */
+export async function deleteOrganization(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const { organizationId } = req.params;
-
-  const result = await scheduleOrganizationDeletion(organizationId as string);
-
-  if ("error" in result) {
-    switch (result.error) {
-      case "ORG_NOT_FOUND":
-        notFound(res, "Organization");
-        return;
-      case "ALREADY_SCHEDULED":
-        sendError(
-          res,
-          400,
-          "ALREADY_SCHEDULED",
-          "Organization deletion is already scheduled.",
-        );
-        return;
-    }
-  }
-
-  res.json({
-    message:
-      "Organization scheduled for deletion in 30 minutes. A notification email has been sent.",
-    scheduled_at: result.scheduled_at,
-    deletes_at: result.deletes_at,
-  });
-}
-
-export async function resendDeletionEmail(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const { organizationId } = req.params;
-
-  if (!isScheduled(organizationId as string)) {
-    sendError(
-      res,
-      400,
-      "NOT_SCHEDULED",
-      "No scheduled deletion found for this organization.",
-    );
+  const organizationId  = getStringParam(req.params.organizationId );
+  if (!organizationId ) {
+    badRequest(res, "Organization id is required.");
     return;
   }
 
   const org = await prisma.organization.findUnique({
-    where: { id: organizationId },
+    where: { id: organizationId  },
     select: { id: true, name: true, email: true },
   });
+
   if (!org) {
     notFound(res, "Organization");
     return;
   }
 
+  const deletionAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
+
+  await prisma.organization.update({
+    where: { id: organizationId  },
+    data: { scheduledDeletionAt: deletionAt },
+  });
+
+  // Schedule background hard-delete job via BullMQ
+  await orgDeletionQueue.add(
+    "delete",
+    { orgId: organizationId  },
+    { delay: 30 * 60 * 1000, jobId: `delete-${organizationId }` },
+  );
+
+  // Notify organization admin via email
   try {
-    const deletesAt = new Date(Date.now() + 30 * 60 * 1000);
-    await sendOrgDeletionScheduledEmail(org.email, org.name, deletesAt);
-    res.json({ message: "Deletion notification email resent successfully." });
-  } catch (err) {
-    sendError(
-      res,
-      500,
-      "EMAIL_FAILED",
-      "Failed to send email. Check SMTP settings.",
+    await sendPendingDeletionEmail(
+      org.email,
+      org.name,
+      deletionAt.toLocaleString(),
     );
+  } catch (e) {
+    console.error(`[Admin] Failed to send deletion notice email to ${org.email}`, e);
   }
+
+  res.json({
+    message: "Organization scheduled for deletion in 30 minutes.",
+    scheduled_at: deletionAt.toISOString(),
+  });
 }
 
-// POST /admin/organizations/:organizationId/cancel-deletion
+/**
+ * POST /admin/organizations/:orgId/cancel-delete
+ *
+ * Cancel a previously scheduled organization deletion.
+ */
 export async function cancelDeleteOrganization(
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> {
-  const { organizationId } = req.params;
-
-  const result = await cancelOrganizationDeletion(organizationId as string);
-
-  if ("error" in result) {
-    switch (result.error) {
-      case "ORG_NOT_FOUND":
-        notFound(res, "Organization");
-        return;
-      case "NOT_SCHEDULED":
-        sendError(
-          res,
-          400,
-          "NOT_SCHEDULED",
-          "This organization has no scheduled deletion to cancel.",
-        );
-        return;
-    }
+  const organizationId  = getStringParam(req.params.organizationId);
+  if (!organizationId ) {
+    badRequest(res, "Organization id is required.");
+    return;
   }
 
-  res.json({
-    message:
-      "Organization deletion cancelled. A confirmation email has been sent to the organization.",
+  const org = await prisma.organization.findUnique({
+    where: { id: organizationId  },
+    select: { id: true, scheduledDeletionAt: true },
   });
+
+  if (!org) {
+    notFound(res, "Organization");
+    return;
+  }
+
+  if (!org.scheduledDeletionAt) {
+    badRequest(res, "This organization is not currently scheduled for deletion.");
+    return;
+  }
+
+  await prisma.organization.update({
+    where: { id: organizationId  },
+    data: { scheduledDeletionAt: null },
+  });
+
+  // Cancel background job
+  const job = await orgDeletionQueue.getJob(`delete-${organizationId }`);
+  if (job) {
+    await job.remove();
+  }
+
+  // Notify organization admin via email
+  try {
+    const orgInfo = await prisma.organization.findUnique({
+      where: { id: organizationId  },
+      select: { name: true, email: true },
+    });
+    if (orgInfo) {
+      await sendDeletionCancelledEmail(orgInfo.email, orgInfo.name);
+    }
+  } catch (e) {
+    console.error(`[Admin] Failed to send deletion cancellation email for org ${organizationId }`, e);
+  }
+
+  res.json({ message: "Scheduled deletion cancelled successfully." });
 }
 /**
  * GET /admin/organizations/:organizationId/tier-stats

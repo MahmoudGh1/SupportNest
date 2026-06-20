@@ -9,6 +9,9 @@
 		"dev:custom": "tsx watch --env-file=.env.development src/index.ts",
 		"postinstall": "prisma generate"
 	},
+	"prisma": {
+		"seed": "tsx --env-file=.env.development prisma/seed.ts"
+	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
@@ -26,6 +29,7 @@
 		"@langchain/textsplitters": "^1.0.1",
 		"@prisma/adapter-pg": "^7.8.0",
 		"@prisma/client": "^7.8.0",
+		"@supabase/supabase-js": "^2.108.2",
 		"@supportnest/shared": "workspace:*",
 		"@types/pg": "^8.20.0",
 		"bcrypt": "^6.0.0",
@@ -49,6 +53,7 @@
 		"pdf-parse": "^2.4.5",
 		"pg": "^8.21.0",
 		"resend": "^6.12.4",
+		"supportnest-server-sdk": "^1.0.1",
 		"swagger-jsdoc": "^6.3.0",
 		"swagger-parser": "^10.0.3",
 		"swagger-ui-express": "^5.0.1",

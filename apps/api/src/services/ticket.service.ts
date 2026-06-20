@@ -1,6 +1,8 @@
 import prisma from "../config/prisma.js";
 import type { TicketPriority, TicketStatus } from "generated/prisma/enums.js";
 import AppError from "../utils/appError.js";
+import type { UpdateTicketInput } from "src/types/ticket.types.js";
+import type { Prisma } from "generated/prisma/client.js";
 
 // ─── PRISMA SELECT ────────────────────────────────────────────────────────────
 // Reused in every query so the response shape is always consistent
@@ -135,46 +137,86 @@ export async function getTickets(
 
 // ─── GET SINGLE TICKET ────────────────────────────────────────────────────────
 export async function getTicketById(organizationId: string, ticketId: string) {
-	const ticket = await prisma.ticket.findUnique({
-		where: { id: ticketId },
-		select: ticketSelect,
+	const ticket = await prisma.ticket.findFirst({
+		where: { id: ticketId, organizationId },
+		select: {
+			id: true,
+			status: true,
+			priority: true,
+			resolutionNote: true,
+			resolvedAt: true,
+			agentAttempts: true,
+			createdAt: true,
+			updatedAt: true,
+			assignedTo: {
+				select: {
+					id: true,
+					firstName: true,
+					lastName: true,
+					email: true,
+				},
+			},
+			conversation: {
+				select: {
+					id: true,
+					conversationStatus: true,
+					closedAt: true,
+					createdAt: true,
+					customer: {
+						select: {
+							id: true,
+							externalId: true,
+							email: true,
+							name: true,
+							isAnonymous: true,
+							metadata: true,
+						},
+					},
+					messages: {
+						orderBy: { createdAt: "asc" },
+						select: {
+							id: true,
+							role: true,
+							content: true,
+							tier: true,
+							createdAt: true,
+						},
+					},
+					reports: {
+						select: {
+							summary: true,
+							issueType: true,
+							resolution: true,
+							language: true,
+							sentiment: true,
+							tiersVisited: true,
+							wasEscalated: true,
+							resolvedByAi: true,
+							tokensUsed: true,
+							createdAt: true,
+						},
+					},
+				},
+			},
+		},
 	});
 
-	if (!ticket) throw new AppError("Ticket not found.", 404);
-	if (ticket.organizationId !== organizationId)
-		throw new AppError("Access denied.", 403);
+	if (!ticket) {
+		throw new AppError("Ticket not found", 404);
+	}
 
-	return ticket;
-}
+	// flatten so controller/frontend gets a clean shape:
+	// { ticket: {...}, conversation: {...}, customer: {...}, messages: [...], report: {...} }
+	const { conversation, ...ticketFields } = ticket;
+	const { customer, messages, reports, ...conversationFields } = conversation;
 
-// ─── ASSIGN TICKET ────────────────────────────────────────────────────────────
-export async function assignTicket(
-	organizationId: string,
-	ticketId: string,
-	assignedToId: string,
-) {
-	const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
-	if (!ticket) throw new AppError("Ticket not found.", 404);
-	if (ticket.organizationId !== organizationId)
-		throw new AppError("Access denied.", 403);
-	if (ticket.status === "RESOLVED")
-		throw new AppError("Cannot assign a resolved ticket.", 400);
-
-	// Verify the agent belongs to the same org
-	const agent = await prisma.user.findUnique({
-		where: { id: assignedToId },
-		select: { id: true, organizationId: true },
-	});
-
-	if (!agent) throw new AppError("Agent not found.", 404);
-	if (agent.organizationId !== organizationId)
-		throw new AppError("Agent does not belong to your organization.", 403);
-
-	return prisma.ticket.update({
-		where: { id: ticketId },
-		data: { assignedToId, status: "OPEN" },
-		select: ticketSelect,
-	});
+	return {
+		ticket: ticketFields,
+		conversation: conversationFields,
+		customer,
+		messages,
+		report: reports ?? null,
+	};
 }
 
 // ─── START TICKET (OPEN → IN_PROGRESS) ───────────────────────────────────────
@@ -223,5 +265,69 @@ export async function resolveTicket(
 			resolvedAt: new Date(),
 		},
 		select: ticketSelect,
+	});
+}
+
+export async function updateTicket(
+	organizationId: string,
+	ticketId: string,
+	input: UpdateTicketInput,
+) {
+	const existing = await prisma.ticket.findFirst({
+		where: { id: ticketId, organizationId },
+		select: { id: true },
+	});
+	if (!existing) throw new AppError("Ticket not found", 404);
+
+	if (input.assignedToId) {
+		const agent = await prisma.user.findFirst({
+			where: { id: input.assignedToId, organizationId, isActive: true },
+			select: { id: true },
+		});
+		if (!agent)
+			throw new AppError("Assignee not found in this organization", 400);
+	}
+
+	const data: Prisma.TicketUpdateInput = {};
+	if (input.status) {
+		data.status = input.status;
+		if (input.status === "RESOLVED") data.resolvedAt = new Date();
+	}
+	if (input.priority) data.priority = input.priority;
+	if (input.resolutionNote !== undefined)
+		data.resolutionNote = input.resolutionNote;
+	if (input.assignedToId !== undefined) {
+		// undefined = leave the assignment as it is
+		// given value = "Connect this ticket to the user whose ID is user123."
+		// null = "Remove the relationship between this ticket and its assigned user."
+
+		/*
+		"If the client sent an assignedToId, then either assign the record to that user (when an ID is provided)
+		 or remove the assignment (when the value is empty/null). If the client didn't send assignedToId at all,
+		  don't change the current assignment."
+		*/
+
+		// Why use [connect]? because it's not a normal column, assignedTo is a relation field to another table
+		data.assignedTo = input.assignedToId
+			? { connect: { id: input.assignedToId } }
+			: { disconnect: true };
+	}
+
+	return prisma.ticket.update({
+		where: { id: ticketId },
+		data,
+		select: {
+			id: true,
+			status: true,
+			priority: true,
+			resolutionNote: true,
+			resolvedAt: true,
+			agentAttempts: true,
+			createdAt: true,
+			updatedAt: true,
+			assignedTo: {
+				select: { id: true, firstName: true, lastName: true, email: true },
+			},
+		},
 	});
 }
