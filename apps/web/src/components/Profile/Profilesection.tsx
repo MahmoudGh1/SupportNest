@@ -94,7 +94,10 @@ export function ProfileSection() {
             {authUser.firstName} {authUser.lastName}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
-            <div style={{ fontSize: 12, color: S.textMuted }}>{authUser.email}</div>
+            <div style={{ fontSize: 12, color: S.textMuted }}>
+              {authUser.email}
+            </div>
+            { (console.log("authUser", authUser.isEmailVerified), null) }
             {authUser.isEmailVerified ? (
               <span style={{
                 background: S.greenBg,

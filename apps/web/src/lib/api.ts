@@ -26,7 +26,8 @@ import {
 	AdminOrganization,
 	WidgetConfig,
 	AdminOrganizationDetail,
-	AnalyticsSummary
+	AnalyticsSummary,
+	UploadDocumentInput
 } from "@/types/types";
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────

@@ -90,7 +90,7 @@ export interface UpdateWidgetConfigInput {
 
 // ─── KNOWLEDGE BASE TYPES ─────────────────────────────────────────────────────
 export type DocStatus = "PROCESSING" | "READY" | "FAILED";
-export type DocType = "PDF" | "FAQ" | "CSV" | "DOCX";
+export type DocType = "PDF" | "CSV" | "DOCX";
 
 export interface KnowledgeDocument {
 	id: string;

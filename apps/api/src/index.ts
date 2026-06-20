@@ -36,6 +36,7 @@ import tier2Router from "./routes/tier2.routes.js";
 import reportRouter from "./routes/reporter.routes.js";
 import AdminRoutes from "./routes/admin-dashboard.routes.js";
 import analyticsRouter from "./routes/analytics.routes.js";
+import NotificationRouter from "./routes/notification.routes.js";
 import businessTableRoutes from "./routes/businessTable.routes.js"
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV || "development"}` });
@@ -48,32 +49,32 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(
-	helmet({
-		crossOriginResourcePolicy: false,
-		contentSecurityPolicy: false,
-	}),
+  helmet({
+    crossOriginResourcePolicy: false,
+    contentSecurityPolicy: false,
+  }),
 );
 
 app.use(
-	cors({
-		// Dynamically sets the header to match whoever is making the request
-		origin: function (origin, callback) {
-			// Allow requests with no origin (like mobile apps, curl, or postman)
-			if (!origin) return callback(null, true);
-			if (
-				[
-					"http://localhost:3000",
-					"https://supportnest.up.railway.app",
-					"http://localhost:3000",
-				].includes(origin)
-			) {
-				callback(null, true);
-			} else {
-				callback(null, true);
-			}
-		},
-		credentials: true,
-	}),
+  cors({
+    // Dynamically sets the header to match whoever is making the request
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl, or postman)
+      if (!origin) return callback(null, true);
+      if (
+        [
+          "http://localhost:3000",
+          "https://supportnest.up.railway.app",
+          "http://localhost:3000",
+        ].includes(origin)
+      ) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
+    credentials: true,
+  }),
 );
 
 app.use(morgan("dev"));
@@ -106,6 +107,7 @@ app.use("/api/v1/tier2", tier2Router);
 
 app.use("/api/v1/admindashboard", AdminRoutes);
 app.use("/api/v1/analytics", analyticsRouter);
+app.use("/api/v1/notifications", NotificationRouter);
 
 app.use('/api/contact', contactRouter);
 app.use(notFoundHandler);
@@ -117,5 +119,5 @@ const wss = new WebSocketServer({ server: Server, path: "/widget/ws" });
 setupWebSocket(wss);
 
 Server.listen(Number(PORT), "0.0.0.0", () => {
-	console.log("Server is running on port:", PORT);
+  console.log("Server is running on port:", PORT);
 });

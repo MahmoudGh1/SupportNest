@@ -5,7 +5,7 @@ import { normalizeApiKey } from "./client";
 // ─── API KEYS ─────────────────────────────────────────────────────────────────
 
 export async function getApiKeys(): Promise<ApiKey[]> {
-	const data = await apiFetch<unknown[]>("/dashboard/apikey/keys");
+	const data = await apiFetch<Record<string, unknown>[]>("/dashboard/apikey/keys");
 	return Array.isArray(data) ? data.map(normalizeApiKey) : [];
 }
 

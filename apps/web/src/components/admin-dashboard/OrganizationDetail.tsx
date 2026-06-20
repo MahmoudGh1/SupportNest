@@ -408,15 +408,15 @@ export function OrganizationDetail({ organizationId, onClose }: Props) {
 									</td>
 									<td style={{ padding: "16px 20px", fontSize: 14, color: S.textMuted, borderBottom: `1px solid ${S.border}`, fontWeight: 500 }}>{user.email}</td>
 									<td style={{ padding: "16px 20px", borderBottom: `1px solid ${S.border}` }}>
-										<span style={{
-											fontSize: 10,
-											background: user.role === 'ADMIN' ? `${S.purple}10` : S.bgSoft,
-											color: user.role === 'ADMIN' ? S.purple : S.textMuted,
-											padding: "4px 10px",
-											borderRadius: 8,
-											textTransform: "uppercase",
-											fontWeight: 800,
-											border: `1px solid ${user.role === 'ADMIN' ? `${S.purple}20` : S.border}`
+										<span style={{ 
+											fontSize: 10, 
+											background: user.role === 'SUPER_ADMIN' ? `${S.purple}10` : S.bgSoft, 
+											color: user.role === 'SUPER_ADMIN' ? S.purple : S.textMuted,
+											padding: "4px 10px", 
+											borderRadius: 8, 
+											textTransform: "uppercase", 
+											fontWeight: 800, 
+											border: `1px solid ${user.role === 'SUPER_ADMIN' ? `${S.purple}20` : S.border}`
 										}}>{user.role}</span>
 									</td>
 									<td style={{ padding: "16px 20px", textAlign: "right", fontSize: 15, color: S.dark, borderBottom: `1px solid ${S.border}`, fontWeight: 750 }}>{user.assigned_tickets_count}</td>

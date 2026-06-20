@@ -14,6 +14,7 @@ function fmtDate(iso: string, locale: string) {
     return new Date(iso).toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" });
 }
 
+// ─── RESPONSIVE STYLES ────────────────────────────────────────────────────────
 function ResponsiveStyles() {
     return (
         <style>{`
@@ -365,6 +366,7 @@ export default function OrganizationsPage() {
                 </button>
             </div>
 
+            {/* Filters */}
             <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
                 <div style={{ position: "relative", flex: "1 1 240px" }}>
                     <i className="ti ti-search" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: S.textMuted, fontSize: 15 }} />
@@ -405,14 +407,20 @@ export default function OrganizationsPage() {
                                 <div style={{ fontSize: 14, fontWeight: 600, color: S.dark, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{org.name}</div>
                                 <div style={{ fontSize: 12, color: S.textMuted, fontFamily: "monospace", marginTop: 2 }}>{org.slug}</div>
                             </div>
+
+                            {/* Plan */}
                             <div className="org-responsive-row">
                                 <span className="org-cell-label" style={{ display: "none" }}><Trans>Plan</Trans></span>
                                 <PlanPill plan={org.plan} />
                             </div>
+
+                            {/* Status */}
                             <div className="org-responsive-row">
                                 <span className="org-cell-label" style={{ display: "none" }}><Trans>Status</Trans></span>
                                 <StatusPill active={org.is_active} />
                             </div>
+
+                            {/* Created date */}
                             <div className="org-responsive-row" style={{ fontSize: 13, color: S.textSecondary }}>
                                 <span className="org-cell-label" style={{ display: "none" }}><Trans>Created</Trans></span>
                                 {fmtDate(org.created_at, locale)}
@@ -427,6 +435,7 @@ export default function OrganizationsPage() {
                         </div>
                     ))}
 
+                    {/* Pagination */}
                     {totalPages > 1 && (
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 20px", background: "var(--surface-muted, #fafafa)", gap: 12, flexWrap: "wrap" }}>
                             <span style={{ fontSize: 12, color: S.textMuted }}><Trans>Page {page} of {totalPages}</Trans></span>
@@ -439,6 +448,7 @@ export default function OrganizationsPage() {
                 </div>
             )}
 
+            {/* Modals */}
             {showCreate && <CreateOrgModal plans={plans} onClose={() => setShowCreate(false)} onCreated={handleCreated} />}
             {editingOrg && <EditOrgModal org={editingOrg} plans={plans} onClose={() => setEditingOrg(null)} onUpdated={handleUpdated} />}
             {deletingOrg && <DeleteConfirmModal org={deletingOrg} onClose={() => setDeletingOrg(null)} onDeleted={handleDeleted} />}
