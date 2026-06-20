@@ -3,7 +3,10 @@ import AppError from "src/utils/appError.js";
 import { comparePassword, hashPassword } from "src/utils/password.util.js";
 
 // ─── UPDATE PROFILE ───────────────────────────────────────────────────────────
-export async function updateProfileService(userId: string, data: { firstName: string; lastName: string; email: string }) {
+export async function updateProfileService(
+	userId: string,
+	data: { firstName: string; lastName: string; email: string },
+) {
 	// Check email not taken by another user
 	if (data.email) {
 		const existing = await prisma.user.findUnique({
@@ -31,7 +34,7 @@ export async function updateProfileService(userId: string, data: { firstName: st
 			isActive: true,
 			createdAt: true,
 			updatedAt: true,
-			isEmailVerified: true
+			isEmailVerified: true,
 		},
 	});
 
@@ -39,7 +42,11 @@ export async function updateProfileService(userId: string, data: { firstName: st
 }
 
 // ─── UPDATE PASSWORD ──────────────────────────────────────────────────────────
-export async function updatePasswordService(userId: string, currentPassword: string, newPassword: string) {
+export async function updatePasswordService(
+	userId: string,
+	currentPassword: string,
+	newPassword: string,
+) {
 	// 1. Fetch user with password hash
 	const user = await prisma.user.findUnique({
 		where: { id: userId },
@@ -67,7 +74,11 @@ export async function updatePasswordService(userId: string, currentPassword: str
 	return { success: true };
 }
 
-export async function deleteAccountService(userId: string, fullName: string, orgName: string) {
+export async function deleteAccountService(
+	userId: string,
+	fullName: string,
+	orgName: string,
+) {
 	const user = await prisma.user.findUnique({
 		where: { id: userId },
 		select: {
@@ -91,18 +102,31 @@ export async function deleteAccountService(userId: string, fullName: string, org
 
 	const organizationId = user.organizationId;
 
-	const otherUsersCount = organizationId ? await prisma.user.count({ where: { organizationId: organizationId, id: { not: userId } } }) : 0;
+	const otherUsersCount = organizationId
+		? await prisma.user.count({
+				where: { organizationId: organizationId, id: { not: userId } },
+			})
+		: 0;
 	const isLastUser = organizationId !== null && otherUsersCount === 0;
 
-	const ownedDocs = await prisma.knowledgeDocument.count({ where: { createdById: userId } });
+	const ownedDocs = await prisma.knowledgeDocument.count({
+		where: { createdById: userId },
+	});
 	let fallbackAdminId: string | null = null;
 	if (ownedDocs > 0 && !isLastUser) {
 		const fallbackAdmin = await prisma.user.findFirst({
-			where: { organizationId: organizationId, role: "ORG_ADMIN", id: { not: userId } },
+			where: {
+				organizationId: organizationId,
+				role: "ORG_ADMIN",
+				id: { not: userId },
+			},
 			select: { id: true },
 		});
 		if (!fallbackAdmin) {
-			throw new AppError("Cannot delete account: you have uploaded knowledge documents and no other admin exists to reassign them to. Please transfer or delete them first.", 409);
+			throw new AppError(
+				"Cannot delete account: you have uploaded knowledge documents and no other admin exists to reassign them to. Please transfer or delete them first.",
+				409,
+			);
 		}
 		fallbackAdminId = fallbackAdmin.id;
 	}
@@ -116,33 +140,69 @@ export async function deleteAccountService(userId: string, fullName: string, org
 			const conversationIds = conversations.map((c) => c.id);
 
 			if (conversationIds.length > 0) {
-				await tx.message.deleteMany({ where: { conversationId: { in: conversationIds } } });
-				await tx.agentLog.deleteMany({ where: { conversationId: { in: conversationIds } } });
-				await tx.report.deleteMany({ where: { conversationId: { in: conversationIds } } });
-				await tx.csatRating.deleteMany({ where: { conversationId: { in: conversationIds } } });
-				await tx.conversationAnalytics.deleteMany({ where: { conversationId: { in: conversationIds } } });
-				await tx.ticket.deleteMany({ where: { conversationId: { in: conversationIds } } });
+				await tx.message.deleteMany({
+					where: { conversationId: { in: conversationIds } },
+				});
+				await tx.agentLog.deleteMany({
+					where: { conversationId: { in: conversationIds } },
+				});
+				await tx.report.deleteMany({
+					where: { conversationId: { in: conversationIds } },
+				});
+				await tx.csatRating.deleteMany({
+					where: { conversationId: { in: conversationIds } },
+				});
+				await tx.conversationAnalytics.deleteMany({
+					where: { conversationId: { in: conversationIds } },
+				});
+				await tx.ticket.deleteMany({
+					where: { conversationId: { in: conversationIds } },
+				});
 			}
-			await tx.conversation.deleteMany({ where: { organizationId: organizationId } });
+			await tx.conversation.deleteMany({
+				where: { organizationId: organizationId },
+			});
 
-			await tx.ticket.deleteMany({ where: { organizationId: organizationId } });
+			await tx.ticket.deleteMany({
+				where: { organizationId: organizationId },
+			});
 
-			await tx.documentChunk.deleteMany({ where: { organizationId: organizationId } });
+			await tx.documentChunk.deleteMany({
+				where: { organizationId: organizationId },
+			});
 
-			await tx.toolDefinition.deleteMany({ where: { organizationId: organizationId } });
+			await tx.toolDefinition.deleteMany({
+				where: { organizationId: organizationId },
+			});
 
-			await tx.knowledgeDocument.deleteMany({ where: { organizationId: organizationId } });
+			await tx.knowledgeDocument.deleteMany({
+				where: { organizationId: organizationId },
+			});
 
-			await tx.businessApiConfig.deleteMany({ where: { organizationId: organizationId } });
+			await tx.businessApiConfig.deleteMany({
+				where: { organizationId: organizationId },
+			});
 
-			await tx.csatRating.deleteMany({ where: { organizationId: organizationId } });
-			await tx.conversationAnalytics.deleteMany({ where: { organizationId: organizationId } });
+			await tx.csatRating.deleteMany({
+				where: { organizationId: organizationId },
+			});
+			await tx.conversationAnalytics.deleteMany({
+				where: { organizationId: organizationId },
+			});
 
-			await tx.customer.deleteMany({ where: { organizationId: organizationId } });
-			await tx.apiKey.deleteMany({ where: { organizationId: organizationId } });
+			await tx.customer.deleteMany({
+				where: { organizationId: organizationId },
+			});
+			await tx.apiKey.deleteMany({
+				where: { organizationId: organizationId },
+			});
 
-			await tx.payment.deleteMany({ where: { organizationId: organizationId } });
-			await tx.invitation.deleteMany({ where: { organizationId: organizationId } });
+			await tx.payment.deleteMany({
+				where: { organizationId: organizationId },
+			});
+			await tx.invitation.deleteMany({
+				where: { organizationId: organizationId },
+			});
 
 			await tx.user.delete({ where: { id: userId } });
 			await tx.organization.delete({ where: { id: organizationId } });
@@ -166,4 +226,22 @@ export async function deleteAccountService(userId: string, fullName: string, org
 	});
 
 	return { success: true };
+}
+
+export async function getAssignableAgents(organizationId: string) {
+	return prisma.user.findMany({
+		where: {
+			organizationId,
+			role: { in: ["SUPPORT_AGENT", "ORG_ADMIN"] },
+			isActive: true,
+		},
+		select: {
+			id: true,
+			firstName: true,
+			lastName: true,
+			email: true,
+			role: true,
+		},
+		orderBy: { firstName: "asc" },
+	});
 }

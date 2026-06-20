@@ -82,12 +82,12 @@ export async function getTicketById(
 		const organizationId = (req.user as any).organizationId;
 		const ticketId = (req as Request<{ id: string }>).params.id;
 
-		const ticket = await ticketService.getTicketById(organizationId, ticketId);
+		const data = await ticketService.getTicketById(organizationId, ticketId);
 
 		res.status(200).json({
 			success: true,
 			message: "Ticket fetched successfully.",
-			data: { ticket },
+			data,
 		});
 	} catch (err) {
 		next(err);
@@ -179,6 +179,30 @@ export async function resolveTicket(
 		res.status(200).json({
 			success: true,
 			message: "Ticket resolved successfully.",
+			data: { ticket },
+		});
+	} catch (err) {
+		next(err);
+	}
+}
+
+export async function updateTicket(
+	req: AuthenticatedRequest,
+	res: Response,
+	next: NextFunction,
+): Promise<void> {
+	try {
+		const organizationId = (req.user as any).organizationId;
+		const ticketId = (req as Request<{ id: string }>).params.id;
+		const ticket = await ticketService.updateTicket(
+			organizationId,
+			ticketId,
+			req.body,
+		);
+
+		res.status(200).json({
+			success: true,
+			message: "Ticket updated successfully.",
 			data: { ticket },
 		});
 	} catch (err) {

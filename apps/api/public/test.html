@@ -25,17 +25,22 @@
 		<p>Chat widget should appear bottom-right.</p>
 		<script
 			src="[The Business Client]/widget.js"
+			id="widgetScript"
 			data-base-url="[SupportNest Server]"
+			defer
 		></script>
 		<script>
-			fetch("[The Business Server]/api/generate-widget-token")
-				.then((res) => res.json())
-				.then((data) => {
-					window.SupportNest.init({
-						widgetKey: "[your unique widget key]",
-						customerToken: data.token ?? null,
+			document.addEventListener("DOMContentLoaded", () => {
+				console.log(window);
+				fetch("[The Business Server]/api/generate-widget-token")
+					.then((res) => res.json())
+					.then((data) => {
+						window.SupportNest.init({
+							widgetKey: "[your unique widget key]",
+							customerToken: data.token ?? null,
+						});
 					});
-				});
+			});
 		</script>
 	</body>
 </html>

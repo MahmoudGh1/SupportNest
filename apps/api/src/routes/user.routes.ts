@@ -1,6 +1,13 @@
 import express, { Router } from "express";
 import { authMiddleware } from "src/middlewares/auth.middleware.js";
-import { getMeController, updateProfileController, updatePasswordController, deleteAccountController } from "src/controllers/user.controller.js";
+import {
+	getMeController,
+	updateProfileController,
+	updatePasswordController,
+	deleteAccountController,
+} from "src/controllers/user.controller.js";
+
+import * as userController from "src/controllers/user.controller.js";
 
 const userRouter: Router = express.Router();
 
@@ -9,6 +16,7 @@ userRouter.use(authMiddleware);
 
 // GET    /api/v1/users/me            → get current user profile
 userRouter.get("/me", getMeController);
+userRouter.get("/agents", authMiddleware, userController.getAssignableAgents);
 
 // PATCH  /api/v1/users/me            → update name + email
 // Body:  { firstName, lastName, email }

@@ -1,4 +1,5 @@
 import {
+	AgentTier,
 	ConversationStatus,
 	MessageRole,
 	MessageTier,
@@ -23,6 +24,8 @@ import {
 import { verifyToken } from "src/utils/jwt.util.js";
 import type { Organization } from "generated/prisma/client.js";
 import { conversationCloseQueue } from "src/queues/conversationCloseQueue.js";
+import router from "src/routes/conversations.routes.js";
+import { getEscalatedStandbyReply } from "src/utils/escalatedStandbyReply.util.js";
 
 export async function startConversation({
 	organizationId,
@@ -35,7 +38,7 @@ export async function startConversation({
 		where: { customerId, conversationStatus: ConversationStatus.ACTIVE },
 		orderBy: { createdAt: "desc" },
 	});
-
+	console.log(existing);
 	if (existing) return existing;
 
 	const conversation = await prisma.conversation.create({
@@ -47,6 +50,7 @@ export async function startConversation({
 			closedAt: null,
 		},
 	});
+	console.log(conversation);
 	return conversation;
 }
 
@@ -163,6 +167,31 @@ export async function processPipelineTurn({
 	// loads Redis memory
 	const redisHistory = await loadMemory(conversationId);
 
+	// fetch conversationStatus
+	const conversation = await prisma.conversation.findUniqueOrThrow({
+		where: { id: conversationId },
+		select: { conversationStatus: true },
+	});
+
+	if (conversation.conversationStatus === ConversationStatus.ESCALATED) {
+		const reply = getEscalatedStandbyReply(); // canned, no LLM call
+		const aiMessage = await prisma.message.create({
+			data: {
+				conversationId,
+				role: MessageRole.AI,
+				content: reply,
+			},
+		});
+
+		return {
+			routerOutput: {
+				finalResponse: reply,
+				resolvedByTier: AgentTier.ROUTER,
+				approved: true,
+			},
+			aiMessage,
+		};
+	}
 	// run the router
 	const context: PipelineContext = {
 		customerId,
@@ -181,11 +210,13 @@ export async function processPipelineTurn({
 			role: "AI",
 			content: routerOutput.finalResponse,
 			tier:
-				routerOutput.resolvedByTier === "HUMAN"
+				routerOutput.resolvedByTier === "HUMAN" ||
+				routerOutput.resolvedByTier === "ROUTER"
 					? null
 					: routerOutput.resolvedByTier,
 		},
 	});
+
 	// appends to Redis memory
 	await appendToMemory(conversationId, content, routerOutput.finalResponse);
 

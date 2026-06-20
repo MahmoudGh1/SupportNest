@@ -27,11 +27,11 @@ import {
 	WidgetConfig,
 	AdminOrganizationDetail,
 	AnalyticsSummary,
-	UploadDocumentInput
+	UploadDocumentInput,
 } from "@/types/types";
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
-function normalizeApiBaseUrl(rawBaseUrl?: string) {
+export function normalizeApiBaseUrl(rawBaseUrl?: string) {
 	const fallback =
 		process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
 	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");
@@ -144,7 +144,14 @@ export const api = {
 		});
 		const data = await res.json();
 		if (!res.ok) {
-			const err = new Error(data.error ?? data.message ?? "Login failed") as Error & { code?: string; userId?: string; redirectTo?: string; userData?: { firstName: string; lastName: string; email: string } };
+			const err = new Error(
+				data.error ?? data.message ?? "Login failed",
+			) as Error & {
+				code?: string;
+				userId?: string;
+				redirectTo?: string;
+				userData?: { firstName: string; lastName: string; email: string };
+			};
 			err.code = data.code;
 			err.userId = data.userId;
 			err.redirectTo = data.redirectTo;
@@ -255,7 +262,13 @@ export const api = {
 		return { user: mapApiUser(body.result) };
 	},
 
-	async registerWithGoogle(idToken: string): Promise<{ userId: string; email: string; isNewUser: boolean; firstName: string; lastName: string }> {
+	async registerWithGoogle(idToken: string): Promise<{
+		userId: string;
+		email: string;
+		isNewUser: boolean;
+		firstName: string;
+		lastName: string;
+	}> {
 		const res = await fetch(`${BASE_URL}/auth/google-register`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -268,13 +281,19 @@ export const api = {
 	},
 
 	async getPaymentStatus(paymentId: string): Promise<{ status: string }> {
-		const res = await fetch(`${BASE_URL}/payments/status/${paymentId}`, { credentials: "include" });
+		const res = await fetch(`${BASE_URL}/payments/status/${paymentId}`, {
+			credentials: "include",
+		});
 		const body = await res.json();
-		if (!res.ok) throw new Error(body.error ?? "Failed to check payment status");
+		if (!res.ok)
+			throw new Error(body.error ?? "Failed to check payment status");
 		return body;
 	},
 
-	async loginAfterPayment(userId: string, paymentId: string): Promise<LoginResponse> {
+	async loginAfterPayment(
+		userId: string,
+		paymentId: string,
+	): Promise<LoginResponse> {
 		const res = await fetch(`${BASE_URL}/auth/login-after-payment`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -324,7 +343,14 @@ export const api = {
 		});
 		const data = await res.json();
 		if (!res.ok) {
-			const err = new Error(data.error ?? data.message ?? "Google login failed") as Error & { code?: string; userId?: string; redirectTo?: string; userData?: { firstName: string; lastName: string; email: string } };
+			const err = new Error(
+				data.error ?? data.message ?? "Google login failed",
+			) as Error & {
+				code?: string;
+				userId?: string;
+				redirectTo?: string;
+				userData?: { firstName: string; lastName: string; email: string };
+			};
 			err.code = data.code;
 			err.userId = data.userId;
 			err.redirectTo = data.redirectTo;
@@ -426,8 +452,14 @@ export const api = {
 		);
 	},
 
-	
-	async createAdminOrganization(data: { name: string; email: string; password?: string; slug: string; plan_id?: string; widget_config?: Partial<WidgetConfig> }): Promise<AdminOrganization> {
+	async createAdminOrganization(data: {
+		name: string;
+		email: string;
+		password?: string;
+		slug: string;
+		plan_id?: string;
+		widget_config?: Partial<WidgetConfig>;
+	}): Promise<AdminOrganization> {
 		return adminFetch<AdminOrganization>("/organizations", {
 			method: "POST",
 			body: JSON.stringify(data),
@@ -666,52 +698,54 @@ export const api = {
 		);
 	},
 
-async getDashboardStats(): Promise<DashboardStats> {
-  const session = getSession();
-  const res = await fetch(`${BASE_URL}/reports/summary?range=7d`, {
-    credentials: "include",
-    headers: session?.token ? { Authorization: `Bearer ${session.token}` } : {},
-  });
-  
-  if (!res.ok) {
-    // fallback to zeros if request fails
-    return {
-      totalConversations: 0,
-      aiResolutionRate: 0,
-      avgResponseTime: "—",
-      csatScore: 0,
-      recentConversations: [],
-      resolutionByTier: { tier1: 0, tier2: 0, human: 0 },
-    };
-  }
+	async getDashboardStats(): Promise<DashboardStats> {
+		const session = getSession();
+		const res = await fetch(`${BASE_URL}/analytics/summary?range=7d`, {
+			credentials: "include",
+			headers: session?.token
+				? { Authorization: `Bearer ${session.token}` }
+				: {},
+		});
 
-  const { data } = await res.json();
+		if (!res.ok) {
+			// fallback to zeros if request fails
+			return {
+				totalConversations: 0,
+				aiResolutionRate: 0,
+				avgResponseTime: "—",
+				csatScore: 0,
+				recentConversations: [],
+				resolutionByTier: { tier1: 0, tier2: 0, human: 0 },
+			};
+		}
 
-  const total = data.totalConversations ?? 0;
-  const tier1 = data.resolutionByTier?.TIER1 ?? 0;
-  const tier2 = data.resolutionByTier?.TIER2 ?? 0;
-  const human = data.resolutionByTier?.HUMAN ?? 0;
+		const { data } = await res.json();
 
-  const aiResolutionRate = total > 0
-    ? Math.round(((tier1 + tier2) / total) * 100)
-    : 0;
+		const total = data.totalConversations ?? 0;
+		const tier1 = data.resolutionByTier?.TIER1 ?? 0;
+		const tier2 = data.resolutionByTier?.TIER2 ?? 0;
+		const human = data.resolutionByTier?.HUMAN ?? 0;
 
-  const avgMs = data.avgResolutionTimeMs ?? 0;
-  const avgResponseTime = avgMs > 0
-    ? avgMs < 60000
-      ? `${Math.round(avgMs / 1000)}s`
-      : `${Math.round(avgMs / 60000)}m`
-    : "—";
+		const aiResolutionRate =
+			total > 0 ? Math.round(((tier1 + tier2) / total) * 100) : 0;
 
-  return {
-    totalConversations: total,
-    aiResolutionRate,
-    avgResponseTime,
-    csatScore: Math.round((data.csat?.average ?? 0) * 10) / 10,
-    recentConversations: [],
-    resolutionByTier: { tier1, tier2, human },
-  };
-},
+		const avgMs = data.avgResolutionTimeMs ?? 0;
+		const avgResponseTime =
+			avgMs > 0
+				? avgMs < 60000
+					? `${Math.round(avgMs / 1000)}s`
+					: `${Math.round(avgMs / 60000)}m`
+				: "—";
+
+		return {
+			totalConversations: total,
+			aiResolutionRate,
+			avgResponseTime,
+			csatScore: Math.round((data.csat?.average ?? 0) * 10) / 10,
+			recentConversations: [],
+			resolutionByTier: { tier1, tier2, human },
+		};
+	},
 
 	async getAnalyticsSummary(range: string): Promise<AnalyticsSummary> {
 		const res = await fetch(`${BASE_URL}/analytics/summary?range=${range}`, {
@@ -836,7 +870,13 @@ async getDashboardStats(): Promise<DashboardStats> {
 		return data.id ? { ...data, configured: true } : { configured: false };
 	},
 
-	async saveApiConfig(input: { baseUrl: string; authType: string; authValue: string; headerName?: string; testEndpoint?: string }): Promise<{ id: string; isVerified: boolean }> {
+	async saveApiConfig(input: {
+		baseUrl: string;
+		authType: string;
+		authValue: string;
+		headerName?: string;
+		testEndpoint?: string;
+	}): Promise<{ id: string; isVerified: boolean }> {
 		const res = await fetch(`${BASE_URL}/organizations/api-config`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -1178,18 +1218,20 @@ async getDashboardStats(): Promise<DashboardStats> {
 		}
 	},
 
-// ─── CONTACT SUBMISSIONS ─────────────────────────────────────────────────────
+	// ─── CONTACT SUBMISSIONS ─────────────────────────────────────────────────────
 
-async getContactSubmissions(): Promise<{
-    id: string;
-    name: string;
-    email: string;
-    company?: string;
-    message: string;
-    createdAt: string;
-}[]> {
-    return adminFetch("/contact-submissions");
-},
+	async getContactSubmissions(): Promise<
+		{
+			id: string;
+			name: string;
+			email: string;
+			company?: string;
+			message: string;
+			createdAt: string;
+		}[]
+	> {
+		return adminFetch("/contact-submissions");
+	},
 
 	// ADD THIS after revokeInvitation
 	async validateInvitation(token: string): Promise<{
@@ -1223,7 +1265,10 @@ async getContactSubmissions(): Promise<{
 		return data;
 	},
 
-	async acceptInvitationWithGoogle(token: string, idToken: string): Promise<{ message: string; email: string }> {
+	async acceptInvitationWithGoogle(
+		token: string,
+		idToken: string,
+	): Promise<{ message: string; email: string }> {
 		const res = await fetch(`${BASE_URL}/invitations/accept/${token}/google`, {
 			method: "POST",
 			credentials: "include",
@@ -1232,7 +1277,8 @@ async getContactSubmissions(): Promise<{
 		});
 		const data = await res.json();
 		console.log("acceptInvitationWithGoogle response:", res.status, data);
-		if (!res.ok) throw new Error(data.error ?? "Failed to accept invitation with Google");
+		if (!res.ok)
+			throw new Error(data.error ?? "Failed to accept invitation with Google");
 		return data;
 	},
 };
