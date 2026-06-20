@@ -18,7 +18,10 @@ import {
 	timeAgo,
 } from "@/app/[locale]/(dashboard)/dashboard/tickets/tickets.utils";
 import { useEffect, useRef, useState } from "react";
-import { apiGetMessages } from "@/app/[locale]/(dashboard)/dashboard/tickets/tickets.api";
+import {
+	apiGetMessages,
+	apiStart,
+} from "@/app/[locale]/(dashboard)/dashboard/tickets/tickets.api";
 import { useAuth } from "@/context/auth-context";
 
 export function PriorityBadge({ p }: { p: TicketPriority }) {
