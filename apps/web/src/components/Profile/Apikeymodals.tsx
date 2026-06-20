@@ -68,7 +68,7 @@ export function CreateKeyModal({
 			style={{
 				position: "fixed",
 				inset: 0,
-				background: "rgba(26,24,48,0.45)",
+				background: "rgba(0,0,0,0.5)",
 				zIndex: 200,
 				display: "flex",
 				alignItems: "center",
@@ -78,12 +78,13 @@ export function CreateKeyModal({
 		>
 			<div
 				style={{
-					background: "#fff",
+					background: S.surface,
+					border: `1px solid ${S.border}`,
 					borderRadius: 16,
 					width: "100%",
 					maxWidth: 520,
 					padding: "2rem",
-					boxShadow: "0 24px 80px rgba(0,0,0,0.18)",
+					boxShadow: "0 24px 80px rgba(0,0,0,0.35)",
 				}}
 			>
 				<div
@@ -198,17 +199,18 @@ export function CreateKeyModal({
 											boxSizing: "border-box",
 											padding: "9px 10px 9px 32px",
 											fontSize: 13,
-											border: `1.5px solid ${errors[`origin_${i}`] ? "#E24B4A" : S.border}`,
+											border: `1.5px solid ${errors[`origin_${i}`] ? S.danger : S.border}`,
 											borderRadius: 8,
 											outline: "none",
 											fontFamily: "inherit",
 											color: S.dark,
+											background: S.surface,
 											transition: "border-color .15s",
 										}}
 										onFocus={(e) => (e.target.style.borderColor = S.purple)}
 										onBlur={(e) =>
 											(e.target.style.borderColor = errors[`origin_${i}`]
-												? "#E24B4A"
+												? S.danger
 												: S.border)
 										}
 									/>
@@ -216,7 +218,7 @@ export function CreateKeyModal({
 										<p
 											style={{
 												fontSize: 11,
-												color: "#E24B4A",
+												color: S.danger,
 												margin: "3px 0 0",
 											}}
 										>
@@ -231,7 +233,7 @@ export function CreateKeyModal({
 											background: "none",
 											border: "none",
 											cursor: "pointer",
-											color: "#E24B4A",
+											color: S.danger,
 											fontSize: 18,
 											lineHeight: 1,
 											padding: "4px",
@@ -248,7 +250,7 @@ export function CreateKeyModal({
 					</div>
 
 					{errors.origins && (
-						<p style={{ fontSize: 12, color: "#E24B4A", marginTop: 6 }}>
+						<p style={{ fontSize: 12, color: S.danger, marginTop: 6 }}>
 							{errors.origins}
 						</p>
 					)}
@@ -262,7 +264,7 @@ export function CreateKeyModal({
 						<p
 							style={{
 								fontSize: 12,
-								color: "#E24B4A",
+								color: S.danger,
 								margin: "0 auto 0 0",
 								alignSelf: "center",
 							}}
@@ -333,7 +335,7 @@ export function KeyRevealModal({
 			style={{
 				position: "fixed",
 				inset: 0,
-				background: "rgba(26,24,48,0.55)",
+				background: "rgba(0,0,0,0.55)",
 				zIndex: 300,
 				display: "flex",
 				alignItems: "center",
@@ -343,12 +345,13 @@ export function KeyRevealModal({
 		>
 			<div
 				style={{
-					background: "#fff",
+					background: S.surface,
+					border: `1px solid ${S.border}`,
 					borderRadius: 16,
 					width: "100%",
 					maxWidth: 500,
 					padding: "2rem",
-					boxShadow: "0 24px 80px rgba(0,0,0,0.2)",
+					boxShadow: "0 24px 80px rgba(0,0,0,0.4)",
 				}}
 			>
 				<div
@@ -373,7 +376,7 @@ export function KeyRevealModal({
 					>
 						<i
 							className="ti ti-alert-triangle"
-							style={{ fontSize: 22, color: "#D97706" }}
+							style={{ fontSize: 22, color: S.amber }}
 						/>
 					</div>
 					<div>
@@ -446,8 +449,8 @@ export function KeyRevealModal({
 							: copyError
 								? S.dangerBg
 								: S.purpleBg,
-						border: `1.5px solid ${copied ? S.green : copyError ? "#E24B4A" : S.purple}`,
-						color: copied ? "#0F6E56" : copyError ? S.danger : S.purple,
+						border: `1.5px solid ${copied ? S.green : copyError ? S.danger : S.purple}`,
+						color: copied ? S.green : copyError ? S.danger : S.purple,
 						fontSize: 14,
 						fontWeight: 600,
 						cursor: "pointer",
@@ -474,6 +477,7 @@ export function KeyRevealModal({
 				<div
 					style={{
 						background: S.bg,
+						border: `1px solid ${S.border}`,
 						borderRadius: 9,
 						padding: "12px 14px",
 						marginBottom: 20,

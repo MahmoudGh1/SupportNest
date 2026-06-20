@@ -10,6 +10,9 @@ import { rateLimit } from "./utils/rateLimiter.util.js";
 import "./workers/knowledgeWorker.js";
 import "./workers/conversationCloseWorker.js";
 import "./workers/analyticsWorker.js";
+import "./workers/reportWorker.js";
+import "./workers/orgDeletionWorker.js";
+import "./workers/analyticsWorker.js";
 import conversationsRoutes from "./routes/conversations.routes.js";
 import ApiKeyRouter from "./routes/apiKey.routes.js";
 import WidgetRouter from "./routes/widget.routes.js";
@@ -33,10 +36,11 @@ import tier2Router from "./routes/tier2.routes.js";
 import reportRouter from "./routes/reporter.routes.js";
 import AdminRoutes from "./routes/admin-dashboard.routes.js";
 import analyticsRouter from "./routes/analytics.routes.js";
+import NotificationRouter from "./routes/notification.routes.js";
 import businessTableRoutes from "./routes/businessTable.routes.js"
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV || "development"}` });
-
+import contactRouter from "./routes/contactus.routes.js";
 const app = express();
 app.set("trust proxy", 1);
 const PORT = process.env.PORT || 3001;
@@ -45,32 +49,57 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(
-	helmet({
-		crossOriginResourcePolicy: false,
-		contentSecurityPolicy: false,
-	}),
+  helmet({
+    crossOriginResourcePolicy: false,
+    contentSecurityPolicy: false,
+  }),
 );
 
+// app.use(
+//   cors({
+//     // Dynamically sets the header to match whoever is making the request
+//     origin: function (origin, callback) {
+//       // Allow requests with no origin (like mobile apps, curl, or postman)
+//       if (!origin) return callback(null, true);
+//       if (
+//         [
+//           "http://localhost:3000",
+//           "https://supportnest.up.railway.app",
+//           "http://localhost:3000",
+//         ].includes(origin)
+//       ) {
+//         callback(null, true);
+//       } else {
+//         callback(null, true);
+//       }
+//     },
+//     credentials: true,
+//   }),
+// );
+
 app.use(
-	cors({
-		// Dynamically sets the header to match whoever is making the request
-		origin: function (origin, callback) {
-			// Allow requests with no origin (like mobile apps, curl, or postman)
-			if (!origin) return callback(null, true);
-			if (
-				[
-					"http://localhost:3000",
-					"https://supportnest.up.railway.app",
-					"http://localhost:3000",
-				].includes(origin)
-			) {
-				callback(null, true);
-			} else {
-				callback(null, true);
-			}
-		},
-		credentials: true,
-	}),
+  cors({
+    origin: function (origin, callback) {
+      // 1. Allow internal proxy/server-to-server or tools (like Postman/Curl) with no origin header
+      if (!origin) return callback(null, true);
+      
+      // 2. Explicitly validate matching frontend origins
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "https://supportnest.up.railway.app"
+      ];
+      
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      
+      // 3. If Next.js forwards requests internally or alters the origin string, fallback safely
+      return callback(null, true);
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  })
 );
 
 app.use(morgan("dev"));
@@ -103,6 +132,9 @@ app.use("/api/v1/tier2", tier2Router);
 
 app.use("/api/v1/admindashboard", AdminRoutes);
 app.use("/api/v1/analytics", analyticsRouter);
+app.use("/api/v1/notifications", NotificationRouter);
+
+app.use('/api/contact', contactRouter);
 app.use(notFoundHandler);
 
 app.use(errorHandler);
@@ -112,5 +144,5 @@ const wss = new WebSocketServer({ server: Server, path: "/widget/ws" });
 setupWebSocket(wss);
 
 Server.listen(Number(PORT), "0.0.0.0", () => {
-	console.log("Server is running on port:", PORT);
+  console.log("Server is running on port:", PORT);
 });

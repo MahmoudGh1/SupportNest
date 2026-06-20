@@ -16,7 +16,6 @@ export const ROLE_TRANSLATIONS: Record<Role, MessageDescriptor> = {
 
 const navItems = [
 	{ icon: "layout-dashboard", label: msg`Overview`, page: "dashboard" },
-	{ icon: "message-2", label: msg`Conversations`, page: "conversations" },
 	{ icon: "ticket", label: msg`Tickets`, page: "tickets" },
 	{
 		icon: "book",
@@ -41,6 +40,13 @@ const navItems = [
 	{ icon: "settings", label: msg`Settings`, page: "settings" },
 	{ icon: "plug", label: msg`API Tools`, page: "tools" },
 	{ icon: "user-circle", label: msg`Profile`, page: "profile" },
+	// In navItems array, after "organizations":
+	{
+		icon: "mail",
+		label: msg`Contact Submissions`,
+		page: "contact-submissions",
+		superAdminOnly: true,
+	},
 ];
 
 interface SidebarProps {
@@ -61,6 +67,8 @@ export function Sidebar({
 		? `${user.firstName?.[0]}${user.lastName?.[0]}`.toUpperCase()
 		: "U";
 	const isSuperAdmin = String(user?.role).toUpperCase() === Role.SUPER_ADMIN;
+	const isSupportAgent =
+		String(user?.role).toUpperCase() === Role.SUPPORT_AGENT;
 
 	return (
 		<div
@@ -143,57 +151,66 @@ export function Sidebar({
 					.filter((item) => {
 						if (isSuperAdmin) {
 							// For Super Admin, only show Admin, Organizations, and Profile
-							return ["admin", "organizations", "profile"].includes(item.page);
+							return [
+								"admin",
+								"organizations",
+								"contact-submissions",
+								"profile",
+							].includes(item.page);
 						}
-						// For others, show everything EXCEPT Admin
+						if (isSupportAgent) {
+							// For Support Agent, show Overview, Tickets, and Profile
+							return ["dashboard", "tickets", "profile"].includes(item.page);
+						}
+						// For others (ORG_ADMIN), show everything EXCEPT Admin
 						return !item.superAdminOnly;
 					})
 					.map((item) => {
-					const isActive = currentPage === item.page;
-					return (
-						<button
-							key={item.page}
-							onClick={() => onNavigate(item.page)}
-							title={collapsed ? i18n._(item.label) : ""}
-							style={{
-								display: "flex",
-								alignItems: "center",
-								gap: 10,
-								padding: collapsed ? "9px 14px" : "8px 10px",
-								borderRadius: 8,
-								cursor: "pointer",
-								border: "none",
-								background: isActive ? S.purple : "transparent",
-								color: isActive ? "#fff" : "rgba(255,255,255,0.5)",
-								fontSize: 13,
-								fontFamily: "inherit",
-								transition: "all .15s",
-								whiteSpace: "nowrap",
-								justifyContent: collapsed ? "center" : "flex-start",
-							}}
-							onMouseEnter={(e) => {
-								if (!isActive) {
-									const el = e.currentTarget as HTMLElement;
-									el.style.background = "rgba(255,255,255,0.06)";
-									el.style.color = "rgba(255,255,255,0.85)";
-								}
-							}}
-							onMouseLeave={(e) => {
-								if (!isActive) {
-									const el = e.currentTarget as HTMLElement;
-									el.style.background = "transparent";
-									el.style.color = "rgba(255,255,255,0.5)";
-								}
-							}}
-						>
-							<i
-								className={`ti ti-${item.icon}`}
-								style={{ fontSize: 17, flexShrink: 0 }}
-							/>
-							{!collapsed && <span>{i18n._(item.label)}</span>}
-						</button>
-					);
-				})}
+						const isActive = currentPage === item.page;
+						return (
+							<button
+								key={item.page}
+								onClick={() => onNavigate(item.page)}
+								title={collapsed ? i18n._(item.label) : ""}
+								style={{
+									display: "flex",
+									alignItems: "center",
+									gap: 10,
+									padding: collapsed ? "9px 14px" : "8px 10px",
+									borderRadius: 8,
+									cursor: "pointer",
+									border: "none",
+									background: isActive ? S.purple : "transparent",
+									color: isActive ? "#fff" : "rgba(255,255,255,0.5)",
+									fontSize: 13,
+									fontFamily: "inherit",
+									transition: "all .15s",
+									whiteSpace: "nowrap",
+									justifyContent: collapsed ? "center" : "flex-start",
+								}}
+								onMouseEnter={(e) => {
+									if (!isActive) {
+										const el = e.currentTarget as HTMLElement;
+										el.style.background = "rgba(255,255,255,0.06)";
+										el.style.color = "rgba(255,255,255,0.85)";
+									}
+								}}
+								onMouseLeave={(e) => {
+									if (!isActive) {
+										const el = e.currentTarget as HTMLElement;
+										el.style.background = "transparent";
+										el.style.color = "rgba(255,255,255,0.5)";
+									}
+								}}
+							>
+								<i
+									className={`ti ti-${item.icon}`}
+									style={{ fontSize: 17, flexShrink: 0 }}
+								/>
+								{!collapsed && <span>{i18n._(item.label)}</span>}
+							</button>
+						);
+					})}
 			</div>
 
 			{/* AI Mode button */}

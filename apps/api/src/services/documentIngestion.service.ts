@@ -44,6 +44,7 @@ export async function ingestDocument(
 		console.log(chunks);
 	} else if (type === "PDF") {
 		const text = await extractTextFromPdfUrl(fileUrl);
+		console.log(text);
 		chunks = await chunkText(text);
 	} else {
 		chunks = [];

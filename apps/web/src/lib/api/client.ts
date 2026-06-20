@@ -1,6 +1,8 @@
 import { getSession } from "@/lib/auth";
 import type { ApiKey, OrgProfile, UserProfile } from "@/types/types";
 
+import { cookies } from "next/headers";
+
 // ─── BASE URL ─────────────────────────────────────────────────────────────────
 
 export function normalizeApiBaseUrl(rawBaseUrl?: string) {
@@ -23,12 +25,22 @@ export const BASE_URL = normalizeApiBaseUrl();
 
 // ─── CORE FETCHERS ────────────────────────────────────────────────────────────
 
-export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+export async function apiFetch<T>(
+	path: string,
+	init?: RequestInit,
+): Promise<T> {
+	const isServer = typeof window === "undefined";
+
+	const cookieHeader = isServer
+		? (await cookies()).toString() // serializes all cookies as "key=value; key2=value2"
+		: undefined;
+
 	const response = await fetch(`${BASE_URL}${path}`, {
 		...init,
 		credentials: "include",
 		headers: {
 			"Content-Type": "application/json",
+			...(cookieHeader ? { Cookie: cookieHeader } : {}),
 			...init?.headers,
 		},
 	});
@@ -39,7 +51,10 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 	return data as T;
 }
 
-export async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
+export async function adminFetch<T>(
+	path: string,
+	init?: RequestInit,
+): Promise<T> {
 	const session = getSession();
 	const response = await fetch(`${BASE_URL}/admindashboard${path}`, {
 		...init,
@@ -52,7 +67,9 @@ export async function adminFetch<T>(path: string, init?: RequestInit): Promise<T
 	});
 	const data = await response.json().catch(() => ({}));
 	if (!response.ok) {
-		throw new Error(data?.error?.message ?? data?.message ?? "Admin request failed");
+		throw new Error(
+			data?.error?.message ?? data?.message ?? "Admin request failed",
+		);
 	}
 	return data as T;
 }
@@ -67,15 +84,21 @@ export function normalizeUserProfile(input: ApiRecord): UserProfile {
 		email: String(input.email ?? ""),
 		first_name: String(input.first_name ?? input.firstName ?? ""),
 		last_name: String(input.last_name ?? input.lastName ?? ""),
-		role: String(input.role ?? "org_admin").toLowerCase() as UserProfile["role"],
-		organization_id: String(input.organization_id ?? input.organizationId ?? ""),
+		role: String(
+			input.role ?? "org_admin",
+		).toLowerCase() as UserProfile["role"],
+		organization_id: String(
+			input.organization_id ?? input.organizationId ?? "",
+		),
 		is_active: Boolean(input.is_active ?? input.isActive ?? true),
 		created_at: String(input.created_at ?? input.createdAt ?? ""),
 	};
 }
 
 export function normalizeOrgProfile(input: ApiRecord): OrgProfile {
-	const widget = (input.widget_config ?? input.widgetConfig ?? {}) as ApiRecord;
+	const widget = (input.widget_config ??
+		input.widgetConfig ??
+		{}) as ApiRecord;
 	return {
 		id: String(input.id ?? ""),
 		name: String(input.name ?? ""),
@@ -83,9 +106,13 @@ export function normalizeOrgProfile(input: ApiRecord): OrgProfile {
 		email: String(input.email ?? ""),
 		widget_config: {
 			color: String(widget.color ?? widget.accentColor ?? "#534AB7"),
-			greeting: String(widget.greeting ?? widget.greetingMessage ?? "Hi! How can we help?"),
+			greeting: String(
+				widget.greeting ?? widget.greetingMessage ?? "Hi! How can we help?",
+			),
 			title: String(widget.title ?? "Support"),
-			position: (widget.position as OrgProfile["widget_config"]["position"]) ?? "bottom-right",
+			position:
+				(widget.position as OrgProfile["widget_config"]["position"]) ??
+				"bottom-right",
 		},
 		plan_id: String(input.plan_id ?? input.planId ?? ""),
 		is_active: Boolean(input.is_active ?? input.isActive ?? true),
@@ -99,7 +126,9 @@ export function normalizeApiKey(input: ApiRecord): ApiKey {
 		id: String(input.id ?? ""),
 		name: String(input.name ?? "Default"),
 		key_prefix: String(input.key_prefix ?? input.keyPrefix ?? ""),
-		allowed_origins: Array.isArray(input.allowed_origins ?? input.allowedOrigins)
+		allowed_origins: Array.isArray(
+			input.allowed_origins ?? input.allowedOrigins,
+		)
 			? ((input.allowed_origins ?? input.allowedOrigins) as string[])
 			: [],
 		is_active: Boolean(input.is_active ?? input.isActive ?? true),
@@ -107,7 +136,9 @@ export function normalizeApiKey(input: ApiRecord): ApiKey {
 			typeof (input.last_used_at ?? input.lastUsedAt) === "string"
 				? String(input.last_used_at ?? input.lastUsedAt)
 				: null,
-		created_at: String(input.created_at ?? input.createdAt ?? new Date().toISOString()),
+		created_at: String(
+			input.created_at ?? input.createdAt ?? new Date().toISOString(),
+		),
 		raw_key: typeof input.raw_key === "string" ? input.raw_key : undefined,
 	};
 }

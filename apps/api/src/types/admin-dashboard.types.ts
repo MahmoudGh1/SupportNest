@@ -59,6 +59,7 @@ export type OrgSummary = {
   slug: string;
   email: string;
   is_active: boolean;
+  scheduled_deletion_at?: string | null;
   plan: {
     id: string;
     name: string;
@@ -82,6 +83,7 @@ export type OrgDetail = {
   slug: string;
   email: string;
   is_active: boolean;
+  scheduled_deletion_at?: string | null;
   widget_config: Record<string, unknown>;
   plan: {
     id: string;
