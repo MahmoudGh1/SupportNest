@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { S } from "@/components/ui";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 type ContactSubmission = {
   id: string;
@@ -19,6 +20,7 @@ function fmtDate(iso: string) {
 }
 
 export default function ContactSubmissionsPage() {
+  const { t } = useLingui();
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -26,19 +28,21 @@ export default function ContactSubmissionsPage() {
   useEffect(() => {
     api.getContactSubmissions()
       .then(setSubmissions)
-      .catch((err) => setError(err.message || "Failed to load"))
+      .catch((err) => setError(err.message || t`Failed to load`))
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div style={{ padding: "2rem", color: S.textMuted }}>Loading...</div>;
+  if (loading) return <div style={{ padding: "2rem", color: S.textMuted }}><Trans>Loading...</Trans></div>;
   if (error) return <div style={{ padding: "2rem", color: S.danger }}>{error}</div>;
 
   return (
     <div style={{ padding: "1.5rem" }}>
       <div style={{ marginBottom: 20 }}>
-        <p style={{ fontSize: 11, fontWeight: 600, color: S.textMuted, letterSpacing: ".06em", textTransform: "uppercase", margin: "0 0 4px" }}>Inbound Leads</p>
+        <p style={{ fontSize: 11, fontWeight: 600, color: S.textMuted, letterSpacing: ".06em", textTransform: "uppercase", margin: "0 0 4px" }}>
+          <Trans>Inbound Leads</Trans>
+        </p>
         <h1 style={{ fontSize: 24, fontWeight: 750, color: S.dark, margin: 0 }}>
-          Contact Submissions
+          <Trans>Contact Submissions</Trans>
           <span style={{ marginLeft: 10, fontSize: 14, fontWeight: 600, padding: "2px 10px", borderRadius: 999, background: S.purpleBg, color: S.purple }}>
             {submissions.length}
           </span>
@@ -47,18 +51,18 @@ export default function ContactSubmissionsPage() {
 
       <div style={{ background: S.surface, borderRadius: 12, border: `0.5px solid ${S.border}`, overflow: "hidden" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr 1fr 2fr 0.8fr 1fr", gap: 12, padding: "12px 20px", borderBottom: `0.5px solid ${S.border}`, fontSize: 11, fontWeight: 600, color: S.textMuted, textTransform: "uppercase" }}>
-          <div>Name</div>
-          <div>Email</div>
-          <div>Company</div>
-          <div>Message</div>
-          <div>Date</div>
-          <div style={{ textAlign: "right" }}>Actions</div>
+          <div><Trans>Name</Trans></div>
+          <div><Trans>Email</Trans></div>
+          <div><Trans>Company</Trans></div>
+          <div><Trans>Message</Trans></div>
+          <div><Trans>Date</Trans></div>
+          <div style={{ textAlign: "right" }}><Trans>Actions</Trans></div>
         </div>
 
         {submissions.length === 0 && (
           <div style={{ padding: "3rem", textAlign: "center", color: S.textMuted, fontSize: 13 }}>
             <i className="ti ti-mail-off" style={{ fontSize: 32, display: "block", marginBottom: 8, opacity: 0.4 }} />
-            No submissions yet.
+            <Trans>No submissions yet.</Trans>
           </div>
         )}
 
@@ -89,7 +93,7 @@ export default function ContactSubmissionsPage() {
                 onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
               >
                 <i className="ti ti-mail-forward" style={{ fontSize: 14 }} />
-                Reply
+                <Trans>Reply</Trans>
               </a>
             </div>
           </div>

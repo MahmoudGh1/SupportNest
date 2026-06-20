@@ -26,7 +26,7 @@ const About = dynamic(() => import("@/components/landingPage/About"));
 
 const Contact = dynamic(() => import("@/components/landingPage/Contact"));
 
-const CtaBanner = dynamic(() => import("@/components/landingPage/Ctabanner"));
+//const CtaBanner = dynamic(() => import("@/components/landingPage/Ctabanner"));
 
 const Footer = dynamic(() => import("@/components/landingPage/Footer"));
 
@@ -100,7 +100,7 @@ export default function LandingPage() {
 
 			<Contact />
 
-			<CtaBanner />
+			{/* <CtaBanner /> */}
 
 			<Footer />
 

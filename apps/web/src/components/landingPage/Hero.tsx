@@ -2,16 +2,21 @@
 
 import Link from "next/link";
 import { Trans, useLingui } from "@lingui/react/macro";
-
-const STATS = [
-  { val: "80%", label: "Tickets auto-resolved" },
-  { val: "70%", label: "Support cost reduction" },
-  { val: "1.4s", label: "Avg AI response time" },
-  { val: "4.8★", label: "Average CSAT score" },
-];
+import { useContext } from "react";
+import { LocaleContext } from "@/context/local-context";
 
 export default function Hero() {
   const { t } = useLingui();
+  const locale = useContext(LocaleContext)?.locale ?? "en";
+  const fmt = (val: number) =>
+    new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en").format(val);
+
+  const STATS = [
+    { val: `${fmt(80)}%`, label: t`Tickets auto-resolved` },
+    { val: `${fmt(70)}%`, label: t`Support cost reduction` },
+    { val: `${fmt(1.4)}${locale === "ar" ? "ث" : "s"}`, label: t`Avg AI response time` },
+    { val: `${fmt(4.8)}★`, label: t`Average CSAT score` },
+  ];
 
   return (
     <section
@@ -48,7 +53,10 @@ export default function Hero() {
           color: "var(--page-text)",
         }}
       >
-        {t`Resolve`} <span className="text-brand">80% {t`of tickets`}</span>{" "}
+        {t`Resolve`}{" "}
+        <span className="text-brand">
+          {fmt(80)}% {t`of tickets`}
+        </span>{" "}
         {t`instantly with AI agents`}
       </h1>
 
@@ -77,23 +85,17 @@ export default function Hero() {
           className="sn-surface text-sm sm:text-[15px] font-semibold no-underline px-5 sm:px-7 py-3 sm:py-[13px] rounded-[10px] border inline-flex items-center gap-2 transition-colors hover:border-brand"
           style={{ color: "var(--page-text)" }}
         >
-          <i className="ti ti-player-play-filled text-[15px]" />{" "}
-          {t`See How It Works`}
+          <i className="ti ti-player-play-filled text-[15px]" /> {t`See How It Works`}
         </a>
       </div>
 
-      {/* Stats strip — 2×2 on mobile, single row on sm+ */}
-      <div className="grid grid-cols-2 sm:flex sm:justify-center sm:flex-wrap">
-        {STATS.map((s, i) => (
+      {/* Stats strip */}
+<div className="grid grid-cols-2 md:grid-cols-4">        {STATS.map((s, i) => (
           <div
             key={s.label}
             className={`px-5 sm:px-10 py-4 sm:py-5 text-center ${
               i < 3 ? "sm:border-r" : ""
-            } ${
-              /* bottom border between the two mobile rows */
-              i < 2 ? "border-b sm:border-b-0" : ""
-            } ${
-              /* right border on left column in mobile 2×2 */
+            } ${i < 2 ? "border-b sm:border-b-0" : ""} ${
               i % 2 === 0 ? "border-r sm:border-r-0" : ""
             }`}
             style={{ borderColor: "var(--card-border)" }}

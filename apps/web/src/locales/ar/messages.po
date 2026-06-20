@@ -13,56 +13,242 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:217
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:505
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:337
+msgid "{0} activated."
+msgstr "{0} مُفعَّل."
+
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:479
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:329
+msgid "{0} created."
+msgstr "تم إنشاء {0}."
+
+#. placeholder {0}: tierStats.tier0_resolved
+#. placeholder {0}: tierStats.tier1_resolved
+#. placeholder {0}: tierStats.tier2_resolved
+#: src/components/admin-dashboard/OrganizationDetail.tsx:356
+#: src/components/admin-dashboard/OrganizationDetail.tsx:361
+#: src/components/admin-dashboard/OrganizationDetail.tsx:366
+msgid "{0} resolved"
+msgstr "{0} تم حلها"
+
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:502
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:336
+msgid "{0} suspended."
+msgstr "{0} موقوف."
+
+#. placeholder {0}: tierStats.human_escalated
+#: src/components/admin-dashboard/OrganizationDetail.tsx:371
+msgid "{0} to human"
+msgstr "{0} إلى وكيل بشري"
+
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:485
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:330
+msgid "{0} updated."
+msgstr "تم تحديث {0}."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:492
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:331
+msgid "{name} deleted."
+msgstr "تم حذف {name}."
+
+#: src/components/landingPage/Footer.tsx:74
+msgid "© 2025 SupportNest. All rights reserved."
+msgstr "© 2025 SupportNest. جميع الحقوق محفوظة."
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:238
 msgid "↑ 0.3 this month"
 msgstr "↑ 0.3 هذا الشهر"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:199
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:220
 msgid "↑ 12% this week"
 msgstr "↑ 12% هذا الأسبوع"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:205
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:226
 msgid "↑ 3% vs last week"
 msgstr "↑ 3% مقارنة بالأسبوع الماضي"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:211
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:232
 msgid "↓ 0.2s improvement"
 msgstr "↓ تحسن بمقدار 0.2 ثانية"
 
 #. placeholder {0}: processing > 1 ? "s" : ""
 #: src/features/knowledgebase/ProcessingNotice.tsx:29
-msgid "<0>{processing}</0> document{0} being processed by the AI pipeline. This "
-"page updates automatically."
-msgstr "<0>{processing}</0> من المستندات يتم معالجتها حاليًا بواسطة مسار الذكاء "
-"الاصطناعي. تتحدث هذه الصفحة تلقائيًا."
+msgid "<0>{processing}</0> document{0} being processed by the AI pipeline. This page updates automatically."
+msgstr "<0>{processing}</0> من المستندات يتم معالجتها حاليًا بواسطة مسار الذكاء الاصطناعي. تتحدث هذه الصفحة تلقائيًا."
 
-#: src/components/Navbar.tsx:56
+#: src/components/Profile/Passwordsection.tsx:155
+msgid "✓ Password updated successfully."
+msgstr "✓ تم تحديث كلمة المرور بنجاح."
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:238
+msgid "30 Days"
+msgstr "30 يومًا"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:238
+msgid "7 Days"
+msgstr "7 أيام"
+
+#: src/components/landingPage/Footer.tsx:15
+#: src/components/landingPage/Footer.tsx:21
+#: src/components/Navbar.tsx:68
+#: src/components/Navbar.tsx:187
 msgid "About"
 msgstr "من نحن"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:142
-#: src/components/ui/index.tsx:236
+#: src/components/landingPage/About.tsx:80
+msgid "About SupportNest"
+msgstr "حول SupportNest"
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:346
+msgid "Access Denied"
+msgstr "تم رفض الوصول"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:166
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:279
+#: src/components/landingPage/Contact.tsx:209
+msgid "Acme Corp"
+msgstr "Acme Corp"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:185
+#~ msgid "acme-corp"
+#~ msgstr "acme-corp"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:509
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:522
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:339
+msgid "Action failed."
+msgstr "فشل الإجراء."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:656
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:316
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:59
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:399
+msgid "Actions"
+msgstr "الإجراءات"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:739
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:422
+#: src/components/admin-dashboard/OrganizationDetail.tsx:257
+msgid "Activate"
+msgstr "تفعيل"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:725
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:421
+msgid "Activate organization"
+msgstr "تفعيل المؤسسة"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:74
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:532
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:195
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:292
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:64
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:376
+#: src/components/admin-dashboard/OrganizationDetail.tsx:191
+#: src/components/ui/index.tsx:246
 msgid "Active"
 msgstr "نشط"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:331
+msgid "Active / Open"
+msgstr "نشط / مفتوح"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:576
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:158
+msgid "Active Organizations"
+msgstr "المؤسسات النشطة"
 
 #: src/features/knowledgebase/DocumentList.tsx:73
 msgid "Added"
 msgstr "تاريخ الإضافة"
 
-#: src/components/sidebar.tsx:199
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:171
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:131
+msgid "Admin email"
+msgstr "البريد الإلكتروني للمسؤول"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:177
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:136
+msgid "Admin password"
+msgstr "كلمة مرور المسؤول"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:173
+#~ msgid "admin@acme.com"
+#~ msgstr "admin@acme.com"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:303
+msgid "ADMINISTRATOR EMAIL"
+msgstr "البريد الإلكتروني للمسؤول"
+
+#: src/components/landingPage/Pipeline.tsx:42
+msgid "Agent Handoff"
+msgstr "تسليم إلى وكيل بشري"
+
+#: src/components/landingPage/About.tsx:58
+msgid "Agent wellbeing"
+msgstr "رفاهية الوكيل"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:349
+msgid "AI & Human Performance by Tier"
+msgstr "أداء الذكاء الاصطناعي والبشر حسب المستوى"
+
+#: src/components/landingPage/About.tsx:34
+msgid "AI availability"
+msgstr "توفر الذكاء الاصطناعي"
+
+#: src/components/landingPage/About.tsx:49
+msgid "AI handles volume, humans handle nuance. Our pipeline knows exactly when to switch."
+msgstr "الذكاء الاصطناعي يتعامل مع الحجم، والبشر يتعاملون مع الدقة. خطوطنا تعرف متى تتحول."
+
+#: src/components/landingPage/Pipeline.tsx:26
+msgid "AI Instant Answer"
+msgstr "إجابة فورية بالذكاء الاصطناعي"
+
+#: src/components/sidebar.tsx:235
 msgid "AI Mode"
 msgstr "وضع ال AI"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:203
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:224
 msgid "AI Resolution Rate"
 msgstr "معدل الحلول بالذكاء الاصطناعي"
 
-#: src/components/landingPage/Hero.tsx:37
+#: src/components/landingPage/Pipeline.tsx:34
+msgid "AI Troubleshooter"
+msgstr "مستكشف أخطاء الذكاء الاصطناعي"
+
+#: src/components/landingPage/About.tsx:48
+msgid "AI with guardrails"
+msgstr "ذكاء اصطناعي بضوابط"
+
+#: src/components/landingPage/Hero.tsx:44
 msgid "AI-Powered Customer Support Platform"
 msgstr "منصة دعم العملاء المدعومة بالذكاء الاصطناعي"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:18
-#: src/components/sidebar.tsx:26
+#: src/components/landingPage/Footer.tsx:38
+msgid "AI-powered customer support that resolves 80% of tickets instantly, 24/7."
+msgstr "دعم عملاء مدعوم بالذكاء الاصطناعي يحل 80% من التذاكر فورًا، على مدار الساعة."
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:375
+msgid "All"
+msgstr "الكل"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:531
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:291
+msgid "All Status"
+msgstr "جميع الحالات"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:569
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:150
+msgid "All Systems Operational"
+msgstr "جميع الأنظمة تعمل"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:211
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:19
+#: src/components/sidebar.tsx:27
 msgid "Analytics"
 msgstr "التحليلات"
 
@@ -74,94 +260,400 @@ msgstr "سنوي"
 #~ msgid "API & Widget"
 #~ msgstr "واجهة برمجة التطبيقات والأداة"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:184
+#: src/components/ProfilePage.tsx:65
+msgid "API Keys"
+msgstr "مفاتيح API"
+
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:18
+#: src/components/sidebar.tsx:42
+msgid "API Tools"
+msgstr "أدوات API"
+
+#. placeholder {0}: org.name
+#: src/components/admin-dashboard/OrganizationDetail.tsx:276
+msgid "Are you sure you want to schedule {0} for deletion? It will be permanently removed in 30 minutes."
+msgstr "هل أنت متأكد من جدولة حذف {0}؟ سيتم حذفه نهائيًا خلال 30 دقيقة."
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:395
+msgid "ASSIGNED"
+msgstr "المُعيَّن"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:205
 msgid "At a glance"
 msgstr "لمحة عامة"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:209
+#: src/components/landingPage/Hero.tsx:18
+msgid "Average CSAT score"
+msgstr "متوسط درجة رضا العملاء"
+
+#. placeholder {0}: fmt(4)
+#: src/components/landingPage/Contact.tsx:155
+msgid "Average reply time: under {0} hours"
+msgstr "متوسط وقت الرد: أقل من {0} ساعات"
+
+#: src/components/landingPage/Hero.tsx:17
+msgid "Avg AI response time"
+msgstr "متوسط وقت استجابة الذكاء الاصطناعي"
+
+#: src/components/landingPage/About.tsx:28
+msgid "Avg auto-resolution"
+msgstr "متوسط الحل التلقائي"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:230
 msgid "Avg Response Time"
 msgstr "متوسط وقت الاستجابة"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:263
+msgid "Avg. Resolution Time"
+msgstr "متوسط وقت الحل"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:324
+msgid "Based on all rated conversations in this period"
+msgstr "بناءً على جميع المحادثات المُقيَّمة في هذه الفترة"
+
+#: src/components/landingPage/About.tsx:86
+msgid "Built by engineers who hated bad support"
+msgstr "بُني بواسطة مهندسين سئموا الدعم السيئ"
 
 #: src/components/landingPage/Features.tsx:66
 msgid "Built for modern support teams"
 msgstr "مصممة لفرق الدعم الحديثة"
 
-#: src/components/AppControls.tsx:25
+#: src/components/landingPage/Footer.tsx:77
+msgid "Built with ❤️ for support teams worldwide"
+msgstr "صُنع بـ ❤️ لفرق الدعم حول العالم"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:204
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:301
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:364
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:153
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:224
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:265
+#: src/components/Profile/Dangerzone.tsx:144
+msgid "Cancel"
+msgstr "إلغاء"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:718
+msgid "Cancel Delete"
+msgstr "إلغاء الحذف"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:704
+msgid "Cancel scheduled deletion"
+msgstr "إلغاء الحذف المجدول"
+
+#: src/components/landingPage/Footer.tsx:21
+msgid "Careers"
+msgstr "وظائف"
+
+#: src/components/AppControls.tsx:56
 msgid "Change language"
 msgstr "تغيير اللغة"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:144
-#: src/components/ui/index.tsx:248
+#: src/components/Profile/Passwordsection.tsx:81
+msgid "Change Password"
+msgstr "تغيير كلمة المرور"
+
+#: src/components/landingPage/Footer.tsx:20
+msgid "Changelog"
+msgstr "سجل التغييرات"
+
+#: src/components/landingPage/Pipeline.tsx:21
+msgid "Classifies intent and routes to the right agent instantly."
+msgstr "يصنّف النية ويوجّه إلى الوكيل المناسب فورًا."
+
+#: src/components/AppControls.tsx:29
+msgid "Close controls"
+msgstr "إغلاق عناصر التحكم"
+
+#: src/components/Navbar.tsx:125
+msgid "Close menu"
+msgstr "إغلاق القائمة"
+
+#: src/components/ui/index.tsx:258
 msgid "Closed"
 msgstr "مغلق"
 
-#: src/components/Navbar.tsx:59
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:56
+#: src/components/landingPage/Contact.tsx:204
+#: src/components/landingPage/Footer.tsx:21
+msgid "Company"
+msgstr "الشركة"
+
+#: src/components/landingPage/Pipeline.tsx:37
+msgid "Complex multi-step reasoning for edge cases and errors."
+msgstr "استدلال متعدد الخطوات للحالات الصعبة والأخطاء."
+
+#: src/components/Profile/Passwordsection.tsx:123
+msgid "Confirm new password"
+msgstr "تأكيد كلمة المرور الجديدة"
+
+#: src/components/landingPage/Footer.tsx:16
+#: src/components/landingPage/Footer.tsx:21
+#: src/components/Navbar.tsx:71
+#: src/components/Navbar.tsx:194
 msgid "Contact"
 msgstr "تواصل معنا"
 
-#: src/components/pricing/PricingCard.tsx:157
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:284
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:212
+msgid "Contact email"
+msgstr "البريد الإلكتروني للتواصل"
+
+#: src/components/pricing/PricingCard.tsx:166
 msgid "Contact sales"
 msgstr "تواصل مع المبيعات"
 
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:45
+#: src/components/sidebar.tsx:47
+msgid "Contact Submissions"
+msgstr "طلبات التواصل"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:286
+#~ msgid "contact@acme.com"
+#~ msgstr "contact@acme.com"
+
 #: src/app/[locale]/(auth)/login/page.tsx:295
-msgid "Continue with Google"
-msgstr "المتابعة مع Google"
+#~ msgid "Continue with Google"
+#~ msgstr "المتابعة مع Google"
 
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:14
-#: src/components/sidebar.tsx:18
+#: src/components/sidebar.tsx:19
 msgid "Conversations"
 msgstr "المحادثات"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:215
+#: src/components/landingPage/About.tsx:22
+msgid "Core team members"
+msgstr "أعضاء الفريق الأساسي"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:153
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:120
+msgid "Create a new tenant and admin user."
+msgstr "إنشاء مستأجر جديد ومستخدم مسؤول."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:208
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:156
+msgid "Create organization"
+msgstr "إنشاء مؤسسة"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:644
+msgid "Create your first organization to get started."
+msgstr "أنشئ مؤسستك الأولى للبدء."
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:398
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:417
+msgid "Created"
+msgstr "تاريخ الإنشاء"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:268
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:236
 msgid "CSAT Score"
 msgstr "مؤشر رضا العملاء (CSAT)"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:251
+#: src/components/landingPage/Features.tsx:31
+msgid "CSAT, resolution rates, escalation trends — all live on your dashboard."
+msgstr "CSAT، معدلات الحل، واتجاهات التصعيد — كلها مباشرة على لوحة التحكم."
+
+#: src/components/Profile/Passwordsection.tsx:85
+msgid "Current password"
+msgstr "كلمة المرور الحالية"
+
+#: src/components/Profile/Passwordsection.tsx:45
+msgid "Current password is required."
+msgstr "كلمة المرور الحالية مطلوبة."
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:309
+msgid "CURRENT SUBSCRIPTION"
+msgstr "الاشتراك الحالي"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:281
 msgid "Customer"
 msgstr "العميل"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:45
-#: src/components/Navbar.tsx:65
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:306
+msgid "Customer Satisfaction"
+msgstr "رضا العملاء"
+
+#: src/components/landingPage/Customerstories.tsx:51
+msgid "Customer stories"
+msgstr "قصص العملاء"
+
+#: src/components/landingPage/Footer.tsx:14
+#: src/components/landingPage/Footer.tsx:21
+msgid "Customer Stories"
+msgstr "قصص العملاء"
+
+#: src/components/landingPage/Customerstories.tsx:36
+msgid "CX Manager, Nexus AI"
+msgstr "مدير تجربة العملاء، Nexus AI"
+
+#: src/components/Profile/Dangerzone.tsx:54
+msgid "Danger zone"
+msgstr "منطقة الخطر"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:134
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:48
+#: src/components/Navbar.tsx:77
+#: src/components/Navbar.tsx:204
 msgid "Dashboard"
 msgstr "لوحة القيادة"
+
+#: src/components/landingPage/About.tsx:53
+msgid "Data isolation"
+msgstr "عزل البيانات"
+
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:58
+msgid "Date"
+msgstr "التاريخ"
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:267
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:425
+msgid "Delete"
+msgstr "حذف"
+
+#: src/components/Profile/Dangerzone.tsx:161
+msgid "Delete account"
+msgstr "حذف الحساب"
+
+#: src/components/Profile/Dangerzone.tsx:79
+msgid "Delete my account"
+msgstr "حذف حسابي"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:286
+msgid "Delete Org"
+msgstr "حذف المنظمة"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:750
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:425
+msgid "Delete organization"
+msgstr "حذف المؤسسة"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:338
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:254
+msgid "Delete organization?"
+msgstr "حذف المؤسسة؟"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:377
+msgid "Delete Permanently"
+msgstr "حذف نهائي"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:62
+msgid "Deleting soon"
+msgstr "جارٍ الحذف قريباً"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:377
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:267
+msgid "Deleting..."
+msgstr "جارٍ الحذف..."
+
+#: src/components/Profile/Dangerzone.tsx:161
+msgid "Deleting…"
+msgstr "جارٍ الحذف…"
+
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:519
+msgid "Deletion of {0} cancelled."
+msgstr "تم إلغاء حذف {0}."
 
 #: src/features/knowledgebase/DocumentList.tsx:69
 msgid "Document"
 msgstr "المستند"
 
-#: src/features/knowledgebase/UploadPdfPanel.tsx:210
+#: src/features/knowledgebase/UploadDocumentPanel.tsx:238
 msgid "Document Title"
 msgstr "عنوان المستند"
 
 #: src/features/knowledgebase/Header.tsx:38
 msgid "Documents your AI pipeline uses to answer customer questions."
-msgstr "المستندات التي يستخدمها مسار الذكاء الاصطناعي للإجابة على أسئلة "
-"العملاء."
+msgstr "المستندات التي يستخدمها مسار الذكاء الاصطناعي للإجابة على أسئلة العملاء."
 
-#: src/app/[locale]/(auth)/login/page.tsx:430
+#: src/app/[locale]/(auth)/login/page.tsx:437
 msgid "Don't have an account?"
 msgstr "ليس لديك حساب؟"
 
-#: src/features/knowledgebase/UploadPdfPanel.tsx:190
-msgid "Drop PDF here or click to browse"
-msgstr "أفلت ملف الـ PDF هنا أو انقر للتصفح"
+#: src/features/knowledgebase/UploadDocumentPanel.tsx:218
+msgid "Drop file here or click to browse"
+msgstr "أفلت الملف هنا أو انقر للتصفح"
 
-#: src/app/[locale]/(auth)/login/page.tsx:329
+#: src/features/knowledgebase/UploadPdfPanel.tsx:190
+#~ msgid "Drop PDF here or click to browse"
+#~ msgstr "أفلت ملف الـ PDF هنا أو انقر للتصفح"
+
+#: src/components/landingPage/Features.tsx:43
+msgid "Each business is fully isolated — own data, knowledge base, and widget config."
+msgstr "كل شركة معزولة تمامًا — بياناتها الخاصة وقاعدة معرفتها وإعدادات الأداة."
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:424
+msgid "Edit"
+msgstr "تعديل"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:743
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:424
+msgid "Edit details"
+msgstr "تعديل التفاصيل"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:265
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:200
+msgid "Edit organization"
+msgstr "تعديل المؤسسة"
+
+#: src/app/[locale]/(auth)/login/page.tsx:335
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:55
+#: src/components/Profile/Profilesection.tsx:161
 msgid "Email"
 msgstr "البريد الإلكتروني"
 
-#: src/app/[locale]/(auth)/login/page.tsx:153
+#: src/components/admin-dashboard/OrganizationDetail.tsx:393
+msgid "EMAIL ADDRESS"
+msgstr "البريد الإلكتروني"
+
+#: src/app/[locale]/(auth)/login/page.tsx:162
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:110
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:229
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:90
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:175
 msgid "Email is required."
 msgstr "البريد الإلكتروني مطلوب."
 
-#: src/app/[locale]/(auth)/login/page.tsx:154
+#: src/components/landingPage/Contact.tsx:19
+msgid "Email us"
+msgstr "راسلنا"
+
+#: src/components/landingPage/Features.tsx:24
+msgid "Embeddable Widget"
+msgstr "أداة قابلة للتضمين"
+
+#: src/app/[locale]/(auth)/login/page.tsx:163
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:111
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:230
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:91
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:176
 msgid "Enter a valid email."
 msgstr "أدخل بريدًا إلكترونيًا صالحًا."
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:143
-#: src/components/ui/index.tsx:242
+#: src/components/ui/index.tsx:252
 msgid "Escalated"
-msgstr "مُصعَّد"
+msgstr "مُصعَّد"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:588
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:162
+msgid "Escalated Tickets"
+msgstr "التذاكر المصعّدة"
+
+#: src/components/landingPage/Features.tsx:37
+msgid "Escalated tickets arrive with full conversation context. Agents never start cold."
+msgstr "تصل التذاكر المصعّدة مع السياق الكامل للمحادثة. الوكلاء لا يبدأون من الصفر أبدًا."
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:258
+msgid "Escalation Rate"
+msgstr "معدل التصعيد"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:335
+msgid "Escalations"
+msgstr "التصعيدات"
+
+#: src/components/landingPage/About.tsx:54
+msgid "Every tenant is completely isolated. Your customer data never touches another business."
+msgstr "كل مستأجر معزول تمامًا. بيانات عملائك لا تلمس أي عمل تجاري آخر."
 
 #: src/components/landingPage/Features.tsx:57
 msgid "Everything included"
@@ -171,158 +663,661 @@ msgstr "كل ما تحتاجه"
 msgid "Failed"
 msgstr "فشلت"
 
-#: src/app/[locale]/(auth)/login/page.tsx:358
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:134
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:108
+msgid "Failed to create organization."
+msgstr "فشل إنشاء المؤسسة."
+
+#: src/components/Profile/Dangerzone.tsx:41
+msgid "Failed to delete account."
+msgstr "فشل حذف الحساب."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:326
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:244
+msgid "Failed to delete organization."
+msgstr "فشل حذف المؤسسة."
+
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:31
+msgid "Failed to load"
+msgstr "فشل التحميل"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:189
+msgid "Failed to load analytics data."
+msgstr "فشل تحميل بيانات التحليلات."
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:128
+msgid "Failed to load details"
+msgstr "فشل تحميل التفاصيل"
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:321
+msgid "Failed to load organizations."
+msgstr "فشل تحميل المنظمات."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:457
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:118
+msgid "Failed to load overview stats"
+msgstr "فشل تحميل الإحصائيات العامة"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:247
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:189
+msgid "Failed to update organization."
+msgstr "فشل تحديث المؤسسة."
+
+#: src/components/Profile/Passwordsection.tsx:38
+msgid "Fair"
+msgstr "مقبولة"
+
+#: src/components/landingPage/Footer.tsx:11
+#: src/components/landingPage/Footer.tsx:20
+msgid "Features"
+msgstr "المميزات"
+
+#: src/components/Profile/Profilesection.tsx:147
+#: src/components/Profile/Profilesection.tsx:150
+msgid "First name"
+msgstr "الاسم الأول"
+
+#: src/app/[locale]/(auth)/login/page.tsx:365
 msgid "Forgot your password?"
 msgstr "نسيت كلمة المرور؟"
 
-#: src/components/landingPage/Features.tsx:69
-msgid "From AI pipeline to human inbox — the full support workflow in one "
-"place."
-msgstr "من مسار الذكاء الاصطناعي إلى صندوق الوارد البشري — سير عمل الدعم الكامل "
-"في مكان واحد."
+#: src/components/landingPage/About.tsx:16
+msgid "Founded"
+msgstr "تأسست"
 
-#: src/components/Navbar.tsx:92
+#: src/components/landingPage/Customerstories.tsx:29
+msgid "Founder, CloudBase"
+msgstr "مؤسس، CloudBase"
+
+#. placeholder {0}: fmt(80)
+#: src/components/landingPage/Pipeline.tsx:68
+msgid "Four layers of intelligence — each one smarter than the last. {0}% of tickets never reach a human."
+msgstr "أربع طبقات من الذكاء — كل طبقة أذكى من السابقة. {0}٪ من التذاكر لا تصل إلى إنسان."
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:313
+msgid "Free Trial"
+msgstr "تجربة مجانية"
+
+#: src/components/landingPage/Features.tsx:69
+msgid "From AI pipeline to human inbox — the full support workflow in one place."
+msgstr "من مسار الذكاء الاصطناعي إلى صندوق الوارد البشري — سير عمل الدعم الكامل في مكان واحد."
+
+#: src/components/landingPage/Pipeline.tsx:45
+msgid "Full context passed to your agent. Never start from scratch."
+msgstr "يتم تمرير السياق الكامل إلى وكيلك. لا تبدأ من الصفر أبدًا."
+
+#: src/components/landingPage/Contact.tsx:90
+msgid "Get in touch"
+msgstr "تواصل معنا"
+
+#: src/components/Navbar.tsx:104
+#: src/components/Navbar.tsx:120
 msgid "Get Started"
 msgstr "ابدأ الآن"
 
-#: src/components/pricing/PricingCard.tsx:158
+#: src/components/pricing/PricingCard.tsx:167
 msgid "Get started →"
 msgstr "ابدأ الآن ←"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:138
+#: src/components/Profile/Passwordsection.tsx:38
+msgid "Good"
+msgstr "جيدة"
+
+#: src/app/[locale]/(auth)/login/page.tsx:299
+msgid "Google sign-in failed."
+msgstr "فشل تسجيل الدخول بواسطة Google."
+
+#: src/components/landingPage/Customerstories.tsx:22
+msgid "Head of Support, TechFlow"
+msgstr "رئيس الدعم، TechFlow"
+
+#: src/components/landingPage/Pipeline.tsx:59
+msgid "How it works"
+msgstr "كيف يعمل"
+
+#: src/components/landingPage/Footer.tsx:12
+#: src/components/landingPage/Footer.tsx:20
+msgid "How It Works"
+msgstr "كيف يعمل"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:79
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:153
 msgid "Human"
 msgstr "بشري"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:87
+#: src/components/landingPage/Pipeline.tsx:41
+msgid "HUMAN"
+msgstr "بشري"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:98
 msgid "Human Agent"
 msgstr "وكيل بشري"
 
-#: src/components/landingPage/Hero.tsx:47
+#: src/components/landingPage/Features.tsx:36
+msgid "Human Agent Inbox"
+msgstr "صندوق وارد الوكيل البشري"
+
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:42
+msgid "Inbound Leads"
+msgstr "العملاء المحتملون"
+
+#: src/components/landingPage/Features.tsx:12
+msgid "Instant AI Resolution"
+msgstr "حل فوري بالذكاء الاصطناعي"
+
+#: src/components/landingPage/Hero.tsx:60
 msgid "instantly with AI agents"
 msgstr "فورًا بوكلاء الذكاء الاصطناعي"
 
-#: src/app/[locale]/(auth)/login/page.tsx:174
+#: src/components/landingPage/Customerstories.tsx:16
+msgid "Integrations per day"
+msgstr "تكاملات يوميًا"
+
+#: src/components/landingPage/Pipeline.tsx:18
+msgid "Intent Detection"
+msgstr "كشف النية"
+
+#: src/components/landingPage/Contact.tsx:122
+msgid "Interested in SupportNest for your team? We'll walk you through a live demo and tailor a plan for your use case."
+msgstr "مهتم بـ SupportNest لفريقك؟ سنأخذك في جولة تجريبية مباشرة ونصمم خطة تناسب احتياجاتك."
+
+#: src/app/[locale]/(auth)/login/page.tsx:207
+#: src/app/[locale]/(auth)/login/page.tsx:293
 msgid "Invalid email or password."
 msgstr "البريد الإلكتروني أو كلمة المرور غير صحيحة."
 
+#: src/components/Profile/Dangerzone.tsx:57
+msgid "Irreversible actions. Proceed with caution."
+msgstr "إجراءات لا يمكن التراجع عنها. تابع بحذر."
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:196
+msgid "Joined"
+msgstr "انضم"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:655
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:315
+msgid "Joined Date"
+msgstr "تاريخ الانضمام"
+
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:17
-#: src/components/sidebar.tsx:22
+#: src/components/sidebar.tsx:23
 #: src/features/knowledgebase/Header.tsx:35
 msgid "Knowledge Base"
 msgstr "قاعدة المعرفة"
 
-#: src/components/pricing/PricingCard.tsx:321
+#: src/components/landingPage/Features.tsx:18
+msgid "Knowledge Base RAG"
+msgstr "قاعدة المعرفة RAG"
+
+#: src/components/Profile/Profilesection.tsx:154
+#: src/components/Profile/Profilesection.tsx:157
+msgid "Last name"
+msgstr "اسم العائلة"
+
+#: src/components/landingPage/Footer.tsx:22
+msgid "Legal"
+msgstr "قانوني"
+
+#: src/components/landingPage/Contact.tsx:31
+msgid "LinkedIn"
+msgstr "لينكد إن"
+
+#: src/components/pricing/PricingCard.tsx:340
 msgid "Loading plans…"
 msgstr "جاري تحميل الخطط…"
 
-#: src/components/Navbar.tsx:78
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:35
+msgid "Loading..."
+msgstr "جارٍ التحميل..."
+
+#: src/components/Navbar.tsx:90
+#: src/components/Navbar.tsx:221
 msgid "Log in"
 msgstr "تسجيل الدخول"
 
-#: src/components/Navbar.tsx:72
-#: src/components/sidebar.tsx:270
-#: src/components/sidebar.tsx:290
+#: src/components/Navbar.tsx:84
+#: src/components/Navbar.tsx:211
+#: src/components/sidebar.tsx:306
+#: src/components/sidebar.tsx:326
 #: src/components/topbar.tsx:113
 msgid "Logout"
 msgstr "تسجيل خروج"
 
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:115
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:95
+msgid "Lowercase letters, numbers, and hyphens only."
+msgstr "أحرف صغيرة وأرقام وشرطات فقط."
+
+#: src/components/ProfilePage.tsx:45
+msgid "Manage your account details and widget authentication keys."
+msgstr "إدارة تفاصيل حسابك ومفاتيح مصادقة الأداة."
+
+#: src/components/ProfilePage.tsx:44
+msgid "Manage your account details."
+msgstr "إدارة تفاصيل حسابك."
+
 #: src/features/knowledgebase/UploadPdfPanel.tsx:105
-msgid "Max 20 MB · PDF only"
-msgstr "الحد الأقصى 20 ميجابايت · ملفات PDF فقط"
+#~ msgid "Max 20 MB · PDF only"
+#~ msgstr "الحد الأقصى 20 ميجابايت · ملفات PDF فقط"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:392
+msgid "MEMBER"
+msgstr "العضو"
+
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:57
+msgid "Message"
+msgstr "الرسالة"
+
+#: src/components/landingPage/Contact.tsx:216
+msgid "Message *"
+msgstr "الرسالة *"
+
+#: src/components/landingPage/Contact.tsx:168
+msgid "Message sent!"
+msgstr "تم إرسال الرسالة!"
+
+#: src/components/Profile/Passwordsection.tsx:98
+msgid "Min. 8 characters"
+msgstr "8 أحرف على الأقل"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:113
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:93
+msgid "Minimum 6 characters."
+msgstr "6 أحرف على الأقل."
+
+#: src/components/landingPage/Customerstories.tsx:15
+msgid "Minutes to set up"
+msgstr "دقائق للإعداد"
+
+#: src/components/landingPage/Contact.tsx:184
+msgid "Mohamed Rashad"
+msgstr "محمد رشاد"
 
 #: src/components/pricing/PricingHero.tsx:44
 msgid "Monthly"
 msgstr "شهري"
 
+#: src/components/landingPage/Features.tsx:42
+msgid "Multi-tenant Ready"
+msgstr "جاهز للاستخدام متعدد المستأجرين"
+
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:54
+msgid "Name"
+msgstr "الاسم"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:152
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:561
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:119
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:364
+msgid "New organization"
+msgstr "مؤسسة جديدة"
+
+#: src/components/Profile/Passwordsection.tsx:94
+msgid "New password"
+msgstr "كلمة المرور الجديدة"
+
+#: src/components/Profile/Passwordsection.tsx:49
+msgid "New password must be at least 8 characters."
+msgstr "يجب أن تتكون كلمة المرور الجديدة من 8 أحرف على الأقل."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:792
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:435
+msgid "Next"
+msgstr "التالي"
+
 #: src/features/knowledgebase/DocumentList.tsx:42
 msgid "No documents yet"
 msgstr "لا توجد مستندات بعد"
 
-#: src/components/landingPage/Hero.tsx:46
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:640
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:390
+msgid "No organizations found"
+msgstr "لا توجد مؤسسات"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:643
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:326
+msgid "No organizations match your search."
+msgstr "لا توجد مؤسسات تطابق بحثك."
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:377
+msgid "No performance data currently available for this organization."
+msgstr "لا توجد بيانات أداء متاحة حاليًا لهذه المنظمة."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:81
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:201
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:70
+msgid "No plan"
+msgstr "لا توجد خطة"
+
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:65
+msgid "No submissions yet."
+msgstr "لا توجد رسائل بعد."
+
+#: src/components/Profile/Profilesection.tsx:126
+msgid "Not Verified"
+msgstr "غير موثق"
+
+#: src/components/landingPage/Hero.tsx:58
 msgid "of tickets"
 msgstr "من التذاكر"
 
-#: src/app/[locale]/(auth)/login/page.tsx:301
+#: src/components/landingPage/Features.tsx:25
+msgid "One script tag. Fully branded, mobile-ready live chat on any website."
+msgstr "وسم سكريبت واحد. دردشة مباشرة بعلامتك التجارية الكاملة، جاهزة للجوال على أي موقع."
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:139
+msgid "Oops! Something went wrong"
+msgstr "عذرًا! حدث خطأ ما"
+
+#: src/components/AppControls.tsx:29
+msgid "Open controls"
+msgstr "فتح عناصر التحكم"
+
+#: src/components/Navbar.tsx:125
+msgid "Open menu"
+msgstr "فتح القائمة"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:322
+msgid "Operational Metrics"
+msgstr "المقاييس التشغيلية"
+
+#: src/app/[locale]/(auth)/login/page.tsx:307
 msgid "or"
 msgstr "أو"
 
-#: src/components/sidebar.tsx:11
+#: src/components/sidebar.tsx:12
 msgid "Org Admin"
 msgstr "مدير المؤسسة"
 
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:651
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:312
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:395
+msgid "Organization"
+msgstr "المؤسسة"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:298
+msgid "Organization Details"
+msgstr "تفاصيل المنظمة"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:165
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:278
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:126
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:207
+#: src/components/Profile/Dangerzone.tsx:107
+msgid "Organization name"
+msgstr "اسم المؤسسة"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:109
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:228
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:89
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:174
+msgid "Organization name is required."
+msgstr "اسم المؤسسة مطلوب."
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:141
+msgid "Organization not found"
+msgstr "المنظمة غير موجودة"
+
+#. placeholder {0}: org.users.length
+#: src/components/admin-dashboard/OrganizationDetail.tsx:386
+msgid "Organization Team & Access ({0})"
+msgstr "فريق المنظمة والوصول ({0})"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:556
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:496
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:21
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:360
+#: src/components/sidebar.tsx:36
+msgid "Organizations"
+msgstr "المؤسسات"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:482
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:13
-#: src/components/sidebar.tsx:17
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:20
+#: src/components/sidebar.tsx:18
+#: src/components/sidebar.tsx:30
 msgid "Overview"
 msgstr "نظرة عامة"
 
-#: src/app/[locale]/(auth)/login/page.tsx:339
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:785
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:432
+msgid "Page {page} of {totalPages}"
+msgstr "صفحة {page} من {totalPages}"
+
+#: src/app/[locale]/(auth)/login/page.tsx:345
 msgid "Password"
 msgstr "كلمة المرور"
 
-#: src/app/[locale]/(auth)/login/page.tsx:155
+#: src/app/[locale]/(auth)/login/page.tsx:164
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:112
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:92
 msgid "Password is required."
 msgstr "كلمة المرور مطلوبة."
 
-#: src/features/knowledgebase/UploadPdfPanel.tsx:193
-msgid "PDF files up to 20 MB"
-msgstr "ملفات PDF بحجم يصل إلى 20 ميجابايت"
+#: src/components/Profile/Passwordsection.tsx:53
+msgid "Passwords do not match."
+msgstr "كلمتا المرور غير متطابقتين."
 
-#: src/components/Navbar.tsx:53
+#: src/components/ProfilePage.tsx:83
+msgid "Paste this in the <head> of your website."
+msgstr "الصق هذا في <head> موقعك الإلكتروني."
+
+#: src/features/knowledgebase/UploadPdfPanel.tsx:193
+#~ msgid "PDF files up to 20 MB"
+#~ msgstr "ملفات PDF بحجم يصل إلى 20 ميجابايت"
+
+#: src/features/knowledgebase/UploadDocumentPanel.tsx:133
+msgid "PDF, CSV, or DOCX · Max 10 MB"
+msgstr "PDF أو CSV أو DOCX · الحد الأقصى 10 ميجابايت"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:652
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:313
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:417
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:396
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:409
+msgid "Plan"
+msgstr "الخطة"
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:359
+msgid "Platform Administration"
+msgstr "إدارة المنصة"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:568
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:145
+msgid "Platform Status"
+msgstr "حالة المنصة"
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:434
+msgid "Prev"
+msgstr "السابق"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:782
+msgid "Previous"
+msgstr "السابق"
+
+#: src/components/landingPage/Footer.tsx:13
+#: src/components/landingPage/Footer.tsx:20
+#: src/components/Navbar.tsx:65
+#: src/components/Navbar.tsx:180
 #: src/components/pricing/PricingHero.tsx:17
 msgid "Pricing"
 msgstr "الأسعار"
+
+#: src/components/landingPage/Pipeline.tsx:92
+msgid "PRIMARY AI"
+msgstr "الذكاء الاصطناعي الأساسي"
+
+#: src/components/landingPage/Footer.tsx:22
+msgid "Privacy Policy"
+msgstr "سياسة الخصوصية"
 
 #: src/features/knowledgebase/Header.tsx:18
 msgid "Processing"
 msgstr "قيد المعالجة"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:20
-#: src/components/sidebar.tsx:29
+#: src/components/landingPage/Footer.tsx:20
+msgid "Product"
+msgstr "المنتج"
+
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:23
+#: src/components/ProfilePage.tsx:40
+#: src/components/ProfilePage.tsx:61
+#: src/components/sidebar.tsx:43
 msgid "Profile"
 msgstr "الملف الشخصى"
+
+#: src/components/ProfilePage.tsx:40
+msgid "Profile & API Keys"
+msgstr "الملف الشخصي ومفاتيح API"
+
+#: src/components/Profile/Profilesection.tsx:53
+#: src/components/Profile/Profilesection.tsx:66
+msgid "Profile Information"
+msgstr "معلومات الملف الشخصي"
+
+#. placeholder {0}: fmt(24)
+#: src/components/landingPage/Contact.tsx:99
+msgid "Questions, demos, or custom enterprise plans — we reply within {0} hours."
+msgstr "أسئلة، عروض توضيحية، أو خطط مؤسسية مخصصة — نرد خلال {0} ساعة."
+
+#: src/components/landingPage/Pipeline.tsx:29
+msgid "RAG-powered answers from your knowledge base in under 2s."
+msgstr "إجابات مدعومة بتقنية RAG من قاعدة معرفتك في أقل من ثانيتين."
 
 #: src/features/knowledgebase/Header.tsx:17
 msgid "Ready"
 msgstr "جاهزة"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:244
+#: src/components/landingPage/Features.tsx:30
+msgid "Real-time Analytics"
+msgstr "تحليلات في الوقت الفعلي"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:269
 msgid "Recent Conversations"
 msgstr "المحادثات الأخيرة"
+
+#: src/components/Profile/Passwordsection.tsx:127
+msgid "Repeat password"
+msgstr "أعد إدخال كلمة المرور"
+
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:96
+msgid "Reply"
+msgstr "رد"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:101
+msgid "Resolution by Tier"
+msgstr "الحل حسب الفئة"
 
 #: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:13
 #~ msgid "Resolution rates CSAT trends response times and tier breakdowns."
 #~ msgstr "معدلات الحلول، اتجاهات رضا العملاء، أوقات الاستجابة، وتصنيفات الفئات."
 
-#: src/components/landingPage/Hero.tsx:45
+#: src/components/landingPage/Hero.tsx:56
 msgid "Resolve"
 msgstr "حلّ"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:339
+msgid "Resolved"
+msgstr "تم الحل"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:228
+msgid "Restore Organization"
+msgstr "استعادة المنظمة"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:152
+msgid "Return to Dashboard"
+msgstr "العودة إلى لوحة التحكم"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:394
+msgid "ROLE"
+msgstr "الدور"
+
+#: src/components/landingPage/Pipeline.tsx:17
+msgid "ROUTER"
+msgstr "موجّه"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:305
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:227
+#: src/components/Profile/Profilesection.tsx:190
+msgid "Save changes"
+msgstr "حفظ التغييرات"
+
+#: src/components/Profile/Profilesection.tsx:187
+msgid "Saved"
+msgstr "تم الحفظ"
 
 #: src/features/knowledgebase/DocumentFilter.tsx:27
 msgid "Search documents..."
 msgstr "البحث في المستندات..."
 
-#: src/components/landingPage/Hero.tsx:74
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:607
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:257
+msgid "Search organizations by name or slug..."
+msgstr "ابحث عن المؤسسات بالاسم أو المعرف..."
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:371
+msgid "Search organizations…"
+msgstr "البحث عن المنظمات…"
+
+#: src/components/landingPage/Footer.tsx:22
+msgid "Security"
+msgstr "الأمان"
+
+#: src/components/landingPage/Hero.tsx:88
 msgid "See How It Works"
 msgstr "شاهد كيف يعمل"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:19
-#: src/components/sidebar.tsx:28
+#: src/app/[locale]/(auth)/login/page.tsx:451
+msgid "See Plans"
+msgstr "عرض الخطط"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:292
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:219
+msgid "Select a plan"
+msgstr "اختر خطة"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:195
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:148
+msgid "Select a plan (optional)"
+msgstr "اختر خطة (اختياري)"
+
+#: src/components/landingPage/Contact.tsx:237
+msgid "Send message"
+msgstr "إرسال الرسالة"
+
+#: src/components/landingPage/Contact.tsx:233
+msgid "Sending…"
+msgstr "جارٍ الإرسال…"
+
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:22
+#: src/components/sidebar.tsx:41
 msgid "Settings"
 msgstr "الاعدادات"
 
-#: src/app/[locale]/(auth)/login/page.tsx:417
+#: src/components/landingPage/Customerstories.tsx:27
+msgid "Setup took 20 minutes. We uploaded our FAQ docs, embedded the widget, and the AI was answering customer questions that same day."
+msgstr "استغرق الإعداد 20 دقيقة. رفعنا مستندات الأسئلة الشائعة، وضمّنّا الأداة، وبدأ الذكاء الاصطناعي في الإجابة على أسئلة العملاء في نفس اليوم."
+
+#. placeholder {0}: (meta.page - 1) * meta.limit + 1
+#. placeholder {1}: Math.min(meta.page * meta.limit, meta.total)
+#. placeholder {2}: meta.total
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:774
+msgid "Showing {0}–{1} of {2}"
+msgstr "عرض {0}–{1} من {2}"
+
+#: src/app/[locale]/(auth)/login/page.tsx:424
 msgid "Sign in"
 msgstr "تسجيل الدخول"
 
-#: src/app/[locale]/(auth)/login/page.tsx:246
+#: src/app/[locale]/(auth)/login/page.tsx:267
 msgid "Sign in to your account"
 msgstr "سجّل الدخول إلى حسابك"
 
 #: src/app/[locale]/(auth)/login/page.tsx:444
-msgid "Sign Up"
-msgstr "إنشاء حساب"
+#~ msgid "Sign Up"
+#~ msgstr "إنشاء حساب"
 
-#: src/app/[locale]/(auth)/login/page.tsx:414
+#: src/app/[locale]/(auth)/login/page.tsx:421
 msgid "Signing in…"
 msgstr "جاري تسجيل الدخول…"
 
@@ -338,11 +1333,25 @@ msgstr "أسعار بسيطة وشفافة"
 msgid "Size / Info"
 msgstr "الحجم / معلومات"
 
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:183
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:141
+msgid "Slug"
+msgstr "المعرّف"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:114
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:94
+msgid "Slug is required."
+msgstr "المعرّف مطلوب."
+
+#: src/components/landingPage/About.tsx:43
+msgid "Speed first"
+msgstr "السرعة أولًا"
+
 #: src/components/pricing/PricingHero.tsx:26
 msgid "Start for free. Upgrade when you need more."
 msgstr "ابدأ مجانًا. ترقّ عندما تحتاج المزيد."
 
-#: src/components/landingPage/Hero.tsx:66
+#: src/components/landingPage/Hero.tsx:81
 msgid "Start Free Trial"
 msgstr "ابدأ تجربة مجانية"
 
@@ -350,62 +1359,201 @@ msgstr "ابدأ تجربة مجانية"
 msgid "Start free. No credit card required."
 msgstr "ابدأ مجانًا. لا يلزم بطاقة ائتمان."
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:251
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:654
+msgid "Stats"
+msgstr "الإحصائيات"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:653
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:314
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:411
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:397
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:413
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:281
+#: src/components/landingPage/Footer.tsx:22
 #: src/features/knowledgebase/DocumentList.tsx:71
 msgid "Status"
 msgstr "الحالة"
 
-#: src/components/sidebar.tsx:13
+#. placeholder {0}: fmt(i + 1)
+#. placeholder {1}: tier.tag
+#: src/components/landingPage/Pipeline.tsx:102
+msgid "Step {0} · {1}"
+msgstr "الخطوة {0} · {1}"
+
+#: src/components/Profile/Passwordsection.tsx:38
+msgid "Strong"
+msgstr "قوية"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:193
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:290
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:146
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:217
+msgid "Subscription Plan"
+msgstr "خطة الاشتراك"
+
+#: src/components/sidebar.tsx:14
 msgid "Super Admin"
 msgstr "المسؤول العام"
 
-#: src/components/sidebar.tsx:12
+#: src/components/sidebar.tsx:13
 msgid "Support Agent"
 msgstr "وكيل الدعم"
 
-#: src/components/landingPage/Hero.tsx:54
-msgid "SupportNest deploys a hierarchy of specialized AI agents that handle "
-"customer inquiries, automate workflows, and escalate complex issues — "
-"24/7, with full context."
-msgstr "ينشر SupportNest تسلسلًا هرميًا من وكلاء الذكاء الاصطناعي المتخصصين "
-"لمعالجة استفسارات العملاء، وأتمتة سير العمل، وتصعيد القضايا المعقدة — "
-"على مدار الساعة، مع سياق كامل."
+#: src/components/landingPage/Hero.tsx:16
+msgid "Support cost reduction"
+msgstr "تخفيض تكلفة الدعم"
+
+#: src/features/knowledgebase/UploadDocumentPanel.tsx:221
+msgid "Support for PDF, CSV, and DOCX"
+msgstr "يدعم ملفات PDF وCSV وDOCX"
+
+#: src/components/landingPage/Hero.tsx:68
+msgid "SupportNest deploys a hierarchy of specialized AI agents that handle customer inquiries, automate workflows, and escalate complex issues — 24/7, with full context."
+msgstr "ينشر SupportNest تسلسلًا هرميًا من وكلاء الذكاء الاصطناعي المتخصصين لمعالجة استفسارات العملاء، وأتمتة سير العمل، وتصعيد القضايا المعقدة — على مدار الساعة، مع سياق كامل."
+
+#: src/components/landingPage/Customerstories.tsx:20
+msgid "SupportNest resolved 82% of our tickets automatically in the first week. Our agents now focus on what actually needs a human."
+msgstr "حلّ SupportNest 82% من تذاكرنا تلقائيًا في الأسبوع الأول. يركز وكلاؤنا الآن على ما يحتاج فعلًا إلى تدخل بشري."
+
+#: src/components/landingPage/About.tsx:89
+msgid "SupportNest was born out of a frustration every SaaS founder knows: customer support is the #1 cost center, yet the tools haven't changed in a decade. Tickets pile up, agents burn out, and customers churn after one bad experience."
+msgstr "وُلد SupportNest من إحباط يعرفه كل مؤسس SaaS: دعم العملاء هو المركز الأول للتكاليف، ومع ذلك لم تتغير الأدوات منذ عقد. تتراكم التذاكر، ويُصاب الوكلاء بالإرهاق، ويغادر العملاء بعد تجربة سيئة واحدة."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:739
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:422
+#: src/components/admin-dashboard/OrganizationDetail.tsx:257
+msgid "Suspend"
+msgstr "تعليق"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:725
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:421
+msgid "Suspend organization"
+msgstr "تعليق المؤسسة"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:74
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:533
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:195
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:293
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:64
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:377
+#: src/components/admin-dashboard/OrganizationDetail.tsx:191
+msgid "Suspended"
+msgstr "موقوف"
+
+#: src/components/landingPage/Contact.tsx:119
+msgid "Talk to sales"
+msgstr "تحدث مع فريق المبيعات"
 
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:15
-#: src/components/sidebar.tsx:25
+#: src/components/sidebar.tsx:26
 msgid "Team"
 msgstr "الفريق"
 
+#: src/components/landingPage/Customerstories.tsx:57
+msgid "Teams love SupportNest"
+msgstr "الفرق تحب SupportNest"
+
+#: src/components/landingPage/Contact.tsx:221
+msgid "Tell us about your team size, current support setup, and what you're hoping to solve..."
+msgstr "أخبرنا عن حجم فريقك، وإعداد الدعم الحالي، وما تأمل في حله..."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:553
+msgid "Tenant management"
+msgstr "إدارة المستأجرين"
+
+#: src/components/landingPage/Footer.tsx:22
+msgid "Terms of Service"
+msgstr "شروط الخدمة"
+
+#: src/components/landingPage/Pipeline.tsx:65
+msgid "The AI agent pipeline"
+msgstr "مسار وكيل الذكاء الاصطناعي"
+
+#: src/components/landingPage/Customerstories.tsx:34
+msgid "The escalation flow is seamless. Agents get the full conversation and context — no more 'can you repeat your issue' moments."
+msgstr "تدفق التصعيد سلس تمامًا. يحصل الوكلاء على المحادثة الكاملة والسياق — لا مزيد من لحظات 'هل يمكنك تكرار مشكلتك'."
+
+#: src/components/Profile/Dangerzone.tsx:84
+msgid "This cannot be undone. Type your full name (<0>{expectedFullName}</0>) and your organization's name (<1>{expectedorgName}</1>) to confirm."
+msgstr "لا يمكن التراجع عن هذا. اكتب اسمك الكامل (<0>{expectedFullName}</0>) واسم مؤسستك (<1>{expectedorgName}</1>) للتأكيد."
+
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:340
+msgid "This will permanently delete <0>{0}</0> and all associated data, including users, conversations, and settings. This action cannot be undone."
+msgstr "سيؤدي هذا إلى الحذف الدائم لـ <0>{0}</0> وجميع البيانات المرتبطة بها، بما في ذلك المستخدمون والمحادثات والإعدادات. لا يمكن التراجع عن هذا الإجراء."
+
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:256
+msgid "This will permanently delete <0>{0}</0> and all data. This action cannot be undone."
+msgstr "سيؤدي هذا إلى حذف <0>{0}</0> وجميع بياناتها نهائيًا. لا يمكن التراجع عن هذا الإجراء."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:692
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:16
-#: src/components/sidebar.tsx:19
+#: src/components/sidebar.tsx:20
 msgid "Tickets"
 msgstr "التذاكر"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:251
+#: src/components/landingPage/Hero.tsx:15
+msgid "Tickets auto-resolved"
+msgstr "التذاكر المحلولة تلقائيًا"
+
+#: src/components/landingPage/Customerstories.tsx:14
+msgid "Tickets resolved automatically"
+msgstr "التذاكر التي تم حلها تلقائيًا"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:281
 msgid "Tier"
 msgstr "الفئة"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:136
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:76
+msgid "Tier 0 (Auto)"
+msgstr "الفئة 0 (تلقائي)"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:151
 msgid "Tier 1"
 msgstr "الفئة 1"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:85
+#: src/components/landingPage/Pipeline.tsx:25
+msgid "TIER 1"
+msgstr "المستوى 1"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:89
 msgid "Tier 1 — AI Instant"
 msgstr "الفئة 1 — ذكاء اصطناعي فوري"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:137
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:77
+msgid "Tier 1 (AI)"
+msgstr "الفئة 1 (ذكاء اصطناعي)"
+
+#: src/components/landingPage/Features.tsx:13
+msgid "Tier 1 AI resolves common questions in under 2 seconds using your knowledge base."
+msgstr "الذكاء الاصطناعي من المستوى الأول يحل الأسئلة الشائعة في أقل من ثانيتين باستخدام قاعدة معرفتك."
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:152
 msgid "Tier 2"
 msgstr "الفئة 2"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:86
+#: src/components/landingPage/Pipeline.tsx:33
+msgid "TIER 2"
+msgstr "المستوى 2"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:94
 msgid "Tier 2 — AI Complex"
 msgstr "الفئة 2 — ذكاء اصطناعي معقد"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:251
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:78
+msgid "Tier 2 (Deep AI)"
+msgstr "الفئة 2 (ذكاء اصطناعي عميق)"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:281
 msgid "Time"
 msgstr "الوقت"
 
-#: src/components/AppControls.tsx:38
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:238
+msgid "Today"
+msgstr "اليوم"
+
+#: src/components/AppControls.tsx:71
 msgid "Toggle theme"
 msgstr "تبديل المظهر"
 
@@ -413,15 +1561,61 @@ msgstr "تبديل المظهر"
 msgid "Total"
 msgstr "الإجمالي"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:197
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:160
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:253
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:218
 msgid "Total Conversations"
 msgstr "إجمالي المحادثات"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:572
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:157
+msgid "Total Organizations"
+msgstr "إجمالي المؤسسات"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:584
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:161
+#: src/components/admin-dashboard/OrganizationDetail.tsx:327
+msgid "Total Tickets"
+msgstr "إجمالي التذاكر"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:580
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:159
+msgid "Total Users"
+msgstr "إجمالي المستخدمين"
+
+#: src/components/landingPage/Contact.tsx:25
+msgid "Twitter"
+msgstr "تويتر"
 
 #: src/features/knowledgebase/DocumentList.tsx:70
 msgid "Type"
 msgstr "النوع"
 
-#: src/components/pricing/PricingCard.tsx:155
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:347
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:260
+msgid "Type <0>{0}</0> to confirm"
+msgstr "اكتب <0>{0}</0> للتأكيد"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:80
+msgid "Unresolved"
+msgstr "غير محلول"
+
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:266
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:201
+msgid "Update details for {0}."
+msgstr "تحديث تفاصيل {0}."
+
+#: src/components/Profile/Passwordsection.tsx:161
+msgid "Update password"
+msgstr "تحديث كلمة المرور"
+
+#: src/components/Profile/Profilesection.tsx:67
+msgid "Update your personal details and login email."
+msgstr "تحديث بياناتك الشخصية وبريدك الإلكتروني."
+
+#: src/components/pricing/PricingCard.tsx:164
 msgid "Upgrade your plan"
 msgstr "ترقية خطتك"
 
@@ -429,27 +1623,113 @@ msgstr "ترقية خطتك"
 msgid "Upload a PDF or add a FAQ URL above to get started."
 msgstr "قم بتحميل ملف PDF أو أضف رابطًا للأسئلة الشائعة أعلاه للبدء."
 
+#: src/features/knowledgebase/UploadDocumentPanel.tsx:130
+#: src/features/knowledgebase/UploadDocumentPanel.tsx:319
+msgid "Upload Document"
+msgstr "تحميل مستند"
+
 #: src/features/knowledgebase/UploadPdfPanel.tsx:102
 #: src/features/knowledgebase/UploadPdfPanel.tsx:291
-msgid "Upload PDF"
-msgstr "تحميل ملف PDF"
+#~ msgid "Upload PDF"
+#~ msgstr "تحميل ملف PDF"
 
-#: src/features/knowledgebase/UploadPdfPanel.tsx:283
+#: src/components/landingPage/Features.tsx:19
+msgid "Upload PDFs, FAQs, docs. AI learns your product and answers accurately."
+msgstr "ارفع ملفات PDF والأسئلة الشائعة والوثائق. يتعلم الذكاء الاصطناعي منتجك ويجيب بدقة."
+
+#: src/features/knowledgebase/UploadDocumentPanel.tsx:311
 msgid "Uploading…"
 msgstr "جاري التحميل..."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:188
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:143
+msgid "URL-safe identifier — lowercase, hyphens only."
+msgstr "معرّف آمن للرابط — أحرف صغيرة وشرطات فقط."
+
+#: src/components/Profile/Passwordsection.tsx:82
+msgid "Use a strong password with at least 8 characters."
+msgstr "استخدم كلمة مرور قوية من 8 أحرف على الأقل."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:691
+msgid "Users"
+msgstr "المستخدمون"
+
+#: src/components/Profile/Profilesection.tsx:111
+msgid "Verified"
+msgstr "موثق"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:759
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:439
+msgid "View Organization Details"
+msgstr "عرض تفاصيل المؤسسة"
 
 #: src/app/[locale]/(marketing)/page.tsx:71
 msgid "View plans"
 msgstr "عرض الخطط"
 
-#: src/app/[locale]/(auth)/login/page.tsx:236
+#: src/components/landingPage/About.tsx:44
+msgid "We believe support shouldn't make customers wait. Every second of delay costs trust."
+msgstr "نؤمن بأن الدعم لا يجب أن يجعل العملاء ينتظرون. كل ثانية تأخير تكلّف ثقة."
+
+#: src/components/landingPage/About.tsx:97
+msgid "We built SupportNest to change that — a platform where AI handles the predictable, humans handle the unpredictable, and customers always get a fast, accurate answer."
+msgstr "بنينا SupportNest لتغيير ذلك — منصة يتولى فيها الذكاء الاصطناعي المتوقع، ويتولى البشر غير المتوقع، ويحصل العملاء دائمًا على إجابة سريعة ودقيقة."
+
+#: src/components/landingPage/About.tsx:59
+msgid "We eliminate Tier 1 grunt work so your agents focus on high-value, satisfying work."
+msgstr "نُزيل أعمال المستوى الأول الروتينية حتى يركز وكلاؤك على العمل عالي القيمة والمُرضي."
+
+#: src/components/landingPage/Contact.tsx:96
+msgid "We'd love to hear from you"
+msgstr "يسعدنا سماعك"
+
+#. placeholder {0}: fmt(24)
+#: src/components/landingPage/Contact.tsx:171
+msgid "We'll get back to you within {0} hours."
+msgstr "سنرد عليك خلال {0} ساعة."
+
+#: src/components/Profile/Passwordsection.tsx:38
+msgid "Weak"
+msgstr "ضعيفة"
+
+#: src/app/[locale]/(auth)/login/page.tsx:257
 msgid "Welcome Back"
 msgstr "مرحبًا بعودتك"
 
-#: src/components/pricing/PricingCard.tsx:153
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:596
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:140
+msgid "Welcome back, Super Admin"
+msgstr "مرحباً بعودتك، المشرف العام"
+
+#: src/components/landingPage/About.tsx:135
+msgid "What we stand for"
+msgstr "ما نؤمن به"
+
+#: src/components/ProfilePage.tsx:82
+msgid "Widget embed snippet"
+msgstr "مقتطف تضمين الأداة"
+
+#: src/components/landingPage/Contact.tsx:190
+msgid "Work email *"
+msgstr "البريد الإلكتروني للعمل *"
+
+#: src/components/landingPage/Contact.tsx:196
+#: src/components/Profile/Profilesection.tsx:165
+msgid "you@company.com"
+msgstr "you@company.com"
+
+#: src/components/pricing/PricingCard.tsx:162
 msgid "Your current plan"
 msgstr "خطتك الحالية"
 
-#: src/components/sidebar.tsx:111
+#: src/components/Profile/Dangerzone.tsx:92
+msgid "Your full name"
+msgstr "اسمك الكامل"
+
+#: src/components/landingPage/Contact.tsx:179
+msgid "Your name *"
+msgstr "اسمك *"
+
+#: src/components/sidebar.tsx:134
 msgid "Your workspace"
 msgstr "مساحة عملك"
