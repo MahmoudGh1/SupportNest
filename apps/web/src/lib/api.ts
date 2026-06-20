@@ -32,6 +32,9 @@ import {
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
 export function normalizeApiBaseUrl(rawBaseUrl?: string) {
+	if (typeof window !== "undefined") {
+		return "/api/v1";
+	}
 	const fallback =
 		process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
 	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");
