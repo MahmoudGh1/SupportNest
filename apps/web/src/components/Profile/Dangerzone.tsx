@@ -5,8 +5,10 @@ import { S } from "../ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export function DangerZone() {
+  const { t } = useLingui();
   const [confirm, setConfirm] = useState(false);
   const [nameInput, setNameInput] = useState("");
   const [orgInput, setOrgInput] = useState("");
@@ -36,25 +38,23 @@ export function DangerZone() {
       await logout();
       router.push("/login");
     } catch (err: any) {
-      setError(err?.message ?? "Failed to delete account.");
+      setError(err?.message ?? t`Failed to delete account.`);
       setLoading(false);
     }
   };
 
   return (
-    <div
-      style={{
-        border: "1.5px solid #FCA5A5",
-        borderRadius: 12,
-        padding: "1.25rem 1.5rem",
-        background: "#FEF2F2",
-      }}
-    >
+    <div style={{
+      border: "1.5px solid #FCA5A5",
+      borderRadius: 12,
+      padding: "1.25rem 1.5rem",
+      background: "#FEF2F2",
+    }}>
       <h3 style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 600, color: "#DC2626" }}>
-        Danger zone
+        <Trans>Danger zone</Trans>
       </h3>
       <p style={{ margin: "0 0 16px", fontSize: 12, color: "#888" }}>
-        Irreversible actions. Proceed with caution.
+        <Trans>Irreversible actions. Proceed with caution.</Trans>
       </p>
 
       {!confirm ? (
@@ -75,18 +75,21 @@ export function DangerZone() {
             gap: 6,
           }}
         >
-          <i className="ti ti-trash" style={{ fontSize: 15 }} /> Delete my account
+          <i className="ti ti-trash" style={{ fontSize: 15 }} />
+          <Trans>Delete my account</Trans>
         </button>
       ) : (
         <div>
           <p style={{ fontSize: 13, color: "#DC2626", margin: "0 0 10px" }}>
-            This cannot be undone. Type your full name (<strong>{expectedFullName}</strong>) and your organization's name (<strong>{expectedorgName}</strong>) to confirm.
+            <Trans>
+              This cannot be undone. Type your full name (<strong>{expectedFullName}</strong>) and your organization's name (<strong>{expectedorgName}</strong>) to confirm.
+            </Trans>
           </p>
 
           <input
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
-            placeholder="Your full name"
+            placeholder={t`Your full name`}
             style={{
               width: "100%",
               padding: "8px 12px",
@@ -101,7 +104,7 @@ export function DangerZone() {
           <input
             value={orgInput}
             onChange={(e) => setOrgInput(e.target.value)}
-            placeholder="Organization name"
+            placeholder={t`Organization name`}
             style={{
               width: "100%",
               padding: "8px 12px",
@@ -138,7 +141,7 @@ export function DangerZone() {
                 fontFamily: "inherit",
               }}
             >
-              Cancel
+              <Trans>Cancel</Trans>
             </button>
             <button
               onClick={handleDelete}
@@ -155,7 +158,7 @@ export function DangerZone() {
                 fontFamily: "inherit",
               }}
             >
-              {loading ? "Deleting…" : "Delete account"}
+              {loading ? <Trans>Deleting…</Trans> : <Trans>Delete account</Trans>}
             </button>
           </div>
         </div>

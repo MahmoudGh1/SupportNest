@@ -96,7 +96,7 @@ const GROUPS: Group[] = [
     rows: [
       {
         label: "Monthly conversations",
-        starter: "5,000 / mo",
+        starter: "1,000 / mo",
         pro: "Unlimited",
         enterprise: "Unlimited",
       },
@@ -147,7 +147,7 @@ const GROUPS: Group[] = [
         pro: "Advanced",
         enterprise: "Advanced",
       },
-      { label: "CSAT scores", starter: false, pro: true, enterprise: true },
+      { label: "CSAT scores", starter: true, pro: true, enterprise: true },
       { label: "API access", starter: false, pro: true, enterprise: true },
     ],
   },
@@ -249,7 +249,7 @@ export default function PricingTable() {
               Starter
             </p>
             <p className="text-var-text-main text-[22px] font-extrabold tracking-tight mt-1">
-              $29
+              EGP799
             </p>
             <p className="text-var-text-muted text-[11px] mt-0.5">/ mo</p>
           </div>
@@ -265,7 +265,7 @@ export default function PricingTable() {
               </span>
             </div>
             <p className="text-white text-[22px] font-extrabold tracking-tight">
-              $79
+              EGP2399
             </p>
             <p className="text-white/30 text-[11px] mt-0.5">/ mo</p>
           </div>
@@ -298,7 +298,8 @@ export default function PricingTable() {
 
             {/* Rows */}
             {group.rows.map((row, ri) => {
-              const isLast = gi === GROUPS.length - 1 && ri === group.rows.length - 1;
+              const isLast =
+                gi === GROUPS.length - 1 && ri === group.rows.length - 1;
               return (
                 <div
                   key={row.label}

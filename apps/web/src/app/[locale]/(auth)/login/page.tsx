@@ -297,7 +297,7 @@ function FormPanel() {
 							}
 						}}
 						onError={() => setError(t`Google sign-in failed.`)}
-						width="full"
+						width="380"
 						auto_select={false}
 					/>
 

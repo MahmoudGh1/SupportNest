@@ -296,6 +296,7 @@ export const userService = async (
         lastName: true,
         role: true,
         organizationId: true,
+		isEmailVerified: true,
         organization: { select: { name: true, planId: true } },
       },
     });
@@ -317,6 +318,7 @@ export const userService = async (
       currentPlanId: user.organization?.planId ?? null,
       onboarded: Boolean(user.organizationId),
       hasActiveSubscription: activeSubscription,
+	  isEmailVerified: user.isEmailVerified
     };
   } catch (err) {
     throw err;
