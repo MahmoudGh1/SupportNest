@@ -34,7 +34,9 @@ function StatCard({
 					marginBottom: 10,
 				}}
 			>
-				<span style={{ fontSize: 12, color: "var(--page-muted)" }}>{label}</span>
+				<span style={{ fontSize: 12, color: "var(--page-muted)" }}>
+					{label}
+				</span>
 				<div
 					style={{
 						width: 32,
@@ -74,10 +76,17 @@ function TierBreakdown({
 	const total = Object.values(data).reduce((a, b) => a + b, 0);
 	const items = [
 		{ label: i18n._(t`Tier 0 (Auto)`), value: data.TIER0, color: "#10b981" },
-		{ label: i18n._(t`Tier 1 (AI)`), value: data.TIER1, color: "var(--color-brand)" },
-		{ label: i18n._(t`Tier 2 (Deep AI)`), value: data.TIER2, color: "#6366f1" },
+		{
+			label: i18n._(t`Tier 1 (AI)`),
+			value: data.TIER1,
+			color: "var(--color-brand)",
+		},
+		{
+			label: i18n._(t`Tier 2 (Deep AI)`),
+			value: data.TIER2,
+			color: "#6366f1",
+		},
 		{ label: i18n._(t`Human`), value: data.HUMAN, color: "#f59e0b" },
-		{ label: i18n._(t`Unresolved`), value: data.UNRESOLVED, color: "#ef4444" },
 	];
 
 	return (
@@ -103,7 +112,10 @@ function TierBreakdown({
 			{items.map((item) => {
 				const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
 				return (
-					<div key={item.label} style={{ marginBottom: 14 }}>
+					<div
+						key={item.label}
+						style={{ marginBottom: 14 }}
+					>
 						<div
 							style={{
 								display: "flex",
@@ -160,7 +172,7 @@ export default function AnalyticsPage() {
 		api
 			.getAnalyticsSummary(range)
 			.then(setData)
-			.catch(err => console.error(err))
+			.catch((err) => console.error(err))
 			.finally(() => setLoading(false));
 	}, [range]);
 
@@ -184,11 +196,18 @@ export default function AnalyticsPage() {
 		);
 	}
 
-	if (!data) return (
-		<div style={{ padding: "2rem", textAlign: "center", color: "var(--page-muted)" }}>
-			<Trans>Failed to load analytics data.</Trans>
-		</div>
-	);
+	if (!data)
+		return (
+			<div
+				style={{
+					padding: "2rem",
+					textAlign: "center",
+					color: "var(--page-muted)",
+				}}
+			>
+				<Trans>Failed to load analytics data.</Trans>
+			</div>
+		);
 
 	const formatMs = (ms: number) => {
 		if (ms < 1000) return `${Math.round(ms)}ms`;
@@ -207,7 +226,14 @@ export default function AnalyticsPage() {
 					marginBottom: 20,
 				}}
 			>
-				<h1 style={{ fontSize: 20, fontWeight: 600, margin: 0, color: "var(--page-text)" }}>
+				<h1
+					style={{
+						fontSize: 20,
+						fontWeight: 600,
+						margin: 0,
+						color: "var(--page-text)",
+					}}
+				>
 					<Trans>Analytics</Trans>
 				</h1>
 				<div
@@ -235,7 +261,11 @@ export default function AnalyticsPage() {
 								transition: "all .15s",
 							}}
 						>
-							{r === "today" ? i18n._(t`Today`) : r === "7d" ? i18n._(t`7 Days`) : i18n._(t`30 Days`)}
+							{r === "today"
+								? i18n._(t`Today`)
+								: r === "7d"
+									? i18n._(t`7 Days`)
+									: i18n._(t`30 Days`)}
 						</button>
 					))}
 				</div>
@@ -276,7 +306,7 @@ export default function AnalyticsPage() {
 					display: "grid",
 					gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
 					gap: 12,
-					marginBottom: 40
+					marginBottom: 40,
 				}}
 			>
 				<TierBreakdown data={data.resolutionByTier} />
@@ -315,12 +345,17 @@ export default function AnalyticsPage() {
 								className="ti ti-star-filled"
 								style={{
 									fontSize: 20,
-									color: star <= data.csat.average ? "#f59e0b" : "var(--card-border)",
+									color:
+										star <= data.csat.average
+											? "#f59e0b"
+											: "var(--card-border)",
 								}}
 							/>
 						))}
 					</div>
-					<p style={{ fontSize: 12, color: "var(--page-muted)", marginTop: 12 }}>
+					<p
+						style={{ fontSize: 12, color: "var(--page-muted)", marginTop: 12 }}
+					>
 						<Trans>Based on all rated conversations in this period</Trans>
 					</p>
 				</div>

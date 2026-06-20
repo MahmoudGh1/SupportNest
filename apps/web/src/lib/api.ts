@@ -27,11 +27,11 @@ import {
 	WidgetConfig,
 	AdminOrganizationDetail,
 	AnalyticsSummary,
-	UploadDocumentInput
+	UploadDocumentInput,
 } from "@/types/types";
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
-function normalizeApiBaseUrl(rawBaseUrl?: string) {
+export function normalizeApiBaseUrl(rawBaseUrl?: string) {
 	const fallback =
 		process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
 	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");
@@ -262,9 +262,7 @@ export const api = {
 		return { user: mapApiUser(body.result) };
 	},
 
-	async registerWithGoogle(
-		idToken: string,
-	): Promise<{
+	async registerWithGoogle(idToken: string): Promise<{
 		userId: string;
 		email: string;
 		isNewUser: boolean;

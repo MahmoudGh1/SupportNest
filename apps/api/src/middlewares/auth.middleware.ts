@@ -9,14 +9,13 @@ export function authMiddleware(
 	next: NextFunction,
 ): void {
 	const cookieToken = req.cookies["accessToken"];
-
+	console.log(cookieToken);
 	if (!cookieToken) {
 		return next(new AuthError("Missing or malformed authorization header"));
 	}
 
 	try {
 		const payload = verifyAccessToken(cookieToken);
-		console.log(payload);
 		req.user = payload;
 		next();
 	} catch (error) {

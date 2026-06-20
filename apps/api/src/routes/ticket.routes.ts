@@ -30,4 +30,6 @@ ticketRouter.patch("/:id/start", ticketController.startTicket);
 // Body:  { resolutionNote?: string }
 ticketRouter.patch("/:id/resolve", ticketController.resolveTicket);
 
+ticketRouter.patch("/:id", authMiddleware, ticketController.updateTicket);
+
 export default ticketRouter;
