@@ -9,10 +9,7 @@ import {
 } from "@/app/[locale]/(dashboard)/dashboard/tickets/tickets.types";
 import { apiGetTickets } from "@/app/[locale]/(dashboard)/dashboard/tickets/tickets.api";
 import { T } from "@/app/[locale]/(dashboard)/dashboard/tickets/tickets.theme";
-import {
-	TicketDetail,
-	TicketRow,
-} from "@/app/[locale]/(dashboard)/dashboard/tickets/tickets.subcomponents";
+import { TicketRow } from "@/app/[locale]/(dashboard)/dashboard/tickets/tickets.subcomponents";
 import { useRouter } from "next/navigation";
 
 // ─── TABS ─────────────────────────────────────────────────────────────────────
