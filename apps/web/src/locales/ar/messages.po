@@ -15,13 +15,13 @@ msgstr ""
 
 #. placeholder {0}: org.name
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:505
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:337
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:338
 msgid "{0} activated."
 msgstr "{0} مُفعَّل."
 
 #. placeholder {0}: org.name
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:479
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:329
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:330
 msgid "{0} created."
 msgstr "تم إنشاء {0}."
 
@@ -36,7 +36,7 @@ msgstr "{0} تم حلها"
 
 #. placeholder {0}: org.name
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:502
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:336
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:337
 msgid "{0} suspended."
 msgstr "{0} موقوف."
 
@@ -47,12 +47,12 @@ msgstr "{0} إلى وكيل بشري"
 
 #. placeholder {0}: org.name
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:485
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:330
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:331
 msgid "{0} updated."
 msgstr "تم تحديث {0}."
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:492
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:331
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:332
 msgid "{name} deleted."
 msgstr "تم حذف {name}."
 
@@ -85,11 +85,11 @@ msgstr "<0>{processing}</0> من المستندات يتم معالجتها حا
 msgid "✓ Password updated successfully."
 msgstr "✓ تم تحديث كلمة المرور بنجاح."
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:238
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:268
 msgid "30 Days"
 msgstr "30 يومًا"
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:238
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:267
 msgid "7 Days"
 msgstr "7 أيام"
 
@@ -104,7 +104,7 @@ msgstr "من نحن"
 msgid "About SupportNest"
 msgstr "حول SupportNest"
 
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:346
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:347
 msgid "Access Denied"
 msgstr "تم رفض الوصول"
 
@@ -120,25 +120,25 @@ msgstr "Acme Corp"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:509
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:522
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:339
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:340
 msgid "Action failed."
 msgstr "فشل الإجراء."
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:656
 #: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:316
 #: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:59
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:399
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:401
 msgid "Actions"
 msgstr "الإجراءات"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:739
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:422
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:430
 #: src/components/admin-dashboard/OrganizationDetail.tsx:257
 msgid "Activate"
 msgstr "تفعيل"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:725
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:421
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:429
 msgid "Activate organization"
 msgstr "تفعيل المؤسسة"
 
@@ -146,10 +146,10 @@ msgstr "تفعيل المؤسسة"
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:532
 #: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:195
 #: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:292
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:64
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:376
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:65
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:378
 #: src/components/admin-dashboard/OrganizationDetail.tsx:191
-#: src/components/ui/index.tsx:246
+#: src/components/ui/index.tsx:245
 msgid "Active"
 msgstr "نشط"
 
@@ -167,12 +167,12 @@ msgid "Added"
 msgstr "تاريخ الإضافة"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:171
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:131
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:132
 msgid "Admin email"
 msgstr "البريد الإلكتروني للمسؤول"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:177
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:136
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:137
 msgid "Admin password"
 msgstr "كلمة مرور المسؤول"
 
@@ -208,7 +208,7 @@ msgstr "الذكاء الاصطناعي يتعامل مع الحجم، والب�
 msgid "AI Instant Answer"
 msgstr "إجابة فورية بالذكاء الاصطناعي"
 
-#: src/components/sidebar.tsx:235
+#: src/components/sidebar.tsx:240
 msgid "AI Mode"
 msgstr "وضع ال AI"
 
@@ -232,7 +232,7 @@ msgstr "منصة دعم العملاء المدعومة بالذكاء الاص�
 msgid "AI-powered customer support that resolves 80% of tickets instantly, 24/7."
 msgstr "دعم عملاء مدعوم بالذكاء الاصطناعي يحل 80% من التذاكر فورًا، على مدار الساعة."
 
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:375
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:377
 msgid "All"
 msgstr "الكل"
 
@@ -246,9 +246,9 @@ msgstr "جميع الحالات"
 msgid "All Systems Operational"
 msgstr "جميع الأنظمة تعمل"
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:211
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:237
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:19
-#: src/components/sidebar.tsx:27
+#: src/components/sidebar.tsx:26
 msgid "Analytics"
 msgstr "التحليلات"
 
@@ -260,12 +260,12 @@ msgstr "سنوي"
 #~ msgid "API & Widget"
 #~ msgstr "واجهة برمجة التطبيقات والأداة"
 
-#: src/components/ProfilePage.tsx:65
+#: src/components/ProfilePage.tsx:101
 msgid "API Keys"
 msgstr "مفاتيح API"
 
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:18
-#: src/components/sidebar.tsx:42
+#: src/components/sidebar.tsx:41
 msgid "API Tools"
 msgstr "أدوات API"
 
@@ -303,11 +303,11 @@ msgstr "متوسط الحل التلقائي"
 msgid "Avg Response Time"
 msgstr "متوسط وقت الاستجابة"
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:263
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:293
 msgid "Avg. Resolution Time"
 msgstr "متوسط وقت الحل"
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:324
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:359
 msgid "Based on all rated conversations in this period"
 msgstr "بناءً على جميع المحادثات المُقيَّمة في هذه الفترة"
 
@@ -326,9 +326,9 @@ msgstr "صُنع بـ ❤️ لفرق الدعم حول العالم"
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:204
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:301
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:364
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:153
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:224
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:265
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:154
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:225
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:266
 #: src/components/Profile/Dangerzone.tsx:144
 msgid "Cancel"
 msgstr "إلغاء"
@@ -369,7 +369,7 @@ msgstr "إغلاق عناصر التحكم"
 msgid "Close menu"
 msgstr "إغلاق القائمة"
 
-#: src/components/ui/index.tsx:258
+#: src/components/ui/index.tsx:257
 msgid "Closed"
 msgstr "مغلق"
 
@@ -395,7 +395,7 @@ msgid "Contact"
 msgstr "تواصل معنا"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:284
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:212
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:213
 msgid "Contact email"
 msgstr "البريد الإلكتروني للتواصل"
 
@@ -404,7 +404,7 @@ msgid "Contact sales"
 msgstr "تواصل مع المبيعات"
 
 #: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:45
-#: src/components/sidebar.tsx:47
+#: src/components/sidebar.tsx:46
 msgid "Contact Submissions"
 msgstr "طلبات التواصل"
 
@@ -417,7 +417,6 @@ msgstr "طلبات التواصل"
 #~ msgstr "المتابعة مع Google"
 
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:14
-#: src/components/sidebar.tsx:19
 msgid "Conversations"
 msgstr "المحادثات"
 
@@ -426,12 +425,12 @@ msgid "Core team members"
 msgstr "أعضاء الفريق الأساسي"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:153
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:120
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:121
 msgid "Create a new tenant and admin user."
 msgstr "إنشاء مستأجر جديد ومستخدم مسؤول."
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:208
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:156
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:157
 msgid "Create organization"
 msgstr "إنشاء مؤسسة"
 
@@ -439,12 +438,12 @@ msgstr "إنشاء مؤسسة"
 msgid "Create your first organization to get started."
 msgstr "أنشئ مؤسستك الأولى للبدء."
 
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:398
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:417
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:400
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:425
 msgid "Created"
 msgstr "تاريخ الإنشاء"
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:268
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:298
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:236
 msgid "CSAT Score"
 msgstr "مؤشر رضا العملاء (CSAT)"
@@ -469,7 +468,7 @@ msgstr "الاشتراك الحالي"
 msgid "Customer"
 msgstr "العميل"
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:306
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:336
 msgid "Customer Satisfaction"
 msgstr "رضا العملاء"
 
@@ -505,8 +504,8 @@ msgstr "عزل البيانات"
 msgid "Date"
 msgstr "التاريخ"
 
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:267
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:425
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:268
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:433
 msgid "Delete"
 msgstr "حذف"
 
@@ -523,12 +522,12 @@ msgid "Delete Org"
 msgstr "حذف المنظمة"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:750
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:425
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:433
 msgid "Delete organization"
 msgstr "حذف المؤسسة"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:338
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:254
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:255
 msgid "Delete organization?"
 msgstr "حذف المؤسسة؟"
 
@@ -541,7 +540,7 @@ msgid "Deleting soon"
 msgstr "جارٍ الحذف قريباً"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:377
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:267
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:268
 msgid "Deleting..."
 msgstr "جارٍ الحذف..."
 
@@ -582,23 +581,23 @@ msgstr "أفلت الملف هنا أو انقر للتصفح"
 msgid "Each business is fully isolated — own data, knowledge base, and widget config."
 msgstr "كل شركة معزولة تمامًا — بياناتها الخاصة وقاعدة معرفتها وإعدادات الأداة."
 
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:424
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:432
 msgid "Edit"
 msgstr "تعديل"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:743
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:424
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:432
 msgid "Edit details"
 msgstr "تعديل التفاصيل"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:265
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:200
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:201
 msgid "Edit organization"
 msgstr "تعديل المؤسسة"
 
 #: src/app/[locale]/(auth)/login/page.tsx:335
 #: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:55
-#: src/components/Profile/Profilesection.tsx:161
+#: src/components/Profile/Profilesection.tsx:164
 msgid "Email"
 msgstr "البريد الإلكتروني"
 
@@ -609,8 +608,8 @@ msgstr "البريد الإلكتروني"
 #: src/app/[locale]/(auth)/login/page.tsx:162
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:110
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:229
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:90
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:175
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:91
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:176
 msgid "Email is required."
 msgstr "البريد الإلكتروني مطلوب."
 
@@ -625,12 +624,12 @@ msgstr "أداة قابلة للتضمين"
 #: src/app/[locale]/(auth)/login/page.tsx:163
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:111
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:230
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:91
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:176
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:92
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:177
 msgid "Enter a valid email."
 msgstr "أدخل بريدًا إلكترونيًا صالحًا."
 
-#: src/components/ui/index.tsx:252
+#: src/components/ui/index.tsx:251
 msgid "Escalated"
 msgstr "مُصعَّد"
 
@@ -643,7 +642,7 @@ msgstr "التذاكر المصعّدة"
 msgid "Escalated tickets arrive with full conversation context. Agents never start cold."
 msgstr "تصل التذاكر المصعّدة مع السياق الكامل للمحادثة. الوكلاء لا يبدأون من الصفر أبدًا."
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:258
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:288
 msgid "Escalation Rate"
 msgstr "معدل التصعيد"
 
@@ -664,7 +663,7 @@ msgid "Failed"
 msgstr "فشلت"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:134
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:108
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:109
 msgid "Failed to create organization."
 msgstr "فشل إنشاء المؤسسة."
 
@@ -673,7 +672,7 @@ msgid "Failed to delete account."
 msgstr "فشل حذف الحساب."
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:326
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:244
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:245
 msgid "Failed to delete organization."
 msgstr "فشل حذف المؤسسة."
 
@@ -681,7 +680,7 @@ msgstr "فشل حذف المؤسسة."
 msgid "Failed to load"
 msgstr "فشل التحميل"
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:189
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:208
 msgid "Failed to load analytics data."
 msgstr "فشل تحميل بيانات التحليلات."
 
@@ -689,7 +688,7 @@ msgstr "فشل تحميل بيانات التحليلات."
 msgid "Failed to load details"
 msgstr "فشل تحميل التفاصيل"
 
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:321
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:322
 msgid "Failed to load organizations."
 msgstr "فشل تحميل المنظمات."
 
@@ -699,7 +698,7 @@ msgid "Failed to load overview stats"
 msgstr "فشل تحميل الإحصائيات العامة"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:247
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:189
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:190
 msgid "Failed to update organization."
 msgstr "فشل تحديث المؤسسة."
 
@@ -712,8 +711,8 @@ msgstr "مقبولة"
 msgid "Features"
 msgstr "المميزات"
 
-#: src/components/Profile/Profilesection.tsx:147
 #: src/components/Profile/Profilesection.tsx:150
+#: src/components/Profile/Profilesection.tsx:153
 msgid "First name"
 msgstr "الاسم الأول"
 
@@ -780,7 +779,7 @@ msgstr "كيف يعمل"
 msgid "How It Works"
 msgstr "كيف يعمل"
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:79
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:89
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:153
 msgid "Human"
 msgstr "بشري"
@@ -840,7 +839,7 @@ msgid "Joined Date"
 msgstr "تاريخ الانضمام"
 
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:17
-#: src/components/sidebar.tsx:23
+#: src/components/sidebar.tsx:22
 #: src/features/knowledgebase/Header.tsx:35
 msgid "Knowledge Base"
 msgstr "قاعدة المعرفة"
@@ -849,8 +848,8 @@ msgstr "قاعدة المعرفة"
 msgid "Knowledge Base RAG"
 msgstr "قاعدة المعرفة RAG"
 
-#: src/components/Profile/Profilesection.tsx:154
 #: src/components/Profile/Profilesection.tsx:157
+#: src/components/Profile/Profilesection.tsx:160
 msgid "Last name"
 msgstr "اسم العائلة"
 
@@ -877,22 +876,21 @@ msgstr "تسجيل الدخول"
 
 #: src/components/Navbar.tsx:84
 #: src/components/Navbar.tsx:211
-#: src/components/sidebar.tsx:306
-#: src/components/sidebar.tsx:326
-#: src/components/topbar.tsx:113
+#: src/components/sidebar.tsx:311
+#: src/components/sidebar.tsx:331
 msgid "Logout"
 msgstr "تسجيل خروج"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:115
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:95
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:96
 msgid "Lowercase letters, numbers, and hyphens only."
 msgstr "أحرف صغيرة وأرقام وشرطات فقط."
 
-#: src/components/ProfilePage.tsx:45
+#: src/components/ProfilePage.tsx:64
 msgid "Manage your account details and widget authentication keys."
 msgstr "إدارة تفاصيل حسابك ومفاتيح مصادقة الأداة."
 
-#: src/components/ProfilePage.tsx:44
+#: src/components/ProfilePage.tsx:62
 msgid "Manage your account details."
 msgstr "إدارة تفاصيل حسابك."
 
@@ -921,7 +919,7 @@ msgid "Min. 8 characters"
 msgstr "8 أحرف على الأقل"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:113
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:93
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:94
 msgid "Minimum 6 characters."
 msgstr "6 أحرف على الأقل."
 
@@ -947,8 +945,8 @@ msgstr "الاسم"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:152
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:561
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:119
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:364
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:120
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:365
 msgid "New organization"
 msgstr "مؤسسة جديدة"
 
@@ -961,7 +959,7 @@ msgid "New password must be at least 8 characters."
 msgstr "يجب أن تتكون كلمة المرور الجديدة من 8 أحرف على الأقل."
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:792
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:435
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:444
 msgid "Next"
 msgstr "التالي"
 
@@ -970,7 +968,7 @@ msgid "No documents yet"
 msgstr "لا توجد مستندات بعد"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:640
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:390
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:392
 msgid "No organizations found"
 msgstr "لا توجد مؤسسات"
 
@@ -985,7 +983,7 @@ msgstr "لا توجد بيانات أداء متاحة حاليًا لهذه ا�
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:81
 #: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:201
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:70
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:71
 msgid "No plan"
 msgstr "لا توجد خطة"
 
@@ -993,7 +991,7 @@ msgstr "لا توجد خطة"
 msgid "No submissions yet."
 msgstr "لا توجد رسائل بعد."
 
-#: src/components/Profile/Profilesection.tsx:126
+#: src/components/Profile/Profilesection.tsx:129
 msgid "Not Verified"
 msgstr "غير موثق"
 
@@ -1031,7 +1029,7 @@ msgstr "مدير المؤسسة"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:651
 #: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:312
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:395
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:397
 msgid "Organization"
 msgstr "المؤسسة"
 
@@ -1041,16 +1039,16 @@ msgstr "تفاصيل المنظمة"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:165
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:278
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:126
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:207
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:127
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:208
 #: src/components/Profile/Dangerzone.tsx:107
 msgid "Organization name"
 msgstr "اسم المؤسسة"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:109
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:228
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:89
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:174
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:90
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:175
 msgid "Organization name is required."
 msgstr "اسم المؤسسة مطلوب."
 
@@ -1066,8 +1064,8 @@ msgstr "فريق المنظمة والوصول ({0})"
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:556
 #: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:496
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:21
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:360
-#: src/components/sidebar.tsx:36
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:361
+#: src/components/sidebar.tsx:35
 msgid "Organizations"
 msgstr "المؤسسات"
 
@@ -1075,12 +1073,12 @@ msgstr "المؤسسات"
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:13
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:20
 #: src/components/sidebar.tsx:18
-#: src/components/sidebar.tsx:30
+#: src/components/sidebar.tsx:29
 msgid "Overview"
 msgstr "نظرة عامة"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:785
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:432
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:441
 msgid "Page {page} of {totalPages}"
 msgstr "صفحة {page} من {totalPages}"
 
@@ -1090,7 +1088,7 @@ msgstr "كلمة المرور"
 
 #: src/app/[locale]/(auth)/login/page.tsx:164
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:112
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:92
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:93
 msgid "Password is required."
 msgstr "كلمة المرور مطلوبة."
 
@@ -1098,7 +1096,7 @@ msgstr "كلمة المرور مطلوبة."
 msgid "Passwords do not match."
 msgstr "كلمتا المرور غير متطابقتين."
 
-#: src/components/ProfilePage.tsx:83
+#: src/components/ProfilePage.tsx:119
 msgid "Paste this in the <head> of your website."
 msgstr "الصق هذا في <head> موقعك الإلكتروني."
 
@@ -1113,12 +1111,12 @@ msgstr "PDF أو CSV أو DOCX · الحد الأقصى 10 ميجابايت"
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:652
 #: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:313
 #: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:417
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:396
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:409
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:398
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:413
 msgid "Plan"
 msgstr "الخطة"
 
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:359
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:360
 msgid "Platform Administration"
 msgstr "إدارة المنصة"
 
@@ -1127,7 +1125,7 @@ msgstr "إدارة المنصة"
 msgid "Platform Status"
 msgstr "حالة المنصة"
 
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:434
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:443
 msgid "Prev"
 msgstr "السابق"
 
@@ -1160,13 +1158,13 @@ msgid "Product"
 msgstr "المنتج"
 
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:23
-#: src/components/ProfilePage.tsx:40
-#: src/components/ProfilePage.tsx:61
-#: src/components/sidebar.tsx:43
+#: src/components/ProfilePage.tsx:55
+#: src/components/ProfilePage.tsx:91
+#: src/components/sidebar.tsx:42
 msgid "Profile"
 msgstr "الملف الشخصى"
 
-#: src/components/ProfilePage.tsx:40
+#: src/components/ProfilePage.tsx:57
 msgid "Profile & API Keys"
 msgstr "الملف الشخصي ومفاتيح API"
 
@@ -1204,7 +1202,7 @@ msgstr "أعد إدخال كلمة المرور"
 msgid "Reply"
 msgstr "رد"
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:101
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:110
 msgid "Resolution by Tier"
 msgstr "الحل حسب الفئة"
 
@@ -1237,12 +1235,12 @@ msgid "ROUTER"
 msgstr "موجّه"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:305
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:227
-#: src/components/Profile/Profilesection.tsx:190
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:228
+#: src/components/Profile/Profilesection.tsx:193
 msgid "Save changes"
 msgstr "حفظ التغييرات"
 
-#: src/components/Profile/Profilesection.tsx:187
+#: src/components/Profile/Profilesection.tsx:190
 msgid "Saved"
 msgstr "تم الحفظ"
 
@@ -1255,7 +1253,7 @@ msgstr "البحث في المستندات..."
 msgid "Search organizations by name or slug..."
 msgstr "ابحث عن المؤسسات بالاسم أو المعرف..."
 
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:371
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:373
 msgid "Search organizations…"
 msgstr "البحث عن المنظمات…"
 
@@ -1272,12 +1270,12 @@ msgid "See Plans"
 msgstr "عرض الخطط"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:292
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:219
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:220
 msgid "Select a plan"
 msgstr "اختر خطة"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:195
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:148
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:149
 msgid "Select a plan (optional)"
 msgstr "اختر خطة (اختياري)"
 
@@ -1290,7 +1288,7 @@ msgid "Sending…"
 msgstr "جارٍ الإرسال…"
 
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:22
-#: src/components/sidebar.tsx:41
+#: src/components/sidebar.tsx:40
 msgid "Settings"
 msgstr "الاعدادات"
 
@@ -1334,12 +1332,12 @@ msgid "Size / Info"
 msgstr "الحجم / معلومات"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:183
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:141
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:142
 msgid "Slug"
 msgstr "المعرّف"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:114
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:94
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:95
 msgid "Slug is required."
 msgstr "المعرّف مطلوب."
 
@@ -1366,8 +1364,8 @@ msgstr "الإحصائيات"
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:653
 #: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:314
 #: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:411
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:397
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:413
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:399
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:419
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:281
 #: src/components/landingPage/Footer.tsx:22
 #: src/features/knowledgebase/DocumentList.tsx:71
@@ -1386,8 +1384,8 @@ msgstr "قوية"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:193
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:290
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:146
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:217
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:147
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:218
 msgid "Subscription Plan"
 msgstr "خطة الاشتراك"
 
@@ -1420,13 +1418,13 @@ msgid "SupportNest was born out of a frustration every SaaS founder knows: custo
 msgstr "وُلد SupportNest من إحباط يعرفه كل مؤسس SaaS: دعم العملاء هو المركز الأول للتكاليف، ومع ذلك لم تتغير الأدوات منذ عقد. تتراكم التذاكر، ويُصاب الوكلاء بالإرهاق، ويغادر العملاء بعد تجربة سيئة واحدة."
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:739
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:422
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:430
 #: src/components/admin-dashboard/OrganizationDetail.tsx:257
 msgid "Suspend"
 msgstr "تعليق"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:725
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:421
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:429
 msgid "Suspend organization"
 msgstr "تعليق المؤسسة"
 
@@ -1434,8 +1432,8 @@ msgstr "تعليق المؤسسة"
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:533
 #: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:195
 #: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:293
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:64
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:377
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:65
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:379
 #: src/components/admin-dashboard/OrganizationDetail.tsx:191
 msgid "Suspended"
 msgstr "موقوف"
@@ -1445,7 +1443,7 @@ msgid "Talk to sales"
 msgstr "تحدث مع فريق المبيعات"
 
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:15
-#: src/components/sidebar.tsx:26
+#: src/components/sidebar.tsx:25
 msgid "Team"
 msgstr "الفريق"
 
@@ -1483,13 +1481,13 @@ msgid "This will permanently delete <0>{0}</0> and all associated data, includin
 msgstr "سيؤدي هذا إلى الحذف الدائم لـ <0>{0}</0> وجميع البيانات المرتبطة بها، بما في ذلك المستخدمون والمحادثات والإعدادات. لا يمكن التراجع عن هذا الإجراء."
 
 #. placeholder {0}: org.name
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:256
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:257
 msgid "This will permanently delete <0>{0}</0> and all data. This action cannot be undone."
 msgstr "سيؤدي هذا إلى حذف <0>{0}</0> وجميع بياناتها نهائيًا. لا يمكن التراجع عن هذا الإجراء."
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:692
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:16
-#: src/components/sidebar.tsx:20
+#: src/components/sidebar.tsx:19
 msgid "Tickets"
 msgstr "التذاكر"
 
@@ -1505,7 +1503,7 @@ msgstr "التذاكر التي تم حلها تلقائيًا"
 msgid "Tier"
 msgstr "الفئة"
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:76
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:78
 msgid "Tier 0 (Auto)"
 msgstr "الفئة 0 (تلقائي)"
 
@@ -1521,7 +1519,7 @@ msgstr "المستوى 1"
 msgid "Tier 1 — AI Instant"
 msgstr "الفئة 1 — ذكاء اصطناعي فوري"
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:77
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:80
 msgid "Tier 1 (AI)"
 msgstr "الفئة 1 (ذكاء اصطناعي)"
 
@@ -1541,7 +1539,7 @@ msgstr "المستوى 2"
 msgid "Tier 2 — AI Complex"
 msgstr "الفئة 2 — ذكاء اصطناعي معقد"
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:78
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:85
 msgid "Tier 2 (Deep AI)"
 msgstr "الفئة 2 (ذكاء اصطناعي عميق)"
 
@@ -1549,7 +1547,7 @@ msgstr "الفئة 2 (ذكاء اصطناعي عميق)"
 msgid "Time"
 msgstr "الوقت"
 
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:238
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:265
 msgid "Today"
 msgstr "اليوم"
 
@@ -1562,7 +1560,7 @@ msgid "Total"
 msgstr "الإجمالي"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:160
-#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:253
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:283
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:218
 msgid "Total Conversations"
 msgstr "إجمالي المحادثات"
@@ -1593,17 +1591,17 @@ msgstr "النوع"
 
 #. placeholder {0}: org.name
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:347
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:260
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:261
 msgid "Type <0>{0}</0> to confirm"
 msgstr "اكتب <0>{0}</0> للتأكيد"
 
 #: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:80
-msgid "Unresolved"
-msgstr "غير محلول"
+#~ msgid "Unresolved"
+#~ msgstr "غير محلول"
 
 #. placeholder {0}: org.name
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:266
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:201
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:202
 msgid "Update details for {0}."
 msgstr "تحديث تفاصيل {0}."
 
@@ -1642,7 +1640,7 @@ msgid "Uploading…"
 msgstr "جاري التحميل..."
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:188
-#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:143
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:144
 msgid "URL-safe identifier — lowercase, hyphens only."
 msgstr "معرّف آمن للرابط — أحرف صغيرة وشرطات فقط."
 
@@ -1654,7 +1652,7 @@ msgstr "استخدم كلمة مرور قوية من 8 أحرف على الأق�
 msgid "Users"
 msgstr "المستخدمون"
 
-#: src/components/Profile/Profilesection.tsx:111
+#: src/components/Profile/Profilesection.tsx:114
 msgid "Verified"
 msgstr "موثق"
 
@@ -1705,7 +1703,7 @@ msgstr "مرحباً بعودتك، المشرف العام"
 msgid "What we stand for"
 msgstr "ما نؤمن به"
 
-#: src/components/ProfilePage.tsx:82
+#: src/components/ProfilePage.tsx:118
 msgid "Widget embed snippet"
 msgstr "مقتطف تضمين الأداة"
 
@@ -1714,7 +1712,7 @@ msgid "Work email *"
 msgstr "البريد الإلكتروني للعمل *"
 
 #: src/components/landingPage/Contact.tsx:196
-#: src/components/Profile/Profilesection.tsx:165
+#: src/components/Profile/Profilesection.tsx:168
 msgid "you@company.com"
 msgstr "you@company.com"
 
