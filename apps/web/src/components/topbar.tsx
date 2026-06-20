@@ -33,7 +33,7 @@ export function Topbar({ pageTitle, onToggleSidebar }: TopbarProps) {
         background: "var(--surface)",
         borderBottom: "0.5px solid var(--card-border)",
         padding: "0 1.5rem",
-        paddingInlineEnd: "7rem",
+        // paddingInlineEnd: "7rem",
         height: 56,
         display: "flex",
         alignItems: "center",

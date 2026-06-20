@@ -172,7 +172,7 @@ export default function RegisterPage() {
 				display: "flex", alignItems: "center",
 				justifyContent: "center", fontFamily: T.font, padding: "40px 16px",
 			}}>
-				<div style={{ width: "100%", maxWidth: 460 }}>
+				<div style={{ width: "100%", maxWidth: 400 }}>
 					{/* Logo */}
 					<div style={{ textAlign: "center", marginBottom: 32 }}>
 						<Link href="/" style={{
@@ -232,7 +232,7 @@ export default function RegisterPage() {
 								}
 							}}
 							onError={() => setSubmitError("Google sign-up failed.")}
-							width="1000"
+							width="390"
 							auto_select={false}
 							text="signup_with"
 						/>

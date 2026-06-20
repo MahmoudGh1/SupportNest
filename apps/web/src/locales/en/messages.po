@@ -13,56 +13,242 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:217
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:505
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:337
+msgid "{0} activated."
+msgstr "{0} activated."
+
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:479
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:329
+msgid "{0} created."
+msgstr "{0} created."
+
+#. placeholder {0}: tierStats.tier0_resolved
+#. placeholder {0}: tierStats.tier1_resolved
+#. placeholder {0}: tierStats.tier2_resolved
+#: src/components/admin-dashboard/OrganizationDetail.tsx:356
+#: src/components/admin-dashboard/OrganizationDetail.tsx:361
+#: src/components/admin-dashboard/OrganizationDetail.tsx:366
+msgid "{0} resolved"
+msgstr "{0} resolved"
+
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:502
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:336
+msgid "{0} suspended."
+msgstr "{0} suspended."
+
+#. placeholder {0}: tierStats.human_escalated
+#: src/components/admin-dashboard/OrganizationDetail.tsx:371
+msgid "{0} to human"
+msgstr "{0} to human"
+
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:485
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:330
+msgid "{0} updated."
+msgstr "{0} updated."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:492
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:331
+msgid "{name} deleted."
+msgstr "{name} deleted."
+
+#: src/components/landingPage/Footer.tsx:74
+msgid "© 2025 SupportNest. All rights reserved."
+msgstr "© 2025 SupportNest. All rights reserved."
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:238
 msgid "↑ 0.3 this month"
 msgstr "↑ 0.3 this month"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:199
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:220
 msgid "↑ 12% this week"
 msgstr "↑ 12% this week"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:205
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:226
 msgid "↑ 3% vs last week"
 msgstr "↑ 3% vs last week"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:211
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:232
 msgid "↓ 0.2s improvement"
 msgstr "↓ 0.2s improvement"
 
 #. placeholder {0}: processing > 1 ? "s" : ""
 #: src/features/knowledgebase/ProcessingNotice.tsx:29
-msgid "<0>{processing}</0> document{0} being processed by the AI pipeline. This "
-"page updates automatically."
-msgstr "<0>{processing}</0> document{0} being processed by the AI pipeline. "
-"This page updates automatically."
+msgid "<0>{processing}</0> document{0} being processed by the AI pipeline. This page updates automatically."
+msgstr "<0>{processing}</0> document{0} being processed by the AI pipeline. This page updates automatically."
 
-#: src/components/Navbar.tsx:56
+#: src/components/Profile/Passwordsection.tsx:155
+msgid "✓ Password updated successfully."
+msgstr "✓ Password updated successfully."
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:238
+msgid "30 Days"
+msgstr "30 Days"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:238
+msgid "7 Days"
+msgstr "7 Days"
+
+#: src/components/landingPage/Footer.tsx:15
+#: src/components/landingPage/Footer.tsx:21
+#: src/components/Navbar.tsx:68
+#: src/components/Navbar.tsx:187
 msgid "About"
 msgstr "About"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:142
-#: src/components/ui/index.tsx:236
+#: src/components/landingPage/About.tsx:80
+msgid "About SupportNest"
+msgstr "About SupportNest"
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:346
+msgid "Access Denied"
+msgstr "Access Denied"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:166
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:279
+#: src/components/landingPage/Contact.tsx:209
+msgid "Acme Corp"
+msgstr "Acme Corp"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:185
+#~ msgid "acme-corp"
+#~ msgstr "acme-corp"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:509
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:522
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:339
+msgid "Action failed."
+msgstr "Action failed."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:656
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:316
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:59
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:399
+msgid "Actions"
+msgstr "Actions"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:739
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:422
+#: src/components/admin-dashboard/OrganizationDetail.tsx:257
+msgid "Activate"
+msgstr "Activate"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:725
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:421
+msgid "Activate organization"
+msgstr "Activate organization"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:74
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:532
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:195
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:292
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:64
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:376
+#: src/components/admin-dashboard/OrganizationDetail.tsx:191
+#: src/components/ui/index.tsx:246
 msgid "Active"
 msgstr "Active"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:331
+msgid "Active / Open"
+msgstr "Active / Open"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:576
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:158
+msgid "Active Organizations"
+msgstr "Active Organizations"
 
 #: src/features/knowledgebase/DocumentList.tsx:73
 msgid "Added"
 msgstr "Added"
 
-#: src/components/sidebar.tsx:199
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:171
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:131
+msgid "Admin email"
+msgstr "Admin email"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:177
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:136
+msgid "Admin password"
+msgstr "Admin password"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:173
+#~ msgid "admin@acme.com"
+#~ msgstr "admin@acme.com"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:303
+msgid "ADMINISTRATOR EMAIL"
+msgstr "ADMINISTRATOR EMAIL"
+
+#: src/components/landingPage/Pipeline.tsx:42
+msgid "Agent Handoff"
+msgstr "Agent Handoff"
+
+#: src/components/landingPage/About.tsx:58
+msgid "Agent wellbeing"
+msgstr "Agent wellbeing"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:349
+msgid "AI & Human Performance by Tier"
+msgstr "AI & Human Performance by Tier"
+
+#: src/components/landingPage/About.tsx:34
+msgid "AI availability"
+msgstr "AI availability"
+
+#: src/components/landingPage/About.tsx:49
+msgid "AI handles volume, humans handle nuance. Our pipeline knows exactly when to switch."
+msgstr "AI handles volume, humans handle nuance. Our pipeline knows exactly when to switch."
+
+#: src/components/landingPage/Pipeline.tsx:26
+msgid "AI Instant Answer"
+msgstr "AI Instant Answer"
+
+#: src/components/sidebar.tsx:235
 msgid "AI Mode"
 msgstr "AI Mode"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:203
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:224
 msgid "AI Resolution Rate"
 msgstr "AI Resolution Rate"
 
-#: src/components/landingPage/Hero.tsx:37
+#: src/components/landingPage/Pipeline.tsx:34
+msgid "AI Troubleshooter"
+msgstr "AI Troubleshooter"
+
+#: src/components/landingPage/About.tsx:48
+msgid "AI with guardrails"
+msgstr "AI with guardrails"
+
+#: src/components/landingPage/Hero.tsx:44
 msgid "AI-Powered Customer Support Platform"
 msgstr "AI-Powered Customer Support Platform"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:18
-#: src/components/sidebar.tsx:26
+#: src/components/landingPage/Footer.tsx:38
+msgid "AI-powered customer support that resolves 80% of tickets instantly, 24/7."
+msgstr "AI-powered customer support that resolves 80% of tickets instantly, 24/7."
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:375
+msgid "All"
+msgstr "All"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:531
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:291
+msgid "All Status"
+msgstr "All Status"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:569
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:150
+msgid "All Systems Operational"
+msgstr "All Systems Operational"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:211
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:19
+#: src/components/sidebar.tsx:27
 msgid "Analytics"
 msgstr "Analytics"
 
@@ -74,62 +260,305 @@ msgstr "Annual"
 #~ msgid "API & Widget"
 #~ msgstr "API & Widget"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:184
+#: src/components/ProfilePage.tsx:65
+msgid "API Keys"
+msgstr "API Keys"
+
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:18
+#: src/components/sidebar.tsx:42
+msgid "API Tools"
+msgstr "API Tools"
+
+#. placeholder {0}: org.name
+#: src/components/admin-dashboard/OrganizationDetail.tsx:276
+msgid "Are you sure you want to schedule {0} for deletion? It will be permanently removed in 30 minutes."
+msgstr "Are you sure you want to schedule {0} for deletion? It will be permanently removed in 30 minutes."
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:395
+msgid "ASSIGNED"
+msgstr "ASSIGNED"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:205
 msgid "At a glance"
 msgstr "At a glance"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:209
+#: src/components/landingPage/Hero.tsx:18
+msgid "Average CSAT score"
+msgstr "Average CSAT score"
+
+#. placeholder {0}: fmt(4)
+#: src/components/landingPage/Contact.tsx:155
+msgid "Average reply time: under {0} hours"
+msgstr "Average reply time: under {0} hours"
+
+#: src/components/landingPage/Hero.tsx:17
+msgid "Avg AI response time"
+msgstr "Avg AI response time"
+
+#: src/components/landingPage/About.tsx:28
+msgid "Avg auto-resolution"
+msgstr "Avg auto-resolution"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:230
 msgid "Avg Response Time"
 msgstr "Avg Response Time"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:263
+msgid "Avg. Resolution Time"
+msgstr "Avg. Resolution Time"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:324
+msgid "Based on all rated conversations in this period"
+msgstr "Based on all rated conversations in this period"
+
+#: src/components/landingPage/About.tsx:86
+msgid "Built by engineers who hated bad support"
+msgstr "Built by engineers who hated bad support"
 
 #: src/components/landingPage/Features.tsx:66
 msgid "Built for modern support teams"
 msgstr "Built for modern support teams"
 
-#: src/components/AppControls.tsx:25
+#: src/components/landingPage/Footer.tsx:77
+msgid "Built with ❤️ for support teams worldwide"
+msgstr "Built with ❤️ for support teams worldwide"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:204
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:301
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:364
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:153
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:224
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:265
+#: src/components/Profile/Dangerzone.tsx:144
+msgid "Cancel"
+msgstr "Cancel"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:718
+msgid "Cancel Delete"
+msgstr "Cancel Delete"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:704
+msgid "Cancel scheduled deletion"
+msgstr "Cancel scheduled deletion"
+
+#: src/components/landingPage/Footer.tsx:21
+msgid "Careers"
+msgstr "Careers"
+
+#: src/components/AppControls.tsx:56
 msgid "Change language"
 msgstr "Change language"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:144
-#: src/components/ui/index.tsx:248
+#: src/components/Profile/Passwordsection.tsx:81
+msgid "Change Password"
+msgstr "Change Password"
+
+#: src/components/landingPage/Footer.tsx:20
+msgid "Changelog"
+msgstr "Changelog"
+
+#: src/components/landingPage/Pipeline.tsx:21
+msgid "Classifies intent and routes to the right agent instantly."
+msgstr "Classifies intent and routes to the right agent instantly."
+
+#: src/components/AppControls.tsx:29
+msgid "Close controls"
+msgstr "Close controls"
+
+#: src/components/Navbar.tsx:125
+msgid "Close menu"
+msgstr "Close menu"
+
+#: src/components/ui/index.tsx:258
 msgid "Closed"
 msgstr "Closed"
 
-#: src/components/Navbar.tsx:59
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:56
+#: src/components/landingPage/Contact.tsx:204
+#: src/components/landingPage/Footer.tsx:21
+msgid "Company"
+msgstr "Company"
+
+#: src/components/landingPage/Pipeline.tsx:37
+msgid "Complex multi-step reasoning for edge cases and errors."
+msgstr "Complex multi-step reasoning for edge cases and errors."
+
+#: src/components/Profile/Passwordsection.tsx:123
+msgid "Confirm new password"
+msgstr "Confirm new password"
+
+#: src/components/landingPage/Footer.tsx:16
+#: src/components/landingPage/Footer.tsx:21
+#: src/components/Navbar.tsx:71
+#: src/components/Navbar.tsx:194
 msgid "Contact"
 msgstr "Contact"
 
-#: src/components/pricing/PricingCard.tsx:157
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:284
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:212
+msgid "Contact email"
+msgstr "Contact email"
+
+#: src/components/pricing/PricingCard.tsx:166
 msgid "Contact sales"
 msgstr "Contact sales"
 
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:45
+#: src/components/sidebar.tsx:47
+msgid "Contact Submissions"
+msgstr "Contact Submissions"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:286
+#~ msgid "contact@acme.com"
+#~ msgstr "contact@acme.com"
+
 #: src/app/[locale]/(auth)/login/page.tsx:295
-msgid "Continue with Google"
-msgstr "Continue with Google"
+#~ msgid "Continue with Google"
+#~ msgstr "Continue with Google"
 
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:14
-#: src/components/sidebar.tsx:18
+#: src/components/sidebar.tsx:19
 msgid "Conversations"
 msgstr "Conversations"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:215
+#: src/components/landingPage/About.tsx:22
+msgid "Core team members"
+msgstr "Core team members"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:153
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:120
+msgid "Create a new tenant and admin user."
+msgstr "Create a new tenant and admin user."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:208
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:156
+msgid "Create organization"
+msgstr "Create organization"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:644
+msgid "Create your first organization to get started."
+msgstr "Create your first organization to get started."
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:398
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:417
+msgid "Created"
+msgstr "Created"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:268
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:236
 msgid "CSAT Score"
 msgstr "CSAT Score"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:251
+#: src/components/landingPage/Features.tsx:31
+msgid "CSAT, resolution rates, escalation trends — all live on your dashboard."
+msgstr "CSAT, resolution rates, escalation trends — all live on your dashboard."
+
+#: src/components/Profile/Passwordsection.tsx:85
+msgid "Current password"
+msgstr "Current password"
+
+#: src/components/Profile/Passwordsection.tsx:45
+msgid "Current password is required."
+msgstr "Current password is required."
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:309
+msgid "CURRENT SUBSCRIPTION"
+msgstr "CURRENT SUBSCRIPTION"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:281
 msgid "Customer"
 msgstr "Customer"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:45
-#: src/components/Navbar.tsx:65
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:306
+msgid "Customer Satisfaction"
+msgstr "Customer Satisfaction"
+
+#: src/components/landingPage/Customerstories.tsx:51
+msgid "Customer stories"
+msgstr "Customer stories"
+
+#: src/components/landingPage/Footer.tsx:14
+#: src/components/landingPage/Footer.tsx:21
+msgid "Customer Stories"
+msgstr "Customer Stories"
+
+#: src/components/landingPage/Customerstories.tsx:36
+msgid "CX Manager, Nexus AI"
+msgstr "CX Manager, Nexus AI"
+
+#: src/components/Profile/Dangerzone.tsx:54
+msgid "Danger zone"
+msgstr "Danger zone"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:134
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:48
+#: src/components/Navbar.tsx:77
+#: src/components/Navbar.tsx:204
 msgid "Dashboard"
 msgstr "Dashboard"
+
+#: src/components/landingPage/About.tsx:53
+msgid "Data isolation"
+msgstr "Data isolation"
+
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:58
+msgid "Date"
+msgstr "Date"
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:267
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:425
+msgid "Delete"
+msgstr "Delete"
+
+#: src/components/Profile/Dangerzone.tsx:161
+msgid "Delete account"
+msgstr "Delete account"
+
+#: src/components/Profile/Dangerzone.tsx:79
+msgid "Delete my account"
+msgstr "Delete my account"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:286
+msgid "Delete Org"
+msgstr "Delete Org"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:750
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:425
+msgid "Delete organization"
+msgstr "Delete organization"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:338
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:254
+msgid "Delete organization?"
+msgstr "Delete organization?"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:377
+msgid "Delete Permanently"
+msgstr "Delete Permanently"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:62
+msgid "Deleting soon"
+msgstr "Deleting soon"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:377
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:267
+msgid "Deleting..."
+msgstr "Deleting..."
+
+#: src/components/Profile/Dangerzone.tsx:161
+msgid "Deleting…"
+msgstr "Deleting…"
+
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:519
+msgid "Deletion of {0} cancelled."
+msgstr "Deletion of {0} cancelled."
 
 #: src/features/knowledgebase/DocumentList.tsx:69
 msgid "Document"
 msgstr "Document"
 
-#: src/features/knowledgebase/UploadPdfPanel.tsx:210
+#: src/features/knowledgebase/UploadDocumentPanel.tsx:238
 msgid "Document Title"
 msgstr "Document Title"
 
@@ -137,30 +566,94 @@ msgstr "Document Title"
 msgid "Documents your AI pipeline uses to answer customer questions."
 msgstr "Documents your AI pipeline uses to answer customer questions."
 
-#: src/app/[locale]/(auth)/login/page.tsx:430
+#: src/app/[locale]/(auth)/login/page.tsx:437
 msgid "Don't have an account?"
 msgstr "Don't have an account?"
 
-#: src/features/knowledgebase/UploadPdfPanel.tsx:190
-msgid "Drop PDF here or click to browse"
-msgstr "Drop PDF here or click to browse"
+#: src/features/knowledgebase/UploadDocumentPanel.tsx:218
+msgid "Drop file here or click to browse"
+msgstr "Drop file here or click to browse"
 
-#: src/app/[locale]/(auth)/login/page.tsx:329
+#: src/features/knowledgebase/UploadPdfPanel.tsx:190
+#~ msgid "Drop PDF here or click to browse"
+#~ msgstr "Drop PDF here or click to browse"
+
+#: src/components/landingPage/Features.tsx:43
+msgid "Each business is fully isolated — own data, knowledge base, and widget config."
+msgstr "Each business is fully isolated — own data, knowledge base, and widget config."
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:424
+msgid "Edit"
+msgstr "Edit"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:743
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:424
+msgid "Edit details"
+msgstr "Edit details"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:265
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:200
+msgid "Edit organization"
+msgstr "Edit organization"
+
+#: src/app/[locale]/(auth)/login/page.tsx:335
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:55
+#: src/components/Profile/Profilesection.tsx:161
 msgid "Email"
 msgstr "Email"
 
-#: src/app/[locale]/(auth)/login/page.tsx:153
+#: src/components/admin-dashboard/OrganizationDetail.tsx:393
+msgid "EMAIL ADDRESS"
+msgstr "EMAIL ADDRESS"
+
+#: src/app/[locale]/(auth)/login/page.tsx:162
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:110
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:229
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:90
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:175
 msgid "Email is required."
 msgstr "Email is required."
 
-#: src/app/[locale]/(auth)/login/page.tsx:154
+#: src/components/landingPage/Contact.tsx:19
+msgid "Email us"
+msgstr "Email us"
+
+#: src/components/landingPage/Features.tsx:24
+msgid "Embeddable Widget"
+msgstr "Embeddable Widget"
+
+#: src/app/[locale]/(auth)/login/page.tsx:163
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:111
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:230
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:91
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:176
 msgid "Enter a valid email."
 msgstr "Enter a valid email."
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:143
-#: src/components/ui/index.tsx:242
+#: src/components/ui/index.tsx:252
 msgid "Escalated"
 msgstr "Escalated"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:588
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:162
+msgid "Escalated Tickets"
+msgstr "Escalated Tickets"
+
+#: src/components/landingPage/Features.tsx:37
+msgid "Escalated tickets arrive with full conversation context. Agents never start cold."
+msgstr "Escalated tickets arrive with full conversation context. Agents never start cold."
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:258
+msgid "Escalation Rate"
+msgstr "Escalation Rate"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:335
+msgid "Escalations"
+msgstr "Escalations"
+
+#: src/components/landingPage/About.tsx:54
+msgid "Every tenant is completely isolated. Your customer data never touches another business."
+msgstr "Every tenant is completely isolated. Your customer data never touches another business."
 
 #: src/components/landingPage/Features.tsx:57
 msgid "Everything included"
@@ -170,158 +663,661 @@ msgstr "Everything included"
 msgid "Failed"
 msgstr "Failed"
 
-#: src/app/[locale]/(auth)/login/page.tsx:358
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:134
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:108
+msgid "Failed to create organization."
+msgstr "Failed to create organization."
+
+#: src/components/Profile/Dangerzone.tsx:41
+msgid "Failed to delete account."
+msgstr "Failed to delete account."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:326
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:244
+msgid "Failed to delete organization."
+msgstr "Failed to delete organization."
+
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:31
+msgid "Failed to load"
+msgstr "Failed to load"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:189
+msgid "Failed to load analytics data."
+msgstr "Failed to load analytics data."
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:128
+msgid "Failed to load details"
+msgstr "Failed to load details"
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:321
+msgid "Failed to load organizations."
+msgstr "Failed to load organizations."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:457
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:118
+msgid "Failed to load overview stats"
+msgstr "Failed to load overview stats"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:247
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:189
+msgid "Failed to update organization."
+msgstr "Failed to update organization."
+
+#: src/components/Profile/Passwordsection.tsx:38
+msgid "Fair"
+msgstr "Fair"
+
+#: src/components/landingPage/Footer.tsx:11
+#: src/components/landingPage/Footer.tsx:20
+msgid "Features"
+msgstr "Features"
+
+#: src/components/Profile/Profilesection.tsx:147
+#: src/components/Profile/Profilesection.tsx:150
+msgid "First name"
+msgstr "First name"
+
+#: src/app/[locale]/(auth)/login/page.tsx:365
 msgid "Forgot your password?"
 msgstr "Forgot your password?"
 
-#: src/components/landingPage/Features.tsx:69
-msgid "From AI pipeline to human inbox — the full support workflow in one "
-"place."
-msgstr "From AI pipeline to human inbox — the full support workflow in one "
-"place."
+#: src/components/landingPage/About.tsx:16
+msgid "Founded"
+msgstr "Founded"
 
-#: src/components/Navbar.tsx:92
+#: src/components/landingPage/Customerstories.tsx:29
+msgid "Founder, CloudBase"
+msgstr "Founder, CloudBase"
+
+#. placeholder {0}: fmt(80)
+#: src/components/landingPage/Pipeline.tsx:68
+msgid "Four layers of intelligence — each one smarter than the last. {0}% of tickets never reach a human."
+msgstr "Four layers of intelligence — each one smarter than the last. {0}% of tickets never reach a human."
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:313
+msgid "Free Trial"
+msgstr "Free Trial"
+
+#: src/components/landingPage/Features.tsx:69
+msgid "From AI pipeline to human inbox — the full support workflow in one place."
+msgstr "From AI pipeline to human inbox — the full support workflow in one place."
+
+#: src/components/landingPage/Pipeline.tsx:45
+msgid "Full context passed to your agent. Never start from scratch."
+msgstr "Full context passed to your agent. Never start from scratch."
+
+#: src/components/landingPage/Contact.tsx:90
+msgid "Get in touch"
+msgstr "Get in touch"
+
+#: src/components/Navbar.tsx:104
+#: src/components/Navbar.tsx:120
 msgid "Get Started"
 msgstr "Get Started"
 
-#: src/components/pricing/PricingCard.tsx:158
+#: src/components/pricing/PricingCard.tsx:167
 msgid "Get started →"
 msgstr "Get started →"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:138
+#: src/components/Profile/Passwordsection.tsx:38
+msgid "Good"
+msgstr "Good"
+
+#: src/app/[locale]/(auth)/login/page.tsx:299
+msgid "Google sign-in failed."
+msgstr "Google sign-in failed."
+
+#: src/components/landingPage/Customerstories.tsx:22
+msgid "Head of Support, TechFlow"
+msgstr "Head of Support, TechFlow"
+
+#: src/components/landingPage/Pipeline.tsx:59
+msgid "How it works"
+msgstr "How it works"
+
+#: src/components/landingPage/Footer.tsx:12
+#: src/components/landingPage/Footer.tsx:20
+msgid "How It Works"
+msgstr "How It Works"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:79
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:153
 msgid "Human"
 msgstr "Human"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:87
+#: src/components/landingPage/Pipeline.tsx:41
+msgid "HUMAN"
+msgstr "HUMAN"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:98
 msgid "Human Agent"
 msgstr "Human Agent"
 
-#: src/components/landingPage/Hero.tsx:47
+#: src/components/landingPage/Features.tsx:36
+msgid "Human Agent Inbox"
+msgstr "Human Agent Inbox"
+
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:42
+msgid "Inbound Leads"
+msgstr "Inbound Leads"
+
+#: src/components/landingPage/Features.tsx:12
+msgid "Instant AI Resolution"
+msgstr "Instant AI Resolution"
+
+#: src/components/landingPage/Hero.tsx:60
 msgid "instantly with AI agents"
 msgstr "instantly with AI agents"
 
-#: src/app/[locale]/(auth)/login/page.tsx:174
+#: src/components/landingPage/Customerstories.tsx:16
+msgid "Integrations per day"
+msgstr "Integrations per day"
+
+#: src/components/landingPage/Pipeline.tsx:18
+msgid "Intent Detection"
+msgstr "Intent Detection"
+
+#: src/components/landingPage/Contact.tsx:122
+msgid "Interested in SupportNest for your team? We'll walk you through a live demo and tailor a plan for your use case."
+msgstr "Interested in SupportNest for your team? We'll walk you through a live demo and tailor a plan for your use case."
+
+#: src/app/[locale]/(auth)/login/page.tsx:207
+#: src/app/[locale]/(auth)/login/page.tsx:293
 msgid "Invalid email or password."
 msgstr "Invalid email or password."
 
+#: src/components/Profile/Dangerzone.tsx:57
+msgid "Irreversible actions. Proceed with caution."
+msgstr "Irreversible actions. Proceed with caution."
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:196
+msgid "Joined"
+msgstr "Joined"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:655
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:315
+msgid "Joined Date"
+msgstr "Joined Date"
+
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:17
-#: src/components/sidebar.tsx:22
+#: src/components/sidebar.tsx:23
 #: src/features/knowledgebase/Header.tsx:35
 msgid "Knowledge Base"
 msgstr "Knowledge Base"
 
-#: src/components/pricing/PricingCard.tsx:321
+#: src/components/landingPage/Features.tsx:18
+msgid "Knowledge Base RAG"
+msgstr "Knowledge Base RAG"
+
+#: src/components/Profile/Profilesection.tsx:154
+#: src/components/Profile/Profilesection.tsx:157
+msgid "Last name"
+msgstr "Last name"
+
+#: src/components/landingPage/Footer.tsx:22
+msgid "Legal"
+msgstr "Legal"
+
+#: src/components/landingPage/Contact.tsx:31
+msgid "LinkedIn"
+msgstr "LinkedIn"
+
+#: src/components/pricing/PricingCard.tsx:340
 msgid "Loading plans…"
 msgstr "Loading plans…"
 
-#: src/components/Navbar.tsx:78
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:35
+msgid "Loading..."
+msgstr "Loading..."
+
+#: src/components/Navbar.tsx:90
+#: src/components/Navbar.tsx:221
 msgid "Log in"
 msgstr "Log in"
 
-#: src/components/Navbar.tsx:72
-#: src/components/sidebar.tsx:270
-#: src/components/sidebar.tsx:290
+#: src/components/Navbar.tsx:84
+#: src/components/Navbar.tsx:211
+#: src/components/sidebar.tsx:306
+#: src/components/sidebar.tsx:326
 #: src/components/topbar.tsx:113
 msgid "Logout"
 msgstr "Logout"
 
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:115
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:95
+msgid "Lowercase letters, numbers, and hyphens only."
+msgstr "Lowercase letters, numbers, and hyphens only."
+
+#: src/components/ProfilePage.tsx:45
+msgid "Manage your account details and widget authentication keys."
+msgstr "Manage your account details and widget authentication keys."
+
+#: src/components/ProfilePage.tsx:44
+msgid "Manage your account details."
+msgstr "Manage your account details."
+
 #: src/features/knowledgebase/UploadPdfPanel.tsx:105
-msgid "Max 20 MB · PDF only"
-msgstr "Max 20 MB · PDF only"
+#~ msgid "Max 20 MB · PDF only"
+#~ msgstr "Max 20 MB · PDF only"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:392
+msgid "MEMBER"
+msgstr "MEMBER"
+
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:57
+msgid "Message"
+msgstr "Message"
+
+#: src/components/landingPage/Contact.tsx:216
+msgid "Message *"
+msgstr "Message *"
+
+#: src/components/landingPage/Contact.tsx:168
+msgid "Message sent!"
+msgstr "Message sent!"
+
+#: src/components/Profile/Passwordsection.tsx:98
+msgid "Min. 8 characters"
+msgstr "Min. 8 characters"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:113
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:93
+msgid "Minimum 6 characters."
+msgstr "Minimum 6 characters."
+
+#: src/components/landingPage/Customerstories.tsx:15
+msgid "Minutes to set up"
+msgstr "Minutes to set up"
+
+#: src/components/landingPage/Contact.tsx:184
+msgid "Mohamed Rashad"
+msgstr "Mohamed Rashad"
 
 #: src/components/pricing/PricingHero.tsx:44
 msgid "Monthly"
 msgstr "Monthly"
 
+#: src/components/landingPage/Features.tsx:42
+msgid "Multi-tenant Ready"
+msgstr "Multi-tenant Ready"
+
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:54
+msgid "Name"
+msgstr "Name"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:152
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:561
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:119
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:364
+msgid "New organization"
+msgstr "New organization"
+
+#: src/components/Profile/Passwordsection.tsx:94
+msgid "New password"
+msgstr "New password"
+
+#: src/components/Profile/Passwordsection.tsx:49
+msgid "New password must be at least 8 characters."
+msgstr "New password must be at least 8 characters."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:792
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:435
+msgid "Next"
+msgstr "Next"
+
 #: src/features/knowledgebase/DocumentList.tsx:42
 msgid "No documents yet"
 msgstr "No documents yet"
 
-#: src/components/landingPage/Hero.tsx:46
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:640
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:390
+msgid "No organizations found"
+msgstr "No organizations found"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:643
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:326
+msgid "No organizations match your search."
+msgstr "No organizations match your search."
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:377
+msgid "No performance data currently available for this organization."
+msgstr "No performance data currently available for this organization."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:81
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:201
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:70
+msgid "No plan"
+msgstr "No plan"
+
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:65
+msgid "No submissions yet."
+msgstr "No submissions yet."
+
+#: src/components/Profile/Profilesection.tsx:126
+msgid "Not Verified"
+msgstr "Not Verified"
+
+#: src/components/landingPage/Hero.tsx:58
 msgid "of tickets"
 msgstr "of tickets"
 
-#: src/app/[locale]/(auth)/login/page.tsx:301
+#: src/components/landingPage/Features.tsx:25
+msgid "One script tag. Fully branded, mobile-ready live chat on any website."
+msgstr "One script tag. Fully branded, mobile-ready live chat on any website."
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:139
+msgid "Oops! Something went wrong"
+msgstr "Oops! Something went wrong"
+
+#: src/components/AppControls.tsx:29
+msgid "Open controls"
+msgstr "Open controls"
+
+#: src/components/Navbar.tsx:125
+msgid "Open menu"
+msgstr "Open menu"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:322
+msgid "Operational Metrics"
+msgstr "Operational Metrics"
+
+#: src/app/[locale]/(auth)/login/page.tsx:307
 msgid "or"
 msgstr "or"
 
-#: src/components/sidebar.tsx:11
+#: src/components/sidebar.tsx:12
 msgid "Org Admin"
 msgstr "Org Admin"
 
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:651
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:312
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:395
+msgid "Organization"
+msgstr "Organization"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:298
+msgid "Organization Details"
+msgstr "Organization Details"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:165
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:278
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:126
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:207
+#: src/components/Profile/Dangerzone.tsx:107
+msgid "Organization name"
+msgstr "Organization name"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:109
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:228
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:89
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:174
+msgid "Organization name is required."
+msgstr "Organization name is required."
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:141
+msgid "Organization not found"
+msgstr "Organization not found"
+
+#. placeholder {0}: org.users.length
+#: src/components/admin-dashboard/OrganizationDetail.tsx:386
+msgid "Organization Team & Access ({0})"
+msgstr "Organization Team & Access ({0})"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:556
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:496
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:21
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:360
+#: src/components/sidebar.tsx:36
+msgid "Organizations"
+msgstr "Organizations"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:482
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:13
-#: src/components/sidebar.tsx:17
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:20
+#: src/components/sidebar.tsx:18
+#: src/components/sidebar.tsx:30
 msgid "Overview"
 msgstr "Overview"
 
-#: src/app/[locale]/(auth)/login/page.tsx:339
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:785
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:432
+msgid "Page {page} of {totalPages}"
+msgstr "Page {page} of {totalPages}"
+
+#: src/app/[locale]/(auth)/login/page.tsx:345
 msgid "Password"
 msgstr "Password"
 
-#: src/app/[locale]/(auth)/login/page.tsx:155
+#: src/app/[locale]/(auth)/login/page.tsx:164
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:112
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:92
 msgid "Password is required."
 msgstr "Password is required."
 
-#: src/features/knowledgebase/UploadPdfPanel.tsx:193
-msgid "PDF files up to 20 MB"
-msgstr "PDF files up to 20 MB"
+#: src/components/Profile/Passwordsection.tsx:53
+msgid "Passwords do not match."
+msgstr "Passwords do not match."
 
-#: src/components/Navbar.tsx:53
+#: src/components/ProfilePage.tsx:83
+msgid "Paste this in the <head> of your website."
+msgstr "Paste this in the <head> of your website."
+
+#: src/features/knowledgebase/UploadPdfPanel.tsx:193
+#~ msgid "PDF files up to 20 MB"
+#~ msgstr "PDF files up to 20 MB"
+
+#: src/features/knowledgebase/UploadDocumentPanel.tsx:133
+msgid "PDF, CSV, or DOCX · Max 10 MB"
+msgstr "PDF, CSV, or DOCX · Max 10 MB"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:652
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:313
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:417
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:396
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:409
+msgid "Plan"
+msgstr "Plan"
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:359
+msgid "Platform Administration"
+msgstr "Platform Administration"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:568
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:145
+msgid "Platform Status"
+msgstr "Platform Status"
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:434
+msgid "Prev"
+msgstr "Prev"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:782
+msgid "Previous"
+msgstr "Previous"
+
+#: src/components/landingPage/Footer.tsx:13
+#: src/components/landingPage/Footer.tsx:20
+#: src/components/Navbar.tsx:65
+#: src/components/Navbar.tsx:180
 #: src/components/pricing/PricingHero.tsx:17
 msgid "Pricing"
 msgstr "Pricing"
+
+#: src/components/landingPage/Pipeline.tsx:92
+msgid "PRIMARY AI"
+msgstr "PRIMARY AI"
+
+#: src/components/landingPage/Footer.tsx:22
+msgid "Privacy Policy"
+msgstr "Privacy Policy"
 
 #: src/features/knowledgebase/Header.tsx:18
 msgid "Processing"
 msgstr "Processing"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:20
-#: src/components/sidebar.tsx:29
+#: src/components/landingPage/Footer.tsx:20
+msgid "Product"
+msgstr "Product"
+
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:23
+#: src/components/ProfilePage.tsx:40
+#: src/components/ProfilePage.tsx:61
+#: src/components/sidebar.tsx:43
 msgid "Profile"
 msgstr "Profile"
+
+#: src/components/ProfilePage.tsx:40
+msgid "Profile & API Keys"
+msgstr "Profile & API Keys"
+
+#: src/components/Profile/Profilesection.tsx:53
+#: src/components/Profile/Profilesection.tsx:66
+msgid "Profile Information"
+msgstr "Profile Information"
+
+#. placeholder {0}: fmt(24)
+#: src/components/landingPage/Contact.tsx:99
+msgid "Questions, demos, or custom enterprise plans — we reply within {0} hours."
+msgstr "Questions, demos, or custom enterprise plans — we reply within {0} hours."
+
+#: src/components/landingPage/Pipeline.tsx:29
+msgid "RAG-powered answers from your knowledge base in under 2s."
+msgstr "RAG-powered answers from your knowledge base in under 2s."
 
 #: src/features/knowledgebase/Header.tsx:17
 msgid "Ready"
 msgstr "Ready"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:244
+#: src/components/landingPage/Features.tsx:30
+msgid "Real-time Analytics"
+msgstr "Real-time Analytics"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:269
 msgid "Recent Conversations"
 msgstr "Recent Conversations"
+
+#: src/components/Profile/Passwordsection.tsx:127
+msgid "Repeat password"
+msgstr "Repeat password"
+
+#: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:96
+msgid "Reply"
+msgstr "Reply"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:101
+msgid "Resolution by Tier"
+msgstr "Resolution by Tier"
 
 #: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:13
 #~ msgid "Resolution rates CSAT trends response times and tier breakdowns."
 #~ msgstr "Resolution rates CSAT trends response times and tier breakdowns."
 
-#: src/components/landingPage/Hero.tsx:45
+#: src/components/landingPage/Hero.tsx:56
 msgid "Resolve"
 msgstr "Resolve"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:339
+msgid "Resolved"
+msgstr "Resolved"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:228
+msgid "Restore Organization"
+msgstr "Restore Organization"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:152
+msgid "Return to Dashboard"
+msgstr "Return to Dashboard"
+
+#: src/components/admin-dashboard/OrganizationDetail.tsx:394
+msgid "ROLE"
+msgstr "ROLE"
+
+#: src/components/landingPage/Pipeline.tsx:17
+msgid "ROUTER"
+msgstr "ROUTER"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:305
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:227
+#: src/components/Profile/Profilesection.tsx:190
+msgid "Save changes"
+msgstr "Save changes"
+
+#: src/components/Profile/Profilesection.tsx:187
+msgid "Saved"
+msgstr "Saved"
 
 #: src/features/knowledgebase/DocumentFilter.tsx:27
 msgid "Search documents..."
 msgstr "Search documents..."
 
-#: src/components/landingPage/Hero.tsx:74
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:607
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:257
+msgid "Search organizations by name or slug..."
+msgstr "Search organizations by name or slug..."
+
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:371
+msgid "Search organizations…"
+msgstr "Search organizations…"
+
+#: src/components/landingPage/Footer.tsx:22
+msgid "Security"
+msgstr "Security"
+
+#: src/components/landingPage/Hero.tsx:88
 msgid "See How It Works"
 msgstr "See How It Works"
 
-#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:19
-#: src/components/sidebar.tsx:28
+#: src/app/[locale]/(auth)/login/page.tsx:451
+msgid "See Plans"
+msgstr "See Plans"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:292
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:219
+msgid "Select a plan"
+msgstr "Select a plan"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:195
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:148
+msgid "Select a plan (optional)"
+msgstr "Select a plan (optional)"
+
+#: src/components/landingPage/Contact.tsx:237
+msgid "Send message"
+msgstr "Send message"
+
+#: src/components/landingPage/Contact.tsx:233
+msgid "Sending…"
+msgstr "Sending…"
+
+#: src/app/[locale]/(dashboard)/dashboard/layout.tsx:22
+#: src/components/sidebar.tsx:41
 msgid "Settings"
 msgstr "Settings"
 
-#: src/app/[locale]/(auth)/login/page.tsx:417
+#: src/components/landingPage/Customerstories.tsx:27
+msgid "Setup took 20 minutes. We uploaded our FAQ docs, embedded the widget, and the AI was answering customer questions that same day."
+msgstr "Setup took 20 minutes. We uploaded our FAQ docs, embedded the widget, and the AI was answering customer questions that same day."
+
+#. placeholder {0}: (meta.page - 1) * meta.limit + 1
+#. placeholder {1}: Math.min(meta.page * meta.limit, meta.total)
+#. placeholder {2}: meta.total
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:774
+msgid "Showing {0}–{1} of {2}"
+msgstr "Showing {0}–{1} of {2}"
+
+#: src/app/[locale]/(auth)/login/page.tsx:424
 msgid "Sign in"
 msgstr "Sign in"
 
-#: src/app/[locale]/(auth)/login/page.tsx:246
+#: src/app/[locale]/(auth)/login/page.tsx:267
 msgid "Sign in to your account"
 msgstr "Sign in to your account"
 
 #: src/app/[locale]/(auth)/login/page.tsx:444
-msgid "Sign Up"
-msgstr "Sign Up"
+#~ msgid "Sign Up"
+#~ msgstr "Sign Up"
 
-#: src/app/[locale]/(auth)/login/page.tsx:414
+#: src/app/[locale]/(auth)/login/page.tsx:421
 msgid "Signing in…"
 msgstr "Signing in…"
 
@@ -337,11 +1333,25 @@ msgstr "Simple, transparent pricing"
 msgid "Size / Info"
 msgstr "Size / Info"
 
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:183
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:141
+msgid "Slug"
+msgstr "Slug"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:114
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:94
+msgid "Slug is required."
+msgstr "Slug is required."
+
+#: src/components/landingPage/About.tsx:43
+msgid "Speed first"
+msgstr "Speed first"
+
 #: src/components/pricing/PricingHero.tsx:26
 msgid "Start for free. Upgrade when you need more."
 msgstr "Start for free. Upgrade when you need more."
 
-#: src/components/landingPage/Hero.tsx:66
+#: src/components/landingPage/Hero.tsx:81
 msgid "Start Free Trial"
 msgstr "Start Free Trial"
 
@@ -349,62 +1359,201 @@ msgstr "Start Free Trial"
 msgid "Start free. No credit card required."
 msgstr "Start free. No credit card required."
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:251
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:654
+msgid "Stats"
+msgstr "Stats"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:653
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:314
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:411
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:397
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:413
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:281
+#: src/components/landingPage/Footer.tsx:22
 #: src/features/knowledgebase/DocumentList.tsx:71
 msgid "Status"
 msgstr "Status"
 
-#: src/components/sidebar.tsx:13
+#. placeholder {0}: fmt(i + 1)
+#. placeholder {1}: tier.tag
+#: src/components/landingPage/Pipeline.tsx:102
+msgid "Step {0} · {1}"
+msgstr "Step {0} · {1}"
+
+#: src/components/Profile/Passwordsection.tsx:38
+msgid "Strong"
+msgstr "Strong"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:193
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:290
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:146
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:217
+msgid "Subscription Plan"
+msgstr "Subscription Plan"
+
+#: src/components/sidebar.tsx:14
 msgid "Super Admin"
 msgstr "Super Admin"
 
-#: src/components/sidebar.tsx:12
+#: src/components/sidebar.tsx:13
 msgid "Support Agent"
 msgstr "Support Agent"
 
-#: src/components/landingPage/Hero.tsx:54
-msgid "SupportNest deploys a hierarchy of specialized AI agents that handle "
-"customer inquiries, automate workflows, and escalate complex issues — "
-"24/7, with full context."
-msgstr "SupportNest deploys a hierarchy of specialized AI agents that handle "
-"customer inquiries, automate workflows, and escalate complex issues — "
-"24/7, with full context."
+#: src/components/landingPage/Hero.tsx:16
+msgid "Support cost reduction"
+msgstr "Support cost reduction"
+
+#: src/features/knowledgebase/UploadDocumentPanel.tsx:221
+msgid "Support for PDF, CSV, and DOCX"
+msgstr "Support for PDF, CSV, and DOCX"
+
+#: src/components/landingPage/Hero.tsx:68
+msgid "SupportNest deploys a hierarchy of specialized AI agents that handle customer inquiries, automate workflows, and escalate complex issues — 24/7, with full context."
+msgstr "SupportNest deploys a hierarchy of specialized AI agents that handle customer inquiries, automate workflows, and escalate complex issues — 24/7, with full context."
+
+#: src/components/landingPage/Customerstories.tsx:20
+msgid "SupportNest resolved 82% of our tickets automatically in the first week. Our agents now focus on what actually needs a human."
+msgstr "SupportNest resolved 82% of our tickets automatically in the first week. Our agents now focus on what actually needs a human."
+
+#: src/components/landingPage/About.tsx:89
+msgid "SupportNest was born out of a frustration every SaaS founder knows: customer support is the #1 cost center, yet the tools haven't changed in a decade. Tickets pile up, agents burn out, and customers churn after one bad experience."
+msgstr "SupportNest was born out of a frustration every SaaS founder knows: customer support is the #1 cost center, yet the tools haven't changed in a decade. Tickets pile up, agents burn out, and customers churn after one bad experience."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:739
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:422
+#: src/components/admin-dashboard/OrganizationDetail.tsx:257
+msgid "Suspend"
+msgstr "Suspend"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:725
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:421
+msgid "Suspend organization"
+msgstr "Suspend organization"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:74
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:533
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:195
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:293
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:64
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:377
+#: src/components/admin-dashboard/OrganizationDetail.tsx:191
+msgid "Suspended"
+msgstr "Suspended"
+
+#: src/components/landingPage/Contact.tsx:119
+msgid "Talk to sales"
+msgstr "Talk to sales"
 
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:15
-#: src/components/sidebar.tsx:25
+#: src/components/sidebar.tsx:26
 msgid "Team"
 msgstr "Team"
 
+#: src/components/landingPage/Customerstories.tsx:57
+msgid "Teams love SupportNest"
+msgstr "Teams love SupportNest"
+
+#: src/components/landingPage/Contact.tsx:221
+msgid "Tell us about your team size, current support setup, and what you're hoping to solve..."
+msgstr "Tell us about your team size, current support setup, and what you're hoping to solve..."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:553
+msgid "Tenant management"
+msgstr "Tenant management"
+
+#: src/components/landingPage/Footer.tsx:22
+msgid "Terms of Service"
+msgstr "Terms of Service"
+
+#: src/components/landingPage/Pipeline.tsx:65
+msgid "The AI agent pipeline"
+msgstr "The AI agent pipeline"
+
+#: src/components/landingPage/Customerstories.tsx:34
+msgid "The escalation flow is seamless. Agents get the full conversation and context — no more 'can you repeat your issue' moments."
+msgstr "The escalation flow is seamless. Agents get the full conversation and context — no more 'can you repeat your issue' moments."
+
+#: src/components/Profile/Dangerzone.tsx:84
+msgid "This cannot be undone. Type your full name (<0>{expectedFullName}</0>) and your organization's name (<1>{expectedorgName}</1>) to confirm."
+msgstr "This cannot be undone. Type your full name (<0>{expectedFullName}</0>) and your organization's name (<1>{expectedorgName}</1>) to confirm."
+
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:340
+msgid "This will permanently delete <0>{0}</0> and all associated data, including users, conversations, and settings. This action cannot be undone."
+msgstr "This will permanently delete <0>{0}</0> and all associated data, including users, conversations, and settings. This action cannot be undone."
+
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:256
+msgid "This will permanently delete <0>{0}</0> and all data. This action cannot be undone."
+msgstr "This will permanently delete <0>{0}</0> and all data. This action cannot be undone."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:692
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:16
-#: src/components/sidebar.tsx:19
+#: src/components/sidebar.tsx:20
 msgid "Tickets"
 msgstr "Tickets"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:251
+#: src/components/landingPage/Hero.tsx:15
+msgid "Tickets auto-resolved"
+msgstr "Tickets auto-resolved"
+
+#: src/components/landingPage/Customerstories.tsx:14
+msgid "Tickets resolved automatically"
+msgstr "Tickets resolved automatically"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:281
 msgid "Tier"
 msgstr "Tier"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:136
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:76
+msgid "Tier 0 (Auto)"
+msgstr "Tier 0 (Auto)"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:151
 msgid "Tier 1"
 msgstr "Tier 1"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:85
+#: src/components/landingPage/Pipeline.tsx:25
+msgid "TIER 1"
+msgstr "TIER 1"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:89
 msgid "Tier 1 — AI Instant"
 msgstr "Tier 1 — AI Instant"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:137
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:77
+msgid "Tier 1 (AI)"
+msgstr "Tier 1 (AI)"
+
+#: src/components/landingPage/Features.tsx:13
+msgid "Tier 1 AI resolves common questions in under 2 seconds using your knowledge base."
+msgstr "Tier 1 AI resolves common questions in under 2 seconds using your knowledge base."
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:152
 msgid "Tier 2"
 msgstr "Tier 2"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:86
+#: src/components/landingPage/Pipeline.tsx:33
+msgid "TIER 2"
+msgstr "TIER 2"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:94
 msgid "Tier 2 — AI Complex"
 msgstr "Tier 2 — AI Complex"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:251
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:78
+msgid "Tier 2 (Deep AI)"
+msgstr "Tier 2 (Deep AI)"
+
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:281
 msgid "Time"
 msgstr "Time"
 
-#: src/components/AppControls.tsx:38
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:238
+msgid "Today"
+msgstr "Today"
+
+#: src/components/AppControls.tsx:71
 msgid "Toggle theme"
 msgstr "Toggle theme"
 
@@ -412,15 +1561,61 @@ msgstr "Toggle theme"
 msgid "Total"
 msgstr "Total"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:197
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:160
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:253
+#: src/app/[locale]/(dashboard)/dashboard/page.tsx:218
 msgid "Total Conversations"
 msgstr "Total Conversations"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:572
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:157
+msgid "Total Organizations"
+msgstr "Total Organizations"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:584
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:161
+#: src/components/admin-dashboard/OrganizationDetail.tsx:327
+msgid "Total Tickets"
+msgstr "Total Tickets"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:580
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:159
+msgid "Total Users"
+msgstr "Total Users"
+
+#: src/components/landingPage/Contact.tsx:25
+msgid "Twitter"
+msgstr "Twitter"
 
 #: src/features/knowledgebase/DocumentList.tsx:70
 msgid "Type"
 msgstr "Type"
 
-#: src/components/pricing/PricingCard.tsx:155
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:347
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:260
+msgid "Type <0>{0}</0> to confirm"
+msgstr "Type <0>{0}</0> to confirm"
+
+#: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:80
+msgid "Unresolved"
+msgstr "Unresolved"
+
+#. placeholder {0}: org.name
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:266
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:201
+msgid "Update details for {0}."
+msgstr "Update details for {0}."
+
+#: src/components/Profile/Passwordsection.tsx:161
+msgid "Update password"
+msgstr "Update password"
+
+#: src/components/Profile/Profilesection.tsx:67
+msgid "Update your personal details and login email."
+msgstr "Update your personal details and login email."
+
+#: src/components/pricing/PricingCard.tsx:164
 msgid "Upgrade your plan"
 msgstr "Upgrade your plan"
 
@@ -428,27 +1623,113 @@ msgstr "Upgrade your plan"
 msgid "Upload a PDF or add a FAQ URL above to get started."
 msgstr "Upload a PDF or add a FAQ URL above to get started."
 
+#: src/features/knowledgebase/UploadDocumentPanel.tsx:130
+#: src/features/knowledgebase/UploadDocumentPanel.tsx:319
+msgid "Upload Document"
+msgstr "Upload Document"
+
 #: src/features/knowledgebase/UploadPdfPanel.tsx:102
 #: src/features/knowledgebase/UploadPdfPanel.tsx:291
-msgid "Upload PDF"
-msgstr "Upload PDF"
+#~ msgid "Upload PDF"
+#~ msgstr "Upload PDF"
 
-#: src/features/knowledgebase/UploadPdfPanel.tsx:283
+#: src/components/landingPage/Features.tsx:19
+msgid "Upload PDFs, FAQs, docs. AI learns your product and answers accurately."
+msgstr "Upload PDFs, FAQs, docs. AI learns your product and answers accurately."
+
+#: src/features/knowledgebase/UploadDocumentPanel.tsx:311
 msgid "Uploading…"
 msgstr "Uploading…"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:188
+#: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:143
+msgid "URL-safe identifier — lowercase, hyphens only."
+msgstr "URL-safe identifier — lowercase, hyphens only."
+
+#: src/components/Profile/Passwordsection.tsx:82
+msgid "Use a strong password with at least 8 characters."
+msgstr "Use a strong password with at least 8 characters."
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:691
+msgid "Users"
+msgstr "Users"
+
+#: src/components/Profile/Profilesection.tsx:111
+msgid "Verified"
+msgstr "Verified"
+
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:759
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:439
+msgid "View Organization Details"
+msgstr "View Organization Details"
 
 #: src/app/[locale]/(marketing)/page.tsx:71
 msgid "View plans"
 msgstr "View plans"
 
-#: src/app/[locale]/(auth)/login/page.tsx:236
+#: src/components/landingPage/About.tsx:44
+msgid "We believe support shouldn't make customers wait. Every second of delay costs trust."
+msgstr "We believe support shouldn't make customers wait. Every second of delay costs trust."
+
+#: src/components/landingPage/About.tsx:97
+msgid "We built SupportNest to change that — a platform where AI handles the predictable, humans handle the unpredictable, and customers always get a fast, accurate answer."
+msgstr "We built SupportNest to change that — a platform where AI handles the predictable, humans handle the unpredictable, and customers always get a fast, accurate answer."
+
+#: src/components/landingPage/About.tsx:59
+msgid "We eliminate Tier 1 grunt work so your agents focus on high-value, satisfying work."
+msgstr "We eliminate Tier 1 grunt work so your agents focus on high-value, satisfying work."
+
+#: src/components/landingPage/Contact.tsx:96
+msgid "We'd love to hear from you"
+msgstr "We'd love to hear from you"
+
+#. placeholder {0}: fmt(24)
+#: src/components/landingPage/Contact.tsx:171
+msgid "We'll get back to you within {0} hours."
+msgstr "We'll get back to you within {0} hours."
+
+#: src/components/Profile/Passwordsection.tsx:38
+msgid "Weak"
+msgstr "Weak"
+
+#: src/app/[locale]/(auth)/login/page.tsx:257
 msgid "Welcome Back"
 msgstr "Welcome Back"
 
-#: src/components/pricing/PricingCard.tsx:153
+#: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:596
+#: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:140
+msgid "Welcome back, Super Admin"
+msgstr "Welcome back, Super Admin"
+
+#: src/components/landingPage/About.tsx:135
+msgid "What we stand for"
+msgstr "What we stand for"
+
+#: src/components/ProfilePage.tsx:82
+msgid "Widget embed snippet"
+msgstr "Widget embed snippet"
+
+#: src/components/landingPage/Contact.tsx:190
+msgid "Work email *"
+msgstr "Work email *"
+
+#: src/components/landingPage/Contact.tsx:196
+#: src/components/Profile/Profilesection.tsx:165
+msgid "you@company.com"
+msgstr "you@company.com"
+
+#: src/components/pricing/PricingCard.tsx:162
 msgid "Your current plan"
 msgstr "Your current plan"
 
-#: src/components/sidebar.tsx:111
+#: src/components/Profile/Dangerzone.tsx:92
+msgid "Your full name"
+msgstr "Your full name"
+
+#: src/components/landingPage/Contact.tsx:179
+msgid "Your name *"
+msgstr "Your name *"
+
+#: src/components/sidebar.tsx:134
 msgid "Your workspace"
 msgstr "Your workspace"

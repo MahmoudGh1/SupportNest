@@ -1,49 +1,49 @@
 "use client";
 
 import { useInView } from "@/hooks/useInView";
-import { Trans } from "@lingui/react/macro";
-
-const FEATURES = [
-  {
-    icon: "ti-bolt",
-    title: "Instant AI Resolution",
-    desc: "Tier 1 AI resolves common questions in under 2 seconds using your knowledge base.",
-    color: "#534AB7",
-  },
-  {
-    icon: "ti-book",
-    title: "Knowledge Base RAG",
-    desc: "Upload PDFs, FAQs, docs. AI learns your product and answers accurately.",
-    color: "#4F46E5",
-  },
-  {
-    icon: "ti-message-chatbot",
-    title: "Embeddable Widget",
-    desc: "One script tag. Fully branded, mobile-ready live chat on any website.",
-    color: "#1D9E75",
-  },
-  {
-    icon: "ti-chart-bar",
-    title: "Real-time Analytics",
-    desc: "CSAT, resolution rates, escalation trends — all live on your dashboard.",
-    color: "#F59E0B",
-  },
-  {
-    icon: "ti-headset",
-    title: "Human Agent Inbox",
-    desc: "Escalated tickets arrive with full conversation context. Agents never start cold.",
-    color: "#E24B4A",
-  },
-  {
-    icon: "ti-building",
-    title: "Multi-tenant Ready",
-    desc: "Each business is fully isolated — own data, knowledge base, and widget config.",
-    color: "#0891B2",
-  },
-];
-
+import { Trans, useLingui } from "@lingui/react/macro";
 export default function Features() {
+  const { t } = useLingui();
   const { ref } = useInView();
+
+  const FEATURES = [
+    {
+      icon: "ti-bolt",
+      title: t`Instant AI Resolution`,
+      desc: t`Tier 1 AI resolves common questions in under 2 seconds using your knowledge base.`,
+      color: "#534AB7",
+    },
+    {
+      icon: "ti-book",
+      title: t`Knowledge Base RAG`,
+      desc: t`Upload PDFs, FAQs, docs. AI learns your product and answers accurately.`,
+      color: "#4F46E5",
+    },
+    {
+      icon: "ti-message-chatbot",
+      title: t`Embeddable Widget`,
+      desc: t`One script tag. Fully branded, mobile-ready live chat on any website.`,
+      color: "#1D9E75",
+    },
+    {
+      icon: "ti-chart-bar",
+      title: t`Real-time Analytics`,
+      desc: t`CSAT, resolution rates, escalation trends — all live on your dashboard.`,
+      color: "#F59E0B",
+    },
+    {
+      icon: "ti-headset",
+      title: t`Human Agent Inbox`,
+      desc: t`Escalated tickets arrive with full conversation context. Agents never start cold.`,
+      color: "#E24B4A",
+    },
+    {
+      icon: "ti-building",
+      title: t`Multi-tenant Ready`,
+      desc: t`Each business is fully isolated — own data, knowledge base, and widget config.`,
+      color: "#0891B2",
+    },
+  ];
 
   return (
     <section
@@ -73,7 +73,6 @@ export default function Features() {
           </p>
         </div>
 
-        {/* 1 col mobile → 2 col sm → 3 col md */}
         <div
           ref={ref}
           className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"

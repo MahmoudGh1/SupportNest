@@ -150,6 +150,8 @@ export async function acceptInvitationService(
         role: invitation.role,
         organizationId: invitation.organizationId,
         isActive: true,
+		isEmailVerified: true,
+		emailVerifiedAt: new Date()
       },
     });
 
