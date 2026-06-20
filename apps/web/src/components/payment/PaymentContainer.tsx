@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://http://localhost:3001/api/v1";
-// const API_BASE = "https://http://localhost:3001/api/v1";
+import { BASE_URL } from "@/lib/api/client";
 const PAYMOB_PUBLIC_KEY = process.env.NEXT_PUBLIC_PAYMOB_KEY ?? "egy_pk_test_24gr1hEc6j0YheiEeIh2oailmkBszFKX";
 
 // ── Design tokens (matches registration dark theme) ──────────────────────────
@@ -94,7 +92,7 @@ export default function PaymentContainer({
         setError("");
 
         try {
-            const res = await fetch(`${API_BASE}/payments/create-intention`, {
+            const res = await fetch(`${BASE_URL}/payments/create-intention`, {
                 method:      "POST",
                 headers:     { "Content-Type": "application/json" },
                 credentials: "include",

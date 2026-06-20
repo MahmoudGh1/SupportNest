@@ -3,15 +3,23 @@ import type { ApiKey, OrgProfile, UserProfile } from "@/types/types";
 
 // ─── BASE URL ─────────────────────────────────────────────────────────────────
 
-function normalizeApiBaseUrl(rawBaseUrl?: string) {
-	const fallback = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
+export function normalizeApiBaseUrl(rawBaseUrl?: string) {
+	// Browser requests go through the Next.js same-origin proxy so auth cookies work in incognito.
+	if (typeof window !== "undefined") {
+		return "/api/v1";
+	}
+	const fallback =
+		process.env.API_PROXY_TARGET ??
+		process.env.NEXT_PUBLIC_API_URL ??
+		"http://localhost:3001/api/v1";
 	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");
+	if (base.startsWith("/")) {
+		return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
+	}
 	return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
 }
 
-export const BASE_URL = normalizeApiBaseUrl(
-	process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE,
-);
+export const BASE_URL = normalizeApiBaseUrl();
 
 // ─── CORE FETCHERS ────────────────────────────────────────────────────────────
 

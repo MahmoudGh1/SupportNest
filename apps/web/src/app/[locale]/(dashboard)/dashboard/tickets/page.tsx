@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/context/auth-context";
+import { BASE_URL } from "@/lib/api/client";
 
 // ─── TYPES (inline so page is self-contained — matches api.ts types) ──────────
 type TicketStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED";
@@ -45,16 +46,6 @@ interface Meta {
 }
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
-
-function normalizeApiBaseUrl(rawBaseUrl?: string) {
-	const fallback = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
-	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");
-	return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
-}
-
-const BASE_URL = normalizeApiBaseUrl(
-	process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE,
-);
 
 const PRIORITY_LABEL: Record<TicketPriority, string> = {
 	HIGH: "High",

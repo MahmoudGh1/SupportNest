@@ -27,16 +27,9 @@ import {
 	WidgetConfig,
 	AdminOrganizationDetail,
 } from "@/types/types";
+import { BASE_URL } from "@/lib/api/client";
 
 // ─── API FUNCTIONS ────────────────────────────────────────────────────────────
-function normalizeApiBaseUrl(rawBaseUrl?: string) {
-	const fallback = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
-	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");
-	return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
-}
-
-const BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE);
-// const BASE_URL = "http://localhost:3001/api/v1";
 
 type ApiRecord = Record<string, unknown>;
 
