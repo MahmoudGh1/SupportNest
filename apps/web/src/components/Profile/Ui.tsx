@@ -33,15 +33,16 @@ export function Section({
           }}
         >
           {title}
-          {
+          {title === "Widget embed snippet" && (
             <a
               style={{ fontSize: "12px" }}
               href="https://www.npmjs.com/package/supportnest-server-sdk"
               target="_blank"
+              rel="noopener noreferrer"
             >
               more details
             </a>
-          }
+          )}
         </h3>
         {subtitle && (
           <p style={{ margin: "4px 0 0", fontSize: 12, color: S.textMuted }}>

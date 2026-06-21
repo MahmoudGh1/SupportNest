@@ -60,122 +60,172 @@ interface Group {
   rows: Row[];
 }
 
-/* ── data ── */
-const GROUPS: Group[] = [
+/* ── API plan shape (matches the backend payload) ── */
+interface ApiPlan {
+  id: string;
+  name: string;
+  priceMonthly: string;
+  maxConversations: number | null;
+  maxAgents: number | null;
+  maxKnowledgeDocuments: number | null;
+  features: string; // JSON-encoded { featureKey: "Display Label" }
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/* ── fallback data — the payload you pasted, used if no `plans` prop is supplied ── */
+const DEFAULT_PLANS: ApiPlan[] = [
   {
-    title: "Team & access",
-    rows: [
-      {
-        label: "Team members",
-        starter: "Up to 3",
-        pro: "Up to 15",
-        enterprise: "Unlimited",
-      },
-      {
-        label: "Knowledge base docs",
-        starter: "10 docs",
-        pro: "50 docs",
-        enterprise: "Unlimited",
-      },
-      {
-        label: "SSO / SAML login",
-        starter: false,
-        pro: false,
-        enterprise: true,
-      },
-      {
-        label: "Custom integrations",
-        starter: false,
-        pro: false,
-        enterprise: true,
-      },
-    ],
+    id: "1e651648-9551-4a58-9df8-d134646ff63b",
+    name: "Pro",
+    priceMonthly: "2399.00",
+    maxConversations: 10000,
+    maxAgents: 15,
+    maxKnowledgeDocuments: 500,
+    features:
+      '{"analytics": "Analytics", "tier1Agent": "Tier 1 Agent", "tier2Agent": "Tier 2 Agent", "csatTracking": "CSAT Tracking", "knowledgeBase": "Knowledge Base", "humanEscalation": "Human Escalation", "prioritySupport": "Priority Support", "conversationInsights": "Conversation Insights"}',
+    isActive: true,
+    createdAt: "2026-06-11 20:37:31.054",
+    updatedAt: "2026-06-11 20:37:31.054",
   },
   {
-    title: "AI conversations",
-    rows: [
-      {
-        label: "Monthly conversations",
-        starter: "1,000 / mo",
-        pro: "Unlimited",
-        enterprise: "Unlimited",
-      },
-      {
-        label: "AI agent tiers",
-        starter: "Tier 1",
-        pro: "Tier 1 + 2",
-        enterprise: "Full pipeline",
-      },
-      {
-        label: "Human agent inbox",
-        starter: false,
-        pro: true,
-        enterprise: true,
-      },
-      {
-        label: "Embeddable chat widget",
-        starter: true,
-        pro: true,
-        enterprise: true,
-      },
-    ],
+    id: "3b6c642a-8dc5-41cf-9f4d-4d0d1a48f985",
+    name: "Enterprise",
+    priceMonthly: "9999.00",
+    maxConversations: null,
+    maxAgents: null,
+    maxKnowledgeDocuments: null,
+    features:
+      '{"analytics": "Analytics", "customSLA": "Custom SLA", "tier1Agent": "Tier 1 Agent", "tier2Agent": "Tier 2 Agent", "whiteLabel": "White Labeling", "customTools": "Unlimited Custom Tools", "csatTracking": "CSAT Tracking", "knowledgeBase": "Knowledge Base", "apiIntegrations": "Unlimited API Integrations", "humanEscalation": "Human Escalation", "prioritySupport": "Priority Support", "dedicatedSupport": "Dedicated Support", "advancedReporting": "Advanced Reporting", "conversationInsights": "Conversation Insights"}',
+    isActive: true,
+    createdAt: "2026-06-11 20:37:31.054",
+    updatedAt: "2026-06-11 20:37:31.054",
   },
   {
-    title: "Branding & customisation",
-    rows: [
-      {
-        label: "Custom widget branding",
-        starter: false,
-        pro: true,
-        enterprise: true,
-      },
-      { label: "Custom themes", starter: false, pro: false, enterprise: true },
-      {
-        label: "Dedicated infrastructure",
-        starter: false,
-        pro: false,
-        enterprise: true,
-      },
-    ],
+    id: "5f5fc275-de3d-42ea-95b3-de22638874f6",
+    name: "Starter",
+    priceMonthly: "799.00",
+    maxConversations: 1000,
+    maxAgents: 5,
+    maxKnowledgeDocuments: 50,
+    features:
+      '{"analytics": "Analytics", "tier1Agent": "Tier 1 Agent", "csatTracking": "CSAT Tracking", "knowledgeBase": "Knowledge Base", "humanEscalation": "Human Escalation"}',
+    isActive: true,
+    createdAt: "2026-06-11 20:37:31.054",
+    updatedAt: "2026-06-11 20:37:31.054",
+  },
+];
+
+/* ── data helpers ── */
+function getPlan(plans: ApiPlan[], name: string) {
+  return plans.find((p) => p.name.toLowerCase() === name.toLowerCase());
+}
+
+function parseFeatures(raw?: string): Record<string, string> {
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return {};
+  }
+}
+
+function formatPrice(priceMonthly?: string) {
+  if (!priceMonthly) return "—";
+  const num = parseFloat(priceMonthly);
+  if (Number.isNaN(num)) return priceMonthly;
+  return `EGP${num.toLocaleString("en-US")}`;
+}
+
+function formatLimit(value: number | null, suffix = "", prefix = "") {
+  if (value === null) return "Unlimited";
+  return `${prefix}${value.toLocaleString("en-US")}${suffix}`;
+}
+
+/* feature keys grouped logically — labels are pulled from the API data itself */
+const FEATURE_GROUPS: { title: string; keys: string[] }[] = [
+  {
+    title: "Core capabilities",
+    keys: ["tier1Agent", "tier2Agent", "knowledgeBase", "humanEscalation"],
   },
   {
     title: "Analytics & reporting",
-    rows: [
-      {
-        label: "Analytics dashboard",
-        starter: "Basic",
-        pro: "Advanced",
-        enterprise: "Advanced",
-      },
-      { label: "CSAT scores", starter: true, pro: true, enterprise: true },
-      { label: "API access", starter: false, pro: true, enterprise: true },
+    keys: [
+      "analytics",
+      "csatTracking",
+      "conversationInsights",
+      "advancedReporting",
     ],
   },
   {
-    title: "Support",
-    rows: [
-      { label: "Email support", starter: true, pro: true, enterprise: true },
-      {
-        label: "Priority support",
-        starter: false,
-        pro: true,
-        enterprise: true,
-      },
-      {
-        label: "SLA & uptime guarantee",
-        starter: false,
-        pro: false,
-        enterprise: true,
-      },
-      {
-        label: "Dedicated account manager",
-        starter: false,
-        pro: false,
-        enterprise: true,
-      },
+    title: "Enterprise & support",
+    keys: [
+      "prioritySupport",
+      "dedicatedSupport",
+      "customSLA",
+      "whiteLabel",
+      "customTools",
+      "apiIntegrations",
     ],
   },
 ];
+
+function buildGroups(plans: ApiPlan[]): Group[] {
+  const starter = getPlan(plans, "Starter");
+  const pro = getPlan(plans, "Pro");
+  const enterprise = getPlan(plans, "Enterprise");
+
+  const starterFeatures = parseFeatures(starter?.features);
+  const proFeatures = parseFeatures(pro?.features);
+  const enterpriseFeatures = parseFeatures(enterprise?.features);
+  const allLabels = {
+    ...starterFeatures,
+    ...proFeatures,
+    ...enterpriseFeatures,
+  };
+
+  const usageGroup: Group = {
+    title: "Usage limits",
+    rows: [
+      {
+        label: "Team members",
+        starter: formatLimit(starter?.maxAgents ?? null, "", "Up to "),
+        pro: formatLimit(pro?.maxAgents ?? null, "", "Up to "),
+        enterprise: formatLimit(enterprise?.maxAgents ?? null, "", "Up to "),
+      },
+      {
+        label: "Knowledge base docs",
+        starter: formatLimit(starter?.maxKnowledgeDocuments ?? null, " docs"),
+        pro: formatLimit(pro?.maxKnowledgeDocuments ?? null, " docs"),
+        enterprise: formatLimit(
+          enterprise?.maxKnowledgeDocuments ?? null,
+          " docs",
+        ),
+      },
+      {
+        label: "Monthly conversations",
+        starter: formatLimit(starter?.maxConversations ?? null, " / mo"),
+        pro: formatLimit(pro?.maxConversations ?? null, " / mo"),
+        enterprise: formatLimit(enterprise?.maxConversations ?? null, " / mo"),
+      },
+    ],
+  };
+
+  const featureGroups: Group[] = FEATURE_GROUPS.map((g) => ({
+    title: g.title,
+    rows: g.keys
+      .filter((key) => allLabels[key]) // only show a row if at least one plan defines this feature
+      .map((key) => ({
+        label: allLabels[key],
+        starter: Boolean(starterFeatures[key]),
+        pro: Boolean(proFeatures[key]),
+        enterprise: Boolean(enterpriseFeatures[key]),
+      })),
+  })).filter((g) => g.rows.length > 0);
+
+  return [usageGroup, ...featureGroups];
+}
 
 type ColVariant = "light" | "dark" | "black";
 
@@ -193,7 +243,16 @@ function CellValue({ val, variant }: { val: Cell; variant: ColVariant }) {
   );
 }
 
-export default function PricingTable() {
+export default function PricingTable({
+  plans = DEFAULT_PLANS,
+}: {
+  plans?: ApiPlan[];
+}) {
+  const starterPlan = getPlan(plans, "Starter");
+  const proPlan = getPlan(plans, "Pro");
+  const enterprisePlan = getPlan(plans, "Enterprise");
+  const GROUPS = buildGroups(plans);
+
   return (
     <div className="max-w-5xl mx-auto px-4 mt-16 mb-24 font-sans text-var-text-main">
       <style>{`
@@ -249,7 +308,7 @@ export default function PricingTable() {
               Starter
             </p>
             <p className="text-var-text-main text-[22px] font-extrabold tracking-tight mt-1">
-              EGP799
+              {formatPrice(starterPlan?.priceMonthly)}
             </p>
             <p className="text-var-text-muted text-[11px] mt-0.5">/ mo</p>
           </div>
@@ -265,7 +324,7 @@ export default function PricingTable() {
               </span>
             </div>
             <p className="text-white text-[22px] font-extrabold tracking-tight">
-              EGP2399
+              {formatPrice(proPlan?.priceMonthly)}
             </p>
             <p className="text-white/30 text-[11px] mt-0.5">/ mo</p>
           </div>
@@ -276,9 +335,9 @@ export default function PricingTable() {
               Enterprise
             </p>
             <p className="text-var-text-main text-[22px] font-extrabold tracking-tight mt-1">
-              Custom
+              {formatPrice(enterprisePlan?.priceMonthly)}
             </p>
-            <p className="text-var-text-muted text-[11px] mt-0.5">&nbsp;</p>
+            <p className="text-var-text-muted text-[11px] mt-0.5">/ mo</p>
           </div>
         </div>
 
@@ -371,7 +430,7 @@ export default function PricingTable() {
         {[
           {
             name: "Starter",
-            price: "$29",
+            price: formatPrice(starterPlan?.priceMonthly),
             period: "/ mo",
             tag: null,
             key: "starter" as const,
@@ -380,7 +439,7 @@ export default function PricingTable() {
           },
           {
             name: "Pro",
-            price: "$79",
+            price: formatPrice(proPlan?.priceMonthly),
             period: "/ mo",
             tag: "Popular",
             key: "pro" as const,
@@ -389,8 +448,8 @@ export default function PricingTable() {
           },
           {
             name: "Enterprise",
-            price: "Custom",
-            period: "",
+            price: formatPrice(enterprisePlan?.priceMonthly),
+            period: "/ mo",
             tag: null,
             key: "enterprise" as const,
             bg: "bg-var-card",
