@@ -252,8 +252,7 @@ export function OnboardingEmptyState({
           className="ti ti-info-circle"
           style={{ fontSize: 16, color: S.purple, flexShrink: 0 }}
         />
-        Once customers start chatting, your analytics will appear here —
-        resolution rates, CSAT scores, response times, and more.
+       
       </div>
     </div>
   );

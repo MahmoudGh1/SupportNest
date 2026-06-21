@@ -16,17 +16,14 @@ const nextConfig: NextConfig = {
 			],
 		],
 	},
-	async rewrites() {
-		const apiTarget =
-			process.env.API_PROXY_TARGET?.replace(/\/+$/, "") ??
-			"http://localhost:3001/api/v1";
-		return [
-			{
-				source: "/api/v1/:path*",
-				destination: `${apiTarget}/:path*`,
-			},
-		];
-	},
+// 	async rewrites() {
+// 		return [
+// 			{
+// 				source: "/api/v1/:path*",
+// 				destination: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/:path*`,
+// 			},
+// 		];
+// 	},
 };
 
 export default nextConfig;

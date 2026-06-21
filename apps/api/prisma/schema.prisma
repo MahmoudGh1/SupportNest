@@ -98,6 +98,7 @@ model ToolDefinition {
   isActive            Boolean            @default(true)
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
+  isPublic            Boolean            @default(false)
   businessTables      BusinessTable[]
   apiConfig           BusinessApiConfig  @relation(fields: [apiConfigId], references: [id])
   knowledge_documents KnowledgeDocument? @relation(fields: [documentId], references: [id])
@@ -481,8 +482,8 @@ model ContactSubmission {
   email     String
   message   String
   source    String?
-  company   String?
   createdAt DateTime @default(now())
+  company   String?
 }
 
 enum Role {

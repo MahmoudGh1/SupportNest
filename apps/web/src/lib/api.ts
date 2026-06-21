@@ -39,7 +39,7 @@ export function normalizeApiBaseUrl(rawBaseUrl?: string) {
 
 const BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE);
 // const BASE_URL = "http://localhost:3001/api/v1";
-
+console.log(BASE_URL);
 type ApiRecord = Record<string, unknown>;
 
 function getErrorMessage(error: unknown) {
@@ -254,6 +254,7 @@ export const api = {
 	},
 
 	async getMe(): Promise<AuthUser> {
+		console.log(BASE_URL);
 		const res = await fetch(`${BASE_URL}/auth/me`, {
 			credentials: "include",
 		});
@@ -1111,4 +1112,22 @@ export const api = {
 		if (!res.ok) throw new Error(data.error ?? "Failed to accept invitation with Google");
 		return data;
 	},
+
+async submitHelpRequest(data: { subject: string; message: string }): Promise<void> {
+  const session = getSession();
+  const BASE = BASE_URL.replace("/api/v1", "");
+  const res = await fetch(`${BASE}/api/contact/help`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(session?.token ? { Authorization: `Bearer ${session.token}` } : {}),
+    },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? "Failed to send help request");
+  }
+}
 };
