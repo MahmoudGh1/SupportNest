@@ -67,3 +67,7 @@ export async function adminFetch<T>(
   }
   return data as T;
 }
+
+export function getErrorMessage(error: unknown): string {
+	return error instanceof Error ? error.message : "Unexpected error";
+}
