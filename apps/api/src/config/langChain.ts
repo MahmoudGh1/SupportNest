@@ -43,7 +43,7 @@ function createChatModel(): BaseChatModel {
 	if (!apiKey) throw new AppError("GOOGLE_API_KEY is not set");
 
 	return new googleLC.ChatGoogleGenerativeAI({
-		model: "gemini-2.5-flash-lite",
+		model: "gemini-2.5-flash",
 		apiKey,
 	}) as unknown as BaseChatModel;
 }
