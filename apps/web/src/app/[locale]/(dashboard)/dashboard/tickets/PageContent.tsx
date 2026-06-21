@@ -14,11 +14,13 @@ import {
 	TicketDetailResponse,
 } from "@/app/[locale]/(dashboard)/dashboard/tickets/tickets.types";
 import { useAuth } from "@/context/auth-context";
+import { Role } from "@/types/types";
 import { useState } from "react";
 
 const PageContent = ({ ticketId }: { ticketId: string }) => {
 	const { user } = useAuth();
 	const currentUserId = user?.id;
+	const currentUserRole = user?.role;
 
 	const [resolutionNote, setResolutionNote] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,11 +33,20 @@ const PageContent = ({ ticketId }: { ticketId: string }) => {
 
 	const { conversation, customer, messages, report, ticket } = data;
 
+	const isAssignee = data.ticket.assignedTo?.id === currentUserId;
+	const isAdmin =
+		currentUserRole === "ORG_ADMIN" || currentUserRole === "SUPER_ADMIN";
+	const isUnassigned = !data.ticket.assignedTo;
+
+	const canMutateWork = isAssignee || isAdmin; // status / priority / resolution
+	const canClaim = isUnassigned; // anyone, including agents
+	const canReassignOrUnassign = isAdmin; // moving an already-claimed ticket
+
 	const handleStatusChange = (status: TicketDetail["status"]) =>
 		mutateTicket({ status });
 	const handlePriorityChange = (priority: TicketDetail["priority"]) =>
 		mutateTicket({ priority });
-	const handleAssign = (agentId: string) =>
+	const handleAssign = (agentId: string | null) =>
 		mutateTicket({ assignedToId: agentId });
 	const handleMarkResolved = () =>
 		mutateTicket({ status: "RESOLVED", resolutionNote });
@@ -45,6 +56,9 @@ const PageContent = ({ ticketId }: { ticketId: string }) => {
 		<div className="flex flex-col h-screen p-6 gap-4">
 			<TicketHeader
 				ticket={ticket}
+				canMutateWork={canMutateWork}
+				canReassignOrUnassign={canReassignOrUnassign}
+				canClaim={canClaim}
 				onStatusChange={handleStatusChange}
 				onPriorityChange={handlePriorityChange}
 				onAssign={handleAssign}
@@ -65,9 +79,11 @@ const PageContent = ({ ticketId }: { ticketId: string }) => {
 						status={ticket.status}
 						resolutionNote={resolutionNote}
 						resolvedAt={ticket.resolvedAt}
+						assignedTo={ticket.assignedTo}
 						onResolutionNoteChange={setResolutionNote}
 						onMarkResolved={handleMarkResolved}
 						isSubmitting={isSubmitting}
+						readOnly={!canMutateWork}
 					/>
 				</div>
 			</div>
