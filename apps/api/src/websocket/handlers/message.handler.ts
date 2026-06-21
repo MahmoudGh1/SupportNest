@@ -6,6 +6,7 @@ import * as ticketService from "src/services/ticket.service.js";
 import type { WsSendMessagePayload } from "src/types/ws.types.js";
 import { activeSockets } from "src/websocket/ws.map.js";
 import { send } from "src/ws/websocket.js";
+
 export async function handleMessageSend(
 	ws: any,
 	payload: WsSendMessagePayload,
@@ -41,7 +42,7 @@ export async function handleMessageSend(
 			payload: { conversationId: newConversation.id },
 		});
 	}
-
+	console.log("handleMessageSend running");
 	const { routerOutput, aiMessage } =
 		await conversationService.processPipelineTurn({
 			conversationId,

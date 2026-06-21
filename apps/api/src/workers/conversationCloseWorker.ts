@@ -1,4 +1,3 @@
-// src/workers/conversationCloseWorker.ts
 import { Worker } from "bullmq";
 import prisma from "src/config/prisma.js";
 import { redis } from "src/config/redis.js";
