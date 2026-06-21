@@ -106,7 +106,7 @@ export default function TicketsPage() {
 	};
 
 	const handleBack = () => {
-		setMobileView("list");
+		// setMobileView("list");
 		setSelected(null);
 	};
 
