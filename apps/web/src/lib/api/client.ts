@@ -72,11 +72,8 @@
 // 	return error instanceof Error ? error.message : "Unexpected error";
 // }
 
-
 import { getSession } from "@/lib/auth";
 import type { ApiKey, OrgProfile, UserProfile } from "@/types/types";
-
-// import { cookies } from "next/headers";
 
 // ─── BASE URL ─────────────────────────────────────────────────────────────────
 
@@ -99,18 +96,12 @@ export async function apiFetch<T>(
 	path: string,
 	init?: RequestInit,
 ): Promise<T> {
-	const isServer = typeof window === "undefined";
-
-	const cookieHeader = isServer
-		? (await cookies()).toString() // serializes all cookies as "key=value; key2=value2"
-		: undefined;
-
+	// Replaced manual cookie headers with pure browser handling for httpOnly cookies
 	const response = await fetch(`${BASE_URL}${path}`, {
 		...init,
-		credentials: "include",
+		credentials: "include", // 👈 Automatically appends and attaches httpOnly cookies
 		headers: {
 			"Content-Type": "application/json",
-			...(cookieHeader ? { Cookie: cookieHeader } : {}),
 			...init?.headers,
 		},
 	});
@@ -215,6 +206,7 @@ export function normalizeApiKey(input: ApiRecord): ApiKey {
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
+// Safe synchronous helper since this file no longer uses "use server"
 export function getErrorMessage(error: unknown): string {
 	return error instanceof Error ? error.message : "Unexpected error";
 }
