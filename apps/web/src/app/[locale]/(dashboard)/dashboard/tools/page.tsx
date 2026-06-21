@@ -10,7 +10,7 @@ type Tool = {
     method: string;
     path: string;
     isActive: boolean;
-    isPublic: boolean;
+    isPublic?: boolean;
     createdAt: string;
     document: { title: string; type: string } | null;
 };
