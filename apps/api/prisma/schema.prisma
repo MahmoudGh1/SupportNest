@@ -51,8 +51,8 @@ model User {
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
   emailVerifiedAt        DateTime?
-  isEmailVerified        Boolean                 @default(false)
   scheduledDeletionAt    DateTime?
+  isEmailVerified        Boolean                 @default(false)
   notificationRecipients NotificationRecipient[]
   emailVerifications     EmailVerification[]
   sentInvitations        Invitation[]            @relation("SentInvitations")
@@ -94,6 +94,7 @@ model ToolDefinition {
   documentId          String?            @db.Uuid
   parameters          Json
   responseSchema      Json
+  isPublic            Boolean            @default(false)
   isActive            Boolean            @default(true)
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt

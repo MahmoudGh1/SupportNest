@@ -10,12 +10,13 @@ function normalizeApiBaseUrl(rawBaseUrl?: string) {
 	const fallback =
 		process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
 	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");
+	if (base.startsWith("/")) {
+		return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
+	}
 	return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
 }
 
-export const BASE_URL = normalizeApiBaseUrl(
-	process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE,
-);
+export const BASE_URL = normalizeApiBaseUrl();
 
 // ─── CORE FETCHERS ────────────────────────────────────────────────────────────
 

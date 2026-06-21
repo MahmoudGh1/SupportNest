@@ -4,10 +4,7 @@ import * as userService from "src/services/user.service.js";
 // ─── GET /users/me ────────────────────────────────────────────────────────────
 // Returns the current user's profile from the JWT payload
 // (no DB call needed — JWT already has the data)
-export const getMeController = async (
-	req: AuthenticatedRequest,
-	res: Response,
-) => {
+export const getMeController = async (req: AuthenticatedRequest, res: Response) => {
 	try {
 		const user = req.user;
 		if (!user) return res.status(401).json({ error: "Unauthorized" });
@@ -31,24 +28,17 @@ export const getMeController = async (
 
 // ─── PATCH /users/me ──────────────────────────────────────────────────────────
 // Body: { firstName, lastName, email }
-export const updateProfileController = async (
-	req: AuthenticatedRequest,
-	res: Response,
-) => {
+export const updateProfileController = async (req: AuthenticatedRequest, res: Response) => {
 	try {
 		const userId = req.user?.sub;
 		if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
 		const { firstName, lastName, email } = req.body;
 
-		if (!firstName?.trim())
-			return res.status(400).json({ error: "First name is required." });
-		if (!lastName?.trim())
-			return res.status(400).json({ error: "Last name is required." });
-		if (!email?.trim())
-			return res.status(400).json({ error: "Email is required." });
-		if (!/\S+@\S+\.\S+/.test(email))
-			return res.status(400).json({ error: "Enter a valid email." });
+		if (!firstName?.trim()) return res.status(400).json({ error: "First name is required." });
+		if (!lastName?.trim()) return res.status(400).json({ error: "Last name is required." });
+		if (!email?.trim()) return res.status(400).json({ error: "Email is required." });
+		if (!/\S+@\S+\.\S+/.test(email)) return res.status(400).json({ error: "Enter a valid email." });
 
 		const updated = await userService.updateProfileService(userId, {
 			firstName,
@@ -71,34 +61,23 @@ export const updateProfileController = async (
 		});
 	} catch (error: any) {
 		const status = error.statusCode ?? 500;
-		return res
-			.status(status)
-			.json({ error: error.message ?? "Internal server error" });
+		return res.status(status).json({ error: error.message ?? "Internal server error" });
 	}
 };
 
 // ─── PATCH /users/me/password ─────────────────────────────────────────────────
 // Body: { current_password, new_password }
-export const updatePasswordController = async (
-	req: AuthenticatedRequest,
-	res: Response,
-) => {
+export const updatePasswordController = async (req: AuthenticatedRequest, res: Response) => {
 	try {
 		const userId = req.user?.sub;
 		if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
 		const { current_password, new_password } = req.body;
 
-		if (!current_password)
-			return res.status(400).json({ error: "Current password is required." });
-		if (!new_password)
-			return res.status(400).json({ error: "New password is required." });
+		if (!current_password) return res.status(400).json({ error: "Current password is required." });
+		if (!new_password) return res.status(400).json({ error: "New password is required." });
 
-		await userService.updatePasswordService(
-			userId,
-			current_password,
-			new_password,
-		);
+		await userService.updatePasswordService(userId, current_password, new_password);
 
 		return res.status(200).json({
 			success: true,
@@ -106,16 +85,11 @@ export const updatePasswordController = async (
 		});
 	} catch (error: any) {
 		const status = error.statusCode ?? 500;
-		return res
-			.status(status)
-			.json({ error: error.message ?? "Internal server error" });
+		return res.status(status).json({ error: error.message ?? "Internal server error" });
 	}
 };
 
-export const deleteAccountController = async (
-	req: AuthenticatedRequest,
-	res: Response,
-) => {
+export const deleteAccountController = async (req: AuthenticatedRequest, res: Response) => {
 	try {
 		const userId = req.user?.sub;
 		if (!userId) return res.status(401).json({ error: "Unauthorized" });
@@ -123,21 +97,13 @@ export const deleteAccountController = async (
 		const { fullName, orgName } = req.body;
 
 		if (!fullName?.trim()) {
-			return res
-				.status(400)
-				.json({ error: "Your name is required to confirm deletion." });
+			return res.status(400).json({ error: "Your name is required to confirm deletion." });
 		}
 		if (!orgName?.trim()) {
-			return res
-				.status(400)
-				.json({ error: "Organization name is required to confirm deletion." });
+			return res.status(400).json({ error: "Organization name is required to confirm deletion." });
 		}
 
-		await userService.deleteAccountService(
-			userId,
-			fullName.trim(),
-			orgName.trim(),
-		);
+		await userService.deleteAccountService(userId, fullName.trim(), orgName.trim());
 
 		return res.status(200).json({
 			success: true,
@@ -145,17 +111,11 @@ export const deleteAccountController = async (
 		});
 	} catch (error: any) {
 		const status = error.statusCode ?? 500;
-		return res
-			.status(status)
-			.json({ error: error.message ?? "Internal server error" });
+		return res.status(status).json({ error: error.message ?? "Internal server error" });
 	}
 };
 
-export async function getAssignableAgents(
-	req: AuthenticatedRequest,
-	res: Response,
-	next: NextFunction,
-): Promise<void> {
+export async function getAssignableAgents(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
 	try {
 		const organizationId = (req.user as any).organizationId;
 		const agents = await userService.getAssignableAgents(organizationId);
@@ -169,3 +129,40 @@ export async function getAssignableAgents(
 		next(err);
 	}
 }
+
+export const scheduleAgentRemovalController = async (req: AuthenticatedRequest, res: Response) => {
+	try {
+		const organizationId = req.user?.organizationId;
+		if (!organizationId) return res.status(401).json({ error: "Unauthorized" });
+
+		const { agentId } = req.params as {agentId: string};
+		const { orgName } = req.body;
+
+		if (!orgName?.trim()) {
+			return res.status(400).json({ error: "Organization name is required to confirm removal." });
+		}
+
+		const result = await userService.scheduleAgentRemovalService(organizationId, agentId, orgName.trim());
+
+		return res.status(200).json({ success: true, ...result });
+	} catch (error: any) {
+		const status = error.statusCode ?? 500;
+		return res.status(status).json({ error: error.message ?? "Internal server error" });
+	}
+};
+
+export const cancelAgentRemovalController = async (req: AuthenticatedRequest, res: Response) => {
+	try {
+		const organizationId = req.user?.organizationId;
+		if (!organizationId) return res.status(401).json({ error: "Unauthorized" });
+
+		const { agentId } = req.params as {agentId: string};
+
+		const result = await userService.cancelAgentRemovalService(organizationId, agentId);
+
+		return res.status(200).json({ success: true, ...result });
+	} catch (error: any) {
+		const status = error.statusCode ?? 500;
+		return res.status(status).json({ error: error.message ?? "Internal server error" });
+	}
+};

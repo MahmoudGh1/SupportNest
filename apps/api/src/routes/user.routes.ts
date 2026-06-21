@@ -1,11 +1,6 @@
 import express, { Router } from "express";
 import { authMiddleware } from "src/middlewares/auth.middleware.js";
-import {
-	getMeController,
-	updateProfileController,
-	updatePasswordController,
-	deleteAccountController,
-} from "src/controllers/user.controller.js";
+import { getMeController, updateProfileController, updatePasswordController, deleteAccountController } from "src/controllers/user.controller.js";
 
 import * as userController from "src/controllers/user.controller.js";
 
@@ -27,5 +22,9 @@ userRouter.patch("/me", updateProfileController);
 userRouter.patch("/me/password", updatePasswordController);
 
 userRouter.delete("/me", deleteAccountController);
+
+userRouter.post("/agents/:agentId/schedule-removal", userController.scheduleAgentRemovalController);
+
+userRouter.post("/agents/:agentId/cancel-removal", userController.cancelAgentRemovalController);
 
 export default userRouter;
