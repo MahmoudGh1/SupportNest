@@ -18,9 +18,10 @@ model Organization {
   isActive              Boolean                 @default(true)
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
-  scheduledDeletionAt   DateTime?
+  notifications         Notification[]
   apiKeys               ApiKey[]
   businessApiConfig     BusinessApiConfig?
+  businessTables        BusinessTable[]
   conversationAnalytics ConversationAnalytics[]
   conversations         Conversation[]
   csatRatings           CsatRating[]
@@ -34,32 +35,31 @@ model Organization {
   tickets               Ticket[]
   toolDefinitions       ToolDefinition[]
   users                 User[]
-  businessTables        BusinessTable[]
-  notifications         Notification[]
 
   @@map("organizations")
 }
 
 model User {
-  id                 String              @id @default(uuid()) @db.Uuid
-  organizationId     String?             @db.Uuid
-  email              String              @unique
-  passwordHash       String
-  role               Role
-  firstName          String
-  lastName           String
-  isActive           Boolean             @default(true)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  emailVerifiedAt    DateTime?
-  isEmailVerified    Boolean             @default(false)
-  emailVerifications EmailVerification[]
-  sentInvitations    Invitation[]        @relation("SentInvitations")
-  knowledgeDocuments KnowledgeDocument[]
-  passwordResets     PasswordReset[]
-  assignedTickets    Ticket[]
-  organization       Organization?       @relation(fields: [organizationId], references: [id])
+  id                     String                  @id @default(uuid()) @db.Uuid
+  organizationId         String?                 @db.Uuid
+  email                  String                  @unique
+  passwordHash           String
+  role                   Role
+  firstName              String
+  lastName               String
+  isActive               Boolean                 @default(true)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  emailVerifiedAt        DateTime?
+  isEmailVerified        Boolean                 @default(false)
+  scheduledDeletionAt    DateTime?
   notificationRecipients NotificationRecipient[]
+  emailVerifications     EmailVerification[]
+  sentInvitations        Invitation[]            @relation("SentInvitations")
+  knowledgeDocuments     KnowledgeDocument[]
+  passwordResets         PasswordReset[]
+  assignedTickets        Ticket[]
+  organization           Organization?           @relation(fields: [organizationId], references: [id])
 
   @@index([organizationId])
   @@map("users")
@@ -91,18 +91,20 @@ model ToolDefinition {
   description         String
   method              HttpMethod
   path                String
-  businessTables      BusinessTable[]
   documentId          String?            @db.Uuid
   parameters          Json
   responseSchema      Json
   isActive            Boolean            @default(true)
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
+  isPublic            Boolean            @default(false)
+  businessTables      BusinessTable[]
   apiConfig           BusinessApiConfig  @relation(fields: [apiConfigId], references: [id])
   knowledge_documents KnowledgeDocument? @relation(fields: [documentId], references: [id])
   organization        Organization       @relation(fields: [organizationId], references: [id])
 
   @@index([organizationId])
+  @@index([isPublic])
   @@map("tool_definitions")
 }
 
@@ -255,7 +257,7 @@ model DocumentChunk {
   documentId     String                @db.Uuid
   organizationId String                @db.Uuid
   content        String
-  embedding      Unsupported("vector(1536)")
+  embedding      Unsupported("vector")
   chunkIndex     Int
   metadata       Json                  @default("{}")
   createdAt      DateTime              @default(now())
@@ -420,9 +422,9 @@ model BusinessTable {
   lastFetchedAt    DateTime?
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
+  rows             BusinessTableRow[]
   organization     Organization       @relation(fields: [organizationId], references: [id])
   toolDefinition   ToolDefinition?    @relation(fields: [toolDefinitionId], references: [id])
-  rows             BusinessTableRow[]
 
   @@index([organizationId])
   @@map("business_tables")
@@ -460,7 +462,6 @@ model Notification {
   @@index([type])
 }
 
-
 model NotificationRecipient {
   id             String       @id @default(uuid()) @db.Uuid
   notificationId String       @db.Uuid
@@ -480,8 +481,8 @@ model ContactSubmission {
   email     String
   message   String
   source    String?
-  company   String?
   createdAt DateTime @default(now())
+  company   String?
 }
 
 enum Role {
