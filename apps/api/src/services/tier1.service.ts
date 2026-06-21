@@ -98,6 +98,7 @@ function buildTool(toolDef: ToolDefinition, apiConfig: BusinessApiConfig): Dynam
 
 				const headers: Record<string, string> = {
 					"Content-Type": "application/json",
+					Accept: "application/json",
 					...buildAuthHeaders(apiConfig),
 				};
 				console.log(url);
