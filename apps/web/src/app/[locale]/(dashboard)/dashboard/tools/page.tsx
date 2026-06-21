@@ -288,7 +288,7 @@ function Chip({ label, color, bg }: { label: string; color: string; bg: string }
     return (
         <span style={{
             padding: "4px 10px", borderRadius: 20, fontSize: 11,
-            fontWeight: 500, background: bg, color, whitespace: "nowrap"
+            fontWeight: 500, background: bg, color, whiteSpace: "nowrap"
         }}>
             {label}
         </span>
