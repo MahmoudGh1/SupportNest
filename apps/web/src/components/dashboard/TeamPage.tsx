@@ -7,7 +7,7 @@ import { useAuth } from "@/context/auth-context";
 // ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
 // Mapped cleanly to dynamic variables that respect your main app layout.
 const T = {
-	bg: "var(--bg-main, transparent)", 
+	bg: "var(--bg-main, transparent)",
 	panel: "var(--panel-bg, rgba(255, 255, 255, 0.03))",
 	surface: "var(--surface-bg, rgba(255, 255, 255, 0.02))",
 	border: "var(--border-subtle, rgba(255, 255, 255, 0.08))",
@@ -18,7 +18,7 @@ const T = {
 	inputBorder: "var(--input-border, rgba(255, 255, 255, 0.15))",
 	inputFocus: "var(--input-focus, #534AB7)",
 	hoverBg: "var(--hover-bg, rgba(255, 255, 255, 0.03))",
-	
+
 	// Brand & Status Tokens
 	violet: "#534AB7",
 	violetLight: "#AFA9EC",
@@ -698,10 +698,10 @@ export function TeamPage() {
 							transition: "opacity .15s",
 						}}
 						onMouseEnter={(e) =>
-							((e.currentTarget as HTMLElement).style.opacity = "0.85")
+						((e.currentTarget as HTMLElement).style.opacity = "0.85")
 						}
 						onMouseLeave={(e) =>
-							((e.currentTarget as HTMLElement).style.opacity = "1")
+						((e.currentTarget as HTMLElement).style.opacity = "1")
 						}
 					>
 						<i
