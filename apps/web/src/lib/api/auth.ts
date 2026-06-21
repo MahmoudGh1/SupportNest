@@ -4,7 +4,10 @@ import { BASE_URL } from "./client";
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
 
-export async function login(email: string, password: string): Promise<LoginResponse> {
+export async function login(
+	email: string,
+	password: string,
+): Promise<LoginResponse> {
 	const res = await fetch(`${BASE_URL}/auth/login`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
@@ -13,7 +16,9 @@ export async function login(email: string, password: string): Promise<LoginRespo
 	});
 	const data = await res.json();
 	if (!res.ok) {
-		const err = new Error(data.error ?? data.message ?? "Login failed") as Error & {
+		const err = new Error(
+			data.error ?? data.message ?? "Login failed",
+		) as Error & {
 			code?: string;
 			userId?: string;
 		};
@@ -85,6 +90,7 @@ export async function registerPaid(data: {
 export async function registerWithGoogle(
 	idToken: string,
 ): Promise<{ userId: string; email: string; isNewUser: boolean }> {
+	console.log(BASE_URL);
 	const res = await fetch(`${BASE_URL}/auth/google-register`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
@@ -96,7 +102,9 @@ export async function registerWithGoogle(
 	return data;
 }
 
-export async function loginWithGoogle(idToken: string): Promise<LoginResponse> {
+export async function loginWithGoogle(
+	idToken: string,
+): Promise<LoginResponse> {
 	const res = await fetch(`${BASE_URL}/auth/google`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
@@ -104,11 +112,15 @@ export async function loginWithGoogle(idToken: string): Promise<LoginResponse> {
 		credentials: "include",
 	});
 	const data = await res.json();
-	if (!res.ok) throw new Error(data.error ?? data.message ?? "Google login failed");
+	if (!res.ok)
+		throw new Error(data.error ?? data.message ?? "Google login failed");
 	return { user: mapApiUser(data.result) };
 }
 
-export async function sendVerification(userId: string, email: string): Promise<void> {
+export async function sendVerification(
+	userId: string,
+	email: string,
+): Promise<void> {
 	const res = await fetch(`${BASE_URL}/auth/send-verification`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
@@ -116,10 +128,14 @@ export async function sendVerification(userId: string, email: string): Promise<v
 		credentials: "include",
 	});
 	const body = await res.json();
-	if (!res.ok) throw new Error(body.error ?? "Failed to send verification code");
+	if (!res.ok)
+		throw new Error(body.error ?? "Failed to send verification code");
 }
 
-export async function verifyEmail(userId: string, code: string): Promise<void> {
+export async function verifyEmail(
+	userId: string,
+	code: string,
+): Promise<void> {
 	const res = await fetch(`${BASE_URL}/auth/verify-email`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
@@ -145,7 +161,8 @@ export async function completeRegistration(data: {
 		credentials: "include",
 	});
 	const body = await res.json();
-	if (!res.ok) throw new Error(body.error ?? "Failed to complete registration");
+	if (!res.ok)
+		throw new Error(body.error ?? "Failed to complete registration");
 	return { user: mapApiUser(body.result) };
 }
 
@@ -177,7 +194,10 @@ export async function forgotPassword(email: string): Promise<void> {
 	if (!res.ok) throw new Error(data.error ?? "Failed to send reset email");
 }
 
-export async function resetPassword(token: string, newPassword: string): Promise<void> {
+export async function resetPassword(
+	token: string,
+	newPassword: string,
+): Promise<void> {
 	const res = await fetch(`${BASE_URL}/auth/reset-password`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },

@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 // ─── BASE URL ─────────────────────────────────────────────────────────────────
 
 function normalizeApiBaseUrl(rawBaseUrl?: string) {
+	console.log(rawBaseUrl);
 	const fallback =
 		process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
 	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");

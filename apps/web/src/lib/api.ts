@@ -39,7 +39,7 @@ export function normalizeApiBaseUrl(rawBaseUrl?: string) {
 
 const BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE);
 // const BASE_URL = "http://localhost:3001/api/v1";
-
+console.log(BASE_URL);
 type ApiRecord = Record<string, unknown>;
 
 function getErrorMessage(error: unknown) {
@@ -254,6 +254,7 @@ export const api = {
 	},
 
 	async getMe(): Promise<AuthUser> {
+		console.log(BASE_URL);
 		const res = await fetch(`${BASE_URL}/auth/me`, {
 			credentials: "include",
 		});
