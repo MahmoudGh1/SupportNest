@@ -480,6 +480,7 @@ model ContactSubmission {
   email     String
   message   String
   source    String?
+  company   String?
   createdAt DateTime @default(now())
 }
 
