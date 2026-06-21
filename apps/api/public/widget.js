@@ -3,7 +3,7 @@ const widgetScript = document.getElementById("widgetScript");
 let CUSTOMER_TOKEN = null;
 let WIDGET_KEY = null;
 const BASE_URL = widgetScript.dataset?.baseUrl ?? "http://localhost:3001";
-
+console.log(BASE_URL);
 // ── 2. STATE ───────────────────────────────────────────────────────────────
 let ws = null;
 let reconnectDelay = 1000;
@@ -13,7 +13,7 @@ let isSending = false;
 let isAuthenticated = false;
 let isExpanded = false;
 let conversationId = null;
-
+let rating = null;
 function init(config) {
 	WIDGET_KEY = config.widgetKey;
 	CUSTOMER_TOKEN = config.customerToken || null;
@@ -105,7 +105,7 @@ function sendWs(type, payload) {
 // ── 4. EVENT HANDLER ───────────────────────────────────────────────────────
 function handleEvent(msg) {
 	const { type, payload } = msg;
-
+	console.log(type);
 	switch (type) {
 		case "auth_ack": {
 			isAuthenticated = true;
@@ -118,7 +118,7 @@ function handleEvent(msg) {
 			setInputDisabled(false);
 			updateStatus("online");
 
-			const rating = new RatingWidget(
+			rating = new RatingWidget(
 				{
 					themeColor: widgetConfig.accentColor || "#6C63FF",
 					submitEndpoint: `${BASE_URL}/api/v1/widget/conversations/${conversationId}/csat`,
@@ -143,7 +143,20 @@ function handleEvent(msg) {
 
 		case "conversation_started":
 			// silent — just resync internal state, no UI change
-			conversationId = payload.message.conversationId;
+			conversationId = payload.conversationId;
+			console.log(payload.conversationId);
+			rating.updateConfig({
+				themeColor: widgetConfig.accentColor || "#6C63FF",
+				submitEndpoint: `${BASE_URL}/api/v1/widget/conversations/${conversationId}/csat`,
+			});
+			rating.updateRequestContext({
+				conversationId,
+				apiKey: WIDGET_KEY,
+				customerJwt: CUSTOMER_TOKEN,
+				visitorId: getOrCreateVisitorId(),
+			});
+			rating.resetState();
+			rating.showRatingTrigger();
 			break;
 		case "typing": {
 			showTyping();
@@ -2142,11 +2155,42 @@ class RatingWidget {
 	showRatingTrigger() {
 		this.elements.trigger.style.display = "block";
 	}
+
+	/**
+	 * ==========================================
+	 * UPDATE REQUEST CONTEXT - when a new conversation started
+	 * ==========================================
+	 */
+	updateRequestContext(context) {
+		this.requestContext = context;
+	}
+	updateConfig(config) {
+		this.config = {
+			...config,
+			autoCloseDelay: config.autoCloseDelay || 2000, // 2 seconds
+			labels: config.labels || {
+				1: "Needs improvement",
+				2: "Okay",
+				3: "Good",
+				4: "Great",
+				5: "Amazing!",
+			},
+		};
+	}
+	resetState() {
+		this.state = {
+			isOpen: false,
+			selectedRating: 0,
+			isSubmitted: false,
+			isSubmitting: false,
+		};
+	}
 	/**
 	 * ==========================================
 	 * SUBMIT RATING - Send to server
 	 * ==========================================
 	 */
+
 	async submitRating(rating) {
 		// Prepare payload
 		const payload = {
