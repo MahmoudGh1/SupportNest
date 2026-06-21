@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
+import { BASE_URL } from "@/lib/api/client";
 const PAYMOB_PUBLIC_KEY = "egy_pk_test_24gr1hEc6j0YheiEeIh2oailmkBszFKX";
 
 interface StoredPlan {
@@ -76,7 +75,7 @@ export default function PaymentContainer({
     setError("");
 
     try {
-      const res = await fetch(`${API_BASE}/payments/create-intention`, {
+      const res = await fetch(`${BASE_URL}/payments/create-intention`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

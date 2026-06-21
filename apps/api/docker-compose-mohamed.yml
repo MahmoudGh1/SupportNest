@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  supportnest-postgres:
+    image: pgvector/pgvector:pg17
+    container_name: supportnest-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: supportnest
+      POSTGRES_DB: supportnest
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data # This links container data to your host machine
+
+  supportnest-redis:
+    image: redis:7
+    container_name: supportnest-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+volumes:
+  pgdata: # This keeps your database data safe permanently

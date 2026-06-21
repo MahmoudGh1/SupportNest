@@ -11,9 +11,9 @@ async function main() {
 			name: "Starter",
 			price: 29,
 			interval: "month",
-			maxConversations: 0,
+			maxConversations: 50,
 			maxAgents: 1,
-			maxKnowledgeDocuments: 0,
+			maxKnowledgeDocuments: 10,
 			features: {
 				members: 3,
 				customerIntegrations: false,

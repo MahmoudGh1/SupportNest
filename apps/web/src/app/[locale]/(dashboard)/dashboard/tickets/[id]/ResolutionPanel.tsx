@@ -14,18 +14,22 @@ type ResolutionPanelProps = {
 	status: TicketDetail["status"];
 	resolutionNote: string | null;
 	resolvedAt: TicketDetail["resolvedAt"];
+	assignedTo: TicketDetail["assignedTo"];
 	onResolutionNoteChange: (value: string) => void;
 	onMarkResolved: () => void;
 	isSubmitting?: boolean;
+	readOnly?: boolean;
 };
 
 export function ResolutionPanel({
 	status,
 	resolutionNote,
 	resolvedAt,
+	assignedTo,
 	onResolutionNoteChange,
 	onMarkResolved,
 	isSubmitting,
+	readOnly,
 }: ResolutionPanelProps) {
 	const isResolved = status === "RESOLVED";
 
@@ -39,7 +43,7 @@ export function ResolutionPanel({
 					placeholder="What did you do to resolve this?"
 					value={resolutionNote ? resolutionNote : ""}
 					onChange={(e) => onResolutionNoteChange(e.target.value)}
-					disabled={isResolved}
+					disabled={isResolved || readOnly}
 					rows={4}
 					className="text-sm resize-none"
 				/>
@@ -48,7 +52,7 @@ export function ResolutionPanel({
 					<p className="text-xs text-muted-foreground">
 						Resolved {format(new Date(resolvedAt), "MMM d, yyyy 'at' h:mm a")}
 					</p>
-				) : (
+				) : !readOnly ? (
 					<Button
 						onClick={onMarkResolved}
 						disabled={
@@ -59,6 +63,14 @@ export function ResolutionPanel({
 					>
 						{isSubmitting ? "Saving..." : "Mark Resolved"}
 					</Button>
+				) : (
+					<p className="text-xs text-muted-foreground">
+						Assigned to{" "}
+						{assignedTo
+							? `${assignedTo.firstName} ${assignedTo.lastName}`
+							: "another agent"}{" "}
+						— only they or an admin can resolve this.
+					</p>
 				)}
 			</CardContent>
 		</Card>

@@ -112,7 +112,7 @@ export const getAllToolsForOrg: RequestHandler = asyncHandler(async (req: Authen
 	const organizationId = req.user?.organizationId as string | UuidFilter<"ToolDefinition">;
 
 	const tools = await prisma.toolDefinition.findMany({
-		where: { organizationId },
+		where: { organizationId, isPublic: false },
 		orderBy: [{ isActive: "desc" }, { createdAt: "asc" }],
 		select: {
 			id: true,
@@ -121,6 +121,7 @@ export const getAllToolsForOrg: RequestHandler = asyncHandler(async (req: Authen
 			method: true,
 			path: true,
 			isActive: true,
+			isPublic: true,
 			createdAt: true,
 			knowledge_documents: {
 				select: { title: true, type: true },
@@ -129,4 +130,54 @@ export const getAllToolsForOrg: RequestHandler = asyncHandler(async (req: Authen
 	});
 
 	res.status(200).json({ tools });
+});
+
+
+export const getPublicToolsForOrg: RequestHandler = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+	const organizationId = req.user?.organizationId as string | UuidFilter<"ToolDefinition">;
+
+	const tools = await prisma.toolDefinition.findMany({
+		where: { organizationId, isPublic: true },
+		orderBy: [{ isActive: "desc" }, { createdAt: "asc" }],
+		select: {
+			id: true,
+			name: true,
+			description: true,
+			method: true,
+			path: true,
+			isActive: true,
+			isPublic: true,
+			createdAt: true,
+			knowledge_documents: {
+				select: { title: true, type: true },
+			},
+		},
+	});
+
+	res.status(200).json({ tools });
+});
+
+
+export const toggleToolVisibility: RequestHandler = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+	const { toolId } = req.params;
+	const organizationId = req.user?.organizationId;
+
+	const tool = await prisma.toolDefinition.findUnique({
+		where: { id: toolId },
+	});
+
+	if (!tool || tool.organizationId !== organizationId) {
+		throw new AppError("Tool not found", 404);
+	}
+
+	const updatedTool = await prisma.toolDefinition.update({
+		where: { id: toolId },
+		data: { isPublic: !tool.isPublic },
+	});
+
+	res.status(200).json({
+		id: updatedTool.id,
+		isPublic: updatedTool.isPublic,
+		message: `Tool is now ${updatedTool.isPublic ? "public" : "private"}`,
+	});
 });

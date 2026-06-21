@@ -1,8 +1,14 @@
 import { Embeddings } from "@langchain/core/embeddings";
 import { GoogleGenAI } from "@google/genai";
+import { OpenAIEmbeddings } from "@langchain/openai";
 
-if(!process.env.GOOGLE_API_KEY){
-	console.log("Something went Wrong. Google API Key not found");
+const AI_PROVIDER = (process.env.AI_PROVIDER ?? "google").toLowerCase();
+
+if (AI_PROVIDER === "google" && !process.env.GOOGLE_API_KEY) {
+	console.log("Something went wrong. Google API Key not found");
+}
+if (AI_PROVIDER === "openai" && !process.env.OPENAI_API_KEY) {
+	console.log("Something went wrong. OpenAI API Key not found");
 }
 
 export class GeminiEmbeddingsWithDimensions extends Embeddings {
@@ -41,8 +47,30 @@ export class GeminiEmbeddingsWithDimensions extends Embeddings {
 	}
 }
 
-export const embeddings = new GeminiEmbeddingsWithDimensions({
-	apiKey: process.env.GOOGLE_API_KEY!,
+export function createEmbeddings(
+	config: {
+		outputDimensionality?: number;
+		taskType?: string;
+	} = {},
+): Embeddings {
+	const outputDimensionality = config.outputDimensionality ?? 1536;
+
+	if (AI_PROVIDER === "openai") {
+		return new OpenAIEmbeddings({
+			apiKey: process.env.OPENAI_API_KEY!,
+			model: "text-embedding-3-small",
+			dimensions: outputDimensionality,
+		});
+	}
+
+	return new GeminiEmbeddingsWithDimensions({
+		apiKey: process.env.GOOGLE_API_KEY!,
+		outputDimensionality,
+		taskType: config.taskType ?? "RETRIEVAL_DOCUMENT",
+	});
+}
+
+export const embeddings = createEmbeddings({
 	outputDimensionality: 1536,
 	taskType: "RETRIEVAL_DOCUMENT",
 });

@@ -3,7 +3,7 @@ const widgetScript = document.getElementById("widgetScript");
 let CUSTOMER_TOKEN = null;
 let WIDGET_KEY = null;
 const BASE_URL = widgetScript.dataset?.baseUrl ?? "http://localhost:3001";
-
+console.log(BASE_URL);
 // ── 2. STATE ───────────────────────────────────────────────────────────────
 let ws = null;
 let reconnectDelay = 1000;
@@ -13,7 +13,7 @@ let isSending = false;
 let isAuthenticated = false;
 let isExpanded = false;
 let conversationId = null;
-
+let rating = null;
 function init(config) {
 	WIDGET_KEY = config.widgetKey;
 	CUSTOMER_TOKEN = config.customerToken || null;
@@ -74,9 +74,19 @@ function connect() {
 			console.error("[SupportNest] Failed to parse message:", e);
 		}
 	};
+	const FATAL_CLOSE_CODES = new Set([4401]);
 
 	ws.onclose = function () {
 		isAuthenticated = false;
+
+		if (FATAL_CLOSE_CODES.has(event.code)) {
+			console.error(
+				"[SupportNest] Connection rejected, giving up:",
+				event.reason,
+			);
+			return; // no reconnect — this isn't a network blip, it's a config/auth problem
+		}
+
 		setTimeout(connect, reconnectDelay);
 		reconnectDelay = Math.min(reconnectDelay * 2, 30000);
 	};
@@ -105,7 +115,7 @@ function sendWs(type, payload) {
 // ── 4. EVENT HANDLER ───────────────────────────────────────────────────────
 function handleEvent(msg) {
 	const { type, payload } = msg;
-
+	console.log(type);
 	switch (type) {
 		case "auth_ack": {
 			isAuthenticated = true;
@@ -118,7 +128,7 @@ function handleEvent(msg) {
 			setInputDisabled(false);
 			updateStatus("online");
 
-			const rating = new RatingWidget(
+			rating = new RatingWidget(
 				{
 					themeColor: widgetConfig.accentColor || "#6C63FF",
 					submitEndpoint: `${BASE_URL}/api/v1/widget/conversations/${conversationId}/csat`,
@@ -143,7 +153,20 @@ function handleEvent(msg) {
 
 		case "conversation_started":
 			// silent — just resync internal state, no UI change
-			conversationId = message.payload.conversationId;
+			conversationId = payload.conversationId;
+			console.log(payload.conversationId);
+			rating.updateConfig({
+				themeColor: widgetConfig.accentColor || "#6C63FF",
+				submitEndpoint: `${BASE_URL}/api/v1/widget/conversations/${conversationId}/csat`,
+			});
+			rating.updateRequestContext({
+				conversationId,
+				apiKey: WIDGET_KEY,
+				customerJwt: CUSTOMER_TOKEN,
+				visitorId: getOrCreateVisitorId(),
+			});
+			rating.resetState();
+			rating.showRatingTrigger();
 			break;
 		case "typing": {
 			showTyping();
@@ -723,6 +746,9 @@ function injectRatingWidgetStyles() {
 	z-index: 10;
 }
 
+.rating-widget.rated {
+display: none;
+}
 /* 
    DESIGN DECISION: Why padding + border-top?
    - Creates natural separation from messages
@@ -1923,6 +1949,7 @@ class RatingWidget {
 	 */
 	async handleStarClick(e) {
 		// If already submitted, ignore clicks
+		console.log(this.state.isSubmitted);
 		if (this.state.isSubmitted) return;
 
 		// Get rating value from data attribute
@@ -1957,6 +1984,7 @@ class RatingWidget {
 
 			// Show thank you message
 			this.showThankYou();
+			this.hideRatingTrigger();
 
 			// Auto-close after delay
 			setTimeout(() => {
@@ -2120,9 +2148,59 @@ class RatingWidget {
 
 	/**
 	 * ==========================================
+	 * HIDE RATING BUTTON - hide rating button after successful rating submission
+	 * ==========================================
+	 */
+
+	hideRatingTrigger() {
+		this.elements.trigger.style.display = "none";
+	}
+
+	/**
+	 * ==========================================
+	 * SHOW RATING BUTTON
+	 * ==========================================
+	 */
+
+	showRatingTrigger() {
+		this.elements.trigger.style.display = "block";
+	}
+
+	/**
+	 * ==========================================
+	 * UPDATE REQUEST CONTEXT - when a new conversation started
+	 * ==========================================
+	 */
+	updateRequestContext(context) {
+		this.requestContext = context;
+	}
+	updateConfig(config) {
+		this.config = {
+			...config,
+			autoCloseDelay: config.autoCloseDelay || 2000, // 2 seconds
+			labels: config.labels || {
+				1: "Needs improvement",
+				2: "Okay",
+				3: "Good",
+				4: "Great",
+				5: "Amazing!",
+			},
+		};
+	}
+	resetState() {
+		this.state = {
+			isOpen: false,
+			selectedRating: 0,
+			isSubmitted: false,
+			isSubmitting: false,
+		};
+	}
+	/**
+	 * ==========================================
 	 * SUBMIT RATING - Send to server
 	 * ==========================================
 	 */
+
 	async submitRating(rating) {
 		// Prepare payload
 		const payload = {

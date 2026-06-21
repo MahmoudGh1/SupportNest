@@ -219,7 +219,6 @@ export async function processPipelineTurn({
 
 	// appends to Redis memory
 	await appendToMemory(conversationId, content, routerOutput.finalResponse);
-
 	// --- inactivity close rescheduling ---
 	// every turn pushes the auto-close timer forward; if one is already
 	// pending for this conversation, remove it before adding the new one
