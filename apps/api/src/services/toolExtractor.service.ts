@@ -85,6 +85,7 @@ async function extractFromSwaggerUrl(url: string): Promise<ExtractedTool[]> {
 		for (const method of methods) {
 			const operation = pathItem[method.toLowerCase()];
 			if (!operation) continue;
+			if (operation.deprecated === true) continue;
 
 			const name = operation.operationId
 				? sanitizeToolName(operation.operationId)

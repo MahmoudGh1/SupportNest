@@ -77,9 +77,11 @@ function buildTool(toolDef: ToolDefinition, apiConfig: BusinessApiConfig): Dynam
 
 				const url = new URL(`${apiConfig.baseUrl}${resolvedPath}`);
 				for (const [k, v] of Object.entries(queryParams)) url.searchParams.set(k, v);
+				console.log(`[Tier2ToolChain] Calling: ${toolDef.method} ${url.toString()}`); // ADD THIS
 
 				const headers: Record<string, string> = {
 					"Content-Type": "application/json",
+					Accept: "application/json",
 					...buildAuthHeaders(apiConfig),
 				};
 
@@ -90,6 +92,7 @@ function buildTool(toolDef: ToolDefinition, apiConfig: BusinessApiConfig): Dynam
 
 				const response = await fetch(url.toString(), fetchOptions);
 				const data = (await response.json()) as { message?: string } | null;
+				console.log(`[Tier2ToolChain] Response (${response.status}):`, JSON.stringify(data).slice(0, 500)); // ADD THIS
 
 				if (!response.ok) {
 					return JSON.stringify({ error: true, status: response.status, message: data?.message ?? "Request failed" });
@@ -147,34 +150,49 @@ export async function runTier2ToolChainAgent(context: PipelineContext): Promise<
 	});
 
 	const systemPrompt = new SystemMessage(`
-        You are a customer support agent handling a request that may require multiple steps to fully resolve.
+		You are a customer support agent handling a request that may require multiple steps to fully resolve.
 
-        AVAILABLE TOOLS:
-        ${toolDescriptions}
+		AVAILABLE TOOLS:
+		${toolDescriptions}
 
-        HOW TO WORK:
-        - Some questions require chaining multiple tool calls. For example: to find a specific item by name when no "search by name" tool exists, first call a tool that lists/filters items (e.g. by status or category), find the matching item in that result, then call a detail/lookup tool using that item's ID.
-        - Look carefully at each tool result before deciding your next step. Use real IDs and values from previous tool results — never invent them.
-        - Only call a tool when it's genuinely needed to answer the question.
-        - You may call multiple tools across multiple turns, but only as many as actually needed.
-        - Never fabricate data that didn't come from a tool result.
+		CRITICAL — IDS VS NAMES:
+		- The customer describes things by name, description, or wording — NOT by ID. You do not have an item's real ID until a tool call returns it to you.
+		- NEVER pass the customer's wording directly into an ID-shaped parameter (e.g. petId, orderId, productId, userId). IDs are numbers or codes that come ONLY from a previous tool result — never from guessing, never from the customer's message itself.
+		- If you don't yet have a real ID for what the customer is asking about, your first move is to call a listing/filtering tool (e.g. by status, category, or type) to get real items with real IDs — not a detail/lookup tool.
 
-        TONE:
-        - Angry/frustrated → calm, apologetic, reassuring. Acknowledge the feeling first.
-        - Confused → patient and simple.
+		HOW TO WORK:
+		- Some questions require chaining multiple tool calls. Example: to find a specific item by name when no "search by name" tool exists — first call a tool that lists or filters items, scan that result for a name/description match, extract its real ID, THEN call a detail/lookup tool using that real ID.
+		- Look carefully at each tool result before deciding your next step. Use only real IDs and values that appeared in a previous tool result — never invent them.
+		- Only call a tool when it's genuinely needed to answer the question. Don't call tools for greetings or unrelated chat.
+		- You may call multiple tools across multiple turns to fully resolve the request, but only as many as actually needed.
+		- Never fabricate data that didn't come from a tool result.
 
-        STYLE:
-        - Short and natural, texting style. No bullet points or lists.
+		WHEN A TOOL CALL FAILS OR RETURNS AN ERROR:
+		- Do not give up immediately. An error often means you skipped a step — most commonly, you called a detail/lookup tool with something that wasn't actually a real ID yet.
+		- Before concluding the request can't be fulfilled, check: did you look up the real ID first? If not, do that now, then retry the correct tool with the real ID you find.
+		- Only conclude the request can't be fulfilled after you've actually tried the correct lookup-then-detail sequence and the item genuinely isn't there.
+		- An empty result (e.g. an empty list) from a listing/filtering tool is not the same as "not found" — it may mean you picked the wrong filter or field to search by. If there are other listing/filtering tools available that search by a different field (e.g. status instead of tags, or category instead of name), try one of those before concluding the item doesn't exist.
+		- Only conclude the request can't be fulfilled after you've tried at least two different reasonable lookup approaches, if more than one listing/filtering tool is available.
 
-        LANGUAGE & DIALECT:
-        - Respond in the exact language/dialect of the customer's most recent message.
+		TONE:
+		- Angry/frustrated → calm, apologetic, reassuring. Acknowledge the feeling first.
+		- Confused → patient and simple.
 
-        LINKS:
-        - Never include raw API or Swagger URLs.
-        - If a clean customer-facing page exists for the item, include it naturally.
-        - If the customer asks for a photo, include the image URL from tool results on its own line as [IMAGE: <url>].
-        - Only use URLs that exist in tool results — never invent them.
-        `);
+		STYLE:
+		- Short and natural, texting style. No bullet points or lists.
+		- When sharing information from a tool result, write it as a natural sentence a helpful person would say — not a labeled list of fields. Say "Yes, we have it — it's called X, it's currently available" rather than "ID is X, name is Y, status is Z."
+		- Still include the details that matter to the customer (name, availability, price, description, etc.) — just say them the way a person would talk, not the way a database would print them.
+		- Skip raw internal identifiers (numeric IDs, internal category/tag object structures) unless the customer specifically asked for an ID.
+
+		LANGUAGE & DIALECT:
+		- Respond in the exact language/dialect of the customer's most recent message.
+
+		LINKS:
+		- Never include raw API or Swagger URLs.
+		- If a clean customer-facing page exists for the item, include it naturally.
+		- If the customer asks for a photo, include the image URL from tool results on its own line as [IMAGE: <url>].
+		- Only use URLs that exist in tool results — never invent them.
+		`);
 
 	const messages: BaseMessage[] = [systemPrompt, ...historyMessages, new HumanMessage(latestMessage)];
 
@@ -187,6 +205,7 @@ export async function runTier2ToolChainAgent(context: PipelineContext): Promise<
 		totalTokens += response.usage_metadata?.total_tokens ?? 0;
 
 		const toolCalls = response.tool_calls ?? [];
+		console.log(`[Tier2ToolChain] Loop iteration, tool_calls:`, JSON.stringify(toolCalls)); // ADD THIS
 
 		if (toolCalls.length === 0) {
 			messages.push(response);
@@ -196,10 +215,24 @@ export async function runTier2ToolChainAgent(context: PipelineContext): Promise<
 		messages.push(response);
 		toolCallCount += toolCalls.length;
 
+		let anyEmptyArrayResult = false;
+
 		const toolResults = await Promise.all(
 			toolCalls.map(async (toolCall) => {
 				const tool = toolMap.get(toolCall.name);
 				const result = tool ? await tool.invoke(toolCall.args as Record<string, unknown>).catch((err: Error) => JSON.stringify({ error: true, message: err.message })) : JSON.stringify({ error: true, message: `Tool ${toolCall.name} not found` });
+
+				// Detect an empty array result — the signal that a listing/filtering
+				// tool found nothing, which may mean the wrong field/filter was used,
+				// not that the item doesn't exist.
+				try {
+					const parsed = JSON.parse(result);
+					if (Array.isArray(parsed) && parsed.length === 0) {
+						anyEmptyArrayResult = true;
+					}
+				} catch {
+					// not JSON or not an array — ignore, no special handling needed
+				}
 
 				return new ToolMessage({
 					content: result,
@@ -209,6 +242,15 @@ export async function runTier2ToolChainAgent(context: PipelineContext): Promise<
 		);
 
 		messages.push(...toolResults);
+
+		// Mechanical nudge — injected fresh at the exact moment it's needed,
+		// rather than relying on the model to recall a rule from the system
+		// prompt several turns back.
+		const otherListingToolNames = apiConfig.toolDefinitions.filter((t) => !toolCalls.some((tc) => tc.name === t.name)).map((t) => t.name);
+
+		if (anyEmptyArrayResult && otherListingToolNames.length > 0) {
+			messages.push(new HumanMessage(`That search returned no results. This may mean you searched by the wrong field, not that the item doesn't exist. Other tools you haven't tried yet: ${otherListingToolNames.join(", ")}. Try one of these with a different search approach before concluding nothing was found.`));
+		}
 	}
 
 	// ─── FINAL STRUCTURED DECISION ────────────────────────────────────────────────
@@ -216,12 +258,13 @@ export async function runTier2ToolChainAgent(context: PipelineContext): Promise<
 
 	const finalResponse = await jsonModel.invoke([
 		...messages,
-		new SystemMessage(`
+		new HumanMessage(`
         Based on everything above, decide:
-        - If you found real data that answers the customer's question: set resolved=true and write agentText.
-        - If nothing matches what the customer asked for, or the request can't be fulfilled with available tools: set resolved=false and leave agentText empty.
-        - If you stopped because you hit the maximum number of tool calls without finding an answer: set resolved=false.
-        Never fabricate an answer just to mark resolved=true.
+		- If you found real data that answers the customer's question: set resolved=true and write agentText.
+		- agentText should sound like a helpful person confirming what they found — naturally phrased, professional, and including the relevant details (name, availability, price, etc.). Do not format it as a list of labeled fields like "ID: X, Name: Y, Status: Z." Write it as a real sentence, the way a person would say it.
+		- If nothing matches what the customer asked for, or the request can't be fulfilled with available tools: set resolved=false and leave agentText empty.
+		- If you stopped because you hit the maximum number of tool calls without finding an answer: set resolved=false.
+		Never fabricate an answer just to mark resolved=true.
     `),
 	]);
 

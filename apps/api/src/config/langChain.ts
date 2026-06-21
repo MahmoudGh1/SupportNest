@@ -28,13 +28,13 @@ export const queryEmbeddings = new GeminiEmbeddingsWithDimensions({
 });
 
 export const fastModel = new langChain.ChatGoogleGenerativeAI({
-	model: "gemini-3.1-flash-lite",
+	model: "gemini-2.5-flash-lite",
 	apiKey: apiKey,
 	// maxOutputTokens: 500,
 });
 
 export const model = new langChain.ChatGoogleGenerativeAI({
-	model: "gemini-3.1-flash-lite",
+	model: "gemini-2.5-flash-lite",
 	apiKey: apiKey,
 });
 
