@@ -10,7 +10,8 @@ export async function handleMessageSend(
 	ws: any,
 	payload: WsSendMessagePayload,
 ) {
-	const { conversationId, organizationId, customerId, apiKeyId } = ws.meta!;
+	const { organizationId, customerId, apiKeyId } = ws.meta!;
+	let { conversationId } = ws.meta!;
 
 	/* for every message check -->
 		- if current conversation has been closed? 
@@ -34,6 +35,7 @@ export async function handleMessageSend(
 
 		activeSockets.delete(ws.meta!.conversationId);
 		ws.meta!.conversationId = newConversation.id;
+		conversationId = newConversation.id;
 		activeSockets.set(newConversation.id, ws);
 
 		send(ws, {
