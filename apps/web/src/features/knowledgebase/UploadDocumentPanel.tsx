@@ -36,7 +36,11 @@ export default function UploadDocumentPanel({
 		e.preventDefault();
 		setDragging(false);
 		const dropped = e.dataTransfer.files[0];
-		if (dropped && (allowedTypes.includes(dropped.type) || allowedExtensions.some(ext => dropped.name.endsWith(ext)))) {
+		if (
+			dropped &&
+			(allowedTypes.includes(dropped.type) ||
+				allowedExtensions.some((ext) => dropped.name.endsWith(ext)))
+		) {
 			setFile(dropped);
 			if (!title) setTitle(dropped.name.replace(/\.[^/.]+$/, ""));
 			setError("");
@@ -47,6 +51,7 @@ export default function UploadDocumentPanel({
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const picked = e.target.files?.[0];
+		console.log("picked", picked);
 		if (!picked) return;
 		setFile(picked);
 		if (!title) setTitle(picked.name.replace(/\.[^/.]+$/, ""));
@@ -69,10 +74,10 @@ export default function UploadDocumentPanel({
 		setError("");
 		setLoading(true);
 		try {
-			await api.uploadDocument({ 
-				file, 
+			await api.uploadDocument({
+				file,
 				title: title.trim(),
-				type: getDocType(file)
+				type: getDocType(file),
 			});
 			setFile(null);
 			setTitle("");
@@ -176,7 +181,17 @@ export default function UploadDocumentPanel({
 							style={{ fontSize: 20, color: S.green }}
 						/>
 						<div style={{ textAlign: "left" }}>
-							<div style={{ fontSize: 13, fontWeight: 500, color: S.dark, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+							<div
+								style={{
+									fontSize: 13,
+									fontWeight: 500,
+									color: S.dark,
+									maxWidth: 200,
+									overflow: "hidden",
+									textOverflow: "ellipsis",
+									whiteSpace: "nowrap",
+								}}
+							>
 								{file.name}
 							</div>
 							<div style={{ fontSize: 11, color: S.textMuted }}>
@@ -188,6 +203,9 @@ export default function UploadDocumentPanel({
 								e.stopPropagation();
 								setFile(null);
 								setTitle("");
+								if (inputRef.current) {
+									inputRef.current.value = "";
+								}
 							}}
 							style={{
 								background: "none",
