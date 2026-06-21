@@ -20,9 +20,12 @@ import { ChevronDown } from "lucide-react";
 
 type TicketHeaderProps = {
 	ticket: TicketDetail;
+	canMutateWork: boolean;
+	canReassignOrUnassign: boolean;
+	canClaim: boolean;
 	onStatusChange: (status: TicketDetail["status"]) => void;
 	onPriorityChange: (priority: TicketDetail["priority"]) => void;
-	onAssign: (agentId: string) => void;
+	onAssign: (agentId: string | null) => void;
 	onAssignToMe: () => void;
 };
 
@@ -32,6 +35,9 @@ function initials(firstName: string, lastName: string) {
 
 export function TicketHeader({
 	ticket,
+	canMutateWork,
+	canReassignOrUnassign,
+	canClaim,
 	onStatusChange,
 	onPriorityChange,
 	onAssign,
@@ -40,38 +46,45 @@ export function TicketHeader({
 	return (
 		<div className="flex items-center justify-between border-b border-border pb-4">
 			<div className="flex items-center gap-3">
-				<Select
-					value={ticket.status}
-					onValueChange={onStatusChange}
-				>
-					<SelectTrigger className="h-8 w-[140px] border-0 p-0 shadow-none focus:ring-0">
-						<SelectValue>
-							<StatusBadge status={ticket.status} />
-						</SelectValue>
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="OPEN">Open</SelectItem>
-						<SelectItem value="IN_PROGRESS">In progress</SelectItem>
-						<SelectItem value="RESOLVED">Resolved</SelectItem>
-					</SelectContent>
-				</Select>
+				{canMutateWork ? (
+					<Select
+						value={ticket.status}
+						onValueChange={onStatusChange}
+					>
+						<SelectTrigger className="h-8 w-[140px] border-0 p-0 shadow-none focus:ring-0">
+							<SelectValue>
+								<StatusBadge status={ticket.status} />
+							</SelectValue>
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="OPEN">Open</SelectItem>
+							<SelectItem value="IN_PROGRESS">In progress</SelectItem>
+							<SelectItem value="RESOLVED">Resolved</SelectItem>
+						</SelectContent>
+					</Select>
+				) : (
+					<StatusBadge status={ticket.status} />
+				)}
 
-				<Select
-					value={ticket.priority}
-					onValueChange={onPriorityChange}
-				>
-					<SelectTrigger className="h-8 w-[110px] border-0 p-0 shadow-none focus:ring-0">
-						<SelectValue>
-							<PriorityBadge priority={ticket.priority} />
-						</SelectValue>
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="HIGH">High</SelectItem>
-						<SelectItem value="MEDIUM">Medium</SelectItem>
-						<SelectItem value="LOW">Low</SelectItem>
-					</SelectContent>
-				</Select>
-
+				{canMutateWork ? (
+					<Select
+						value={ticket.priority}
+						onValueChange={onPriorityChange}
+					>
+						<SelectTrigger className="h-8 w-[110px] border-0 p-0 shadow-none focus:ring-0">
+							<SelectValue>
+								<PriorityBadge priority={ticket.priority} />
+							</SelectValue>
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="HIGH">High</SelectItem>
+							<SelectItem value="MEDIUM">Medium</SelectItem>
+							<SelectItem value="LOW">Low</SelectItem>
+						</SelectContent>
+					</Select>
+				) : (
+					<PriorityBadge priority={ticket.priority} />
+				)}
 				<span className="text-xs text-muted-foreground">
 					{ticket.agentAttempts} agent attempt
 					{ticket.agentAttempts === 1 ? "" : "s"}
@@ -87,14 +100,30 @@ export function TicketHeader({
 				</span>
 
 				{ticket.assignedTo ? (
-					<ReassignPopover
-						currentAssigneeId={ticket.assignedTo.id}
-						onAssign={onAssign}
-					>
-						<button
-							type="button"
-							className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-accent"
+					canReassignOrUnassign ? (
+						<ReassignPopover
+							currentAssigneeId={ticket.assignedTo.id}
+							onAssign={onAssign}
 						>
+							<button
+								type="button"
+								className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-accent"
+							>
+								<Avatar className="h-6 w-6">
+									<AvatarFallback className="text-[10px]">
+										{initials(
+											ticket.assignedTo.firstName,
+											ticket.assignedTo.lastName,
+										)}
+									</AvatarFallback>
+								</Avatar>
+								<span className="text-sm">
+									{ticket.assignedTo.firstName} {ticket.assignedTo.lastName}
+								</span>
+							</button>
+						</ReassignPopover>
+					) : (
+						<div className="flex items-center gap-2 px-2 py-1">
 							<Avatar className="h-6 w-6">
 								<AvatarFallback className="text-[10px]">
 									{initials(
@@ -106,29 +135,33 @@ export function TicketHeader({
 							<span className="text-sm">
 								{ticket.assignedTo.firstName} {ticket.assignedTo.lastName}
 							</span>
-						</button>
-					</ReassignPopover>
+						</div>
+					)
 				) : (
 					<div className="flex items-center gap-1">
-						<Button
-							variant="default"
-							size="sm"
-							onClick={onAssignToMe}
-						>
-							Assign to me
-						</Button>
-						<ReassignPopover
-							currentAssigneeId={null}
-							onAssign={onAssign}
-						>
+						{canClaim && (
 							<Button
-								variant="outline"
-								size="icon"
-								className="h-8 w-8"
+								variant="default"
+								size="sm"
+								onClick={onAssignToMe}
 							>
-								<ChevronDown className="h-3 w-3" />
+								Assign to me
 							</Button>
-						</ReassignPopover>
+						)}
+						{canReassignOrUnassign && (
+							<ReassignPopover
+								currentAssigneeId={null}
+								onAssign={onAssign}
+							>
+								<Button
+									variant="outline"
+									size="icon"
+									className="h-8 w-8"
+								>
+									<ChevronDown className="h-3 w-3" />
+								</Button>
+							</ReassignPopover>
+						)}
 					</div>
 				)}
 			</div>

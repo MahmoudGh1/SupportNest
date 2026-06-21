@@ -40,7 +40,11 @@ export const submit: RequestHandler = asyncHandler(
 					score: rating,
 				},
 			});
-			return res.status(201).json(csatRating);
+			return res.status(201).json({
+				data: csatRating,
+				message: "The conversation rating is submitted successfully",
+				success: true,
+			});
 		} catch (err: any) {
 			if (err.code === "P2002") {
 				// unique constraint on conversationId — already rated

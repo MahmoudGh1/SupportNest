@@ -7,37 +7,14 @@
  */
 import type { Response } from "express";
 
-import {
-  listOrganizations,
-  getOrganizationDetail,
-  getGlobalOverview,
-  buildTierStats,
-  buildConversationStats,
-  buildTicketStats,
-  buildCsatSummary,
-  buildRecentEscalations,
-  deleteConversationService,
-  getOrgConversationsService,
-  getConversationByIdService,
-  cancelOrganizationDeletion,
-  scheduleOrganizationDeletion,
-} from "../../services/admin-dashboard/organization.service.js";
-import {
-  parsePagination,
-  buildPaginatedResponse,
-  notFound,
-  badRequest,
-  sendError,
-} from "../../utils/helpers.js";
+import { listOrganizations, getOrganizationDetail, getGlobalOverview, buildTierStats, buildConversationStats, buildTicketStats, buildCsatSummary, buildRecentEscalations, deleteConversationService, getOrgConversationsService, getConversationByIdService, cancelOrganizationDeletion, scheduleOrganizationDeletion } from "../../services/admin-dashboard/organization.service.js";
+import { parsePagination, buildPaginatedResponse, notFound, badRequest, sendError } from "../../utils/helpers.js";
 import { parseDateRange } from "../../utils/helpers.js";
 import type { AuthenticatedRequest } from "src/types/auth.types.js";
 import prisma from "src/config/prisma.js";
 import bcrypt from "bcrypt";
 import { orgDeletionQueue } from "../../queues/orgDeletionQueue.js";
-import {
-  sendPendingDeletionEmail,
-  sendDeletionCancelledEmail,
-} from "../../config/mailer.js";
+import { sendPendingDeletionEmail, sendDeletionCancelledEmail } from "../../config/mailer.js";
 
 /**
  * Normalize a URL/query parameter value to a single string.
@@ -45,14 +22,12 @@ import {
  * This helper accepts string, string array, or object values and returns the
  * first string value when available.
  */
-function getStringParam(
-  value: string | string[] | Record<string, unknown> | undefined,
-): string | undefined {
-  if (typeof value === "string") return value;
-  if (Array.isArray(value)) {
-    return typeof value[0] === "string" ? value[0] : undefined;
-  }
-  return undefined;
+function getStringParam(value: string | string[] | Record<string, unknown> | undefined): string | undefined {
+	if (typeof value === "string") return value;
+	if (Array.isArray(value)) {
+		return typeof value[0] === "string" ? value[0] : undefined;
+	}
+	return undefined;
 }
 
 /**
@@ -60,12 +35,9 @@ function getStringParam(
  *
  * Return the overall global admin dashboard overview metrics.
  */
-export async function getOverview(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const overview = await getGlobalOverview();
-  res.json(overview);
+export async function getOverview(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const overview = await getGlobalOverview();
+	res.json(overview);
 }
 
 /**
@@ -73,35 +45,29 @@ export async function getOverview(
  *
  * List organizations with pagination, optional search, and optional active-state filter.
  */
-export async function getOrganizations(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const { page, limit, skip } = parsePagination(req.query);
-  const search = getStringParam(req.query.search as string);
-  const is_active_raw = getStringParam(req.query.is_active as string) || getStringParam(req.query.isActive as string);
-  const is_active =
-    is_active_raw !== undefined
-      ? is_active_raw === "true"
-      : undefined;
+export async function getOrganizations(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const { page, limit, skip } = parsePagination(req.query);
+	const search = getStringParam(req.query.search as string);
+	const is_active_raw = getStringParam(req.query.is_active as string) || getStringParam(req.query.isActive as string);
+	const is_active = is_active_raw !== undefined ? is_active_raw === "true" : undefined;
 
-  const params: {
-    page: number;
-    limit: number;
-    skip: number;
-    search?: string;
-    is_active?: boolean;
-  } = {
-    page,
-    limit,
-    skip,
-  };
+	const params: {
+		page: number;
+		limit: number;
+		skip: number;
+		search?: string;
+		is_active?: boolean;
+	} = {
+		page,
+		limit,
+		skip,
+	};
 
-  if (search !== undefined) params.search = search;
-  if (is_active !== undefined) params.is_active = is_active;
+	if (search !== undefined) params.search = search;
+	if (is_active !== undefined) params.is_active = is_active;
 
-  const { data, total } = await listOrganizations(params);
-  res.json(buildPaginatedResponse(data, total, page, limit));
+	const { data, total } = await listOrganizations(params);
+	res.json(buildPaginatedResponse(data, total, page, limit));
 }
 
 /**
@@ -109,21 +75,18 @@ export async function getOrganizations(
  *
  * Return detailed organization data for the specified organization id.
  */
-export async function getOrganization(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const organizationId = getStringParam(req.params.organizationId);
-  if (!organizationId) {
-    badRequest(res, "Organization id is required.");
-    return;
-  }
-  const detail = await getOrganizationDetail(organizationId);
-  if (!detail) {
-    notFound(res, "Organization");
-    return;
-  }
-  res.json(detail);
+export async function getOrganization(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const organizationId = getStringParam(req.params.organizationId);
+	if (!organizationId) {
+		badRequest(res, "Organization id is required.");
+		return;
+	}
+	const detail = await getOrganizationDetail(organizationId);
+	if (!detail) {
+		notFound(res, "Organization");
+		return;
+	}
+	res.json(detail);
 }
 
 /**
@@ -131,98 +94,85 @@ export async function getOrganization(
  *
  * Create a new organization, validating required fields and slug uniqueness.
  */
-export async function createOrganization(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const { name, email, password, slug, plan_id, widget_config } = req.body;
+export async function createOrganization(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const { name, email, password, slug, plan_id, widget_config } = req.body;
 
-  if (!name || !email || !slug || !password) {
-    badRequest(res, "name, email, slug, and password are required.");
-    return;
-  }
+	if (!name || !email || !slug || !password) {
+		badRequest(res, "name, email, slug, and password are required.");
+		return;
+	}
 
-  const slugConflict = await prisma.organization.findUnique({
-    where: { slug },
-  });
-  if (slugConflict) {
-    sendError(
-      res,
-      409,
-      "SLUG_CONFLICT",
-      "An organization with this slug already exists.",
-    );
-    return;
-  }
+	const slugConflict = await prisma.organization.findUnique({
+		where: { slug },
+	});
+	if (slugConflict) {
+		sendError(res, 409, "SLUG_CONFLICT", "An organization with this slug already exists.");
+		return;
+	}
 
-  const emailConflict = await prisma.user.findUnique({
-    where: { email },
-  });
-  if (emailConflict) {
-    sendError(
-      res,
-      409,
-      "EMAIL_CONFLICT",
-      "A user with this email already exists.",
-    );
-    return;
-  }
+	const emailConflict = await prisma.user.findUnique({
+		where: { email },
+	});
+	if (emailConflict) {
+		sendError(res, 409, "EMAIL_CONFLICT", "A user with this email already exists.");
+		return;
+	}
 
-  const crypto = await import("crypto");
-  const widgetSecret = crypto.randomBytes(32).toString("hex");
+	const crypto = await import("crypto");
+	const widgetSecret = crypto.randomBytes(32).toString("hex");
 
-  const passwordHash = await bcrypt.hash(password, 10);
+	const passwordHash = await bcrypt.hash(password, 10);
 
-  const result = await prisma.$transaction(async (tx) => {
-    const org = await tx.organization.create({
-      data: {
-        name,
-        email,
-        slug,
-        widgetSecret,
-        widgetConfig: widget_config ?? {},
-        planId: plan_id as string,
-        isActive: true,
-      },
-      include: {
-        plan: { select: { id: true, name: true, priceMonthly: true } },
-      },
-    });
+	const result = await prisma.$transaction(async (tx) => {
+		const org = await tx.organization.create({
+			data: {
+				name,
+				email,
+				slug,
+				widgetSecret,
+				widgetConfig: widget_config ?? {},
+				planId: plan_id as string,
+				isActive: true,
+			},
+			include: {
+				plan: { select: { id: true, name: true, priceMonthly: true } },
+			},
+		});
 
-    const user = await tx.user.create({
-      data: {
-        email,
-        passwordHash,
-        role: "ORG_ADMIN",
-        firstName: name,
-        lastName: "Admin",
-        organizationId: org.id,
-        isActive: true,
-      },
-    });
+		const user = await tx.user.create({
+			data: {
+				email,
+				passwordHash,
+				role: "ORG_ADMIN",
+				firstName: name,
+				lastName: "Admin",
+				organizationId: org.id,
+				isActive: true,
+			},
+		});
 
-    return { org, user };
-  });
+		return { org, user };
+	});
 
-  res.status(201).json({
-    id: result.org.id,
-    name: result.org.name,
-    slug: result.org.slug,
-    email: result.org.email,
-    is_active: result.org.isActive,
-    plan: result.org.plan
-      ? {
-          id: result.org.plan.id,
-          name: result.org.plan.name,
-          price_monthly: Number(result.org.plan.priceMonthly),
-        }
-      : null,
-    created_at: result.org.createdAt.toISOString(),
-    admin_user: {
-      id: result.user.id,
-      email: result.user.email,
-    },
-  });
+	res.status(201).json({
+		id: result.org.id,
+		name: result.org.name,
+		slug: result.org.slug,
+		email: result.org.email,
+		is_active: result.org.isActive,
+		plan: result.org.plan
+			? {
+					id: result.org.plan.id,
+					name: result.org.plan.name,
+					price_monthly: Number(result.org.plan.priceMonthly),
+				}
+			: null,
+		created_at: result.org.createdAt.toISOString(),
+		admin_user: {
+			id: result.user.id,
+			email: result.user.email,
+		},
+	});
 }
 
 /**
@@ -230,63 +180,60 @@ export async function createOrganization(
  *
  * Update allowed organization fields for the specified organization id.
  */
-export async function updateOrganization(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const organizationId = getStringParam(req.params.organizationId);
-  if (!organizationId) {
-    badRequest(res, "Organization id is required.");
-    return;
-  }
-  const fieldMap: Record<string, string> = {
-    name: "name",
-    email: "email",
-    is_active: "isActive",
-    plan_id: "planId",
-    widget_config: "widgetConfig",
-  };
-  const updates: Record<string, unknown> = {};
+export async function updateOrganization(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const organizationId = getStringParam(req.params.organizationId);
+	if (!organizationId) {
+		badRequest(res, "Organization id is required.");
+		return;
+	}
+	const fieldMap: Record<string, string> = {
+		name: "name",
+		email: "email",
+		is_active: "isActive",
+		plan_id: "planId",
+		widget_config: "widgetConfig",
+	};
+	const updates: Record<string, unknown> = {};
 
-  for (const [field, prismaKey] of Object.entries(fieldMap)) {
-    if (req.body[field] !== undefined) updates[prismaKey] = req.body[field];
-  }
+	for (const [field, prismaKey] of Object.entries(fieldMap)) {
+		if (req.body[field] !== undefined) updates[prismaKey] = req.body[field];
+	}
 
-  if (Object.keys(updates).length === 0) {
-    badRequest(res, "No valid fields provided for update.");
-    return;
-  }
+	if (Object.keys(updates).length === 0) {
+		badRequest(res, "No valid fields provided for update.");
+		return;
+	}
 
-  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
-  if (!exists) {
-    notFound(res, "Organization");
-    return;
-  }
+	const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
+	if (!exists) {
+		notFound(res, "Organization");
+		return;
+	}
 
-  const org = await prisma.organization.update({
-    where: { id: organizationId },
-    data: updates as any,
-    include: {
-      plan: { select: { id: true, name: true, priceMonthly: true } },
-    },
-  });
+	const org = await prisma.organization.update({
+		where: { id: organizationId },
+		data: updates as any,
+		include: {
+			plan: { select: { id: true, name: true, priceMonthly: true } },
+		},
+	});
 
-  res.json({
-    id: org.id,
-    name: org.name,
-    slug: org.slug,
-    email: org.email,
-    is_active: org.isActive,
-    widget_config: org.widgetConfig,
-    plan: org.plan
-      ? {
-          id: org.plan.id,
-          name: org.plan.name,
-          price_monthly: Number(org.plan.priceMonthly),
-        }
-      : null,
-    updated_at: org.updatedAt.toISOString(),
-  });
+	res.json({
+		id: org.id,
+		name: org.name,
+		slug: org.slug,
+		email: org.email,
+		is_active: org.isActive,
+		widget_config: org.widgetConfig,
+		plan: org.plan
+			? {
+					id: org.plan.id,
+					name: org.plan.name,
+					price_monthly: Number(org.plan.priceMonthly),
+				}
+			: null,
+		updated_at: org.updatedAt.toISOString(),
+	});
 }
 
 /**
@@ -294,26 +241,23 @@ export async function updateOrganization(
  *
  * Suspend an organization by setting its active flag to false.
  */
-export async function suspendOrganization(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const organizationId = getStringParam(req.params.organizationId);
-  if (!organizationId) {
-    badRequest(res, "Organization id is required.");
-    return;
-  }
-  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
-  if (!exists) {
-    notFound(res, "Organization");
-    return;
-  }
+export async function suspendOrganization(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const organizationId = getStringParam(req.params.organizationId);
+	if (!organizationId) {
+		badRequest(res, "Organization id is required.");
+		return;
+	}
+	const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
+	if (!exists) {
+		notFound(res, "Organization");
+		return;
+	}
 
-  await prisma.organization.update({
-    where: { id: organizationId },
-    data: { isActive: false },
-  });
-  res.json({ message: "Organization suspended." });
+	await prisma.organization.update({
+		where: { id: organizationId },
+		data: { isActive: false },
+	});
+	res.json({ message: "Organization suspended." });
 }
 
 /**
@@ -321,26 +265,23 @@ export async function suspendOrganization(
  *
  * Reactivate an organization by setting its active flag to true.
  */
-export async function activateOrganization(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const organizationId = getStringParam(req.params.organizationId);
-  if (!organizationId) {
-    badRequest(res, "Organization id is required.");
-    return;
-  }
-  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
-  if (!exists) {
-    notFound(res, "Organization");
-    return;
-  }
+export async function activateOrganization(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const organizationId = getStringParam(req.params.organizationId);
+	if (!organizationId) {
+		badRequest(res, "Organization id is required.");
+		return;
+	}
+	const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
+	if (!exists) {
+		notFound(res, "Organization");
+		return;
+	}
 
-  await prisma.organization.update({
-    where: { id: organizationId },
-    data: { isActive: true },
-  });
-  res.json({ message: "Organization activated." });
+	await prisma.organization.update({
+		where: { id: organizationId },
+		data: { isActive: true },
+	});
+	res.json({ message: "Organization activated." });
 }
 
 /**
@@ -348,55 +289,44 @@ export async function activateOrganization(
  *
  * Schedule an organization for deletion in 30 minutes and notify its administrator.
  */
-export async function deleteOrganization(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const organizationId  = getStringParam(req.params.organizationId );
-  if (!organizationId ) {
-    badRequest(res, "Organization id is required.");
-    return;
-  }
+export async function deleteOrganization(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const organizationId = getStringParam(req.params.organizationId);
+	if (!organizationId) {
+		badRequest(res, "Organization id is required.");
+		return;
+	}
 
-  const org = await prisma.organization.findUnique({
-    where: { id: organizationId  },
-    select: { id: true, name: true, email: true },
-  });
+	const org = await prisma.organization.findUnique({
+		where: { id: organizationId },
+		select: { id: true, name: true, email: true },
+	});
 
-  if (!org) {
-    notFound(res, "Organization");
-    return;
-  }
+	if (!org) {
+		notFound(res, "Organization");
+		return;
+	}
 
-  const deletionAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
+	const deletionAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
 
-  await prisma.organization.update({
-    where: { id: organizationId  },
-    data: { scheduledDeletionAt: deletionAt },
-  });
+	await prisma.organization.update({
+		where: { id: organizationId },
+		data: { scheduledDeletionAt: deletionAt },
+	});
 
-  // Schedule background hard-delete job via BullMQ
-  await orgDeletionQueue.add(
-    "delete",
-    { orgId: organizationId  },
-    { delay: 30 * 60 * 1000, jobId: `delete-${organizationId }` },
-  );
+	// Schedule background hard-delete job via BullMQ
+	await orgDeletionQueue.add("delete", { orgId: organizationId }, { delay: 30 * 60 * 1000, jobId: `delete-${organizationId}` });
 
-  // Notify organization admin via email
-  try {
-    await sendPendingDeletionEmail(
-      org.email,
-      org.name,
-      deletionAt.toLocaleString(),
-    );
-  } catch (e) {
-    console.error(`[Admin] Failed to send deletion notice email to ${org.email}`, e);
-  }
+	// Notify organization admin via email
+	try {
+		await sendPendingDeletionEmail(org.email, org.name, deletionAt.toLocaleString());
+	} catch (e) {
+		console.error(`[Admin] Failed to send deletion notice email to ${org.email}`, e);
+	}
 
-  res.json({
-    message: "Organization scheduled for deletion in 30 minutes.",
-    scheduled_at: deletionAt.toISOString(),
-  });
+	res.json({
+		message: "Organization scheduled for deletion in 30 minutes.",
+		scheduled_at: deletionAt.toISOString(),
+	});
 }
 
 /**
@@ -404,85 +334,76 @@ export async function deleteOrganization(
  *
  * Cancel a previously scheduled organization deletion.
  */
-export async function cancelDeleteOrganization(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const organizationId  = getStringParam(req.params.organizationId);
-  if (!organizationId ) {
-    badRequest(res, "Organization id is required.");
-    return;
-  }
+export async function cancelDeleteOrganization(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const organizationId = getStringParam(req.params.organizationId);
+	if (!organizationId) {
+		badRequest(res, "Organization id is required.");
+		return;
+	}
 
-  const org = await prisma.organization.findUnique({
-    where: { id: organizationId  },
-    select: { id: true, scheduledDeletionAt: true },
-  });
+	const org = await prisma.organization.findUnique({
+		where: { id: organizationId },
+		select: { id: true, scheduledDeletionAt: true },
+	});
 
-  if (!org) {
-    notFound(res, "Organization");
-    return;
-  }
+	if (!org) {
+		notFound(res, "Organization");
+		return;
+	}
 
-  if (!org.scheduledDeletionAt) {
-    badRequest(res, "This organization is not currently scheduled for deletion.");
-    return;
-  }
+	if (!org.scheduledDeletionAt) {
+		badRequest(res, "This organization is not currently scheduled for deletion.");
+		return;
+	}
 
-  await prisma.organization.update({
-    where: { id: organizationId  },
-    data: { scheduledDeletionAt: null },
-  });
+	await prisma.organization.update({
+		where: { id: organizationId },
+		data: { scheduledDeletionAt: null },
+	});
 
-  // Cancel background job
-  const job = await orgDeletionQueue.getJob(`delete-${organizationId }`);
-  if (job) {
-    await job.remove();
-  }
+	// Cancel background job
+	const job = await orgDeletionQueue.getJob(`delete-${organizationId}`);
+	if (job) {
+		await job.remove();
+	}
 
-  // Notify organization admin via email
-  try {
-    const orgInfo = await prisma.organization.findUnique({
-      where: { id: organizationId  },
-      select: { name: true, email: true },
-    });
-    if (orgInfo) {
-      await sendDeletionCancelledEmail(orgInfo.email, orgInfo.name);
-    }
-  } catch (e) {
-    console.error(`[Admin] Failed to send deletion cancellation email for org ${organizationId }`, e);
-  }
+	// Notify organization admin via email
+	try {
+		const orgInfo = await prisma.organization.findUnique({
+			where: { id: organizationId },
+			select: { name: true, email: true },
+		});
+		if (orgInfo) {
+			await sendDeletionCancelledEmail(orgInfo.email, orgInfo.name);
+		}
+	} catch (e) {
+		console.error(`[Admin] Failed to send deletion cancellation email for org ${organizationId}`, e);
+	}
 
-  res.json({ message: "Scheduled deletion cancelled successfully." });
+	res.json({ message: "Scheduled deletion cancelled successfully." });
 }
 /**
  * GET /admin/organizations/:organizationId/tier-stats
  *
  * Retrieve tier-level metrics for a specific organization, with optional date filtering.
  */
-export async function getOrgTierStats(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const organizationId = getStringParam(req.params.organizationId);
-  if (!organizationId) {
-    badRequest(res, "Organization id is required.");
-    return;
-  }
-  const { from, to } = req.query as { from?: string; to?: string };
-  const dateFilter = parseDateRange(from, to);
+export async function getOrgTierStats(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const organizationId = getStringParam(req.params.organizationId);
+	if (!organizationId) {
+		badRequest(res, "Organization id is required.");
+		return;
+	}
+	const { from, to } = req.query as { from?: string; to?: string };
+	const dateFilter = parseDateRange(from, to);
 
-  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
-  if (!exists) {
-    notFound(res, "Organization");
-    return;
-  }
+	const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
+	if (!exists) {
+		notFound(res, "Organization");
+		return;
+	}
 
-  const stats = await buildTierStats(
-    organizationId,
-    Object.keys(dateFilter).length ? dateFilter : undefined,
-  );
-  res.json(stats);
+	const stats = await buildTierStats(organizationId, Object.keys(dateFilter).length ? dateFilter : undefined);
+	res.json(stats);
 }
 
 /**
@@ -490,29 +411,23 @@ export async function getOrgTierStats(
  *
  * Return conversation metrics for a specific organization, with optional date filtering.
  */
-export async function getOrgConversationStats(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const organizationId = getStringParam(req.params.organizationId);
-  if (!organizationId) {
-    badRequest(res, "Organization id is required.");
-    return;
-  }
-  const { from, to } = req.query as { from?: string; to?: string };
-  const dateFilter = parseDateRange(from, to);
+export async function getOrgConversationStats(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const organizationId = getStringParam(req.params.organizationId);
+	if (!organizationId) {
+		badRequest(res, "Organization id is required.");
+		return;
+	}
+	const { from, to } = req.query as { from?: string; to?: string };
+	const dateFilter = parseDateRange(from, to);
 
-  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
-  if (!exists) {
-    notFound(res, "Organization");
-    return;
-  }
+	const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
+	if (!exists) {
+		notFound(res, "Organization");
+		return;
+	}
 
-  const stats = await buildConversationStats(
-    organizationId,
-    Object.keys(dateFilter).length ? dateFilter : undefined,
-  );
-  res.json(stats);
+	const stats = await buildConversationStats(organizationId, Object.keys(dateFilter).length ? dateFilter : undefined);
+	res.json(stats);
 }
 
 /**
@@ -520,29 +435,23 @@ export async function getOrgConversationStats(
  *
  * Retrieve ticket statistics for a specific organization, with optional date filtering.
  */
-export async function getOrgTicketStats(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const organizationId = getStringParam(req.params.organizationId);
-  if (!organizationId) {
-    badRequest(res, "Organization id is required.");
-    return;
-  }
-  const { from, to } = req.query as { from?: string; to?: string };
-  const dateFilter = parseDateRange(from, to);
+export async function getOrgTicketStats(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const organizationId = getStringParam(req.params.organizationId);
+	if (!organizationId) {
+		badRequest(res, "Organization id is required.");
+		return;
+	}
+	const { from, to } = req.query as { from?: string; to?: string };
+	const dateFilter = parseDateRange(from, to);
 
-  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
-  if (!exists) {
-    notFound(res, "Organization");
-    return;
-  }
+	const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
+	if (!exists) {
+		notFound(res, "Organization");
+		return;
+	}
 
-  const stats = await buildTicketStats(
-    organizationId,
-    Object.keys(dateFilter).length ? dateFilter : undefined,
-  );
-  res.json(stats);
+	const stats = await buildTicketStats(organizationId, Object.keys(dateFilter).length ? dateFilter : undefined);
+	res.json(stats);
 }
 
 /**
@@ -550,29 +459,23 @@ export async function getOrgTicketStats(
  *
  * Return customer satisfaction summary data for a specific organization.
  */
-export async function getOrgCsat(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const organizationId = getStringParam(req.params.organizationId);
-  if (!organizationId) {
-    badRequest(res, "Organization id is required.");
-    return;
-  }
-  const { from, to } = req.query as { from?: string; to?: string };
-  const dateFilter = parseDateRange(from, to);
+export async function getOrgCsat(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const organizationId = getStringParam(req.params.organizationId);
+	if (!organizationId) {
+		badRequest(res, "Organization id is required.");
+		return;
+	}
+	const { from, to } = req.query as { from?: string; to?: string };
+	const dateFilter = parseDateRange(from, to);
 
-  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
-  if (!exists) {
-    notFound(res, "Organization");
-    return;
-  }
+	const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
+	if (!exists) {
+		notFound(res, "Organization");
+		return;
+	}
 
-  const stats = await buildCsatSummary(
-    organizationId,
-    Object.keys(dateFilter).length ? dateFilter : undefined,
-  );
-  res.json(stats);
+	const stats = await buildCsatSummary(organizationId, Object.keys(dateFilter).length ? dateFilter : undefined);
+	res.json(stats);
 }
 
 /**
@@ -580,72 +483,69 @@ export async function getOrgCsat(
  *
  * List active escalation tickets for a specific organization with pagination and optional date filtering.
  */
-export async function getOrgEscalations(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const organizationId = getStringParam(req.params.organizationId);
-  if (!organizationId) {
-    badRequest(res, "Organization id is required.");
-    return;
-  }
-  const { page, limit, skip } = parsePagination(req.query);
-  const { from, to } = req.query as { from?: string; to?: string };
-  const dateFilter = parseDateRange(from, to);
+export async function getOrgEscalations(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const organizationId = getStringParam(req.params.organizationId);
+	if (!organizationId) {
+		badRequest(res, "Organization id is required.");
+		return;
+	}
+	const { page, limit, skip } = parsePagination(req.query);
+	const { from, to } = req.query as { from?: string; to?: string };
+	const dateFilter = parseDateRange(from, to);
 
-  const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
-  if (!exists) {
-    notFound(res, "Organization");
-    return;
-  }
+	const exists = await prisma.organization.findUnique({ where: { id: organizationId } });
+	if (!exists) {
+		notFound(res, "Organization");
+		return;
+	}
 
-  const where = {
-    organizationId: organizationId,
-    status: { in: ["OPEN", "IN_PROGRESS"] as any },
-    ...(Object.keys(dateFilter).length ? { createdAt: dateFilter } : {}),
-  };
+	const where = {
+		organizationId: organizationId,
+		status: { in: ["OPEN", "IN_PROGRESS"] as any },
+		...(Object.keys(dateFilter).length ? { createdAt: dateFilter } : {}),
+	};
 
-  const [tickets, total] = await Promise.all([
-    prisma.ticket.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: { createdAt: "desc" },
-      include: {
-        organization: { select: { id: true, name: true } },
-        assignedTo: { select: { id: true, firstName: true, lastName: true } },
-        conversation: {
-          select: {
-            id: true,
-            conversationStatus: true,
-            createdAt: true,
-          },
-        },
-      },
-    }),
-    prisma.ticket.count({ where }),
-  ]);
+	const [tickets, total] = await Promise.all([
+		prisma.ticket.findMany({
+			where,
+			skip,
+			take: limit,
+			orderBy: { createdAt: "desc" },
+			include: {
+				organization: { select: { id: true, name: true } },
+				assignedTo: { select: { id: true, firstName: true, lastName: true } },
+				conversation: {
+					select: {
+						id: true,
+						conversationStatus: true,
+						createdAt: true,
+					},
+				},
+			},
+		}),
+		prisma.ticket.count({ where }),
+	]);
 
-  const data = tickets.map((t) => ({
-    ticket_id: t.id,
-    conversation_id: t.conversationId,
-    organization_id: t.organizationId,
-    organization_name: t.organization.name,
-    conversation_status: t.conversation.conversationStatus,
-    priority: t.priority,
-    status: t.status,
-    resolution_note: t.resolutionNote,
-    assigned_to: t.assignedTo
-      ? {
-          id: t.assignedTo.id,
-          full_name: `${t.assignedTo.firstName} ${t.assignedTo.lastName}`,
-        }
-      : null,
-    created_at: t.createdAt.toISOString(),
-    resolved_at: t.resolvedAt?.toISOString() ?? null,
-  }));
+	const data = tickets.map((t) => ({
+		ticket_id: t.id,
+		conversation_id: t.conversationId,
+		organization_id: t.organizationId,
+		organization_name: t.organization.name,
+		conversation_status: t.conversation.conversationStatus,
+		priority: t.priority,
+		status: t.status,
+		resolution_note: t.resolutionNote,
+		assigned_to: t.assignedTo
+			? {
+					id: t.assignedTo.id,
+					full_name: `${t.assignedTo.firstName} ${t.assignedTo.lastName}`,
+				}
+			: null,
+		created_at: t.createdAt.toISOString(),
+		resolved_at: t.resolvedAt?.toISOString() ?? null,
+	}));
 
-  res.json(buildPaginatedResponse(data, total, page, limit));
+	res.json(buildPaginatedResponse(data, total, page, limit));
 }
 
 /**
@@ -653,17 +553,11 @@ export async function getOrgEscalations(
  *
  * Return global tier statistics across all organizations, with optional date filtering.
  */
-export async function getGlobalTierStats(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const { from, to } = req.query as { from?: string; to?: string };
-  const dateFilter = parseDateRange(from, to);
-  const stats = await buildTierStats(
-    undefined,
-    Object.keys(dateFilter).length ? dateFilter : undefined,
-  );
-  res.json(stats);
+export async function getGlobalTierStats(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const { from, to } = req.query as { from?: string; to?: string };
+	const dateFilter = parseDateRange(from, to);
+	const stats = await buildTierStats(undefined, Object.keys(dateFilter).length ? dateFilter : undefined);
+	res.json(stats);
 }
 
 /**
@@ -671,100 +565,83 @@ export async function getGlobalTierStats(
  *
  * List global escalation tickets with pagination, filtering by priority/status/date.
  */
-export async function getGlobalEscalations(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const { page, limit, skip } = parsePagination(req.query);
-  const { from, to, priority, status } = req.query as Record<
-    string,
-    string | undefined
-  >;
-  const dateFilter = parseDateRange(from, to);
+export async function getGlobalEscalations(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const { page, limit, skip } = parsePagination(req.query);
+	const { from, to, priority, status } = req.query as Record<string, string | undefined>;
+	const dateFilter = parseDateRange(from, to);
 
-  const where = {
-    ...(Object.keys(dateFilter).length ? { createdAt: dateFilter } : {}),
-    ...(priority ? { priority: priority.toUpperCase() as any } : {}),
-    ...(status
-      ? { status: status.toUpperCase() as any }
-      : { status: { in: ["OPEN", "IN_PROGRESS"] as any } }),
-  };
+	const where = {
+		...(Object.keys(dateFilter).length ? { createdAt: dateFilter } : {}),
+		...(priority ? { priority: priority.toUpperCase() as any } : {}),
+		...(status ? { status: status.toUpperCase() as any } : { status: { in: ["OPEN", "IN_PROGRESS"] as any } }),
+	};
 
-  const [tickets, total] = await Promise.all([
-    prisma.ticket.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: { createdAt: "desc" },
-      include: {
-        organization: { select: { id: true, name: true } },
-        assignedTo: { select: { id: true, firstName: true, lastName: true } },
-        conversation: { select: { id: true, conversationStatus: true } },
-      },
-    }),
-    prisma.ticket.count({ where }),
-  ]);
+	const [tickets, total] = await Promise.all([
+		prisma.ticket.findMany({
+			where,
+			skip,
+			take: limit,
+			orderBy: { createdAt: "desc" },
+			include: {
+				organization: { select: { id: true, name: true } },
+				assignedTo: { select: { id: true, firstName: true, lastName: true } },
+				conversation: { select: { id: true, conversationStatus: true } },
+			},
+		}),
+		prisma.ticket.count({ where }),
+	]);
 
-  const data = tickets.map((t) => ({
-    ticket_id: t.id,
-    conversation_id: t.conversationId,
-    organization_id: t.organizationId,
-    organization_name: t.organization.name,
-    conversation_status: t.conversation.conversationStatus,
-    priority: t.priority,
-    status: t.status,
-    assigned_to: t.assignedTo
-      ? {
-          id: t.assignedTo.id,
-          full_name: `${t.assignedTo.firstName} ${t.assignedTo.lastName}`,
-        }
-      : null,
-    created_at: t.createdAt.toISOString(),
-    resolved_at: t.resolvedAt?.toISOString() ?? null,
-  }));
+	const data = tickets.map((t) => ({
+		ticket_id: t.id,
+		conversation_id: t.conversationId,
+		organization_id: t.organizationId,
+		organization_name: t.organization.name,
+		conversation_status: t.conversation.conversationStatus,
+		priority: t.priority,
+		status: t.status,
+		assigned_to: t.assignedTo
+			? {
+					id: t.assignedTo.id,
+					full_name: `${t.assignedTo.firstName} ${t.assignedTo.lastName}`,
+				}
+			: null,
+		created_at: t.createdAt.toISOString(),
+		resolved_at: t.resolvedAt?.toISOString() ?? null,
+	}));
 
-  res.json(buildPaginatedResponse(data, total, page, limit));
+	res.json(buildPaginatedResponse(data, total, page, limit));
 }
 
-export async function getOrgConversations(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const { organizationId } = req.params;
+export async function getOrgConversations(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const { organizationId } = req.params;
 
-  const result = await getOrgConversationsService(organizationId as string);
+	const result = await getOrgConversationsService(organizationId as string);
 
-  if ("error" in result) {
-    notFound(res, "Organization");
-    return;
-  }
+	if ("error" in result) {
+		notFound(res, "Organization");
+		return;
+	}
 
-  res.json({ data: result.data, total: result.total });
+	res.json({ data: result.data, total: result.total });
 }
 
-export async function getConversationById(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const { organizationId, conversationId } = req.params;
+export async function getConversationById(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const { organizationId, conversationId } = req.params;
 
-  const result = await getConversationByIdService(
-    organizationId as string,
-    conversationId as string,
-  );
+	const result = await getConversationByIdService(organizationId as string, conversationId as string);
 
-  if ("error" in result) {
-    switch (result.error) {
-      case "ORG_NOT_FOUND":
-        notFound(res, "Organization");
-        return;
-      case "CONVERSATION_NOT_FOUND":
-        notFound(res, "Conversation");
-        return;
-    }
-  }
+	if ("error" in result) {
+		switch (result.error) {
+			case "ORG_NOT_FOUND":
+				notFound(res, "Organization");
+				return;
+			case "CONVERSATION_NOT_FOUND":
+				notFound(res, "Conversation");
+				return;
+		}
+	}
 
-  res.json(result.data);
+	res.json(result.data);
 }
 
 /**
@@ -772,41 +649,30 @@ export async function getConversationById(
  *
  * Delete a completed conversation and its related records for the specified organization.
  */
-export async function deleteConversation(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
-  const { organizationId, conversationId } = req.params;
+export async function deleteConversation(req: AuthenticatedRequest, res: Response): Promise<void> {
+	const { organizationId, conversationId } = req.params;
 
-  const result = await deleteConversationService(
-    organizationId as string,
-    conversationId as string,
-  );
+	const result = await deleteConversationService(organizationId as string, conversationId as string);
 
-  if ("error" in result) {
-    switch (result.error) {
-      case "ORG_NOT_FOUND":
-        notFound(res, "Organization");
-        return;
-      case "CONVERSATION_NOT_FOUND":
-        notFound(res, "Conversation");
-        return;
-      case "CONVERSATION_STILL_ACTIVE":
-        sendError(
-          res,
-          400,
-          "CONVERSATION_STILL_ACTIVE",
-          "Cannot delete an active conversation. Close it first.",
-        );
-        return;
-    }
-  }
+	if ("error" in result) {
+		switch (result.error) {
+			case "ORG_NOT_FOUND":
+				notFound(res, "Organization");
+				return;
+			case "CONVERSATION_NOT_FOUND":
+				notFound(res, "Conversation");
+				return;
+			case "CONVERSATION_STILL_ACTIVE":
+				sendError(res, 400, "CONVERSATION_STILL_ACTIVE", "Cannot delete an active conversation. Close it first.");
+				return;
+		}
+	}
 
-  res.json({
-    message: "Conversation and all related data deleted successfully.",
-    deleted: {
-      conversation_id: result.conversation_id,
-      organization_id: result.organization_id,
-    },
-  });
+	res.json({
+		message: "Conversation and all related data deleted successfully.",
+		deleted: {
+			conversation_id: result.conversation_id,
+			organization_id: result.organization_id,
+		},
+	});
 }

@@ -1,7 +1,21 @@
 "use server";
 import { getSession } from "@/lib/auth";
 import { cookies } from "next/headers";
-import { BASE_URL } from "@/lib/utils";
+
+// ─── BASE URL ─────────────────────────────────────────────────────────────────
+
+function normalizeApiBaseUrl(rawBaseUrl?: string) {
+	console.log(rawBaseUrl);
+	const fallback =
+		process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
+	const base = (rawBaseUrl ?? fallback).trim().replace(/\/+$/, "");
+	if (base.startsWith("/")) {
+		return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
+	}
+	return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
+}
+
+export const BASE_URL = normalizeApiBaseUrl();
 
 // ─── CORE FETCHERS ────────────────────────────────────────────────────────────
 

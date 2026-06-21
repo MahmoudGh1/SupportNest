@@ -6,11 +6,13 @@ import * as ticketService from "src/services/ticket.service.js";
 import type { WsSendMessagePayload } from "src/types/ws.types.js";
 import { activeSockets } from "src/websocket/ws.map.js";
 import { send } from "src/ws/websocket.js";
+
 export async function handleMessageSend(
 	ws: any,
 	payload: WsSendMessagePayload,
 ) {
-	const { conversationId, organizationId, customerId, apiKeyId } = ws.meta!;
+	const { organizationId, customerId, apiKeyId } = ws.meta!;
+	let { conversationId } = ws.meta!;
 
 	/* for every message check -->
 		- if current conversation has been closed? 
@@ -34,6 +36,7 @@ export async function handleMessageSend(
 
 		activeSockets.delete(ws.meta!.conversationId);
 		ws.meta!.conversationId = newConversation.id;
+		conversationId = newConversation.id;
 		activeSockets.set(newConversation.id, ws);
 
 		send(ws, {
@@ -41,7 +44,7 @@ export async function handleMessageSend(
 			payload: { conversationId: newConversation.id },
 		});
 	}
-
+	console.log("handleMessageSend running");
 	const { routerOutput, aiMessage } =
 		await conversationService.processPipelineTurn({
 			conversationId,

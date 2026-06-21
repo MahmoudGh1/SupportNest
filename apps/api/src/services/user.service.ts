@@ -1,12 +1,13 @@
 import prisma from "src/config/prisma.js";
 import AppError from "src/utils/appError.js";
 import { comparePassword, hashPassword } from "src/utils/password.util.js";
+import { agentRemovalQueue } from "src/queues/agentRemovalQueue.js";
+import { sendAgentRemovalScheduledEmail, sendAgentRemovalCancelledEmail } from "src/config/mailer.js";
+
+const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 
 // ─── UPDATE PROFILE ───────────────────────────────────────────────────────────
-export async function updateProfileService(
-	userId: string,
-	data: { firstName: string; lastName: string; email: string },
-) {
+export async function updateProfileService(userId: string, data: { firstName: string; lastName: string; email: string }) {
 	// Check email not taken by another user
 	if (data.email) {
 		const existing = await prisma.user.findUnique({
@@ -42,11 +43,7 @@ export async function updateProfileService(
 }
 
 // ─── UPDATE PASSWORD ──────────────────────────────────────────────────────────
-export async function updatePasswordService(
-	userId: string,
-	currentPassword: string,
-	newPassword: string,
-) {
+export async function updatePasswordService(userId: string, currentPassword: string, newPassword: string) {
 	// 1. Fetch user with password hash
 	const user = await prisma.user.findUnique({
 		where: { id: userId },
@@ -74,11 +71,7 @@ export async function updatePasswordService(
 	return { success: true };
 }
 
-export async function deleteAccountService(
-	userId: string,
-	fullName: string,
-	orgName: string,
-) {
+export async function deleteAccountService(userId: string, fullName: string, orgName: string) {
 	const user = await prisma.user.findUnique({
 		where: { id: userId },
 		select: {
@@ -123,10 +116,7 @@ export async function deleteAccountService(
 			select: { id: true },
 		});
 		if (!fallbackAdmin) {
-			throw new AppError(
-				"Cannot delete account: you have uploaded knowledge documents and no other admin exists to reassign them to. Please transfer or delete them first.",
-				409,
-			);
+			throw new AppError("Cannot delete account: you have uploaded knowledge documents and no other admin exists to reassign them to. Please transfer or delete them first.", 409);
 		}
 		fallbackAdminId = fallbackAdmin.id;
 	}
@@ -243,5 +233,119 @@ export async function getAssignableAgents(organizationId: string) {
 			role: true,
 		},
 		orderBy: { firstName: "asc" },
+	});
+}
+
+export async function scheduleAgentRemovalService(organizationId: string, agentId: string, confirmedOrgName: string) {
+	const org = await prisma.organization.findUnique({
+		where: { id: organizationId },
+		select: { name: true },
+	});
+	if (!org) throw new AppError("Organization not found.", 404);
+
+	if (confirmedOrgName.trim() !== org.name) {
+		throw new AppError("Organization name does not match.", 400);
+	}
+
+	const agent = await prisma.user.findFirst({
+		where: { id: agentId, organizationId, role: "SUPPORT_AGENT" },
+		select: { id: true, email: true, firstName: true, scheduledDeletionAt: true },
+	});
+	if (!agent) throw new AppError("Support agent not found in this organization.", 404);
+
+	if (agent.scheduledDeletionAt) {
+		throw new AppError("This agent is already scheduled for removal.", 409);
+	}
+
+	const removalAt = new Date(Date.now() + THREE_DAYS_MS);
+
+	await prisma.user.update({
+		where: { id: agentId },
+		data: { scheduledDeletionAt: removalAt },
+	});
+
+	await agentRemovalQueue.add("remove", { userId: agentId }, { delay: THREE_DAYS_MS, jobId: `remove-agent-${agentId}` });
+
+	try {
+		await sendAgentRemovalScheduledEmail(agent.email, agent.firstName, org.name, removalAt);
+	} catch (e) {
+		console.error(`[Agent Removal] Failed to send removal notice to ${agent.email}`, e);
+	}
+
+	return {
+		message: "Support agent scheduled for removal in 3 days.",
+		scheduledAt: removalAt.toISOString(),
+	};
+}
+
+export async function cancelAgentRemovalService(organizationId: string, agentId: string) {
+	const agent = await prisma.user.findFirst({
+		where: { id: agentId, organizationId, role: "SUPPORT_AGENT" },
+		select: { id: true, email: true, firstName: true, scheduledDeletionAt: true },
+	});
+	if (!agent) throw new AppError("Support agent not found in this organization.", 404);
+
+	if (!agent.scheduledDeletionAt) {
+		throw new AppError("This agent is not currently scheduled for removal.", 400);
+	}
+
+	await prisma.user.update({
+		where: { id: agentId },
+		data: { scheduledDeletionAt: null },
+	});
+
+	const job = await agentRemovalQueue.getJob(`remove-agent-${agentId}`);
+	if (job) await job.remove();
+
+	const org = await prisma.organization.findUnique({
+		where: { id: organizationId },
+		select: { name: true },
+	});
+
+	try {
+		await sendAgentRemovalCancelledEmail(agent.email, agent.firstName, org?.name ?? "your organization");
+	} catch (e) {
+		console.error(`[Agent Removal] Failed to send cancellation email to ${agent.email}`, e);
+	}
+
+	return { message: "Scheduled removal cancelled successfully." };
+}
+
+export async function getAgentsWithTicketStats(organizationId: string) {
+	const agents = await prisma.user.findMany({
+		where: { organizationId, role: "SUPPORT_AGENT" },
+		select: {
+			id: true,
+			firstName: true,
+			lastName: true,
+			email: true,
+			isActive: true,
+			scheduledDeletionAt: true,
+			createdAt: true,
+		},
+		orderBy: { createdAt: "asc" },
+	});
+
+	const ticketCounts = await prisma.ticket.groupBy({
+		by: ["assignedToId", "status"],
+		where: { assignedToId: { in: agents.map((a) => a.id) } },
+		_count: true,
+	});
+
+	return agents.map((agent) => {
+		const agentTickets = ticketCounts.filter((t) => t.assignedToId === agent.id);
+		const resolved = agentTickets.find((t) => t.status === "RESOLVED")?._count ?? 0;
+		const open = agentTickets.find((t) => t.status === "OPEN")?._count ?? 0;
+		const inProgress = agentTickets.find((t) => t.status === "IN_PROGRESS")?._count ?? 0;
+		const totalAssigned = resolved + open + inProgress;
+
+		return {
+			...agent,
+			ticketStats: {
+				totalAssigned,
+				resolved,
+				unresolved: open + inProgress,
+			},
+		};
 	});
 }

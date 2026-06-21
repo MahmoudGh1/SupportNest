@@ -56,25 +56,32 @@ msgstr "{0} updated."
 msgid "{name} deleted."
 msgstr "{name} deleted."
 
+#: src/components/pricing/PricingTable.tsx:135
+#: src/components/pricing/PricingTable.tsx:146
+#: src/components/pricing/PricingTable.tsx:214
+#: src/components/pricing/PricingTable.tsx:215
+msgid "/ mo"
+msgstr "/ mo"
+
 #: src/components/landingPage/Footer.tsx:74
 msgid "© 2025 SupportNest. All rights reserved."
 msgstr "© 2025 SupportNest. All rights reserved."
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:238
-msgid "↑ 0.3 this month"
-msgstr "↑ 0.3 this month"
+#~ msgid "↑ 0.3 this month"
+#~ msgstr "↑ 0.3 this month"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:220
-msgid "↑ 12% this week"
-msgstr "↑ 12% this week"
+#~ msgid "↑ 12% this week"
+#~ msgstr "↑ 12% this week"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:226
-msgid "↑ 3% vs last week"
-msgstr "↑ 3% vs last week"
+#~ msgid "↑ 3% vs last week"
+#~ msgstr "↑ 3% vs last week"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:232
-msgid "↓ 0.2s improvement"
-msgstr "↓ 0.2s improvement"
+#~ msgid "↓ 0.2s improvement"
+#~ msgstr "↓ 0.2s improvement"
 
 #. placeholder {0}: processing > 1 ? "s" : ""
 #: src/features/knowledgebase/ProcessingNotice.tsx:29
@@ -85,9 +92,21 @@ msgstr "<0>{processing}</0> document{0} being processed by the AI pipeline. This
 msgid "✓ Password updated successfully."
 msgstr "✓ Password updated successfully."
 
+#: src/components/pricing/PricingTable.tsx:52
+msgid "1,000 / mo"
+msgstr "1,000 / mo"
+
+#: src/components/pricing/PricingTable.tsx:44
+msgid "10 docs"
+msgstr "10 docs"
+
 #: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:268
 msgid "30 Days"
 msgstr "30 Days"
+
+#: src/components/pricing/PricingTable.tsx:44
+msgid "50 docs"
+msgstr "50 docs"
 
 #: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:267
 msgid "7 Days"
@@ -184,6 +203,11 @@ msgstr "Admin password"
 msgid "ADMINISTRATOR EMAIL"
 msgstr "ADMINISTRATOR EMAIL"
 
+#: src/components/pricing/PricingTable.tsx:69
+#: src/components/pricing/PricingTable.tsx:69
+msgid "Advanced"
+msgstr "Advanced"
+
 #: src/components/landingPage/Pipeline.tsx:42
 msgid "Agent Handoff"
 msgstr "Agent Handoff"
@@ -196,9 +220,17 @@ msgstr "Agent wellbeing"
 msgid "AI & Human Performance by Tier"
 msgstr "AI & Human Performance by Tier"
 
+#: src/components/pricing/PricingTable.tsx:53
+msgid "AI agent tiers"
+msgstr "AI agent tiers"
+
 #: src/components/landingPage/About.tsx:34
 msgid "AI availability"
 msgstr "AI availability"
+
+#: src/components/pricing/PricingTable.tsx:50
+msgid "AI conversations"
+msgstr "AI conversations"
 
 #: src/components/landingPage/About.tsx:49
 msgid "AI handles volume, humans handle nuance. Our pipeline knows exactly when to switch."
@@ -208,13 +240,13 @@ msgstr "AI handles volume, humans handle nuance. Our pipeline knows exactly when
 msgid "AI Instant Answer"
 msgstr "AI Instant Answer"
 
-#: src/components/sidebar.tsx:240
+#: src/components/sidebar.tsx:262
 msgid "AI Mode"
 msgstr "AI Mode"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:224
-msgid "AI Resolution Rate"
-msgstr "AI Resolution Rate"
+#~ msgid "AI Resolution Rate"
+#~ msgstr "AI Resolution Rate"
 
 #: src/components/landingPage/Pipeline.tsx:34
 msgid "AI Troubleshooter"
@@ -248,9 +280,17 @@ msgstr "All Systems Operational"
 
 #: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:237
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:19
-#: src/components/sidebar.tsx:26
+#: src/components/sidebar.tsx:27
 msgid "Analytics"
 msgstr "Analytics"
+
+#: src/components/pricing/PricingTable.tsx:67
+msgid "Analytics & reporting"
+msgstr "Analytics & reporting"
+
+#: src/components/pricing/PricingTable.tsx:69
+msgid "Analytics dashboard"
+msgstr "Analytics dashboard"
 
 #: src/components/pricing/PricingHero.tsx:54
 msgid "Annual"
@@ -260,12 +300,16 @@ msgstr "Annual"
 #~ msgid "API & Widget"
 #~ msgstr "API & Widget"
 
+#: src/components/pricing/PricingTable.tsx:71
+msgid "API access"
+msgstr "API access"
+
 #: src/components/ProfilePage.tsx:101
 msgid "API Keys"
 msgstr "API Keys"
 
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:18
-#: src/components/sidebar.tsx:41
+#: src/components/sidebar.tsx:42
 msgid "API Tools"
 msgstr "API Tools"
 
@@ -279,8 +323,8 @@ msgid "ASSIGNED"
 msgstr "ASSIGNED"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:205
-msgid "At a glance"
-msgstr "At a glance"
+#~ msgid "At a glance"
+#~ msgstr "At a glance"
 
 #: src/components/landingPage/Hero.tsx:18
 msgid "Average CSAT score"
@@ -300,8 +344,8 @@ msgid "Avg auto-resolution"
 msgstr "Avg auto-resolution"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:230
-msgid "Avg Response Time"
-msgstr "Avg Response Time"
+#~ msgid "Avg Response Time"
+#~ msgstr "Avg Response Time"
 
 #: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:293
 msgid "Avg. Resolution Time"
@@ -310,6 +354,14 @@ msgstr "Avg. Resolution Time"
 #: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:359
 msgid "Based on all rated conversations in this period"
 msgstr "Based on all rated conversations in this period"
+
+#: src/components/pricing/PricingTable.tsx:69
+msgid "Basic"
+msgstr "Basic"
+
+#: src/components/pricing/PricingTable.tsx:59
+msgid "Branding & customisation"
+msgstr "Branding & customisation"
 
 #: src/components/landingPage/About.tsx:86
 msgid "Built by engineers who hated bad support"
@@ -379,6 +431,10 @@ msgstr "Closed"
 msgid "Company"
 msgstr "Company"
 
+#: src/components/pricing/PricingTable.tsx:123
+msgid "Compare plans"
+msgstr "Compare plans"
+
 #: src/components/landingPage/Pipeline.tsx:37
 msgid "Complex multi-step reasoning for edge cases and errors."
 msgstr "Complex multi-step reasoning for edge cases and errors."
@@ -400,11 +456,13 @@ msgid "Contact email"
 msgstr "Contact email"
 
 #: src/components/pricing/PricingCard.tsx:166
+#: src/components/pricing/PricingTable.tsx:205
+#: src/components/pricing/PricingTable.tsx:260
 msgid "Contact sales"
 msgstr "Contact sales"
 
 #: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:45
-#: src/components/sidebar.tsx:46
+#: src/components/sidebar.tsx:47
 msgid "Contact Submissions"
 msgstr "Contact Submissions"
 
@@ -444,9 +502,12 @@ msgid "Created"
 msgstr "Created"
 
 #: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:298
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:236
 msgid "CSAT Score"
 msgstr "CSAT Score"
+
+#: src/components/pricing/PricingTable.tsx:70
+msgid "CSAT scores"
+msgstr "CSAT scores"
 
 #: src/components/landingPage/Features.tsx:31
 msgid "CSAT, resolution rates, escalation trends — all live on your dashboard."
@@ -464,9 +525,26 @@ msgstr "Current password is required."
 msgid "CURRENT SUBSCRIPTION"
 msgstr "CURRENT SUBSCRIPTION"
 
+#: src/components/pricing/PricingTable.tsx:151
+#: src/components/pricing/PricingTable.tsx:216
+msgid "Custom"
+msgstr "Custom"
+
+#: src/components/pricing/PricingTable.tsx:46
+msgid "Custom integrations"
+msgstr "Custom integrations"
+
+#: src/components/pricing/PricingTable.tsx:62
+msgid "Custom themes"
+msgstr "Custom themes"
+
+#: src/components/pricing/PricingTable.tsx:61
+msgid "Custom widget branding"
+msgstr "Custom widget branding"
+
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:281
-msgid "Customer"
-msgstr "Customer"
+#~ msgid "Customer"
+#~ msgstr "Customer"
 
 #: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:336
 msgid "Customer Satisfaction"
@@ -503,6 +581,14 @@ msgstr "Data isolation"
 #: src/app/[locale]/(dashboard)/dashboard/contact-submissions/page.tsx:58
 msgid "Date"
 msgstr "Date"
+
+#: src/components/pricing/PricingTable.tsx:80
+msgid "Dedicated account manager"
+msgstr "Dedicated account manager"
+
+#: src/components/pricing/PricingTable.tsx:63
+msgid "Dedicated infrastructure"
+msgstr "Dedicated infrastructure"
 
 #: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:268
 #: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:433
@@ -613,9 +699,17 @@ msgstr "EMAIL ADDRESS"
 msgid "Email is required."
 msgstr "Email is required."
 
+#: src/components/pricing/PricingTable.tsx:77
+msgid "Email support"
+msgstr "Email support"
+
 #: src/components/landingPage/Contact.tsx:19
 msgid "Email us"
 msgstr "Email us"
+
+#: src/components/pricing/PricingTable.tsx:55
+msgid "Embeddable chat widget"
+msgstr "Embeddable chat widget"
 
 #: src/components/landingPage/Features.tsx:24
 msgid "Embeddable Widget"
@@ -628,6 +722,11 @@ msgstr "Embeddable Widget"
 #: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:177
 msgid "Enter a valid email."
 msgstr "Enter a valid email."
+
+#: src/components/pricing/PricingTable.tsx:150
+#: src/components/pricing/PricingTable.tsx:216
+msgid "Enterprise"
+msgstr "Enterprise"
 
 #: src/components/ui/index.tsx:251
 msgid "Escalated"
@@ -745,9 +844,18 @@ msgstr "From AI pipeline to human inbox — the full support workflow in one pla
 msgid "Full context passed to your agent. Never start from scratch."
 msgstr "Full context passed to your agent. Never start from scratch."
 
+#: src/components/pricing/PricingTable.tsx:53
+msgid "Full pipeline"
+msgstr "Full pipeline"
+
 #: src/components/landingPage/Contact.tsx:90
 msgid "Get in touch"
 msgstr "Get in touch"
+
+#: src/components/pricing/PricingTable.tsx:195
+#: src/components/pricing/PricingTable.tsx:258
+msgid "Get started"
+msgstr "Get started"
 
 #: src/components/Navbar.tsx:104
 #: src/components/Navbar.tsx:120
@@ -770,6 +878,14 @@ msgstr "Google sign-in failed."
 msgid "Head of Support, TechFlow"
 msgstr "Head of Support, TechFlow"
 
+#: src/components/sidebar.tsx:335
+msgid "Help"
+msgstr "Help"
+
+#: src/components/sidebar.tsx:352
+msgid "Help & Support"
+msgstr "Help & Support"
+
 #: src/components/landingPage/Pipeline.tsx:59
 msgid "How it works"
 msgstr "How it works"
@@ -780,7 +896,6 @@ msgid "How It Works"
 msgstr "How It Works"
 
 #: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:89
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:153
 msgid "Human"
 msgstr "Human"
 
@@ -789,8 +904,12 @@ msgid "HUMAN"
 msgstr "HUMAN"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:98
-msgid "Human Agent"
-msgstr "Human Agent"
+#~ msgid "Human Agent"
+#~ msgstr "Human Agent"
+
+#: src/components/pricing/PricingTable.tsx:54
+msgid "Human agent inbox"
+msgstr "Human agent inbox"
 
 #: src/components/landingPage/Features.tsx:36
 msgid "Human Agent Inbox"
@@ -839,10 +958,14 @@ msgid "Joined Date"
 msgstr "Joined Date"
 
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:17
-#: src/components/sidebar.tsx:22
+#: src/components/sidebar.tsx:23
 #: src/features/knowledgebase/Header.tsx:35
 msgid "Knowledge Base"
 msgstr "Knowledge Base"
+
+#: src/components/pricing/PricingTable.tsx:44
+msgid "Knowledge base docs"
+msgstr "Knowledge base docs"
 
 #: src/components/landingPage/Features.tsx:18
 msgid "Knowledge Base RAG"
@@ -876,8 +999,8 @@ msgstr "Log in"
 
 #: src/components/Navbar.tsx:84
 #: src/components/Navbar.tsx:211
-#: src/components/sidebar.tsx:311
-#: src/components/sidebar.tsx:331
+#: src/components/sidebar.tsx:357
+#: src/components/sidebar.tsx:377
 msgid "Logout"
 msgstr "Logout"
 
@@ -934,6 +1057,10 @@ msgstr "Mohamed Rashad"
 #: src/components/pricing/PricingHero.tsx:44
 msgid "Monthly"
 msgstr "Monthly"
+
+#: src/components/pricing/PricingTable.tsx:52
+msgid "Monthly conversations"
+msgstr "Monthly conversations"
 
 #: src/components/landingPage/Features.tsx:42
 msgid "Multi-tenant Ready"
@@ -1023,7 +1150,7 @@ msgstr "Operational Metrics"
 msgid "or"
 msgstr "or"
 
-#: src/components/sidebar.tsx:12
+#: src/components/sidebar.tsx:13
 msgid "Org Admin"
 msgstr "Org Admin"
 
@@ -1065,15 +1192,15 @@ msgstr "Organization Team & Access ({0})"
 #: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:496
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:21
 #: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:361
-#: src/components/sidebar.tsx:35
+#: src/components/sidebar.tsx:36
 msgid "Organizations"
 msgstr "Organizations"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:482
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:13
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:20
-#: src/components/sidebar.tsx:18
-#: src/components/sidebar.tsx:29
+#: src/components/sidebar.tsx:19
+#: src/components/sidebar.tsx:30
 msgid "Overview"
 msgstr "Overview"
 
@@ -1125,6 +1252,11 @@ msgstr "Platform Administration"
 msgid "Platform Status"
 msgstr "Platform Status"
 
+#: src/components/pricing/PricingTable.tsx:142
+#: src/components/pricing/PricingTable.tsx:215
+msgid "Popular"
+msgstr "Popular"
+
 #: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:443
 msgid "Prev"
 msgstr "Prev"
@@ -1145,9 +1277,18 @@ msgstr "Pricing"
 msgid "PRIMARY AI"
 msgstr "PRIMARY AI"
 
+#: src/components/pricing/PricingTable.tsx:78
+msgid "Priority support"
+msgstr "Priority support"
+
 #: src/components/landingPage/Footer.tsx:22
 msgid "Privacy Policy"
 msgstr "Privacy Policy"
+
+#: src/components/pricing/PricingTable.tsx:140
+#: src/components/pricing/PricingTable.tsx:215
+msgid "Pro"
+msgstr "Pro"
 
 #: src/features/knowledgebase/Header.tsx:18
 msgid "Processing"
@@ -1160,7 +1301,7 @@ msgstr "Product"
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:23
 #: src/components/ProfilePage.tsx:55
 #: src/components/ProfilePage.tsx:91
-#: src/components/sidebar.tsx:42
+#: src/components/sidebar.tsx:43
 msgid "Profile"
 msgstr "Profile"
 
@@ -1191,8 +1332,8 @@ msgid "Real-time Analytics"
 msgstr "Real-time Analytics"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:269
-msgid "Recent Conversations"
-msgstr "Recent Conversations"
+#~ msgid "Recent Conversations"
+#~ msgstr "Recent Conversations"
 
 #: src/components/Profile/Passwordsection.tsx:127
 msgid "Repeat password"
@@ -1288,7 +1429,7 @@ msgid "Sending…"
 msgstr "Sending…"
 
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:22
-#: src/components/sidebar.tsx:40
+#: src/components/sidebar.tsx:41
 msgid "Settings"
 msgstr "Settings"
 
@@ -1331,6 +1472,10 @@ msgstr "Simple, transparent pricing"
 msgid "Size / Info"
 msgstr "Size / Info"
 
+#: src/components/pricing/PricingTable.tsx:79
+msgid "SLA & uptime guarantee"
+msgstr "SLA & uptime guarantee"
+
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:183
 #: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:142
 msgid "Slug"
@@ -1345,9 +1490,18 @@ msgstr "Slug is required."
 msgid "Speed first"
 msgstr "Speed first"
 
+#: src/components/pricing/PricingTable.tsx:45
+msgid "SSO / SAML login"
+msgstr "SSO / SAML login"
+
 #: src/components/pricing/PricingHero.tsx:26
 msgid "Start for free. Upgrade when you need more."
 msgstr "Start for free. Upgrade when you need more."
+
+#: src/components/pricing/PricingTable.tsx:200
+#: src/components/pricing/PricingTable.tsx:259
+msgid "Start free trial"
+msgstr "Start free trial"
 
 #: src/components/landingPage/Hero.tsx:81
 msgid "Start Free Trial"
@@ -1356,6 +1510,11 @@ msgstr "Start Free Trial"
 #: src/app/[locale]/(marketing)/page.tsx:59
 msgid "Start free. No credit card required."
 msgstr "Start free. No credit card required."
+
+#: src/components/pricing/PricingTable.tsx:133
+#: src/components/pricing/PricingTable.tsx:214
+msgid "Starter"
+msgstr "Starter"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:654
 msgid "Stats"
@@ -1366,7 +1525,6 @@ msgstr "Stats"
 #: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:411
 #: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:399
 #: src/app/[locale]/(dashboard)/dashboard/organizations/page.tsx:419
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:281
 #: src/components/landingPage/Footer.tsx:22
 #: src/features/knowledgebase/DocumentList.tsx:71
 msgid "Status"
@@ -1389,11 +1547,15 @@ msgstr "Strong"
 msgid "Subscription Plan"
 msgstr "Subscription Plan"
 
-#: src/components/sidebar.tsx:14
+#: src/components/sidebar.tsx:15
 msgid "Super Admin"
 msgstr "Super Admin"
 
-#: src/components/sidebar.tsx:13
+#: src/components/pricing/PricingTable.tsx:75
+msgid "Support"
+msgstr "Support"
+
+#: src/components/sidebar.tsx:14
 msgid "Support Agent"
 msgstr "Support Agent"
 
@@ -1443,9 +1605,17 @@ msgid "Talk to sales"
 msgstr "Talk to sales"
 
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:15
-#: src/components/sidebar.tsx:25
+#: src/components/sidebar.tsx:26
 msgid "Team"
 msgstr "Team"
+
+#: src/components/pricing/PricingTable.tsx:41
+msgid "Team & access"
+msgstr "Team & access"
+
+#: src/components/pricing/PricingTable.tsx:43
+msgid "Team members"
+msgstr "Team members"
 
 #: src/components/landingPage/Customerstories.tsx:57
 msgid "Teams love SupportNest"
@@ -1487,7 +1657,7 @@ msgstr "This will permanently delete <0>{0}</0> and all data. This action cannot
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:692
 #: src/app/[locale]/(dashboard)/dashboard/layout.tsx:16
-#: src/components/sidebar.tsx:19
+#: src/components/sidebar.tsx:20
 msgid "Tickets"
 msgstr "Tickets"
 
@@ -1500,14 +1670,14 @@ msgid "Tickets resolved automatically"
 msgstr "Tickets resolved automatically"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:281
-msgid "Tier"
-msgstr "Tier"
+#~ msgid "Tier"
+#~ msgstr "Tier"
 
 #: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:78
 msgid "Tier 0 (Auto)"
 msgstr "Tier 0 (Auto)"
 
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:151
+#: src/components/pricing/PricingTable.tsx:53
 msgid "Tier 1"
 msgstr "Tier 1"
 
@@ -1516,36 +1686,40 @@ msgid "TIER 1"
 msgstr "TIER 1"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:89
-msgid "Tier 1 — AI Instant"
-msgstr "Tier 1 — AI Instant"
+#~ msgid "Tier 1 — AI Instant"
+#~ msgstr "Tier 1 — AI Instant"
 
 #: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:80
 msgid "Tier 1 (AI)"
 msgstr "Tier 1 (AI)"
+
+#: src/components/pricing/PricingTable.tsx:53
+msgid "Tier 1 + 2"
+msgstr "Tier 1 + 2"
 
 #: src/components/landingPage/Features.tsx:13
 msgid "Tier 1 AI resolves common questions in under 2 seconds using your knowledge base."
 msgstr "Tier 1 AI resolves common questions in under 2 seconds using your knowledge base."
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:152
-msgid "Tier 2"
-msgstr "Tier 2"
+#~ msgid "Tier 2"
+#~ msgstr "Tier 2"
 
 #: src/components/landingPage/Pipeline.tsx:33
 msgid "TIER 2"
 msgstr "TIER 2"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:94
-msgid "Tier 2 — AI Complex"
-msgstr "Tier 2 — AI Complex"
+#~ msgid "Tier 2 — AI Complex"
+#~ msgstr "Tier 2 — AI Complex"
 
 #: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:85
 msgid "Tier 2 (Deep AI)"
 msgstr "Tier 2 (Deep AI)"
 
 #: src/app/[locale]/(dashboard)/dashboard/page.tsx:281
-msgid "Time"
-msgstr "Time"
+#~ msgid "Time"
+#~ msgstr "Time"
 
 #: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:265
 msgid "Today"
@@ -1561,7 +1735,6 @@ msgstr "Total"
 
 #: src/app/[locale]/(dashboard)/dashboard/admin/page.tsx:160
 #: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:283
-#: src/app/[locale]/(dashboard)/dashboard/page.tsx:218
 msgid "Total Conversations"
 msgstr "Total Conversations"
 
@@ -1595,9 +1768,24 @@ msgstr "Type"
 msgid "Type <0>{0}</0> to confirm"
 msgstr "Type <0>{0}</0> to confirm"
 
+#: src/components/pricing/PricingTable.tsx:43
+#: src/components/pricing/PricingTable.tsx:44
+#: src/components/pricing/PricingTable.tsx:52
+#: src/components/pricing/PricingTable.tsx:52
+msgid "Unlimited"
+msgstr "Unlimited"
+
 #: src/app/[locale]/(dashboard)/dashboard/analytics/page.tsx:80
 #~ msgid "Unresolved"
 #~ msgstr "Unresolved"
+
+#: src/components/pricing/PricingTable.tsx:43
+msgid "Up to 15"
+msgstr "Up to 15"
+
+#: src/components/pricing/PricingTable.tsx:43
+msgid "Up to 3"
+msgstr "Up to 3"
 
 #. placeholder {0}: org.name
 #: src/app/[locale]/(dashboard)/dashboard/admin/organizations/page.tsx:266
@@ -1728,6 +1916,6 @@ msgstr "Your full name"
 msgid "Your name *"
 msgstr "Your name *"
 
-#: src/components/sidebar.tsx:134
+#: src/components/sidebar.tsx:156
 msgid "Your workspace"
 msgstr "Your workspace"

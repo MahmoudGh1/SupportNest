@@ -3,7 +3,7 @@ import upload from "src/middlewares/upload.middleware.js";
 import * as knowledgeController from "../controllers/knowledge.controller.js";
 import { getMyOrgController, updateOrgProfileController, updateWidgetConfigController } from "src/controllers/organization.controller.js";
 import { authMiddleware } from "src/middlewares/auth.middleware.js";
-import { getActiveToolsForOrg, getAllToolsForOrg, getToolsByDocument, toggleTool } from "src/controllers/tool.controller.js";
+import { getActiveToolsForOrg, getAllToolsForOrg, getPublicToolsForOrg, getToolsByDocument, toggleTool, toggleToolVisibility } from "src/controllers/tool.controller.js";
 
 const router: Router = express.Router();
 
@@ -30,5 +30,9 @@ router.get("/:organizationId/knowledge", knowledgeController.getKnowledgeDocumen
 router.delete("/:organizationId/knowledge/:docId", knowledgeController.deleteKnowledgeDocument);
 
 router.get("/tools/all", getAllToolsForOrg);
+
+router.get("/tools/public", getPublicToolsForOrg);
+
+router.patch("/tools/:toolId/visibility", toggleToolVisibility);
 
 export default router;

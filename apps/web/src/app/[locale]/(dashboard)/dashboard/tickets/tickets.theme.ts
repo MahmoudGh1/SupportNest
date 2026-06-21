@@ -1,5 +1,6 @@
 // ─── THEME TOKENS ──────────────────────────────────────────────────────────
 export const T = {
+	warning: "#FFCC00",
 	surface: "var(--surface,    #ffffff)",
 	surfaceSub: "var(--surface-sub, #f9f8ff)",
 	pageBg: "var(--page-bg,    #f4f3fb)",

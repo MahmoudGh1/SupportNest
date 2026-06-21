@@ -7,7 +7,14 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"dev": "tsx watch src/index.ts",
 		"dev:custom": "tsx watch --env-file=.env.development src/index.ts",
-		"postinstall": "prisma generate"
+		"postinstall": "prisma generate",
+		"prisma:prod:status": "dotenv -e .env.production -- prisma migrate status",
+		"prisma:prod:deploy": "dotenv -e .env.production -- prisma migrate deploy",
+		"prisma:prod:studio": "dotenv -e .env.production -- prisma studio",
+		"prisma:dev:studio": "dotenv -e .env.development -- prisma studio",
+		"db:migrate": "prisma migrate dev",
+		"db:deploy": "dotenv -e .env.production -- prisma migrate deploy",
+		"db:status": "dotenv -e .env.production -- prisma migrate status"
 	},
 	"prisma": {
 		"seed": "tsx --env-file=.env.development prisma/seed.ts"
@@ -75,6 +82,7 @@
 		"@types/swagger-parser": "^7.0.1",
 		"@types/swagger-ui-express": "^4.1.8",
 		"@types/ws": "^8.18.1",
+		"dotenv-cli": "^11.0.0",
 		"prisma": "^7.8.0",
 		"tsx": "^4.22.3",
 		"typescript": "^6.0.3"

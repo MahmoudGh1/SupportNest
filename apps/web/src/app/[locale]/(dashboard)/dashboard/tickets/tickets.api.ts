@@ -101,6 +101,7 @@ export async function updateTicket(
 	ticketId: string,
 	input: UpdateTicketInput,
 ): Promise<TicketDetail> {
+	console.log(input);
 	const res = await fetch(`${BASE_URL}/tickets/${ticketId}`, {
 		method: "PATCH",
 		credentials: "include",
@@ -115,4 +116,92 @@ export async function updateTicket(
 	}
 	const json: ApiEnvelope<{ ticket: TicketDetail }> = await res.json();
 	return json.data.ticket;
+}
+
+export type TicketSummary = {
+	id: string;
+	status: TicketDetail["status"];
+	priority: TicketDetail["priority"];
+	resolvedAt: string | null;
+	createdAt: string;
+	updatedAt: string;
+	assignedTo: AgentLite | null;
+	conversation: {
+		id: string;
+		conversationStatus: "ACTIVE" | "ESCALATED" | "CLOSED";
+		customer: {
+			id: string;
+			name: string | null;
+			email: string | null;
+			isAnonymous: boolean;
+		};
+		messages: { content: string }[]; // 0 or 1 item — the first customer message
+	};
+};
+
+export type TicketCounts = {
+	all: number;
+	open: number;
+	in_progress: number;
+	resolved: number;
+	mine: number;
+	unassigned: number;
+};
+
+export type TicketListFilters = {
+	status?: TicketDetail["status"];
+	priority?: TicketDetail["priority"];
+	assignedToId?: string; // pass "unassigned" as the sentinel value
+	page?: number;
+	limit?: number;
+};
+
+export async function getTickets(
+	filters: TicketListFilters = {},
+	signal?: AbortSignal,
+): Promise<{
+	tickets: TicketSummary[];
+	meta: { total: number; page: number; limit: number; totalPages: number };
+}> {
+	const params = new URLSearchParams();
+	if (filters.status) params.set("status", filters.status);
+	if (filters.priority) params.set("priority", filters.priority);
+	if (filters.assignedToId) params.set("assignedToId", filters.assignedToId);
+	if (filters.page) params.set("page", String(filters.page));
+	if (filters.limit) params.set("limit", String(filters.limit));
+
+	const res = await fetch(`${BASE_URL}/tickets?${params.toString()}`, {
+		method: "GET",
+		credentials: "include",
+		signal,
+	});
+
+	if (!res.ok) {
+		const body = await res.json().catch(() => null);
+		throw new Error(
+			body?.message ?? `Failed to fetch tickets (${res.status})`,
+		);
+	}
+
+	const json: ApiEnvelope<{
+		tickets: TicketSummary[];
+		meta: { total: number; page: number; limit: number; totalPages: number };
+	}> = await res.json();
+	return json.data;
+}
+
+export async function getTicketCounts(
+	signal?: AbortSignal,
+): Promise<TicketCounts> {
+	const res = await fetch(`${BASE_URL}/tickets/counts`, {
+		method: "GET",
+		credentials: "include",
+		signal,
+	});
+
+	if (!res.ok)
+		throw new Error(`Failed to fetch ticket counts (${res.status})`);
+
+	const json: ApiEnvelope<TicketCounts> = await res.json();
+	return json.data;
 }
