@@ -13,6 +13,7 @@ import { handleMessageSend } from "src/websocket/handlers/message.handler.js";
 import { activeSockets } from "src/websocket/ws.map.js";
 import * as conversationService from "src/services/conversations.service.js";
 import * as widgetServerSdk from "src/config/widget-server-sdk.js";
+import { normalizeOrigin } from "src/utils/normalizeOrigin.util.js";
 
 export function send(socket: AuthenticatedSocket, envelope: WsEnvelope) {
 	socket.send(JSON.stringify(envelope));
@@ -44,16 +45,15 @@ async function connectionAuth(
 		include: { organization: true },
 	});
 
-	if (!isKey || !isKey.isActive || !isKey.organizationId) {
+	if (!isKey || !isKey.isActive || !isKey.organization.isActive) {
 		send(socket, {
 			type: "error",
 			payload: {
 				message: "Invalid API key. your organizations is not authorized.",
 			},
 		});
-
-		socket.close();
-		return;
+		socket.close(4401, "Unauthorized");
+		return false;
 	}
 
 	console.log("Key exists");
@@ -62,29 +62,47 @@ async function connectionAuth(
 
 	const origin =
 		typeof req.headers.origin == "string" ? req.headers.origin : undefined;
+	console.log(origin);
 
-	const isAllowedOrigin: boolean =
-		origin !== undefined && isKey.allowedOrigins.includes(origin);
+	const normalizedIncoming = normalizeOrigin(origin);
 
-	// if (!isAllowedOrigin) {
-	// 	return null;
-	// }
+	const isAllowedOrigin =
+		normalizedIncoming !== null &&
+		isKey.allowedOrigins.some(
+			(allowed) => normalizeOrigin(allowed) === normalizedIncoming,
+		);
+
+	if (!isAllowedOrigin) {
+		send(socket, {
+			type: "error",
+			payload: { message: "Origin not allowed" },
+		});
+		socket.close(4401, "Unauthorized");
+		return false;
+	}
 
 	let customer = null;
 
 	if (customerJwt) {
+		let verifyError: any = null;
 		let customerPayload: any = await widgetServerSdk.verifyToken(
 			isKey.organization.widgetSecret,
 			customerJwt,
 			(err: any) => {
-				send(socket, {
-					type: "error",
-					payload: { message: err.message || "not a valid customerJwt" },
-				});
-				socket.close();
-				return;
+				verifyError = err;
 			},
 		);
+
+		if (verifyError || !customerPayload) {
+			send(socket, {
+				type: "error",
+				payload: {
+					message: verifyError?.message || "not a valid customerJwt",
+				},
+			});
+			socket.close(4401, "Unauthorized");
+			return false;
+		}
 
 		const { userId, email } = customerPayload;
 
@@ -147,6 +165,15 @@ async function connectionAuth(
 		apiKeyId: isKey.id,
 	};
 
+	const existing = activeSockets.get(socket.meta.conversationId);
+	if (
+		existing &&
+		existing !== socket &&
+		existing.readyState === existing.OPEN
+	) {
+		existing.close(4000, "Replaced by new connection");
+	}
+
 	activeSockets.set(socket.meta.conversationId, socket);
 
 	send(socket, {
@@ -161,6 +188,8 @@ async function connectionAuth(
 			widgetConfig: isKey.organization.widgetConfig,
 		},
 	});
+
+	return true;
 }
 
 export function setupWebSocket(wss: WebSocketServer) {
@@ -180,14 +209,29 @@ export function setupWebSocket(wss: WebSocketServer) {
 
 				if (!socket.authenticated) {
 					if (envelope.type === "auth") {
-						clearTimeout(authTimeout);
-						await connectionAuth(socket, envelope.payload, req);
-					} else {
-						send(socket, {
-							type: "error",
-							payload: { message: "Not authenticated" },
-						});
-						socket.close();
+						socket.authAttempts = (socket.authAttempts ?? 0) + 1;
+						if (socket.authAttempts > 3) {
+							send(socket, {
+								type: "error",
+								payload: { message: "Too many attempts" },
+							});
+							clearTimeout(authTimeout);
+							socket.close(4401, "Unauthorized");
+							return;
+						}
+
+						const ok = await connectionAuth(socket, envelope.payload, req);
+
+						if (ok) {
+							clearTimeout(authTimeout);
+						} else {
+							send(socket, {
+								type: "error",
+								payload: { message: "Authentication failed" },
+							});
+							// leave authTimeout running — it'll close the socket at 5s if they don't succeed
+						}
+						return;
 					}
 					return;
 				}

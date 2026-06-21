@@ -26,6 +26,7 @@ export interface SocketMeta {
 export interface AuthenticatedSocket extends WebSocket {
 	meta?: SocketMeta;
 	authenticated?: boolean;
+	authAttempts: number;
 }
 
 export type WsSendMessagePayload = {
