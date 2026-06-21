@@ -11,7 +11,7 @@ const API_BASE =
 // so credentials: "include" is what actually authenticates this request.
 // No Authorization header needed here at all.
 async function apiFetch(path: string, options: RequestInit = {}) {
-  const res = await fetch(`${API_BASE}/api/v1${path}`, {
+  const res = await fetch(`${API_BASE}/${path}`, {
     ...options,
     credentials: "include",
     headers: {
