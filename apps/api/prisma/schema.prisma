@@ -94,7 +94,6 @@ model ToolDefinition {
   documentId          String?            @db.Uuid
   parameters          Json
   responseSchema      Json
-  isPublic            Boolean            @default(false)
   isActive            Boolean            @default(true)
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
