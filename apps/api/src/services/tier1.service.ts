@@ -219,7 +219,7 @@ ${toolDescriptions}
 INSTRUCTIONS:
 - Read the customer's question carefully.
 - If a tool matches, call it. Only call tools that are relevant to the question.
-- If no tool matches, respond with this exact JSON and nothing else:
+- If no tool matches, respond with JSON Only no markdown, no explaination and in this exact format:
   { "agentText": "I don't have access to that information.", "confidenceScore": 0 }
 - Never make up data. Never call a tool with invented arguments.
 - Always base your response on real tool output.
@@ -264,8 +264,8 @@ INSTRUCTIONS:
 	const resolvedResults = await Promise.all(toolPromises);
 	const toolResults = resolvedResults.filter((res): res is string => res !== null);
 
-	// 7. Second LLM call — Enforce native JSON output format if supported by provider
-	const jsonModel = model.withStructuredOutput(
+	// 7. Second LLM call — Enforce native  output format if supported by provider
+	const Model = model.withStructuredOutput(
 		z.object({
 			agentText: z.string(),
 			confidenceScore: z.number(),
@@ -273,7 +273,7 @@ INSTRUCTIONS:
 		{ name: "tier1_response" },
 	);
 
-	const secondResponse = await jsonModel.invoke([
+	const secondResponse = await Model.invoke([
 		new SystemMessage(`
 You are a customer support agent. Use the tool results below to write a reply.
 
@@ -314,7 +314,7 @@ LINKS:
 	- If the customer asks for a photo or image of a pet, include the image URL from the tool result in your response using this exact format on its own line: [IMAGE: <url>]
 	- Only use URLs that exist in the tool results. Never invent URLs.
 
-Respond ONLY with valid JSON matching this schema:
+respond with JSON Only no markdown, no explaination and in this exact format:
 { "agentText": string, "confidenceScore": number }
 
 confidenceScore rules:
