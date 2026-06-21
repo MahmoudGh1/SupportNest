@@ -1112,4 +1112,22 @@ export const api = {
 		if (!res.ok) throw new Error(data.error ?? "Failed to accept invitation with Google");
 		return data;
 	},
+
+async submitHelpRequest(data: { subject: string; message: string }): Promise<void> {
+  const session = getSession();
+  const BASE = BASE_URL.replace("/api/v1", "");
+  const res = await fetch(`${BASE}/api/contact/help`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(session?.token ? { Authorization: `Bearer ${session.token}` } : {}),
+    },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? "Failed to send help request");
+  }
+}
 };
