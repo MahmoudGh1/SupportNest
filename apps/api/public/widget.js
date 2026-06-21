@@ -74,9 +74,19 @@ function connect() {
 			console.error("[SupportNest] Failed to parse message:", e);
 		}
 	};
+	const FATAL_CLOSE_CODES = new Set([4401]);
 
 	ws.onclose = function () {
 		isAuthenticated = false;
+
+		if (FATAL_CLOSE_CODES.has(event.code)) {
+			console.error(
+				"[SupportNest] Connection rejected, giving up:",
+				event.reason,
+			);
+			return; // no reconnect — this isn't a network blip, it's a config/auth problem
+		}
+
 		setTimeout(connect, reconnectDelay);
 		reconnectDelay = Math.min(reconnectDelay * 2, 30000);
 	};
