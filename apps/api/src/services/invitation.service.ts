@@ -191,7 +191,7 @@ export async function acceptInvitationService(token: string, firstName: string, 
 }
 
 export async function getTeamService(organizationId: string) {
-	const [members, pendingInvitations] = await Promise.all([
+	const [members, pendingInvitations, ticketCounts] = await Promise.all([
 		prisma.user.findMany({
 			where: { organizationId },
 			select: {
@@ -201,6 +201,7 @@ export async function getTeamService(organizationId: string) {
 				email: true,
 				role: true,
 				isActive: true,
+				scheduledDeletionAt: true,
 				createdAt: true,
 			},
 			orderBy: { createdAt: "asc" },
@@ -224,9 +225,30 @@ export async function getTeamService(organizationId: string) {
 			},
 			orderBy: { createdAt: "desc" },
 		}),
+		prisma.ticket.groupBy({
+			by: ["assignedToId", "status"],
+			where: { organizationId, assignedToId: { not: null } },
+			_count: true,
+		}),
 	]);
 
-	return { members, pendingInvitations };
+	const membersWithStats = members.map((member) => {
+		const rows = ticketCounts.filter((t) => t.assignedToId === member.id);
+		const resolved = rows.find((t) => t.status === "RESOLVED")?._count ?? 0;
+		const open = rows.find((t) => t.status === "OPEN")?._count ?? 0;
+		const inProgress = rows.find((t) => t.status === "IN_PROGRESS")?._count ?? 0;
+
+		return {
+			...member,
+			ticketStats: {
+				totalAssigned: resolved + open + inProgress,
+				resolved,
+				unresolved: open + inProgress,
+			},
+		};
+	});
+
+	return { members, membersWithStats, pendingInvitations };
 }
 
 export async function revokeInvitationService(invitationId: string, organizationId: string): Promise<void> {

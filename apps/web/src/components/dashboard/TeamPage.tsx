@@ -47,6 +47,12 @@ interface Member {
 	role: string;
 	isActive: boolean;
 	createdAt: string;
+	scheduledDeletionAt: string | null;
+	ticketStats: {
+		totalAssigned: number;
+		resolved: number;
+		unresolved: number;
+	};
 }
 
 interface PendingInvitation {
@@ -438,6 +444,239 @@ function InviteModal({
 	);
 }
 
+
+
+// ─── REMOVE AGENT MODAL ───────────────────────────────────────────────────────
+
+function RemoveAgentModal({
+	agent,
+	orgName,
+	onClose,
+	onSuccess,
+}: {
+	agent: Member;
+	orgName: string;
+	onClose: () => void;
+	onSuccess: () => void;
+}) {
+	const [confirmText, setConfirmText] = useState("");
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState("");
+	const [focused, setFocused] = useState(false);
+
+	const handleConfirm = async () => {
+		if (!confirmText.trim()) {
+			setError("Organization name is required.");
+			return;
+		}
+		setError("");
+		setLoading(true);
+		try {
+			await api.scheduleAgentRemoval(agent.id, confirmText.trim());
+			onSuccess();
+			onClose();
+		} catch (e: any) {
+			setError(e.message ?? "Failed to schedule removal.");
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	return (
+		<>
+			<div
+				onClick={onClose}
+				style={{
+					position: "fixed",
+					inset: 0,
+					background: "rgba(10, 10, 20, 0.6)",
+					backdropFilter: "blur(6px)",
+					zIndex: 100,
+				}}
+			/>
+
+			<div
+				className="responsive-modal"
+				style={{
+					position: "fixed",
+					top: "50%",
+					left: "50%",
+					transform: "translate(-50%, -50%)",
+					zIndex: 101,
+					background: T.panel,
+					backdropFilter: "blur(20px)",
+					border: `1px solid ${T.border2}`,
+					borderRadius: T.radiusLg,
+					padding: "32px",
+					width: "calc(100% - 32px)",
+					maxWidth: 420,
+					fontFamily: T.font,
+					boxSizing: "border-box",
+					boxShadow: "0 24px 50px -12px rgba(0, 0, 0, 0.5)",
+				}}
+			>
+				<div
+					style={{
+						display: "flex",
+						justifyContent: "space-between",
+						alignItems: "flex-start",
+						marginBottom: 24,
+					}}
+				>
+					<div>
+						<h2
+							style={{
+								fontSize: 18,
+								fontWeight: 700,
+								color: T.textPrimary,
+								margin: "0 0 6px",
+								letterSpacing: "-0.4px",
+							}}
+						>
+							Remove {agent.firstName} {agent.lastName}
+						</h2>
+						<p
+							style={{
+								fontSize: 13,
+								color: T.textSecondary,
+								margin: 0,
+								lineHeight: 1.5,
+								opacity: 0.8,
+							}}
+						>
+							They'll be removed in 3 days. Their assigned tickets will return to the unassigned pool. They'll be notified by email and can be restored anytime before then.
+						</p>
+					</div>
+					<button
+						onClick={onClose}
+						style={{
+							background: "none",
+							border: "none",
+							cursor: "pointer",
+							color: T.textSecondary,
+							padding: 4,
+							display: "flex",
+							borderRadius: T.radiusSm,
+						}}
+					>
+						<i className="ti ti-x" style={{ fontSize: 18 }} />
+					</button>
+				</div>
+
+				<div
+					style={{
+						display: "flex",
+						flexDirection: "column",
+						gap: 6,
+						marginBottom: 20,
+					}}
+				>
+					<label
+						style={{
+							fontSize: 13,
+							fontWeight: 500,
+							color: T.textPrimary,
+							opacity: 0.8,
+						}}
+					>
+						Type <strong style={{ color: T.textPrimary }}>{orgName}</strong> to confirm
+					</label>
+					<input
+						type="text"
+						value={confirmText}
+						onChange={(e) => setConfirmText(e.target.value)}
+						onFocus={() => setFocused(true)}
+						onBlur={() => setFocused(false)}
+						onKeyDown={(e) => e.key === "Enter" && handleConfirm()}
+						placeholder={orgName}
+						autoFocus
+						style={{
+							width: "100%",
+							boxSizing: "border-box",
+							padding: "12px 14px",
+							fontSize: 14,
+							fontFamily: T.font,
+							color: T.textPrimary,
+							background: T.inputBg,
+							border: `1.5px solid ${error ? T.danger : focused ? T.inputFocus : T.inputBorder}`,
+							borderRadius: T.radius,
+							outline: "none",
+							transition: "border-color .15s, background-color .15s",
+						}}
+					/>
+					{error && (
+						<span
+							style={{
+								fontSize: 12,
+								color: T.danger,
+								display: "flex",
+								gap: 5,
+								alignItems: "center",
+							}}
+						>
+							<i className="ti ti-alert-circle" style={{ fontSize: 13 }} />
+							{error}
+						</span>
+					)}
+				</div>
+
+				<div style={{ display: "flex", gap: 10 }}>
+					<button
+						onClick={onClose}
+						style={{
+							flex: 1,
+							padding: "11px",
+							background: "transparent",
+							color: T.textSecondary,
+							border: `1.5px solid ${T.border2}`,
+							borderRadius: T.radius,
+							fontSize: 14,
+							fontWeight: 500,
+							fontFamily: T.font,
+							cursor: "pointer",
+						}}
+					>
+						Cancel
+					</button>
+					<button
+						onClick={handleConfirm}
+						disabled={loading}
+						style={{
+							flex: 2,
+							padding: "11px",
+							background: T.danger,
+							color: "#FFF",
+							border: "none",
+							borderRadius: T.radius,
+							fontSize: 14,
+							fontWeight: 600,
+							fontFamily: T.font,
+							cursor: loading ? "not-allowed" : "pointer",
+							opacity: loading ? 0.7 : 1,
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							gap: 8,
+							transition: "opacity .15s",
+						}}
+					>
+						{loading ? (
+							<>
+								<i className="ti ti-loader-2" style={{ fontSize: 15, animation: "spin 0.8s linear infinite" }} />{" "}
+								Scheduling…
+							</>
+						) : (
+							<>
+								<i className="ti ti-user-x" style={{ fontSize: 15 }} /> Schedule Removal
+							</>
+						)}
+					</button>
+				</div>
+			</div>
+		</>
+	);
+}
+
 // ─── EMPTY STATE ──────────────────────────────────────────────────────────────
 
 function EmptyState({ onInvite }: { onInvite: () => void }) {
@@ -530,6 +769,8 @@ export function TeamPage() {
 	const [showModal, setShowModal] = useState(false);
 	const [revoking, setRevoking] = useState<string | null>(null);
 	const [successMsg, setSuccessMsg] = useState("");
+	const [removeTarget, setRemoveTarget] = useState<Member | null>(null);
+	const [cancelingRemoval, setCancelingRemoval] = useState<string | null>(null);
 
 	const fetchTeam = useCallback(async () => {
 		try {
@@ -551,6 +792,26 @@ export function TeamPage() {
 		setSuccessMsg("Invitation sent successfully!");
 		fetchTeam();
 		setTimeout(() => setSuccessMsg(""), 4000);
+	};
+
+	const handleRemovalScheduled = () => {
+		setSuccessMsg("Removal scheduled. The agent has been notified.");
+		fetchTeam();
+		setTimeout(() => setSuccessMsg(""), 4000);
+	};
+
+	const handleCancelRemoval = async (agentId: string) => {
+		setCancelingRemoval(agentId);
+		try {
+			await api.cancelAgentRemoval(agentId);
+			setSuccessMsg("Removal cancelled.");
+			fetchTeam();
+			setTimeout(() => setSuccessMsg(""), 4000);
+		} catch (e: any) {
+			setError(e.message ?? "Failed to cancel removal.");
+		} finally {
+			setCancelingRemoval(null);
+		}
 	};
 
 	const handleRevoke = async (id: string) => {
@@ -886,6 +1147,20 @@ export function TeamPage() {
 										<div style={{ fontSize: 12, color: T.textSecondary, marginTop: 2 }}>
 											{member.email}
 										</div>
+										{member.role === "SUPPORT_AGENT" && (
+											<div style={{ fontSize: 11, color: T.textSecondary, marginTop: 3, opacity: 0.75 }}>
+												{member.ticketStats?.totalAssigned ?? 0} ticket{member.ticketStats?.totalAssigned !== 1 ? "s" : ""} ·{" "}
+												<span style={{ color: T.green }}>{member.ticketStats?.resolved ?? 0} resolved</span>
+												{" · "}
+												<span style={{ color: T.amber }}>{member.ticketStats?.unresolved ?? 0} open</span>
+											</div>
+										)}
+										{member.scheduledDeletionAt && (
+											<div style={{ fontSize: 11, color: T.danger, marginTop: 3, display: "flex", alignItems: "center", gap: 4 }}>
+												<i className="ti ti-clock-exclamation" style={{ fontSize: 12 }} />
+												Removal scheduled for {formatDate(member.scheduledDeletionAt)}
+											</div>
+										)}
 									</div>
 								</div>
 
@@ -902,7 +1177,68 @@ export function TeamPage() {
 									{formatDate(member.createdAt)}
 								</span>
 
-								<div />
+								{/* Remove / Cancel removal action */}
+								<div className="mobile-action-cell" style={{ display: "flex", justifyContent: "flex-end" }}>
+									{member.role === "SUPPORT_AGENT" &&
+										(member.scheduledDeletionAt ? (
+											<button
+												onClick={() => handleCancelRemoval(member.id)}
+												disabled={cancelingRemoval === member.id}
+												title="Cancel scheduled removal"
+												style={{
+													background: "none",
+													border: `1px solid ${T.border2}`,
+													borderRadius: T.radiusSm,
+													color: cancelingRemoval === member.id ? T.textSecondary : T.green,
+													cursor: cancelingRemoval === member.id ? "not-allowed" : "pointer",
+													padding: "5px 10px",
+													fontSize: 12,
+													fontFamily: T.font,
+													display: "flex",
+													alignItems: "center",
+													gap: 5,
+													transition: "border-color .15s, color .15s, background-color .15s",
+												}}
+											>
+												{cancelingRemoval === member.id ? (
+													<i className="ti ti-loader-2" style={{ fontSize: 13, animation: "spin 0.8s linear infinite" }} />
+												) : (
+													<i className="ti ti-rotate" style={{ fontSize: 13 }} />
+												)}
+												Restore
+											</button>
+										) : (
+											<button
+												onClick={() => setRemoveTarget(member)}
+												title="Remove from organization"
+												style={{
+													background: "none",
+													border: `1px solid ${T.border2}`,
+													borderRadius: T.radiusSm,
+													color: T.danger,
+													cursor: "pointer",
+													padding: "5px 10px",
+													fontSize: 12,
+													fontFamily: T.font,
+													display: "flex",
+													alignItems: "center",
+													gap: 5,
+													transition: "border-color .15s, color .15s, background-color .15s",
+												}}
+												onMouseEnter={(e) => {
+													(e.currentTarget as HTMLElement).style.borderColor = T.dangerBorder;
+													(e.currentTarget as HTMLElement).style.background = T.dangerBg;
+												}}
+												onMouseLeave={(e) => {
+													(e.currentTarget as HTMLElement).style.borderColor = T.border2;
+													(e.currentTarget as HTMLElement).style.background = "none";
+												}}
+											>
+												<i className="ti ti-user-x" style={{ fontSize: 13 }} />
+												Remove
+											</button>
+										))}
+								</div>
 							</div>
 						))}
 
@@ -1025,6 +1361,15 @@ export function TeamPage() {
 				<InviteModal
 					onClose={() => setShowModal(false)}
 					onSuccess={handleInviteSuccess}
+				/>
+			)}
+
+			{removeTarget && (
+				<RemoveAgentModal
+					agent={removeTarget}
+					orgName={user?.orgName ?? ""}
+					onClose={() => setRemoveTarget(null)}
+					onSuccess={handleRemovalScheduled}
 				/>
 			)}
 		</>

@@ -160,3 +160,42 @@ export async function sendPasswordResetEmail(toEmail: string, resetUrl: string):
         `,
 	});
 }
+
+export async function sendAgentRemovalScheduledEmail(toEmail: string, agentFirstName: string, orgName: string, removalAt: Date): Promise<void> {
+	await transporter.sendMail({
+		from: `"SupportNest Admin" <${process.env.GMAIL_USER}>`,
+		to: toEmail,
+		subject: `Your access to ${orgName} on SupportNest will be removed`,
+		html: `
+      <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; padding: 32px 24px;">
+        <h2 style="color: #c0392b; margin-bottom: 16px;">Account Removal Scheduled</h2>
+        <p>Hi <strong>${agentFirstName}</strong>,</p>
+        <p>An administrator has scheduled the removal of your support agent access to <strong>${orgName}</strong> on SupportNest.</p>
+        <div style="background-color: #fff5f5; border-left: 4px solid #c0392b; border-radius: 4px; padding: 12px 16px; margin: 20px 0;">
+          <p style="margin: 0; color: #c0392b; font-weight: 600;">Removal time: ${removalAt.toUTCString()}</p>
+        </div>
+        <p>If you believe this is a mistake, please contact your organization administrator before the removal time.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
+        <p style="color: #999; font-size: 12px; text-align: center;">SupportNest · AI-Powered Support</p>
+      </div>
+    `,
+	});
+}
+
+export async function sendAgentRemovalCancelledEmail(toEmail: string, agentFirstName: string, orgName: string): Promise<void> {
+	await transporter.sendMail({
+		from: `"SupportNest Admin" <${process.env.GMAIL_USER}>`,
+		to: toEmail,
+		subject: `Your access to ${orgName} on SupportNest has been restored`,
+		html: `
+      <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; padding: 32px 24px;">
+        <h2 style="color: #1D9E75; margin-bottom: 16px;">Removal Cancelled</h2>
+        <p>Hi <strong>${agentFirstName}</strong>,</p>
+        <p>Good news — the scheduled removal of your access to <strong>${orgName}</strong> has been cancelled by an administrator.</p>
+        <p>Your account remains active with no changes.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
+        <p style="color: #999; font-size: 12px; text-align: center;">SupportNest · AI-Powered Support</p>
+      </div>
+    `,
+	});
+}

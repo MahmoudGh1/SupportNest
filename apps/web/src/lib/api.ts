@@ -1004,6 +1004,28 @@ export const api = {
 		}
 	},
 
+	async scheduleAgentRemoval(agentId: string, orgName: string): Promise<{ message: string; scheduledAt: string }> {
+		const res = await fetch(`${BASE_URL}/users/agents/${agentId}/schedule-removal`, {
+			method: "POST",
+			credentials: "include",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ orgName }),
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to schedule removal");
+		return data;
+	},
+
+	async cancelAgentRemoval(agentId: string): Promise<{ message: string }> {
+		const res = await fetch(`${BASE_URL}/users/agents/${agentId}/cancel-removal`, {
+			method: "POST",
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to cancel removal");
+		return data;
+	},
+
 	// ─── CONTACT SUBMISSIONS ─────────────────────────────────────────────────────
 
 	async getContactSubmissions(): Promise<
