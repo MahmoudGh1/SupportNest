@@ -94,6 +94,7 @@ model ToolDefinition {
   documentId          String?            @db.Uuid
   parameters          Json
   responseSchema      Json
+  isPublic            Boolean            @default(false)
   isActive            Boolean            @default(true)
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
@@ -103,6 +104,7 @@ model ToolDefinition {
   organization        Organization       @relation(fields: [organizationId], references: [id])
 
   @@index([organizationId])
+  @@index([isPublic])
   @@map("tool_definitions")
 }
 

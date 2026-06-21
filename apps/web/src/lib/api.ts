@@ -781,6 +781,37 @@ export const api = {
 		return data;
 	},
 
+	async getPublicOrgTools(): Promise<{
+		tools: {
+			id: string;
+			name: string;
+			description: string;
+			method: string;
+			path: string;
+			isActive: boolean;
+			isPublic: boolean;
+			createdAt: string;
+			document: { title: string; type: string } | null;
+		}[];
+	}> {
+		const res = await fetch(`${BASE_URL}/organizations/tools/public`, {
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to load public tools");
+		return data;
+	},
+
+	async toggleToolVisibility(toolId: string): Promise<{ id: string; isPublic: boolean }> {
+		const res = await fetch(`${BASE_URL}/organizations/tools/${toolId}/visibility`, {
+			method: "PATCH",
+			credentials: "include",
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error ?? "Failed to update tool visibility");
+		return data;
+	},
+
 	// ─── SETTINGS ───────────────────────────────────────────────────────────────
 
 	async getUserProfile(): Promise<{ user: UserProfile }> {
