@@ -1,16 +1,8 @@
-import type {
-	ConversationMessage,
-	TierResponse,
-} from "src/types/agent.types.js";
+import type { ConversationMessage, TierResponse } from "src/types/agent.types.js";
 
 // runs before the tier is called
-export function buildRoutingPrompt(
-	latestMessage: string,
-	conversationHistory: ConversationMessage[],
-): string {
-	const formattedHistory = conversationHistory
-		.map((m) => `[${m.role.toUpperCase()}]: ${m.content}`)
-		.join("\n");
+export function buildRoutingPrompt(latestMessage: string, conversationHistory: ConversationMessage[]): string {
+	const formattedHistory = conversationHistory.map((m) => `[${m.role.toUpperCase()}]: ${m.content}`).join("\n");
 
 	return `
 You are a supervisor agent in a customer support AI pipeline.
@@ -79,11 +71,7 @@ Latest Customer Message: "where is my order #4521?"
 }
 
 // runs after the tier responds
-export function buildReviewPrompt(
-	latestMessage: string,
-	tierResponse: TierResponse,
-	tier: string,
-): string {
+export function buildReviewPrompt(latestMessage: string, tierResponse: TierResponse, tier: string): string {
 	return `
 You are a quality control supervisor in a customer support AI pipeline.
 Your job is to review a tier's response before it reaches the customer and decide if it meets the quality bar.
