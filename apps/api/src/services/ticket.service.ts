@@ -1,27 +1,24 @@
 import prisma from "../config/prisma.js";
-import type { TicketPriority, TicketStatus } from "generated/prisma/enums.js";
+import type {
+	Role,
+	TicketPriority,
+	TicketStatus,
+} from "generated/prisma/enums.js";
 import AppError from "../utils/appError.js";
 import type { UpdateTicketInput } from "src/types/ticket.types.js";
 import type { Prisma } from "generated/prisma/client.js";
+import { assertCanUpdateTicket } from "src/utils/ticketPermissions.util.js";
 
 // ─── PRISMA SELECT ────────────────────────────────────────────────────────────
 // Reused in every query so the response shape is always consistent
 const ticketSelect = {
 	id: true,
-	conversationId: true,
-	organizationId: true,
 	assignedToId: true,
 	assignedTo: {
-		select: {
-			id: true,
-			firstName: true,
-			lastName: true,
-			email: true,
-		},
+		select: { id: true, firstName: true, lastName: true, email: true },
 	},
 	status: true,
 	priority: true,
-	resolutionNote: true,
 	resolvedAt: true,
 	createdAt: true,
 	updatedAt: true,
@@ -29,15 +26,14 @@ const ticketSelect = {
 		select: {
 			id: true,
 			conversationStatus: true,
-			createdAt: true,
+			customer: {
+				select: { id: true, name: true, email: true, isAnonymous: true },
+			},
 			messages: {
+				where: { role: "CUSTOMER" },
 				orderBy: { createdAt: "asc" as const },
-				select: {
-					id: true,
-					role: true,
-					content: true,
-					createdAt: true,
-				},
+				take: 1,
+				select: { content: true },
 			},
 		},
 	},
@@ -112,10 +108,12 @@ export async function getTickets(
 	const skip = (page - 1) * limit;
 
 	const where = {
-		organizationId: organizationId,
+		organizationId,
 		...(filters.status && { status: filters.status }),
 		...(filters.priority && { priority: filters.priority }),
-		...(filters.assignedToId && { assignedToId: filters.assignedToId }),
+		...(filters.assignedToId === "unassigned"
+			? { assignedToId: null }
+			: filters.assignedToId && { assignedToId: filters.assignedToId }),
 	};
 
 	const [tickets, total] = await prisma.$transaction([
@@ -132,6 +130,39 @@ export async function getTickets(
 	return {
 		tickets,
 		meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+	};
+}
+
+export async function getTicketCounts(
+	organizationId: string,
+	currentUserId: string,
+) {
+	const [byStatus, mine, unassigned] = await prisma.$transaction([
+		prisma.ticket.groupBy({
+			by: ["status"],
+			where: { organizationId },
+			_count: true,
+		}),
+		prisma.ticket.count({
+			where: { organizationId, assignedToId: currentUserId },
+		}),
+		prisma.ticket.count({ where: { organizationId, assignedToId: null } }),
+	]);
+
+	const statusCounts = Object.fromEntries(
+		byStatus.map((s) => [s.status, s._count]),
+	);
+
+	return {
+		all:
+			(statusCounts.OPEN || 0) +
+			(statusCounts.IN_PROGRESS || 0) +
+			(statusCounts.RESOLVED || 0),
+		open: statusCounts.OPEN ?? 0,
+		in_progress: statusCounts.IN_PROGRESS ?? 0,
+		resolved: statusCounts.RESOLVED ?? 0,
+		mine,
+		unassigned,
 	};
 }
 
@@ -271,13 +302,16 @@ export async function resolveTicket(
 export async function updateTicket(
 	organizationId: string,
 	ticketId: string,
+	actor: { id: string; role: Role },
 	input: UpdateTicketInput,
 ) {
 	const existing = await prisma.ticket.findFirst({
 		where: { id: ticketId, organizationId },
-		select: { id: true },
+		select: { id: true, assignedToId: true },
 	});
 	if (!existing) throw new AppError("Ticket not found", 404);
+
+	assertCanUpdateTicket(existing, actor, input);
 
 	if (input.assignedToId) {
 		const agent = await prisma.user.findFirst({
@@ -311,6 +345,12 @@ export async function updateTicket(
 		data.assignedTo = input.assignedToId
 			? { connect: { id: input.assignedToId } }
 			: { disconnect: true };
+
+		// returning to the pool should look like a fresh ticket, not a stale in-progress one —
+		// only auto-reset if the caller didn't explicitly set a status in this same request
+		if (input.assignedToId === null && !input.status) {
+			data.status = "OPEN";
+		}
 	}
 
 	return prisma.ticket.update({

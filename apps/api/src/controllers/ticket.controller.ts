@@ -4,10 +4,16 @@ import type {
 	CreateTicketBody,
 	AssignTicketBody,
 	ResolveTicketBody,
+	UpdateTicketInput,
 } from "../types/ticket.types.js";
-import type { TicketStatus, TicketPriority } from "generated/prisma/enums.js";
+import {
+	type TicketStatus,
+	type TicketPriority,
+	Role,
+} from "generated/prisma/enums.js";
 import * as ticketService from "../services/ticket.service.js";
 import type { Request } from "express";
+import AppError from "src/utils/appError.js";
 
 // ─── POST /tickets ────────────────────────────────────────────────────────────
 // Body: { conversationId, priority? }
@@ -66,6 +72,29 @@ export async function getTickets(
 			success: true,
 			message: "Tickets fetched successfully.",
 			data: result,
+		});
+	} catch (err) {
+		next(err);
+	}
+}
+
+export async function getTicketsCount(
+	req: AuthenticatedRequest,
+	res: Response,
+	next: NextFunction,
+): Promise<void> {
+	try {
+		const currentUserId = (req.user as any).sub;
+		const organizationId = (req.user as any).organizationId;
+
+		const data = await ticketService.getTicketCounts(
+			organizationId,
+			currentUserId,
+		);
+		res.status(200).json({
+			success: true,
+			message: "Tickets counts fetched successfully.",
+			data,
 		});
 	} catch (err) {
 		next(err);
@@ -193,10 +222,13 @@ export async function updateTicket(
 ): Promise<void> {
 	try {
 		const organizationId = (req.user as any).organizationId;
+		const actor = { id: (req.user as any).sub, role: (req.user as any).role };
 		const ticketId = (req as Request<{ id: string }>).params.id;
+
 		const ticket = await ticketService.updateTicket(
 			organizationId,
 			ticketId,
+			actor,
 			req.body,
 		);
 

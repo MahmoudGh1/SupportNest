@@ -16,6 +16,8 @@ ticketRouter.post("/", ticketController.createTicket);
 // Query: ?status=open&priority=high&assignedToId=xxx&page=1&limit=20
 ticketRouter.get("/", ticketController.getTickets);
 
+ticketRouter.get("/counts", ticketController.getTicketsCount);
+
 // GET    /api/v1/tickets/:id          → get single ticket
 ticketRouter.get("/:id", ticketController.getTicketById);
 
