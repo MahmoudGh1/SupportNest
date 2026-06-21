@@ -47,7 +47,7 @@ interface Member {
 	role: string;
 	isActive: boolean;
 	createdAt: string;
-	scheduledDeletionAt: string | null;
+	scheduledDeletionAt?: string | null;
 	ticketStats: {
 		totalAssigned: number;
 		resolved: number;
