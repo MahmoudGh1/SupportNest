@@ -143,7 +143,7 @@ function handleEvent(msg) {
 
 		case "conversation_started":
 			// silent — just resync internal state, no UI change
-			conversationId = message.payload.conversationId;
+			conversationId = payload.message.conversationId;
 			break;
 		case "typing": {
 			showTyping();
@@ -723,6 +723,9 @@ function injectRatingWidgetStyles() {
 	z-index: 10;
 }
 
+.rating-widget.rated {
+display: none;
+}
 /* 
    DESIGN DECISION: Why padding + border-top?
    - Creates natural separation from messages
@@ -1923,6 +1926,7 @@ class RatingWidget {
 	 */
 	async handleStarClick(e) {
 		// If already submitted, ignore clicks
+		console.log(this.state.isSubmitted);
 		if (this.state.isSubmitted) return;
 
 		// Get rating value from data attribute
@@ -1957,6 +1961,7 @@ class RatingWidget {
 
 			// Show thank you message
 			this.showThankYou();
+			this.hideRatingTrigger();
 
 			// Auto-close after delay
 			setTimeout(() => {
@@ -2118,6 +2123,25 @@ class RatingWidget {
 		this.elements.thankYou.hidden = false;
 	}
 
+	/**
+	 * ==========================================
+	 * HIDE RATING BUTTON - hide rating button after successful rating submission
+	 * ==========================================
+	 */
+
+	hideRatingTrigger() {
+		this.elements.trigger.style.display = "none";
+	}
+
+	/**
+	 * ==========================================
+	 * SHOW RATING BUTTON
+	 * ==========================================
+	 */
+
+	showRatingTrigger() {
+		this.elements.trigger.style.display = "block";
+	}
 	/**
 	 * ==========================================
 	 * SUBMIT RATING - Send to server
