@@ -12,7 +12,7 @@ export default function About() {
     new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en").format(val);
   const STATS = [
     {
-      val: fmt(2024),
+      val: fmt(2026),
       label: t`Founded`,
       bg: "var(--color-brand-faint)",
       color: "var(--color-brand)",
