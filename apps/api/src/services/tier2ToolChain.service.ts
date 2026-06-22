@@ -90,14 +90,42 @@ function buildTool(toolDef: ToolDefinition, apiConfig: BusinessApiConfig): Dynam
 					fetchOptions.body = JSON.stringify(bodyParams);
 				}
 
-				const response = await fetch(url.toString(), fetchOptions);
-				const data = (await response.json()) as { message?: string } | null;
-				console.log(`[Tier2ToolChain] Response (${response.status}):`, JSON.stringify(data).slice(0, 500)); // ADD THIS
+				// const response = await fetch(url.toString(), fetchOptions);
+				// const data = (await response.json()) as { message?: string } | null;
+				// console.log(`[Tier2ToolChain] Response (${response.status}):`, JSON.stringify(data).slice(0, 500)); // ADD THIS
 
-				if (!response.ok) {
-					return JSON.stringify({ error: true, status: response.status, message: data?.message ?? "Request failed" });
+				// if (!response.ok) {
+				// 	return JSON.stringify({ error: true, status: response.status, message: data?.message ?? "Request failed" });
+				// }
+
+				// return JSON.stringify(data);
+
+				const contentType = response.headers.get("content-type") ?? "";
+				const rawBody = await response.text();
+				
+				if (!contentType.includes("application/json")) {
+				    console.error(`[Tier2ToolChain Tool Error] ${toolDef.name}: non-JSON response (status ${response.status}, content-type "${contentType}")`);
+				    return JSON.stringify({
+				        error: true,
+				        status: response.status,
+				        message: `External API returned a non-JSON response (status ${response.status}). The endpoint may be unreachable, misconfigured, or behind a login wall.`,
+				    });
 				}
-
+				
+				let data: { message?: string } | null = null;
+				try {
+				    data = rawBody ? JSON.parse(rawBody) : null;
+				} catch (parseErr) {
+				    console.error(`[Tier2ToolChain Tool Error] ${toolDef.name}: failed to parse JSON body despite JSON content-type`, parseErr);
+				    return JSON.stringify({ error: true, status: response.status, message: "External API response could not be parsed as JSON." });
+				}
+				
+				console.log(`[Tier2ToolChain] Response (${response.status}):`, JSON.stringify(data).slice(0, 500));
+				
+				if (!response.ok) {
+				    return JSON.stringify({ error: true, status: response.status, message: data?.message ?? "Request failed" });
+				}
+				
 				return JSON.stringify(data);
 			} catch (err) {
 				console.error(`[Tier2ToolChain Tool Error] ${toolDef.name}:`, err);
