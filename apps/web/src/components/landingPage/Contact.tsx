@@ -54,67 +54,67 @@ export default function Contact() {
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // const [error, setError] = useState<string | null>(null);
 
   const set = (k: keyof FormState) => (v: string) =>
     setForm((f) => ({ ...f, [k]: v }));
 
-  // async function handleSubmit(e: React.FormEvent) {
-  //   e.preventDefault();
-  //   setLoading(true);
-  //   const res = await fetch("http://localhost:3001/api/contact", {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({
-  //       name: form.name,
-  //       email: form.email,
-  //       company: form.company,
-  //       message: form.message,
-  //     }),
-  //   });
-  //   setLoading(false);
-  //   if (res.ok) {
-  //     setSent(true);
-  //     setForm(INITIAL_FORM);
-  //   }
-  // }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setError(null); // see new state below
-  
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"}/api/contact`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: form.name,
-            email: form.email,
-            company: form.company,
-            message: form.message,
-          }),
-        }
-      );
-  
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(`Request failed (${res.status}): ${text}`);
-      }
-  
+    const res = await fetch("https://api-production-e60c.up.railway.app/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: form.name,
+        email: form.email,
+        company: form.company,
+        message: form.message,
+      }),
+    });
+    setLoading(false);
+    if (res.ok) {
       setSent(true);
       setForm(INITIAL_FORM);
-    } catch (err) {
-      console.error("Contact form submit failed:", err);
-      setError(
-        err instanceof Error ? err.message : "Something went wrong. Please try again."
-      );
-    } finally {
-      setLoading(false);
     }
   }
+
+  // async function handleSubmit(e: React.FormEvent) {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   setError(null); // see new state below
+  
+  //   try {
+  //     const res = await fetch(
+  //       `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"}/api/contact`,
+  //       {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({
+  //           name: form.name,
+  //           email: form.email,
+  //           company: form.company,
+  //           message: form.message,
+  //         }),
+  //       }
+  //     );
+  
+  //     if (!res.ok) {
+  //       const text = await res.text().catch(() => "");
+  //       throw new Error(`Request failed (${res.status}): ${text}`);
+  //     }
+  
+  //     setSent(true);
+  //     setForm(INITIAL_FORM);
+  //   } catch (err) {
+  //     console.error("Contact form submit failed:", err);
+  //     setError(
+  //       err instanceof Error ? err.message : "Something went wrong. Please try again."
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
 
   return (
     <section
