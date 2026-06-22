@@ -369,7 +369,7 @@
 
 
 import prisma from "src/config/prisma.js";
-import { model } from "../config/langChain.js";
+import { tier1Model } from "../config/langChain.js";
 import { HumanMessage, SystemMessage, AIMessage, BaseMessage } from "@langchain/core/messages";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
@@ -640,7 +640,7 @@ export async function runTier1Agent(context: PipelineContext): Promise<TierRespo
 
 	// 2. Build LangChain tools from DB rows
 	const tools = apiConfig.toolDefinitions.map((t) => buildTool(t, apiConfig));
-	const modelWithTools = model.bindTools(tools);
+	const modelWithTools = tier1Model.bindTools(tools);
 
 	// 3. Build conversation history
 	const historyMessages = conversationHistory.flatMap((msg): BaseMessage[] => {
@@ -739,7 +739,7 @@ INSTRUCTIONS:
 	const toolResults = resolvedResults.filter((res): res is string => res !== null);
 
 	// 7. Second LLM call — Enforce native JSON output format if supported by provider
-	const jsonModel = model.withStructuredOutput(tier1OutputSchema, { name: "tier1_response" });
+	const jsonModel = tier1Model.withStructuredOutput(tier1OutputSchema, { name: "tier1_response" });
 
 	let secondResponse: unknown;
 	try {
