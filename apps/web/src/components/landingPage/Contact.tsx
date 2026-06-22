@@ -262,9 +262,9 @@ export default function Contact() {
                   />
                 </div>
 
-                {error && (
+                /* {error && (
                   <p className="text-sm text-red-600 -mt-1">{error}</p>
-                )}
+                )} */
 
                 <button
                   type="submit"
