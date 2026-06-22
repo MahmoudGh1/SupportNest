@@ -87,7 +87,7 @@ export const queryEmbeddings = createEmbeddings({
 
 type ChatModelRole = "router" | "tier0" | "tier1" | "tier2";
 
-const GOOGLE_MODEL_NAME = "gemini-2.5-flash-lite";
+const GOOGLE_MODEL_NAME = "gemini-3.1-flash-lite";
 const OPENAI_MODEL_NAME = "gpt-4o-mini";
 
 function resolveGoogleApiKey(role: ChatModelRole): string {
