@@ -182,7 +182,7 @@ export function Sidebar({
 						}
 						if (isSupportAgent) {
 							// For Support Agent, show Overview, Tickets, and Profile
-							return ["dashboard", "tickets", "profile"].includes(item.page);
+							return ["tickets", "profile"].includes(item.page);
 						}
 						// For others (ORG_ADMIN), show everything EXCEPT Admin
 						return !item.superAdminOnly;
