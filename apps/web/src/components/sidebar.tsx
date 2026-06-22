@@ -235,35 +235,6 @@ export function Sidebar({
 					})}
 			</div>
 
-			{/* AI Mode button */}
-			{!collapsed && (
-				<div style={{ padding: "0 0.75rem 0.75rem" }}>
-					<button
-						style={{
-							width: "100%",
-							background: "var(--color-brand)",
-							border: "none",
-							borderRadius: 8,
-							color: "#fff",
-							fontFamily: "inherit",
-							fontSize: 12,
-							fontWeight: 500,
-							padding: "10px 14px",
-							cursor: "pointer",
-							display: "flex",
-							alignItems: "center",
-							gap: 8,
-						}}
-					>
-						<i
-							className="ti ti-bolt"
-							style={{ fontSize: 15 }}
-						/>{" "}
-						<Trans>AI Mode</Trans>
-					</button>
-				</div>
-			)}
-
 			{/* Bottom: user info + logout */}
 			<div
 				style={{
