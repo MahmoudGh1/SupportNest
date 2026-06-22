@@ -248,7 +248,7 @@ export async function getTeamService(organizationId: string) {
 		};
 	});
 
-	return { members, membersWithStats, pendingInvitations };
+	return { members: membersWithStats, pendingInvitations };
 }
 
 export async function revokeInvitationService(invitationId: string, organizationId: string): Promise<void> {
