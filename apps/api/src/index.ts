@@ -112,7 +112,7 @@ app.use("/api/v1/admindashboard", AdminRoutes);
 app.use("/api/v1/analytics", analyticsRouter);
 app.use("/api/v1/notifications", NotificationRouter);
 
-app.use('/api/contact', contactRouter);
+app.use('/api/v1/contact', contactRouter);
 app.use(notFoundHandler);
 
 app.use(errorHandler);
