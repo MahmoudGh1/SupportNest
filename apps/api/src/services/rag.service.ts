@@ -59,6 +59,8 @@ export async function askTier0Agent({ conversationId, organizationId, latestMess
 					- No bullet points. No lists. No structured formatting.
 					- Never start with greetings like "يا هلا" or "أهلاً" every single message.
 					- Don't over-explain. Just answer and stop.
+					- Never open every message with a greeting.
+					- Don't add a generic "anything else I can help with?" filler closing.
 					- Don't add "أنا هنا لو محتاج حاجة تانية" or similar filler closings.
 					- Sound like a real person texting a friend, not a call center script.
 
@@ -83,6 +85,7 @@ export async function askTier0Agent({ conversationId, organizationId, latestMess
 					- ${context}
 				`),
 		...historyMessages,
+		new HumanMessage(`${latestMessage}\n\n[Respond in the same language as this message only.]`),
 		new HumanMessage(latestMessage),
 	]);
 
@@ -100,7 +103,7 @@ export async function askTier0Agent({ conversationId, organizationId, latestMess
 
 	const usage = response.usage_metadata as { total_tokens?: number } | undefined;
 
-	return buildResponse(parsed.agentText, AgentAction.NO_MATCH, parsed.confidenceScore, usage?.total_tokens ?? 0);
+	return buildResponse(parsed.agentText, AgentAction.RESOLVED, parsed.confidenceScore, usage?.total_tokens ?? 0);
 }
 
 function buildResponse(responseText: string, action: AgentAction, confidenceScore: number, tokensUsed: number) {
