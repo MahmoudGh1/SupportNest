@@ -74,8 +74,10 @@ function buildTool(toolDef: ToolDefinition, apiConfig: BusinessApiConfig): Dynam
 						bodyParams[param.name] = value;
 					}
 				}
-
-				const url = new URL(`${apiConfig.baseUrl}${resolvedPath}`);
+				const normalizedBaseUrl = apiConfig.baseUrl.replace(/\/+$/, ""); // strip trailing slashes
+				const normalizedPath = resolvedPath.startsWith("/") ? resolvedPath : `/${resolvedPath}`;
+				const url = new URL(`${normalizedBaseUrl}${normalizedPath}`);
+				// const url = new URL(`${apiConfig.baseUrl}${resolvedPath}`);
 				for (const [k, v] of Object.entries(queryParams)) url.searchParams.set(k, v);
 				console.log(`[Tier2ToolChain] Calling: ${toolDef.method} ${url.toString()}`); // ADD THIS
 
