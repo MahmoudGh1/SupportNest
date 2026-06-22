@@ -997,6 +997,12 @@ export const api = {
 			role: string;
 			isActive: boolean;
 			createdAt: string;
+			scheduledDeletionAt?: string | null;
+        	ticketStats?: {
+	            totalAssigned: number;
+	            resolved: number;
+	            unresolved: number;
+        };
 		}[];
 		pendingInvitations: {
 			id: string;
