@@ -1,5 +1,5 @@
 import prisma from "src/config/prisma.js";
-import { model } from "../config/langChain.js";
+import { tier2Model } from "../config/langChain.js";
 import { HumanMessage, SystemMessage, AIMessage, ToolMessage, BaseMessage } from "@langchain/core/messages";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
@@ -169,7 +169,7 @@ export async function runTier2ToolChainAgent(context: PipelineContext): Promise<
 
 	const tools = apiConfig.toolDefinitions.map((t) => buildTool(t, apiConfig));
 	const toolMap = new Map(tools.map((t) => [t.name, t]));
-	const modelWithTools = model.bindTools(tools);
+	const modelWithTools = tier2Model.bindTools(tools);
 
 	const toolDescriptions = apiConfig.toolDefinitions.map((t) => `- ${t.name}: ${t.description}`).join("\n");
 
@@ -284,7 +284,7 @@ export async function runTier2ToolChainAgent(context: PipelineContext): Promise<
 	}
 
 	// ─── FINAL STRUCTURED DECISION ────────────────────────────────────────────────
-	const jsonModel = model.withStructuredOutput(finalAnswerSchema, { name: "tier2_toolchain_response" });
+	const jsonModel = tier2Model.withStructuredOutput(finalAnswerSchema, { name: "tier2_toolchain_response" });
 
 	const finalResponse = await jsonModel.invoke([
 		...messages,
