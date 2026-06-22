@@ -16,26 +16,48 @@ import prisma from "src/config/prisma.js";
 
 import type { AnalyticsJobData } from "../types/analytics.types.js";
 
+// function deriveResolvedByTier(
+// 	logs: { tier: string; action: string }[],
+// ): ResolutionTier {
+// 	// who ultimately resolved this conversation?
+
+// 	if (logs.some((l) => l.action === AgentAction.ESCALATED_TO_HUMAN))
+// 		return ResolutionTier.HUMAN;
+
+// 	const resolvedLog = logs.find((l) => l.action === AgentAction.RESOLVED);
+
+// 	if (!resolvedLog) return ResolutionTier.UNRESOLVED;
+
+// 	const tier = resolvedLog.tier;
+
+// 	// Map the tier name directly to the return value
+// 	if (tier === ResolutionTier.TIER2) return ResolutionTier.TIER2;
+// 	if (tier === ResolutionTier.TIER1) return ResolutionTier.TIER1;
+// 	if (tier === ResolutionTier.TIER0) return ResolutionTier.TIER0;
+
+// 	return ResolutionTier.UNRESOLVED;
+// }
+
 function deriveResolvedByTier(
-	logs: { tier: string; action: string }[],
+    logs: { tier: string; action: string }[],
 ): ResolutionTier {
-	// who ultimately resolved this conversation?
+    // ✅ Check RESOLVED first — it's the source of truth
+    // Use the LAST resolved log (the tier that ultimately closed it)
+    const resolvedLog = [...logs].reverse().find((l) => l.action === AgentAction.RESOLVED);
 
-	if (logs.some((l) => l.action === AgentAction.ESCALATED_TO_HUMAN))
-		return ResolutionTier.HUMAN;
+    if (resolvedLog) {
+        const tier = resolvedLog.tier;
+        if (tier === ResolutionTier.TIER2) return ResolutionTier.TIER2;
+        if (tier === ResolutionTier.TIER1) return ResolutionTier.TIER1;
+        if (tier === ResolutionTier.TIER0) return ResolutionTier.TIER0;
+        if (tier === "HUMAN")              return ResolutionTier.HUMAN;
+    }
 
-	const resolvedLog = logs.find((l) => l.action === AgentAction.RESOLVED);
+    // ✅ Only fall back to escalation check if no RESOLVED log exists
+    if (logs.some((l) => l.action === AgentAction.ESCALATED_TO_HUMAN))
+        return ResolutionTier.HUMAN;
 
-	if (!resolvedLog) return ResolutionTier.UNRESOLVED;
-
-	const tier = resolvedLog.tier;
-
-	// Map the tier name directly to the return value
-	if (tier === ResolutionTier.TIER2) return ResolutionTier.TIER2;
-	if (tier === ResolutionTier.TIER1) return ResolutionTier.TIER1;
-	if (tier === ResolutionTier.TIER0) return ResolutionTier.TIER0;
-
-	return ResolutionTier.UNRESOLVED;
+    return ResolutionTier.UNRESOLVED;
 }
 
 async function processAnalyticsJob(job: Job<AnalyticsJobData>) {
