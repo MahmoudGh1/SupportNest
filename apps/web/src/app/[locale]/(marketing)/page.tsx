@@ -32,51 +32,51 @@ const Footer = dynamic(() => import("@/components/landingPage/Footer"));
 
 
 
-function PricingTeaser() {
+// function PricingTeaser() {
 
-	const { t } = useLingui();
+// 	const { t } = useLingui();
 
-	return (
+// 	return (
 
-		<section
+// 		<section
 
-			id="pricing"
+// 			id="pricing"
 
-			className="py-20 px-[5%] text-center sn-surface border-y"
+// 			className="py-20 px-[5%] text-center sn-surface border-y"
 
-			style={{ background: "var(--surface-elevated)" }}
+// 			style={{ background: "var(--surface-elevated)" }}
 
-		>
+// 		>
 
-			<h2 className="text-3xl font-bold mb-3 mt-0">
+// 			<h2 className="text-3xl font-bold mb-3 mt-0">
 
-				<Trans>Simple, transparent pricing</Trans>
+// 				<Trans>Simple, transparent pricing</Trans>
 
-			</h2>
+// 			</h2>
 
-			<p className="sn-muted mb-8 max-w-md mx-auto">
+// 			<p className="sn-muted mb-8 max-w-md mx-auto">
 
-				<Trans>Start free. No credit card required.</Trans>
+// 				<Trans>Start free. No credit card required.</Trans>
 
-			</p>
+// 			</p>
 
-			<Link
+// 			<Link
 
-				href="/pricing"
+// 				href="/pricing"
 
-				className="inline-flex items-center gap-2 no-underline px-8 py-3 rounded-[10px] text-[15px] font-semibold text-white bg-brand hover:bg-brand-light transition-colors"
+// 				className="inline-flex items-center gap-2 no-underline px-8 py-3 rounded-[10px] text-[15px] font-semibold text-white bg-brand hover:bg-brand-light transition-colors"
 
-			>
+// 			>
 
-				{t`View plans`} <i className="ti ti-arrow-right" />
+// 				{t`View plans`} <i className="ti ti-arrow-right" />
 
-			</Link>
+// 			</Link>
 
-		</section>
+// 		</section>
 
-	);
+// 	);
 
-}
+// }
 
 
 
@@ -94,7 +94,7 @@ export default function LandingPage() {
 
 			<CustomerStories />
 
-			<PricingTeaser />
+			{/* <PricingTeaser /> */}
 
 			<About />
 
