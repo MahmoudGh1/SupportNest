@@ -110,15 +110,6 @@ npm run dev
 
 ---
 
-## About
-
-Built solo by **Mahmoud** — a full-stack developer with a Mechatronics & Robotics Engineering background, currently building SupportNest into a launch-ready B2B SaaS product.
-
-- [LinkedIn](#)
-- [Mostaql](#)
-
----
-
 ## License
 
-This project is currently unlicensed / all rights reserved. Licensing terms to be added before public release.
+MIT
